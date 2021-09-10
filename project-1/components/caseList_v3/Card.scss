@@ -1,0 +1,110 @@
+@import "../../scss/var";
+
+.card {
+  position: relative;
+  width: 300px;
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: pointer;
+  margin: 0 10px 20px;
+  &.mobile {
+    border: none;
+    .tutor {
+      border-top-left-radius: 3px;
+      border-top-right-radius: 3px;
+    }
+  }
+  &:hover {
+    box-shadow: 1px 1px 4px rgba(0,0,0,0.2);
+    .tutor {
+      background-color: #00daff;
+    }
+    .title {
+      color: $main-2;
+    }
+  }
+  &:visited {
+    .title {
+      color: $visited;
+    }
+  }
+  &:focus {
+    text-decoration: none;
+  }
+
+  :global {
+    .ant-card-actions {
+      border-top: none;
+      padding: 0 20px;
+    }
+    .ant-card-actions > li:not(:last-child) {
+      border: none;
+      text-align: left;
+      padding-left: 20px;
+    }
+    .ant-card-actions > li:last-child {
+      text-align: left;
+      padding: 0;
+      margin: 0;
+      width: 100%;
+    }
+    .ant-comment-content {
+      line-height: 1.3;
+    }
+    .ant-comment-content-author {
+      margin-bottom: 0;
+      display: inline-block;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      max-width: 217px;
+      vertical-align: middle;
+        span {
+          font-size: $font-size-12;
+          color: $black;
+        }
+    }
+    .ant-comment-content-detail {
+      font-size: $font-size-12;
+      color: $gray-300;
+    }
+    .ant-card-body {
+      position: relative;
+      padding: 20px 20px 10px;
+    }
+    .ant-card-actions > li > span {
+      cursor: default;
+      display: block;
+    }
+    .ant-card-actions > li > span:hover {
+      color: $gray-300;
+    }
+  }
+  .tutor {
+    width: 100%;
+    height: 4px;
+    background-color: $main-2-hover;
+    position: absolute;
+    top:0;
+    left: 0;
+  }
+  .title {
+    font-size: $font-size-18;
+    font-weight: 400;
+    color: $black;
+    width : 220px;
+    height: 50px;
+    display: block;
+    text-decoration: none;
+  }
+  .cash {
+    font-size: $font-size-18;
+    color: $main-2-hover;
+    .money {
+      font-weight: 600;
+    }
+    .textSmall {
+      font-size: $font-size-12;
+    }
+  }
+}

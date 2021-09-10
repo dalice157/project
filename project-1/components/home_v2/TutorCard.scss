@@ -1,0 +1,105 @@
+@import "../../scss/var2";
+
+.wrap {
+  width: 48%;
+  &.mobile {
+    width: 100%;
+  }
+}
+.line {
+  display: block;
+  height: 3px;
+  color:  $gray-400;
+  margin-top: -1px;
+  font-size: $font-size-14;
+  background-color: $gray-400;
+  text-align: center;
+    margin-bottom: 30px;
+  .triangle {
+    display: inline-block;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 15px 13px 0 13px;
+    border-color: $gray-400 transparent transparent transparent;
+  }
+}
+h2.title {
+  color: $gray-400;
+  font-size: $font-size-22;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 8px;
+}
+
+.list {
+  border: 1px solid $white;
+  border-bottom: 1px solid $gray-300;
+  display: flex;
+  padding: 18px 18px 18px 0;
+
+  .count {
+    color: $gray-500;
+  }
+  &::before {
+    content: " ";
+    width: 8px;
+  }
+  &:hover {
+    border: 1px solid $primary-3;
+    color: $primary-3;
+    &::before {
+      content: " ";
+      width: 8px;
+      background: $primary-3;
+    }
+    .title, .price, .count {
+      color: $primary-3;
+    }
+  }
+  &:visited {
+    .title {
+      color: $visited;
+    }
+  }
+}
+.hot {
+  width: 60px;
+  background: url('../../img/index_v2/icon-label.svg') left center no-repeat;
+  height: 24px;
+  color: $white;
+  font-size: $font-size-14;
+  text-align: center;
+  padding-right: 10px;
+  margin-right: 8px;
+  &.nopic {
+    background: none;
+  }
+}
+.infoWrap {
+  width: 100%;
+  .title {
+    font-size: $font-size-20;
+    font-weight: bold;
+  }
+}
+.footer {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  font-size: $font-size-16;
+}
+.price {
+  font-size: $font-size-16;
+  color: $gray-500;
+  .text {
+    color: $primary-3;
+  }
+}
+
+@media screen and (max-width: 320px) {
+  .hot {
+    width: 65px;
+  }
+}

@@ -1,0 +1,32 @@
+.chart-pies {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: 100px;
+    padding: 20px;
+    .chart-pie {
+        width: 40%;
+    }
+}
+
+.chart-pies-compared {
+    margin-top: 50px;
+    display: flex;
+    flex-wrap: wrap;
+    .chart-pie-pair {
+        display: flex;
+        flex-direction: column;
+        width: 50%;
+        .chart-pie {
+            width: 100%;
+            h2 {
+                text-align: center;
+            }
+        }
+        .chart-pie + .chart-pie {
+            margin-top: 20px;
+        }
+    }
+    
+}

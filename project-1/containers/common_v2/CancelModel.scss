@@ -1,0 +1,65 @@
+@import "../../scss/var";
+.wrap {
+  position: relative;
+  :global {
+    .ant-btn {
+      left: 50%;
+    }
+  }
+}
+.cancelReason {
+  font-size: $font-size-16;
+  font-weight: 600;
+  color: $black;
+  margin-top: 16px;
+  margin-bottom: 8px;
+}
+.radio {
+  display: block;
+}
+.radio + .radio {
+  margin-top: 6px;
+}
+.answer {
+  margin-top: 8px;
+}
+.checkbox {
+  margin-top: 16px;
+}
+.dropdown {
+  position: absolute;
+  left: 10px;
+  bottom: 35px;
+  &.mobile {
+    left: auto;
+    right: 90%;
+    bottom: 0;
+  }
+  :global {
+    .ant-btn {
+      border-radius: 4px !important;
+      border: none !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.15) !important;
+      color: $black !important;
+      &:hover {
+        background-color: #e6f7ff !important;
+      }
+    }
+  }
+}
+.btnWrap {
+  text-align: center;
+  margin-top: 20px;
+  button + button {
+    margin-left: 8px;
+  }
+}
+
+.content {
+  margin-top: 8px;
+  line-height: 1.8;
+  .num {
+    color: $main-2;
+    font-weight: bold;
+  }
+}

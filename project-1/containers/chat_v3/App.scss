@@ -1,0 +1,103 @@
+@import "../../scss/var2";
+.bg {
+  background-color: $gray-100;
+  &.mobile {
+    background-color: $white;
+  }
+  &.messageBlock {
+    &:last-child{
+      display: none;
+    }
+  }
+}
+.wrap {
+  width: 1095px;
+  margin: 0 auto;
+  padding-top: 12vh;
+  &.mobile {
+    width: auto;
+    padding-top: 13vh;
+  }
+}
+.hide {
+  display: none;
+}
+.chatRoot {
+  display: flex;
+  justify-content: space-between;
+  height: 80vh;
+}
+.rate {
+    width: 340px;
+    margin: auto;
+    .item {
+        span {
+            width: 200px;
+            display:inline-block;
+            color: $black;
+        }
+    }
+}
+
+.buttonWrap {
+    text-align: center;
+    margin-top: 15px;
+}
+
+.messageWrap {
+  display: flex;
+ }
+
+// .sidebar {
+//     background-color: $white;
+//     width: 345px;
+//     margin-right: 20px;
+//     &.mobile {
+//       width: 100%;
+//       margin-right: 0;
+//       position: fixed;
+//       top: 6vh;
+//       z-index: 100;
+//       :global {
+//         .ant-menu-item {
+//           font-size: $font-size-16;
+//           box-shadow: inset 1px 1px 5px 0 rgba(0, 0, 0, 0.1);
+//           &.ant-menu-item-selected {
+//             border-bottom: 4px solid $primary-4;
+//             box-shadow: none;
+//           }
+//           &.ant-menu-item-disabled {
+//             background-color: $gray-200;
+//           }
+//         }
+//       }
+//     }
+//     :global {
+//         .ant-menu {
+//             width: 100%;
+//         }
+//         .ant-menu-horizontal {
+//             border: 0;
+//             text-align: center;
+//         }
+//         .ant-menu-item {
+//             width: 50%;
+//             background-color: $gray-200;
+//             transition: 0.5s;
+//             &:hover {
+//               background-color: $white;
+//               border-bottom-color: $white;
+//               color: $black;
+//             }
+//             &.ant-menu-item-selected {
+//                 background-color: $white;
+//                 border-bottom-color: $primary-4;
+//                 color: $black;
+//             }
+//             &.ant-menu-item-disabled {
+//               background-color: $gray-200;
+//               color: $gray-300;
+//             }
+//         }
+//     }
+// }

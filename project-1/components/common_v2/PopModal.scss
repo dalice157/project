@@ -1,0 +1,19 @@
+@import "../../scss/var";
+
+.popModal {
+  :global {
+    .ant-modal-footer {
+      div+div {
+        margin-left: 8px;
+      }
+    }
+    .ant-modal-footer {
+        border:none;
+        text-align: center;
+        padding: 0px 16px 20px;
+    }
+  }
+}
+  .hide{
+    display: none;
+  }

@@ -1,0 +1,121 @@
+@import "../../scss/var";
+
+.wrap {
+  width: 100%;
+  margin-top: 128px;
+  background-color: $white;
+  iframe {
+    position: relative;
+    min-height: calc(100vh - 163px);
+    width: 100%;
+  }
+  .block {
+    position: fixed;
+    bottom: 10em;
+    right: 2em;
+    z-index: 10;
+    background-color: $white;
+    border: 1px solid $gray-100;
+    border-radius: 4px;
+    padding: 20px;
+    :global {
+      .ant-btn {
+        display: flex;
+        line-height: 28px;
+      }
+      .ant-avatar {
+        margin-right: 8px;
+      }
+    }
+    .text {
+      margin-left: 8px;
+      line-height: 32px;
+      display: inline-block;
+    }
+    > button, > a {
+      display: block;
+    }
+    a + a,
+    button + a {
+      margin-top: 8px;
+    }
+    .list {
+      margin-top: 8px;
+      margin-bottom: 0;
+      list-style: none;
+      color: $gray-300;
+      li + li {
+        padding: 0;
+        margin: 8px 0 0;
+      }
+      .title {
+        width: 60px;
+        display: inline-block;
+      }
+      .number {
+        text-align: right;
+        display: inline-block;
+        min-width: 26px;
+      }
+      a.number {
+        color: $main-2;
+        text-decoration: underline;
+        &:hover {
+          color: #00daff;
+        }
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .wrap{
+    .block {
+      bottom: 6em;
+      right: 1.5em;
+    }
+  }
+}
+
+.footer {
+  padding: 20px 10%;
+  background-color: $white;
+  box-shadow: 0 -2px 8px rgba(0,0,0,.15);
+  display: flex;
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  justify-content: space-between;
+  align-items: center; 
+  :global {
+    .ant-btn {
+      display: flex;
+      line-height: 28px;
+    }
+    .ant-avatar {
+      margin-right: 8px;
+    }
+  }
+  .list {
+    margin-bottom: 0;
+    list-style: none;
+    color: $gray-300;
+    .title {
+      width: 60px;
+      display: inline-block;
+    }
+    .number {
+      text-align: right;
+      display: inline-block;
+      min-width: 26px;
+    }
+    a.number {
+      color: $main-2;
+      text-decoration: underline;
+      &:hover {
+        color: #00daff;
+      }
+    }
+  }
+}

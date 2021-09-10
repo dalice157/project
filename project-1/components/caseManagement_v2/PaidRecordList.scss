@@ -1,0 +1,116 @@
+@import "../../scss/_var.scss";
+@import "../../scss/_var2.scss";
+.content {
+    background-color: $white;
+    border-radius: 0 4px 4px 4px;
+    padding: 20px 20px 40px;
+    margin-bottom: 20px;
+    .notes {
+        .note::before {
+            content: '*';
+            margin-right: 5px;
+        }
+        .note + .note {
+            margin-top: 5px;
+        }
+    }
+    
+    .subNotes {
+        margin-top: 5px;
+        .subNote::before {
+            content: '-';
+            margin-left: 10px;
+            margin-right: 5px;
+        }
+        .subNote + .subNote {
+            margin-top: 5px;
+        }
+    }
+    
+    .num {
+        font-weight: bold;
+        font-size:  $font-size-16;
+        margin: 10px auto;
+        span {
+            color: $primary-4;
+        }
+    }
+    
+    :global {
+        .ant-collapse-item {
+            background-color: white;
+        }
+    }
+}
+
+.card {
+    :global {
+      .ant-divider-horizontal {
+        margin: 16px auto;
+      }
+    }
+      .date {
+          display: flex;
+          color: $primary-4;
+          font-weight: bold;
+          margin: auto;
+          p + p {
+              margin-left: 10px;
+          }
+      }
+      .topperName {
+          display: block;
+          font-size:  $font-size-16;
+          margin: 5px auto;
+      }
+  
+      .score {
+          color: $third-3;
+          font-weight: bold;
+      }
+      
+      .title {
+          font-weight: bold;
+      }
+      
+      .line {
+        p > p {
+            color: $primary-4;
+            font-weight: bold;
+        }
+      }
+      
+      .line + .line {
+          margin-top: 8px;
+      }
+  
+      .content {
+        display: inline-flex;
+        align-items: center;
+      }
+      
+      .content + .content {
+          margin-left: 10px;
+      }
+  
+      .btnWrap {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        margin-top: 10px;
+        button {
+          padding: 0 10px;
+        }
+      }
+  }
+  
+  .card + .card {
+      margin-top: 20px;
+  }
+  
+
+@media only screen and (max-width: 768px) {
+    .content {
+        padding-top: 0;
+    }
+}

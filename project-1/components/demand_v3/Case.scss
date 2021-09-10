@@ -1,0 +1,313 @@
+@import "../../scss/var";
+
+$fieldWidth: 90%;
+
+@mixin largeField() {
+  width: $fieldWidth !important;
+}
+
+.demandFormWrap {
+  border-bottom: 1px solid $gray-200;
+  padding-bottom: 20px;
+  margin-bottom: 20px;
+}
+.userWrap {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.form {
+  margin-top: 20px;
+}
+.flex {
+  display: flex;
+}
+
+.field + .field {
+  margin-top: 10px;
+}
+.flex + .flex {
+  margin-top: 0;
+}
+.field {
+  .userName {
+    width: 30%;
+  }
+  
+  .cellphone {
+    width: 570px !important;
+  }
+  
+  .telArea {
+  
+    width: 100px !important;
+  }
+  
+  .tel {
+    width: 460px !important;
+  }
+  
+  .email {
+    width: 580px !important;
+  }
+  
+  .otherContactWay {
+    width: 600px !important;
+    height: 100px !important;
+  }
+  
+  .label {
+    margin-left: 10px;
+  }
+
+  > div, > span, > input {
+    margin-left: 10px;
+  }
+  &.specWrap {
+    margin-top: 20px;
+    :global {
+      .ant-checkbox-wrapper {
+        display: inline-block;
+      }
+    }
+  }
+  label {
+    display: block;
+    margin-bottom: 5px;
+    svg {
+      display: inline-block;
+      vertical-align: -6px;
+      font-size: 23px;
+      margin-left: 4px;
+      color: $complete;
+    }
+  }
+  :global {
+    .ant-radio-wrapper {
+      display: inline-block;
+    }
+    .ant-form-item {
+      margin-bottom: 0;
+    }
+    .ant-form-item-children-icon {
+      display: none;
+    }
+    .ant-btn {
+      margin-left: 8px;
+    }
+    .ant-select-arrow {
+      right: 16px !important;
+    }
+  }
+}
+
+.validate {
+  color: $errorTip;
+  margin-right: 5px;
+}
+.valueData {
+  color: $black;
+}
+
+.errorBord {
+  border-color: $errorTip;
+}
+.error {
+  color: $errorTip;
+  margin-top: 2px;
+  display: block;
+}
+
+.btnWrap {
+  text-align: center;
+  margin-top: 20px;
+  button + button {
+    margin-left: 8px;
+  }
+}
+
+.telWrap {
+  input {
+    &:first-child {
+      width: 30%;
+    }
+  }
+  input + input {
+    margin-left: 8px;
+  }
+}
+
+.specWrap {
+  margin-top: 20px;
+  label {
+    margin-right: 10px;
+  }
+  :global {
+    .ant-checkbox-wrapper {
+      display: inline-block;
+      margin-right: 8px;
+    }
+  }
+}
+
+  @media only screen and (max-width: 800px) {
+    .demandFormWrap {
+      border-bottom: 1px solid $gray-200;
+      padding-bottom: 20px;
+      margin-bottom: 20px;
+    }
+    .userWrap {
+      display: flex;
+      justify-content: space-between;
+      margin: 20px 10px 20px 10px;
+    }
+
+    .form {
+      margin-top: 20px;
+    }
+    .flex {
+      display: flex;
+    }
+
+    .field + .field {
+      margin-top: 10px;
+    }
+    .flex + .flex {
+      margin-top: 0;
+    }
+    .field {
+      margin: 20px 10px;
+      top: 50%;
+      .catSelect {
+        @include largeField;
+      }
+
+      .title {
+        @include largeField;
+      }
+
+      .desc {
+        @include largeField;
+      }
+
+      .userName {
+        @include largeField;
+        // width: 30%;
+      }
+      
+      .cellphone {
+        @include largeField;
+      }
+      
+      .telArea {
+        width: 30% !important;
+      }
+      
+      .tel {
+        width: 60% !important;
+      }
+      
+      .email {
+        @include largeField;
+      }
+      
+      .otherContactWay {
+        @include largeField;
+        height: 100px !important;
+      }
+      
+      .label {
+        margin-left: 10px;
+      }
+      
+      > div, > span, > input, > textarea {
+        margin-left: 10px;
+      }
+      &.specWrap {
+        margin-top: 20px;
+        :global {
+          .ant-checkbox-wrapper {
+            display: inline-block;
+          }
+        }
+      }
+      label {
+        display: block;
+        margin-bottom: 5px;
+        svg {
+          display: inline-block;
+          vertical-align: -6px;
+          font-size: 23px;
+          margin-left: 4px;
+          color: $complete;
+        }
+      }
+      :global {
+        .ant-radio-wrapper {
+          display: inline-block;
+        }
+        .ant-form-item {
+          margin-bottom: 0;
+        }
+        .ant-form-item-children-icon {
+          display: none;
+        }
+        .ant-btn {
+          margin-left: 8px;
+        }
+        .ant-select-arrow {
+          right: 16px !important;
+        }
+      }
+    }
+
+    .validate {
+      color: $errorTip;
+      margin-right: 5px;
+    }
+    .valueData {
+      color: $black;
+    }
+
+    .errorBord {
+      border-color: $errorTip;
+    }
+    .error {
+      color: $errorTip;
+      margin-top: 2px;
+      display: block;
+    }
+
+    .btnWrap {
+      text-align: center;
+      margin-top: 20px;
+      button + button {
+        margin-left: 8px;
+      }
+    }
+
+    .telWrap {
+      input {
+        &:first-child {
+          width: 30%;
+        }
+      }
+      input + input {
+        margin-left: 8px;
+      }
+    }
+
+    .specWrap {
+      margin-top: 20px;
+      label {
+        margin-right: 10px;
+      }
+      :global {
+        .ant-checkbox-wrapper {
+          display: inline-block;
+          margin-right: 8px;
+        }
+      }
+    }
+}

@@ -1,0 +1,361 @@
+@import "../../scss/_var2.scss";
+@import "../../components/ui/rate/Rate.scss";
+
+p {
+  margin-bottom: 0;
+}
+
+.sidebar {
+  background-color: $white;	
+  padding: 35px 20px;	
+  text-align: center;	
+  border-radius: 4px;
+  width: 240px !important;
+  flex: 0 0 240px !important;
+  max-width: 240px !important;
+  min-width: 240px !important;
+  margin-right: 20px;
+  color: $black;
+  :global {
+    .ant-avatar {
+      margin-bottom: 10px;
+    }
+    .ant-btn {
+      margin-top: 10px;
+    }
+  }
+}
+.title {
+  width: 70%;
+  font-size: $font-size-18;
+  font-weight: normal;
+  margin: 8px auto 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  word-wrap:break-word;
+  white-space:pre-wrap;
+  .username {
+    color: $black;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    word-wrap:break-word;
+    white-space:pre-wrap;
+  }
+  .username:hover {
+    text-decoration: underline;
+  }
+}
+.evaluationNo {
+  font-size: $font-size-46;
+  color: $primary-4;
+  font-weight: 500;
+}
+.rateWrap {
+  .rateNo {
+    font-size: $font-size-14;
+    color: $gray-300;
+  }
+  :global {
+    .ant-rate {
+      font-size: $font-size-16;
+    }
+    .ant-rate-star {
+      color: $primary-4;
+    }
+  }
+}
+.reviewWrap {
+  color: $gray-300;
+  font-size: $font-size-14;
+  margin-top: 8px;
+}
+.list {
+  width: 90%;
+  margin: 20px auto 0;
+  font-size: $font-size-16;
+  text-align: left;
+  color: $black;
+  li {
+    display: flex;
+    .cancelModel {
+      margin: auto;
+    }
+  }
+  li[type="button"] {
+    margin: auto;
+  }
+  li + li {
+    margin-top: 8px;
+  }
+  :global {
+    .MuiSvgIcon-root {
+      color: $primary-4;
+      font-size: $font-size-24;
+      margin-left: 8px;
+    }
+  }
+}
+
+.buttonList {
+ margin: 10px auto;
+}
+
+.alert {
+  height: 40px;
+  width: 100%;
+  background-color: $secondary-1;
+  display: flex;
+  align-items: center;
+  .alertContent {
+    margin-left: 20px;
+    .numOfUnread {
+      color: $primary-4;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    span {
+      color: $secondary-4;
+      font-size: 14px;
+      font-weight: bold;
+    }
+    span + span {
+      margin-left: 5px;
+    }
+  }
+}
+
+.badgeInfo {
+  width: 60%;
+  margin: 8px auto 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  img {
+    width: 60px;
+    &:first-child {
+      cursor: pointer;
+    }
+    + img{
+      margin-left: 4px;
+    }
+  }
+}
+
+.medalTips {
+  width: 80%;
+  color: $white;
+  background: linear-gradient(to right, #e98e43 34%, #fddc61 90%);
+  border-radius: 9px;
+  margin: 10px auto 0 ;
+  display: flex;
+  justify-content: flex-start;
+  text-align: left;
+  .img {
+    margin-left: 10px;
+    img {
+      width: 37px;
+      margin-bottom: -18px;
+    }
+  }
+  .tips {
+    margin-left: 5px;
+    padding: 5px;
+  }
+  .keyPoint {
+    font-weight: 700;
+  }
+}
+
+
+.button {
+  margin-top: 8px;
+  :global {
+    .ant-btn {
+      border-color: $primary-4;
+      color: $primary-4;
+      &:hover, &:focus {
+        border-color: $primary-5;
+        color: $primary-5;
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 768px){
+  .medalTips {
+    width: 90%;
+    margin: 8px auto;
+    display: flex;
+    justify-content: flex-start;
+    .img {
+      margin-left: 5%;
+      margin-right: 0;
+      display: flex;
+      align-items: flex-start;
+      img {
+        width: 25px;
+        margin-bottom: -17px;
+      }
+    }
+    .tips {
+      margin-left: 5%;
+      padding: 5px;
+      font-size: $font-size-16;
+    }
+    .keyPoint {
+      font-weight: 700;
+    }
+  }
+
+  .profile {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    width: 90%;
+    margin: 16px auto 0;
+    .userBrand {
+      display: flex;
+      width: 100%;
+      justify-content: space-between;
+      align-items: center;
+      .avatar {
+        flex-direction: column;
+        margin: 0 16px 0 0;
+      }
+    }
+    .userInfo {
+      width: 100%;
+      .titleWrap {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: $font-size-18;
+        line-height: 1.3;
+        .username {
+          width: 100%;
+          word-wrap: break-word;
+          word-break: break-all;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          display: -webkit-box;
+          -webkit-line-clamp: 2;
+          -webkit-box-orient: vertical;
+          color: $black;
+        }
+      }
+      .edit {
+        font-size: $font-size-13;
+        padding: 0 10px;
+        &:focus {
+          color: $gray-500;
+        }
+      }
+    }
+    .userBadge {
+      display: flex;
+      align-items: center;
+      margin-top: 5px;
+      justify-content: space-between;
+      .pid {
+        display: flex;
+        align-items: center;
+      }
+      .badgeInfo {
+        display: flex;
+        align-items: center;
+        margin: 0 0 0 5%;
+        text-align: right;
+        width: 45%;
+        a + a {
+          margin-left: 5%;
+        }
+        img {
+          width: 45px;
+        }
+      }
+    }
+  }
+  .userRate {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: 90%;
+    margin: 0 auto 18px;
+    .rateWrap {
+      display: flex;
+      align-items: flex-end;
+      margin-top: 5px;
+      .evaluationNo {
+        display: inline-block;
+        color: $primary-4;
+        line-height: 100%;
+        font-size: $font-size-33;
+      }
+      .rateNo {
+        font-size: $font-size-14;
+        color: $gray-400;
+        margin-left: 5px;
+      }
+    }
+
+    .reviewWrap {
+      font-size: $font-size-14;
+      color: $gray-400;
+      margin: 0;
+    }
+  }
+  .userStatus {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: 90%;
+    margin: 0 auto;
+    .statusList {
+      display: flex;
+      flex-direction: column;
+      margin: 0;
+      .item {
+        font-size: $font-size-16;
+        color: $gray-500;
+        font-weight: 600;
+        &:before {
+          content: attr(data-label);
+        }
+        + .item {
+          margin-top: 6px;
+        }
+      }
+    }
+    .userBtn {
+      display: flex;
+      flex-direction: column;
+    }
+    .button {
+      font-size: $font-size-16;
+      color: $primary-4;
+      text-decoration: underline;
+      position: relative;
+      &:hover, &:focus {
+        border-color: $primary-5;
+        color: $primary-5;
+        text-decoration: none;
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 320px){
+  .profile {
+  .userBadge {
+    .badgeInfo {
+      margin: 0;
+    }
+  }
+  }
+}

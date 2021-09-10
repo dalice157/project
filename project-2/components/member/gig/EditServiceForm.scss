@@ -1,0 +1,56 @@
+:global {
+  .ant-card-form {
+    display: table;
+    border-collapse: separate;
+    border-spacing: 20px;
+  }
+}
+
+.editServiceField {
+  display: table-row;
+  .fieldName {
+    display: table-cell;
+    vertical-align: top;
+    margin-right: 20px;
+    padding-right: 50px;
+    padding-bottom: 20px;
+    font-size: 14px;
+  }
+  .fieldContent {
+    display: table-cell;
+    vertical-align: top;
+    padding-bottom: 10px;
+    width: 400px;
+    img {
+      width: 100%;
+      height: 100%;
+      margin: auto 20px 10px auto;
+    }
+    .removePreviewImage {
+      margin: 10px auto;
+    }
+    .unit {
+      width: 35%;
+      display: inline-block;
+      margin: auto 10px auto auto;
+    }
+    .price {
+      width: 45%;
+      display: inline-block;
+      margin: auto 10px;
+    }
+    .description {
+      width: 100%;
+      height: 200px;
+    }
+  }
+  .validate {
+    display: table-cell;
+    vertical-align: top;
+    color: red;
+  }
+}
+
+.buttonField {
+  margin-top: 20px;
+}

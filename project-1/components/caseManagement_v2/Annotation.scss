@@ -1,0 +1,22 @@
+@import "../../scss/var";
+
+.wrap {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid $gray-200;
+  padding-bottom: 20px;
+}
+
+@media only screen and (max-width: 768px) {
+  .wrap {
+    padding-bottom: 10px;
+    flex-direction: column;
+    justify-content: space-around;
+    align-items: initial;
+  }
+}
+
+.img {
+  width: 98px;
+  margin-right: 16px;
+}

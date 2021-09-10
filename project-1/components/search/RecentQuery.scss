@@ -1,0 +1,33 @@
+@import "../../scss/var2";
+
+.wrap {
+  width: 100%;
+  margin: 20px auto 0;
+  padding-bottom: 40px;
+  .title {
+    font-weight: 600;
+    font-size: $font-size-16;
+    color: $gray-500;
+  }
+  .list {
+    padding: 16px;
+    a {
+      color: $secondary-4;
+      font-size: $font-size-14;
+      font-weight: 500;
+      &:hover {
+        color: $secondary-2;
+      }
+    }
+  }
+  .list + .list {
+    border-top: 1px solid $gray-200;
+  }
+}
+
+@media only screen and (max-width: 768px){
+  .wrap {
+    margin-top: 0;
+    width: 90%;
+  }
+}

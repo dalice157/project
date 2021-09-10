@@ -1,0 +1,90 @@
+@import "../../scss/var2";
+
+.bg {
+  background-color: $secondary-1;
+  position: absolute;
+  z-index: 999;
+  top: 70px;
+  padding: 8px 0;
+  width: 100%;
+}
+
+.wrap {
+  margin: 0 auto;
+  max-width: 1200px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.menu, .howCase {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  font-size: $font-size-16;
+  font-weight: bold;
+  li {
+    :global {
+      .MuiSvgIcon-root {
+        font-size: $font-size-26;
+        color: $secondary-5;
+        margin-right: 4px;
+      }
+    }
+    &:hover, &.active{
+      border-radius: 50px;
+      background-color: $primary-4;
+      color: $white;
+      :global {
+        .MuiSvgIcon-root {
+          color: $white;
+        }
+      }
+      a {
+        color: $white;
+      }
+    }
+  }
+  a {
+    color: $secondary-5;
+    padding: 9px 20px;
+    display: block;
+    &:hover {
+      color: $white;
+    }
+  }
+}
+.howCase {
+  .free, .case {
+    padding-left: 25px;
+  }
+  .free {
+    background: url('../../img/header_v2/nav-free.svg') 20px center no-repeat;
+    &:hover, &.active {
+      background-image: url('../../img/header_v2/nav-free-hover.svg')
+    }
+  }
+  .case {
+    display: flex;
+    align-items: center;
+    &:hover, &.active {
+      .icon {
+        background-color: $white; /* defines the background color of the image */
+      }
+      
+    }
+    .icon {
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      background-color: $secondary-5; /* defines the background color of the image */
+      mask: url('../../img/header_v2/add_group.svg') no-repeat center / contain;
+      -webkit-mask: url('../../img/header_v2/add_group.svg') no-repeat center / contain;
+    }
+    a {
+      padding: 9px 20px 9px 10px;
+    }
+    
+    
+  }
+}

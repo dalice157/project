@@ -1,0 +1,190 @@
+@import "../../scss/var2";
+.wrap {
+  > div {
+    width: 100% !important;
+  }
+  :global {
+    .ant-drawer-body {
+      padding: 0 !important;
+    }
+  }
+}
+.hamburger{
+  position: absolute;
+  top: 8px;
+  left: 16px;
+  height: 24px;
+  width: 24px;
+  z-index: 1001;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  > .line{
+    position: relative;
+    top: 0;
+    left: 0;
+    background: $secondary-5;
+    border-radius: 50px;
+    height: 2px;
+    width: 100%;
+    transition: all  0.4s ease;
+    &::before,
+    &::after{
+      content: '';
+      position: absolute;
+      border-radius: 50px;
+      top: -10px;
+      background: $secondary-5;
+      width: 100%;
+      height: 2px;
+      transition: all  0.4s ease;
+    }
+    &::after{
+      top: 10px;
+    }
+  }
+}
+
+.hamburger.change > .line{
+  background: rgba(0,0,0,0);
+  &::before{
+    top: 0;
+    transform: rotate(45deg);
+    background: $secondary-5;
+  }
+  &::after{
+    top: 0;
+    transform: rotate(135deg);
+    background: $secondary-5;
+  }
+}
+
+.menu{
+  position: absolute;
+  left: 0;
+  background: $white;
+  width: 0%;
+  height: 100vh;
+  z-index: 1000;
+  
+  transition: all 0.4s ease;
+}
+
+.toggler:checked ~ .menu{
+  width: 100%;
+}
+
+
+.menu > .bg{
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  width: 100%;
+  visibility: hidden;
+  > .search {
+    display: none;
+  }
+}
+
+
+.toggler:checked ~ .menu > .bg{
+  transition: visibility 0.4s ease;
+  transition-delay: 0.1s;
+  visibility: visible;
+
+  > .search {
+    display: block;
+  }
+}
+
+.logo {
+  display: block;
+  text-align: center;
+  padding-top: 8px;
+  img {
+    width: 90px;
+  }
+}
+
+.search {
+  width: 90%;
+  margin: 40px auto 24px;
+  > div {
+    width: 100%;
+    margin: 0;
+  }
+}
+
+.list {
+  width: 90%;
+  margin: 0 auto;
+  li {
+    padding-left: 70px;
+    border-bottom: 1px solid $gray-300;
+    &:focus, &:hover, &:active {
+      background-color: $primary-4;
+      border-bottom-color: $primary-4;
+    }
+    a {
+      color: $secondary-5;
+      padding: 15px 0;
+      display: block;
+      font-size: $font-size-18;
+      &:hover, &:focus, &:active  {
+        color: $white;
+      }
+    }
+  }
+  .home {
+    background: url('../../img/header_v2/hamMenu-icon-1.svg') 24px center no-repeat;
+    &:hover {
+      background-image: url('../../img/header_v2/hamMenu-icon-hover-1.svg');
+    }
+  }
+  .teacher {
+    background: url('../../img/header_v2/hamMenu-icon-2.svg') 24px center no-repeat;
+    &:hover {
+      background-image: url('../../img/header_v2/hamMenu-icon-hover-2.svg');
+    }
+  }
+  .offer {
+    background: url('../../img/header_v2/hamMenu-icon-3.svg') 24px center no-repeat;
+    &:hover {
+      background-image: url('../../img/header_v2/hamMenu-icon-hover-3.svg');
+    }
+  }
+  .case {
+    background: url('../../img/header_v2/hamMenu-icon-4.svg') 24px center no-repeat;
+    &:hover {
+      background-image: url('../../img/header_v2/hamMenu-icon-hover-4.svg');
+    }
+  }
+  .free {
+    background: url('../../img/header_v2/hamMenu-icon-5.svg') 24px center no-repeat;
+    &:hover {
+      background-image: url('../../img/header_v2/hamMenu-icon-hover-5.svg');
+    }
+  }
+  .join {
+    display: flex;
+    align-items: center;
+    padding-left: 18px;
+    a {
+      margin-left: 13px;
+    }
+    .icon {
+      width: 38px;
+      height: 38px;
+      display: inline-flex;
+      background-color: $secondary-5; /* defines the background color of the image */
+      mask: url('../../img/header_v2/add_group.svg') no-repeat center / contain;
+      -webkit-mask: url('../../img/header_v2/add_group.svg') no-repeat center / contain;
+    }
+    &:focus, &:hover, &:active {
+      .icon {
+        background-color: $white; /* defines the background color of the image */
+      }
+    }
+  }
+}

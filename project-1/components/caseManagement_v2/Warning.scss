@@ -1,0 +1,22 @@
+@import "../../scss/_var2.scss";
+
+.warn {
+  color: $danger;
+  font-size: $font-size-14;
+  margin-top: 8px;
+  .ps {
+    color: $primary-4;
+  }
+}
+.pointLink {
+  a {
+    margin-left: 16px;
+    color: $primary-4;
+    text-decoration: underline;
+    &:hover {
+      text-decoration: none;
+    }
+  }
+}
+
+

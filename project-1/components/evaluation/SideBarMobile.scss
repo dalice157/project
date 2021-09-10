@@ -1,0 +1,47 @@
+@import "../../scss/var2";
+
+.wrap {
+  padding-top:10px;
+  padding-bottom: 20px;
+  :global {
+    .ant-menu-inline, .ant-menu-vertical, .ant-menu-vertical-left {
+      border: none;
+      padding: 10px 20px;
+    }
+    .ant-menu-inline .ant-menu-item, .ant-menu-inline .ant-menu-submenu-title {
+      display: flex;
+      align-items: center;
+      box-sizing: border-box;
+      border-radius: 4px;
+      box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+      border: 1px solid $gray-200;
+      padding: 20px;
+      line-height: auto;
+      height: 60px;
+      font-size: $font-size-16;
+    }
+    .ant-menu-vertical .ant-menu-item:after, .ant-menu-vertical-left .ant-menu-item:after, .ant-menu-vertical-right .ant-menu-item:after, .ant-menu-inline .ant-menu-item:after {
+      content: '＞';
+      border: none;
+      top: 8px;
+      right: 15px;
+      opacity:1;
+      transform: inherit;
+    }
+    .ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected,
+    .ant-menu-item-selected > a, .ant-menu-item-selected > a:hover {
+      background-color: $white;
+      color: $black;
+    }
+  }
+}
+
+.title {
+  width: 95%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  word-wrap: break-word;
+  word-break: break-all;
+  display: block;
+}

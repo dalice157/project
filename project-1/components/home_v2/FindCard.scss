@@ -1,0 +1,151 @@
+@import "../../scss/var2";
+.cardWarp {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  >div {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+  &.mobile {
+    display: block;
+    >div >div {
+      width: 100%;
+    }
+    .tagWrap {
+      display: flex;
+      flex-flow: wrap;
+      a {
+        margin-bottom: 4px;
+      }
+    }
+    :global {
+      .ant-collapse-icon-position-right > .ant-collapse-item.ant-collapse-item-active > .ant-collapse-header {
+        background-color: $primary-3;
+        color: $white;
+      }
+      .ant-collapse-content {
+        border: 1px solid $primary-3;
+      }
+      .ant-collapse {
+        border-radius: 0;
+        background: transparent;
+        border: none;
+      }
+      .ant-collapse-icon-position-right > .ant-collapse-item > .ant-collapse-header .ant-collapse-arrow {
+        transform:rotate(90deg);
+        font-size: $font-size-18;
+        top: 20px;
+      }
+      .ant-collapse-icon-position-right > .ant-collapse-item.ant-collapse-item-active > .ant-collapse-header .ant-collapse-arrow {
+        transform:rotate(180deg);
+        top: 20px;
+      }
+      .ant-collapse > .ant-collapse-item {
+        border: none;
+        margin-bottom: 8px;
+      }
+      .ant-collapse-icon-position-right > .ant-collapse-item > .ant-collapse-header {
+        padding: 8px 16px;
+        background-color: $gray-300;
+      }
+      .ant-collapse > .ant-collapse-item:last-child, .ant-collapse > .ant-collapse-item:last-child > .ant-collapse-header {
+        border-radius: 0;
+      }
+      .ant-collapse-item:last-child > .ant-collapse-content {
+        border-radius: 0;
+      }
+    }
+    .btnWrap {
+      :global {
+        .ant-btn{
+          font-size: $font-size-20;
+        }
+      }
+    }
+  }
+}
+
+.btnWrap {
+  text-align: center;
+  margin-top: 24px;
+  :global {
+    .ant-btn-lg {
+      height: 50px;
+    }
+    .ant-btn {
+      border-color: $third-4;
+      border-radius: 8px;
+      background-color: $third-4;
+      font-size: $font-size-22;
+    }
+    a.ant-btn-lg {
+      line-height: 50px;
+      span {
+        display: inline-block;
+      }
+    }
+  }
+}
+
+.wrap {
+  border: 1px solid $gray-300;
+  display: flex;
+  width: 49%;
+  &:hover {
+    border: 1px solid $primary-3;
+    .left {
+      background-color: $primary-3;
+    }
+  }
+}
+.wrap:nth-child(n+1){
+  margin-top: 10px;
+}
+.left {
+  background-color: $gray-300;
+  justify-content: center;
+  padding: 12px;
+  width: 150px;
+  display: flex;
+  align-items: center;
+  .container {
+    text-align: center;
+  }
+  .title {
+    color: $black;
+    font-size: $font-size-16;
+  }
+  img {
+    width: 40px;
+    height: 40px;
+    margin-top: 4px;
+  }
+}
+
+.right {
+  background-color: $white;
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  width: calc(100% - 150px);
+  align-items: center;
+  justify-content: flex-start;
+}
+
+
+.panel {
+  display: flex;
+  align-items: center;
+  img {
+    width: 40px;
+    height: 40px;
+    margin-right: 8px;
+  }
+  .title {
+    font-size: $font-size-18;
+    font-weight: bold;
+  }
+}

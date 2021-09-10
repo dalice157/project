@@ -1,0 +1,71 @@
+@import "../../scss/_var2";
+
+.card {
+  :global {
+    .ant-divider-horizontal {
+      margin: 16px auto;
+    }
+  }
+    .date {
+        display: flex;
+        color: $primary-4;
+        font-weight: bold;
+        margin: auto;
+        p + p {
+            margin-left: 10px;
+        }
+    }
+    .topperName {
+        display: block;
+        font-size:  $font-size-16;
+        margin: 5px auto;
+    }
+
+    .score {
+        color: $third-3;
+        font-weight: bold;
+    }
+    
+    .title {
+        font-weight: bold;
+    }
+    
+    .line {
+      p > p {
+          color: $primary-4;
+          font-weight: bold;
+      }
+    }
+    
+    .line + .line {
+        margin-top: 4px;
+    }
+
+    .content {
+      display: inline-flex;
+      align-items: center;
+    }
+
+    .content {
+      display: inline-flex;
+      align-items: center;
+    }
+    
+    .content + .content {
+        margin-left: 10px;
+    }
+
+    .btnWrap {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      margin-top: 10px;
+      button {
+        padding: 0 10px;
+      }
+    }
+}
+
+.card + .card {
+    margin-top: 20px;
+}

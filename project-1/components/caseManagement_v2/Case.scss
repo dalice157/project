@@ -1,0 +1,95 @@
+@import "../../scss/_var2.scss";
+
+.wrap {
+  background-color: $gray-100;
+  :global {
+    .ant-collapse, .ant-collapse-item {
+      background-color: white;
+      font-weight: 500;
+    }
+  }
+}
+
+.notes {
+  .ul {
+    margin-top: 5px;
+    li::before {
+        content: '-';
+        margin-left: 10px;
+        margin-right: 5px;
+    }
+    li + li {
+        margin-top: 5px;
+    }
+  }
+  li::before {
+      content: '*';
+      margin-right: 5px;
+  }
+  li + li {
+      margin-top: 5px;
+  }
+}
+
+
+.content {
+  background-color: $white;
+  border-radius: 0 4px 4px 4px;
+  padding: 35px;
+}
+
+.list {
+  color: $gray-500;
+  li {
+    list-style-type: square;
+    margin-left: 20px;
+    font-size: $font-size-16;
+  }
+  li + li {
+    margin-top: 8px;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .wrap {
+    width: 100%;
+    :global {
+      .ant-breadcrumb {
+        width: 90%;
+        margin: 16px auto;
+      }
+    }
+    .title {
+      margin: 20px;
+    }
+    .triggerExpand {
+      display: flex;
+      justify-content: space-between;
+      color: $gray-500;
+      .text {
+        font-size: $font-size-14;
+        font-weight: 500;
+      }
+      :global {
+        .MuiSvgIcon-root {
+          color: $gray-400
+        }
+      }
+    }
+    .list {
+      margin-top: 14px;
+      color: $gray-500;
+      li {
+        list-style-type: square;
+        margin-left: 20px;
+        font-size: $font-size-14;
+      }
+      li + li {
+        margin-top: 8px;
+      }
+    }
+    .content {
+      padding: 16px;
+    }
+  }
+}

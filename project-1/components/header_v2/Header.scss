@@ -1,0 +1,100 @@
+@import "../../scss/var2";
+.header{
+  height: 70px !important;
+  line-height: 70px !important;
+  padding: 0;
+  position: fixed;
+  z-index: 1000;
+  background-color: $white;
+  width: 100%;
+  box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.28);
+  &.mobile {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 14px;
+    height: 40px !important;
+    line-height: 40px !important;
+    .logo {
+      width: 90px;
+      margin-left: 40px;
+    }
+    .right {
+      .search {
+        cursor: pointer;
+        margin-right: 16px;
+        img {
+          width: 24px;
+          height: 24px;
+        }
+      }
+    }
+  }
+  .wrap {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+  }
+  .right {
+    display: flex;
+  }
+  .signIn {
+    display: flex;
+    align-items: center;
+    &.mobile {
+      .caseList, .profile {
+        margin-left: 16px;
+      }
+      .profile {
+        display: inline-block;
+      }
+    }
+  }
+  .signOut {
+    font-size: $font-size-16;
+    font-weight: bold;
+    color: $secondary-5;
+    a {
+      color: $secondary-5;
+      &:hover {
+        color: $secondary-3;
+      }
+    }
+  }
+
+  .logo {
+      width: 118px;
+      margin-right: 15px;
+      display: inline-block;
+      img{
+        width:100%;
+      }
+  }
+  .caseList {
+    margin-left: 32px;
+  }
+}
+
+.signWrap {
+  margin-top: -4px;
+  .hi, .userName {
+    color: $secondary-5;
+  }
+  .userName {
+    font-weight: bold;
+  }
+  a {
+    color: $secondary-5;
+    &:hover {
+      color: $secondary-3;
+    }
+  }
+}
+
+@media only screen and (max-width: 320px) {
+  .header {
+    &.mobile {
+      max-width: 320px;
+    }
+  }
+}

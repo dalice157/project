@@ -1,0 +1,19 @@
+@import "../../scss/_var2.scss";
+.wrap {
+    .rate {
+        width: 340px;
+        margin: auto;
+        .item {
+            span {
+                width: 200px;
+                display:inline-block;
+                color: $black;
+            }
+        }
+    }
+    
+    .buttonWrap {
+        text-align: center;
+        margin-top: 15px;
+    }
+}

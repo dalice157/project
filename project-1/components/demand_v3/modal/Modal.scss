@@ -1,0 +1,151 @@
+@import "../../../scss/var";
+.error {
+    color: $errorTip;
+    margin-top: 2px;
+    display: block;
+  }
+.apply {
+  color: $black;
+  .title {
+    margin-top: 8px;
+    font-size: $font-size-16;
+    font-weight: 400;
+  }
+  .content {
+    margin-top: 8px;
+    line-height: 1.8
+  }
+  .radio {
+    margin-top: 8px;
+  }
+  .rateText {
+    margin-top: 20px;
+  }
+  .select {
+    margin-top: 20px;
+        .label {
+            display: inline-block;
+            width: 70px;
+        }
+    }
+    .select + .select {
+        margin-top: 8px;
+    }
+
+    .rate {
+      margin-top: 8px;
+        .item {
+            display: flex;
+            .rateType {
+                width: 200px;
+                display:inline-block;
+                color: $black;
+            }
+            .rateWrap {
+              display: inline-block;
+              position: relative;
+              padding-top: 20px;
+              .lowRate {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: auto;
+                margin-left: 8px;
+              }
+              .highRate {
+                position: absolute;
+                right: 0;
+                top: 0;
+                width: auto;
+              }
+            }
+        }
+    }
+    :global {
+        .ant-checkbox-group {
+            display: block;
+            margin-top: 15px;
+        }
+        .ant-checkbox-wrapper + .ant-checkbox-wrapper {
+            margin-left: 0;
+            margin-top: 5px;
+        }
+    }
+    .commentText, .commentSelect, .textArea {
+      margin-top: 8px;
+    }
+    .commentText {
+      font-size: $font-size-12;
+    }
+    .notFound {
+      margin-top: 8px;
+      .text {
+        font-size: $font-size-14;
+      }
+      :global {
+        .ant-radio-wrapper {
+          display: block;
+          line-height: 1.8
+        }
+      }
+    }
+    .report {
+      display: flex;
+      align-items: center; 
+      margin-top: 20px;
+      svg {
+        color: $errorTip;
+        font-size: $font-size-38;
+      }
+      .text {
+        display: inline-block;
+      }
+    }
+    .checkText {
+      margin-top: 20px;
+      padding-bottom: 20px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid $gray-200;
+      .warn {
+        color: $errorTip;
+      }
+    }
+}
+.okPay {
+  .content {
+    margin-top: 8px;
+    line-height: 1.8
+  }
+}
+.btnWrap {
+  text-align: center;
+  margin-top: 20px;
+}
+
+@media only screen and (max-width: 768px) {
+  .apply{
+    :global {
+      .ant-select {
+        width: 100%;
+      }
+    }
+    .select {
+      .label {
+          width: 100%;
+      }
+    }
+    .rateIcon {
+      font-size: $font-size-26;
+    }
+    .rate {
+      .item {
+        display: block;
+        margin-bottom: 8px;
+        .rateType {
+          margin-bottom: 8px;
+        }
+      }
+    }
+  }
+  
+}

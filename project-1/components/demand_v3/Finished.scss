@@ -1,0 +1,71 @@
+@import "../../scss/var";
+
+.form {
+  margin: 25px;
+}
+
+.title {
+  font-size: $font-size-20;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.btnWrap {
+  text-align: center;
+  margin-top: 20px;
+  button + button {
+    margin-left: 8px;
+  }
+}
+
+.flex {
+  display: flex;
+}
+
+.field + .field {
+  margin-top: 10px;
+}
+.flex + .flex {
+  margin-top: 0;
+}
+.field {
+  label {
+    display: block;
+    margin-bottom: 5px;
+  }
+}
+
+.valueData {
+  color: $black;
+}
+
+.text {
+  line-height: 1.8;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.table {
+  width: 100%;
+  margin-top: 8px; 
+  td {
+    padding: 10px 20px;
+    background-color: $gray-100;
+    &:first-child {
+      background-color: $black;
+      color: $white;
+      font-weight: 700; 
+      text-align: center;
+    }
+  }
+}
+.notYet {
+  color: $errorTip;
+}
+.ok {
+  color: $complete;
+}
+
+.demandField {
+  margin: 20px auto;
+}

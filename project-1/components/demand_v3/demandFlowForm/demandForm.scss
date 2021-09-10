@@ -1,0 +1,60 @@
+@import "../../../scss/var2";
+
+form {
+    line-height: 35px;
+    .title {
+        font-size: $font-size-16;
+        font-weight: 500;
+    }
+    .line {
+        display: flex;
+        align-items: center;
+    }
+    .clickText {
+        color: $primary-5;
+        cursor: pointer;
+    }
+    .center {
+        display: flex;
+        justify-content: center;
+    }
+    svg {
+        cursor: pointer;
+    }
+    :global {
+        .ant-btn {
+            margin: 10px;
+        }
+    }
+    .block {
+        margin: 10px 0;
+    }
+    .error {
+        color: $danger;
+        margin: 2px 0;
+      }
+    .radio {
+        display: flex;
+        flex-direction: column;
+        :global {
+            .ant-radio-wrapper {
+                margin: 5px 0;
+            }
+        }
+    }
+    :global {
+        .ant-radio-wrapper {
+            margin: 5px;
+        }
+    }
+}
+
+@media only screen and (max-width: 375px) {
+    form {
+        .evaluate {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+    }
+}

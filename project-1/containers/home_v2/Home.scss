@@ -1,0 +1,105 @@
+@import "../../scss/var2";
+
+.wrap {
+  margin-top: 128px;
+  font-family: $font-family;
+}
+.title {
+  text-indent: -9999px;
+  display: none;
+}
+
+.mobile {
+  margin-top: 40px;
+  font-family: $font-family;
+}
+
+.nav {
+  width: 100%;
+  margin: 24px auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  li {
+    border-radius: 100px;
+    border: 1px solid $gray-400;
+    padding: 0 20px;
+    height: 48px;
+    &:focus, &:hover, &:active {
+      background-color: $primary-2;
+      border: 1px solid $primary-2;
+    }
+    a {
+      color: $secondary-5;
+      padding-left:33px;
+      display: block;
+      font-size: $font-size-20;
+      &:hover, &:focus, &:active  {
+        color: $primary-3;
+      }
+    }
+  }
+  .free {
+    display: flex;
+    align-items: center;
+    
+    a {
+      margin-left: 10px;
+      padding-left: 0;
+    }
+    .icon {
+      width: 30px;
+      height: 30px;
+      background: url('../../img/index_v2/icon-free.svg') no-repeat center;
+      background-size: 80% auto;
+    }
+    &:focus, &:hover {
+      .icon {
+        background: url('../../img/index_v2/icon-free_hover.svg') no-repeat center;
+      }
+    }
+  }
+  .join {
+    display: flex;
+    align-items: center;
+    
+    a {
+      margin-left: 10px;
+      padding-left: 0;
+    }
+    .icon {
+      width: 30px;
+      height: 30px;
+      background: url('../../img/index_v2/icon-join.svg') no-repeat center;
+      background-size: 90% auto;
+    }
+    &:focus, &:hover {
+      .icon {
+        background: url('../../img/index_v2/icon-join_hover.svg') no-repeat center;
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 320px) {
+  .nav {
+    li {
+      padding: 0 15px;
+      a {
+        font-size: $font-size-18;
+      }
+    }
+    .free {
+      .icon {
+      width: 25px;
+      height: 25px;
+      }
+    }
+    .join {
+      .icon {
+      width: 25px;
+      height: 25px;
+      }
+    }
+  }
+}

@@ -1,0 +1,131 @@
+@import "../../scss/var";	
+
+.wrap {	
+  background-color: $white;	
+  border-radius: 4px;	
+  margin-bottom: 20px;	
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  &.mobile {
+    margin-top: 10px;
+    margin-bottom: 0;
+    padding: 20px 10px;
+    border-radius: 4px 4px 0 0;	
+    .sort {
+      border-bottom: 1px solid $gray-100;	
+      margin-top: 0;
+      margin-bottom: 0;
+      padding-bottom: 20px;
+    }
+    .hide {
+      display: inline-block;
+      font-size: 0;
+      width: 0;
+      height: 0;
+    }
+    .tagWrap {
+      border-top: none;
+      border-bottom: 1px solid $gray-100;
+      margin-top: 0;
+      padding-top: 0;
+      margin-bottom: 0;
+      padding-bottom: 20px;
+      :global {
+        .ant-tag {
+          margin-right: 10px;
+          margin-bottom: 10px;
+          font-size: $font-size-13;
+          padding: 4px 6px;
+        }
+      }
+    }
+    .intro {
+      .info {
+        width: 84%;
+      }
+    }
+    .desc {
+      display: block;
+      .title, .info {
+        width: 100%;
+        display: block;
+      }
+      .info {
+        margin-top: 10px;
+      }
+    }
+  }
+}
+
+
+.sort {	
+  font-size: $font-size-20;	
+  font-weight: normal;
+  line-height: 40px;
+  color: #000;
+}
+
+.hide {
+  display: inline-block;
+  font-size: 0;
+  width: 0;
+  height: 0;
+}
+
+.money {
+  font-weight: 600;	
+  color: $main-2-hover;	
+
+}	
+.intro {	
+  margin-top: 20px;
+  .textSmall {
+    font-size: $font-size-14;
+  }
+  .type {
+    font-weight: normal;
+  }
+  li {	
+    display: flex;	
+    font-size: $font-size-16;
+    align-items: flex-start;
+    &.desc {
+      align-items: stretch;
+    }
+    address {
+      margin: 0;
+    }
+  }	
+  li + li {	
+    margin-top: 8px;	
+  }	
+  .studentTitle {
+    font-size: 18px;
+    // font-weight: normal;
+    margin: 20px auto 10px auto;
+  }
+  .title {	
+    font-weight: 600;	
+    width: 120px;	
+  }	
+  .info {	
+    width: 95%;
+    line-height: 1.8;
+    word-wrap: break-word;
+    word-break: break-all;
+  }
+}	
+.tagWrap {	
+  border-top: 1px solid $gray-100;	
+  margin-top: 20px;	
+  padding-top: 20px;
+  a {
+    :global {
+      .ant-tag {
+        cursor: pointer;
+        font-size: $font-size-13;
+        padding: 4px 6px;
+      }
+    }
+  }
+} 

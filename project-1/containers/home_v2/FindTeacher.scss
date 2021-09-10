@@ -1,0 +1,125 @@
+@import "../../scss/var2";
+
+
+.wrap {
+  background-color: $secondary-1;
+  padding: 50px;
+  .btnWrap {
+    text-align: center;
+    margin-top: 24px;
+    :global {
+      .ant-btn-lg {
+        height: 50px;
+      }
+      .ant-btn {
+        border-color: $third-4;
+        border-radius: 8px;
+        background-color: $third-4;
+        font-size: $font-size-22;
+      }
+      .ant-btn-primary:hover, .ant-btn-primary:focus, .ant-btn-primary:active {
+        background-color: $primary-5;
+        border-color: $primary-5;
+      }
+      a.ant-btn-lg {
+        line-height: 50px;
+        span {
+          display: inline-block;
+        }
+      }
+    }
+  }
+  &.mobile {
+    padding: 24px 14px;
+    h2.title {
+      font-size: $font-size-26;
+      text-align: center;
+      align-items: flex-start;
+    }
+    h3.title {
+      font-size: $font-size-22;
+    }
+    h4.title {
+      font-size: $font-size-16;
+    }
+    .btnWrap {
+      :global {
+        .ant-btn{
+          font-size: $font-size-20;
+        }
+      }
+    }
+  }
+}
+
+h2.title {
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  font-size: $font-size-28;
+  font-weight: bold;
+  color: $secondary-5;
+}
+
+
+h3.title {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 50px;
+  margin-bottom: 10px;
+  color: $black;
+  font-size: $font-size-24;
+  font-weight: bold;
+  color: $black;
+  img {
+    &:first-child {
+      margin-right: 8px;
+    }
+    &:last-child {
+      margin-left: 8px;
+    }
+  }
+}
+
+.substandard {
+  color: $black;
+  font-size: $font-size-16;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.stepWrap {
+  background-color: $secondary-5;
+  padding: 29px 48px;
+  margin-top: 27px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  img {
+    width: 90px;
+    height: 90px;
+  }
+  .step {
+    display: flex;
+  }
+  .right {
+    margin-left: 8px;
+    width: 147px;
+  }
+  .title {
+    color: $white;
+    font-size: $font-size-16;
+    font-weight: normal;
+    align-items: flex-start;
+    justify-content: flex-start;
+    margin-top: 8px;
+  }
+  .text {
+    color: $primary-4;
+    font-size: $font-size-14;
+    list-style: 1.8;
+    margin-top: 4px;
+  }
+}

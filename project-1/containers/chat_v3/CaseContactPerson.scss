@@ -1,0 +1,115 @@
+@import "../../scss/var2";
+
+.wrap {
+ display: flex;
+}
+.sidebar {
+    background-color: $white;
+    width: 518px;
+    margin-right: 20px;
+    padding-top: 15px;
+    height: 80vh;
+    .panel {
+        height: 500px;
+        overflow-y: scroll;
+        .panelHeader {
+            display: flex;
+            align-items: center;
+            .deleteIcon {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin: auto 10px;
+                width: 40px;
+            }
+            :global {
+                .anticon-loading {
+                    font-size: 20px;
+                }
+            }
+        }
+    }
+    &.mobile {
+      width: 100%;
+      margin-right: 0;
+      :global {
+        .ant-menu-inline > .ant-menu-item {
+            max-width: 100%;
+        }
+      }
+    }
+}
+.total {
+    text-align: right;
+    color: $black;
+    font-size: $font-size-12;
+    margin: 10px auto 0;
+    width: 90%;
+}
+.collapse {
+    max-height: 70vh;
+    background-color: $white;
+    .moreChat {
+        margin: 10px;
+    }
+    .meta {
+        overflow : hidden;
+        text-overflow : ellipsis;
+        .nameField {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 6px;
+            .name {
+                display : inline-block;
+                overflow : hidden;
+                text-overflow : ellipsis;
+                white-space : nowrap;
+                padding-top: 8px;
+                margin: 0;
+                font-size: $font-size-14;
+                color: $black;
+            }
+        }
+        &.active {
+            .name {
+                color: $black;
+                font-weight: bold;
+            }
+        }
+    }
+    .item {
+        display: block;
+        text-overflow : ellipsis;
+        white-space : nowrap;
+        font-size: $font-size-12;
+        color: $gray-400;
+        margin-top: 6px;
+    }
+    .closed {
+        color: $danger;
+        font-size: $font-size-12;
+    }
+    .inviting {
+        color: #80c037;
+        font-size: $font-size-12;
+    }
+    :global {
+        .ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected,
+        .ant-menu-item:active, .ant-menu-submenu-title:active {
+            background-color: $third-1;
+        }
+
+        .ant-menu-vertical > .ant-menu-item, .ant-menu-vertical-left > .ant-menu-item, .ant-menu-vertical-right > .ant-menu-item, .ant-menu-inline > .ant-menu-item, .ant-menu-vertical > .ant-menu-submenu > .ant-menu-submenu-title, .ant-menu-vertical-left > .ant-menu-submenu > .ant-menu-submenu-title, .ant-menu-vertical-right > .ant-menu-submenu > .ant-menu-submenu-title, .ant-menu-inline > .ant-menu-submenu > .ant-menu-submenu-title {
+            line-height: 1.7;
+            height: 60px;
+            margin: 0;
+            max-width: 300px;
+        }
+
+        .ant-collapse, .ant-collapse-header, .ant-collapse-icon-position-right, .ant-collapse-item, .ant-collapse-item-active, .ant-collapse-content, .ant-collapse-content-box, .ant-menu-item-selected, .ant-menu-vertical .ant-menu-item:after, .ant-menu-vertical-left .ant-menu-item:after, .ant-menu-vertical-right .ant-menu-item:after, .ant-menu-inline .ant-menu-item:after, .ant-menu-inline, .ant-menu-vertical, .ant-menu-vertical-left  {
+            border: none;
+            background-color: $white;
+            color: $white;
+        }
+    }
+}

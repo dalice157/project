@@ -1,0 +1,125 @@
+@import "../../../scss/var2";
+.leaveForm {
+    height: 500px;
+    max-height: 70vh;
+    font-weight: 500;
+    .chatList {
+        overflow-y: scroll;
+        max-height: 55vh;
+        .meta {
+            padding-top: 8px;
+            display: flex;
+            align-items: center;
+            .metaBox {
+                width: 90%;
+            }
+            
+            .nameField {
+                display: flex;
+                justify-content: space-between;
+                .name {
+                    width: 60%;
+                    display : inline-block;
+                    overflow : hidden;
+                    text-overflow : ellipsis;
+                }
+            }
+            .selected {
+                margin: 5px;
+            }
+            &.active {
+                background-color: $third-1;
+                .nameField {
+                  font-weight: bold;
+                }
+            }
+        }
+        .disabled {
+            background-color: whitesmoke;
+            cursor: not-allowed;
+        }
+        .avatar {
+            margin-right: 16px;
+        }
+    }
+    .moreChat {
+        margin: 10px;
+    }
+    
+    
+    .metaBox {
+        overflow: hidden;
+    }
+    .nameField {
+        overflow : hidden;
+        text-overflow : ellipsis;
+        white-space : nowrap;
+        padding-top: 8px;
+        margin: 0;
+        font-size: $font-size-14;
+        color: $black;
+    }
+    .item {
+        display: block;
+        text-overflow : ellipsis;
+        white-space : nowrap;
+        font-size: $font-size-12;
+        color: $gray-400;
+    }
+    .closed {
+        color: $danger;
+        font-size: $font-size-12;
+    }
+    .inviting {
+        color: #80c037;
+        font-size: $font-size-12;
+    }
+    :global {
+        .ant-menu:not(.ant-menu-horizontal) .ant-menu-item-selected,
+        .ant-menu-item:active, .ant-menu-submenu-title:active {
+            background-color: white;
+        }
+        .ant-menu-vertical > .ant-menu-item, .ant-menu-vertical-left > .ant-menu-item, .ant-menu-vertical-right > .ant-menu-item, .ant-menu-inline > .ant-menu-item, .ant-menu-vertical > .ant-menu-submenu > .ant-menu-submenu-title, .ant-menu-vertical-left > .ant-menu-submenu > .ant-menu-submenu-title, .ant-menu-vertical-right > .ant-menu-submenu > .ant-menu-submenu-title, .ant-menu-inline > .ant-menu-submenu > .ant-menu-submenu-title {
+            line-height: 1.7;
+            height: 60px;
+            margin: 0;
+            max-width: 340px;
+        }
+
+        .ant-collapse, .ant-collapse-header, .ant-collapse-icon-position-right, .ant-collapse-item, .ant-collapse-item-active, .ant-collapse-content, .ant-collapse-content-box, .ant-menu-item-selected, .ant-menu-vertical .ant-menu-item:after, .ant-menu-vertical-left .ant-menu-item:after, .ant-menu-vertical-right .ant-menu-item:after, .ant-menu-inline .ant-menu-item:after, .ant-menu-inline, .ant-menu-vertical, .ant-menu-vertical-left  {
+            border: none;
+            background-color: $white;
+            color: $white;
+        }
+    }
+}
+
+.deleteHeader {
+    font-size: $font-size-12;
+    display: flex;
+    justify-content: space-around;
+    margin: 5px;
+    font-weight: 500;
+    .numOfSelected {
+        color: $primary-4;
+        font-weight: bold;
+    }
+    .warn {
+        color: $danger;
+    }
+}
+
+.deleteFooter {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 20px auto;
+}
+
+.total {
+    text-align: right;
+    color: $black;
+    font-size: $font-size-12;
+    margin: 10px auto 0;
+    width: 90%;
+}

@@ -1,0 +1,126 @@
+@import "../../scss/var2";
+$width: 512px;
+
+.wrap {
+  margin-top: 128px;
+  background: $white url('../../img/editProfile/bg.png') center bottom no-repeat;
+  background-size: cover;
+  min-height: calc(100vh - 200px);
+  &.mobile {
+    min-height: calc(100vh - 80px);
+    margin-top: 40px;
+    :global {
+      .ant-input {
+        padding: 20px 10px;
+      }
+      .ant-input-affix-wrapper .ant-input-suffix {
+        right: 5px;
+      }
+    }
+    .block {
+      width: 100%;
+      text-align: center;
+      padding-left: 20px;
+      padding-right: 20px;
+      .title {
+        margin-top: 24px;
+      }
+      .img {
+        display: none;
+      }
+      .copyUrl {
+        display: block;
+        text-align: center;
+        > button {
+          margin-top: 8px;
+        }
+      }
+    }
+    
+  }
+}
+
+.img {
+  position: absolute;
+  right: -65%;
+  bottom: 0;
+  z-index: 0;
+}
+.block {
+  width: $width;
+  height: calc(100vh - 200px);
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  .copyUrl {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    .link {
+      font-size: $font-size-14;
+      color: $gray-500;
+    }
+  }
+  .title {
+    position: relative;
+    z-index: 1;
+    font-size: $font-size-24;
+    font-weight: 500;
+    color: $secondary-5;
+    margin-top:48px;
+  }
+  .text {
+    position: relative;
+    z-index: 1;
+    font-size: $font-size-16;
+    color: $gray-500;
+    line-height: 1.7;
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 20px;
+  }
+  svg {
+    font-size: $font-size-14;
+    line-height: 24px;
+  }
+  :global {
+    .ant-input {
+      padding: 20px;
+    }
+    .ant-btn-danger {
+      min-width: 45px;
+      padding: 3px 10px;
+      height: auto;
+    }
+    .ant-btn-primary {
+      margin-left: 8px;
+    }
+  }
+}
+.show {
+  display: block;
+}
+.hide {
+  display: none;
+}
+
+
+
+.cancelBtn {
+  :global {
+    .ant-btn {
+      left: 0 !important;
+    }
+  }
+}
+
+.step {
+  &.mobile {
+    > div {
+      margin: 0;
+      padding-left: 5%;
+      padding-right: 5%;
+    }
+  }
+}

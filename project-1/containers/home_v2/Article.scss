@@ -1,0 +1,41 @@
+@import "../../scss/var2";
+
+.articles{
+  background-color: $secondary-5;
+  padding-bottom: 48px;
+
+  .articleList {
+    width: 950px;
+    margin: 0 auto;
+    &.mobile {
+      width: 80%;
+    }
+    :global {
+      .slick-next, .slick-prev{
+        background-color: $primary-4;
+        color: $white;
+        width: 24px;
+        height: 24px;
+        border-radius: 2px;
+        background-size: cover;
+        background-position: center center;
+      }
+      .slick-prev {
+        background-image: url('../../img/common_v2/icon-arrow-left.png');
+      }
+      .slick-next {
+        background-image: url('../../img/common_v2/icon-arrow-right.png');
+      }
+      .slick-prev:before, .slick-next:before {
+        content: ' ';
+      }
+    }
+  }
+}
+
+h2.title {
+  color: $white;
+  font-size: $font-size-28;
+  text-align: center;
+  padding: 45px;
+}

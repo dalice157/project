@@ -1,0 +1,149 @@
+@import "../../scss/var2";
+
+.wrap {
+  margin-top: 124px;
+  &.mobile {
+    margin-top: 40px;
+    .popularBanner {
+      height: 100%;
+      padding-bottom: 28px;
+    }
+    
+    
+    .btnWrap {
+      :global {
+        .ant-btn-primary {
+        font-size: $font-size-20;
+        }
+      }
+    }
+  }
+}
+
+.popularBanner {
+  background: url('../../img/join_v3/banner-3.jpg') center center repeat;
+  background-size: cover; 
+  height: 614px;
+}
+
+.btnWrap {
+  text-align: center;
+  padding-bottom: 24px;
+  :global {
+    .ant-btn-primary {
+      border-radius: 8px;
+      width: 156px;
+      height: 50px;
+      line-height: 50px;
+      background-color: $third-4;
+      font-size: $font-size-22;
+      border-color: $third-4;
+      &:hover {
+        background-color: $third-3;
+        border-color: $third-3;
+      }
+    }
+  }
+}
+
+.btnBg {
+  background: rgba(0, 0, 0, 0.8);
+  width: 100%;
+  padding: 24px 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  color: $white;
+  z-index: 5;
+  :global {
+    .ant-btn-primary {
+      border-radius: 8px;
+      width: 156px;
+      height: 50px;
+      line-height: 50px;
+      background-color: $third-4;
+      font-size: $font-size-22;
+      border-color: $third-4;
+      &:hover {
+        background-color: $third-3;
+        border-color: $third-3;
+      }
+    }
+  }
+  .wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+  }
+  .infoWrap {
+    display: flex;
+    margin-right: 40px;
+    .line {
+      margin-right: 16px;
+      width: 6px;
+      background-color: $white;
+    }
+    .title {
+      color: $white;
+      font-size: $font-size-22;
+      font-weight: bold;
+    }
+  }
+  .close {
+    position: relative;
+    top: -15px;
+    right: -10px;
+  }
+}
+
+.btnMPBg {
+  background: rgba(0, 0, 0, 0.8);
+  width: 100%;
+  padding: 24px 0;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 105;
+  color: $white;
+  :global {
+    .ant-btn-primary {
+      border-radius: 8px;
+      width: 156px;
+      height: 50px;
+      line-height: 50px;
+      background-color: $third-4;
+      font-size: $font-size-20;
+      border-color: $third-4;
+      &:hover {
+        background-color: $third-3;
+        border-color: $third-3;
+      }
+    }
+  }
+  .wrap {
+    color: $white;
+    text-align: center;
+    width: 80%;
+    margin: 0 auto;
+    .title {
+      font-size: $font-size-20;
+      font-weight: bold;
+      color: $white;
+      margin-bottom: 8px;
+    }
+  }
+  .close {
+    position: absolute;
+    top: 1.2em;
+    right: 1.5em;
+  }
+}
+
+.hide {
+  display: none;
+}
+h1.title {
+  text-indent: -9999px;
+  display: none;
+}

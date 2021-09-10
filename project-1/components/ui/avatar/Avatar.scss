@@ -1,0 +1,11 @@
+@import "../../../scss/var";
+
+.avatar {
+    display: inline-block;
+    :global {
+        .ant-avatar {
+            background-color: $gray-200 !important;
+            border: 1px solid $gray-200 !important;
+        }
+    }
+}

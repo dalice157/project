@@ -1,0 +1,82 @@
+@import "../../scss/var";
+
+.wrap {
+  margin-top: 128px;
+  background-color: $white;
+  &.mobile {
+    width: 100%;
+  }
+  :global {
+    .ant-layout.ant-layout-has-sider > .ant-layout, .ant-layout.ant-layout-has-sider > .ant-layout-content {
+      overflow: initial;
+    }
+  }
+}
+
+.layout {
+  margin: 20px auto 60px;
+  background-color: $white;
+  width: 1200px;
+  :global {
+    .ant-layout-sider, .ant-layout, .ant-menu-dark, .ant-menu-dark .ant-menu-sub {
+      background-color: $white;
+      overflow: initial;
+    }
+    .ant-layout-sider {
+      box-sizing: border-box;
+      flex: 0 0 320px !important;
+      max-width: 320px !important;
+      min-width: 320px !important;
+      width: 320px !important;
+      margin-top: -2px;
+    }
+    .ant-menu-dark.ant-menu-inline .ant-menu-item {
+      height: 60px;
+      border-radius: 4px;
+      border: solid 1px $gray-200;
+      background-color: $gray-100;
+      color: $black;
+      font-size: $font-size-16;
+      align-items: center;
+      display: flex;
+    }
+    .ant-menu.ant-menu-dark .ant-menu-item-selected {
+      background-color: $white;
+      border-left: 4px solid $main-1;
+      color: #000000;
+      .nav-text {
+        margin-left: -4px;
+      }
+    }
+    .ant-menu-dark .ant-menu-item, .ant-menu-dark .ant-menu-item-group-title, .ant-menu-dark .ant-menu-item > a {
+      color: $black;
+    }
+  }
+  .content {
+    margin-left: 20px;
+  }
+}
+
+.breadcrumb{
+  padding: 20px;
+  background-color: $gray-150;
+  .breadWrap {
+    width: 1200px;
+    margin: auto;
+  }
+  :global {
+    .ant-breadcrumb, .ant-breadcrumb-separator{
+      color: $black;
+    }
+    .ant-breadcrumb-link > a {
+      color: $black;
+      text-decoration: underline;
+    }
+  }
+  h2{
+    color: $black;
+    font-size: $font-size-26;
+    font-weight: normal;
+    margin-top: 10px;
+  }
+}

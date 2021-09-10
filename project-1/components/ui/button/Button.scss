@@ -1,0 +1,60 @@
+@import "../../../scss/var";
+:global {
+  .ant-btn-lg {
+    width: 160px;
+    height: 32px;
+    font-size: $font-size-14;
+  }
+  .ant-btn{
+      border-radius: 100px;
+      box-shadow: none;
+      text-shadow: none;
+      font-weight: normal;
+      background-color: $white;
+      border: 1px solid $gray-200;
+      color: $black;
+      i {
+          color: $gray-300;
+      }
+      &:hover, &:focus, &:active {
+          border: 1px solid $gray-200;
+          color:  $black;
+          background-color: $gray-100;
+          i {
+              color:  $black;
+          }
+      }
+  }
+  .ant-btn-disabled, .ant-btn.disabled, .ant-btn[disabled], .ant-btn-disabled:hover, .ant-btn.disabled:hover, .ant-btn[disabled]:hover, .ant-btn-disabled:focus, .ant-btn.disabled:focus, .ant-btn[disabled]:focus, .ant-btn-disabled:active, .ant-btn.disabled:active, .ant-btn[disabled]:active, .ant-btn-disabled.active, .ant-btn.disabled.active, .ant-btn[disabled].active {
+      background-color: $gray-200;
+      border: 1px solid $gray-200;
+      color: $gray-300;
+  }
+  .ant-btn-primary {
+      background-color: $main-1;
+      border: 1px solid $main-1;
+      color: $white;
+      &:hover, &:focus, &:active {
+          background-color: $main-1-hover;
+          border: 1px solid $main-1-hover;
+          color: $white;
+      }
+  }
+  .ant-btn-danger {
+      background-color: $main-2;
+      border: 1px solid $main-2;
+      color:  $white;
+      i {
+          color:  $white;
+      }
+      &:hover, &:focus, &:active {
+          background-color: $main-2-hover;
+          border: 1px solid $main-2-hover;
+          color:  $white;
+          i {
+              color:  $white;
+          }
+      }
+      
+  }
+}

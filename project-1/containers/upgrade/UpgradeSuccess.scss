@@ -1,0 +1,93 @@
+@import "../../scss/var2";
+
+.wrap {
+  margin-top: 128px;
+  background: $white url('../../img/editProfile/bg.png') center bottom no-repeat;
+  background-size: cover;
+  min-height: calc(100vh - 192px);
+}
+
+.img {
+  position: absolute;
+  right: -65%;
+  bottom: 0;
+  z-index: 0;
+}
+.block {
+  width: 512px;
+  height: calc(100vh - 192px);
+  margin: 0 auto;
+  text-align: center;
+  position: relative;
+  .title {
+    font-size: $font-size-28;
+    color: $secondary-5;
+    font-weight: 500;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding-top: 48px;
+    margin-bottom: 24px;
+  }
+}
+
+.proposal {
+  font-size: $font-size-18;
+  color: $gray-500;
+  margin-bottom: 16px;
+  > .plan {
+    color: $primary-4;
+    font-weight: 500;
+  }
+}
+
+.step {
+  &.mobile {
+    > div {
+      margin: 0;
+      padding-left: 5%;
+      padding-right: 5%;
+    }
+  }
+}
+
+.btnWrap {
+  margin-top: 24px;
+  a + a {
+    margin-left: 8px;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .wrap {
+    min-height: calc(100vh - 128px);
+    margin-top: 40px;
+  }
+  .block {
+    width: 100%;
+    min-height: calc(100vh - 128px);
+    text-align: center;
+    padding-left: 20px;
+    padding-right: 20px;
+    .title {
+      font-size: $font-size-24;
+      margin-top: 24px;
+    }
+    .img {
+      width: 60%;
+      right: 0;
+    }
+    .proposal {
+      font-size: $font-size-16;
+    }
+  }
+
+  .step {
+    > div {
+      max-width: 100%;
+      margin: 0;
+      padding-left: 5%;
+      padding-right: 5%;
+    }
+  }
+}

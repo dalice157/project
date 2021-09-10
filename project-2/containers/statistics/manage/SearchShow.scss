@@ -1,0 +1,57 @@
+#manageShow {
+  h2.info {
+    margin: 0;
+    color: black;
+    font-size: 1.25rem;
+    .title {
+      font-size: 1.0625rem;
+      color: #333333;
+    }
+  }
+  .tableWrap {
+    overflow-x:auto;
+    width: 100%;
+    margin-top: 8px;
+    table {
+      width: 1200px;
+      border: 3px solid #ccc;
+      border-collapse: collapse;
+      th, td {
+        border: 1px solid #ccc;
+        padding: 4px;
+        text-align: center;
+      }
+    }
+    &.typeTable {
+      thead {
+        background-color: #d4d4d4;
+      }
+      tbody {
+        tr {
+          &:nth-child(1) {
+            text-align: center;
+            border-bottom: 2px solid #ccc;
+            background-color: #dddddd;
+          }
+        }
+      }
+      th {
+        font-size: 1.0625rem;
+        &:nth-child(1) {
+          width: 100px;
+        }
+        &:nth-child(2) {
+          width: 50px;
+        }
+      }
+    }
+    &.memberTable-sum {
+      th, td {
+        &:nth-last-child(1) {
+          background-color: #dddddd;
+        }
+      }
+    }
+  }
+  
+}

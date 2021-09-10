@@ -1,0 +1,28 @@
+@import '../../../scss/var';
+
+:global {
+  .ant-modal-body {
+    padding: 5px 24px 24px;
+  }
+  .ant-modal-footer {
+    border: none;
+    text-align: center;
+    padding: 0px 16px 20px;
+    .ant-btn-primary {
+      background-color: $main-2 !important;
+      border-color: $main-2 !important;
+      &:hover {
+        background-color: $main-2-hover !important;
+        border-color: $main-2-hover !important;
+      }
+    }
+  }
+  .has-error .ant-form-explain,
+  .has-error .ant-form-split {
+    color: $errorTip;
+  }
+  .has-error .ant-input,
+  .has-error .ant-input:hover {
+    border-color: $errorTip;
+  }
+}

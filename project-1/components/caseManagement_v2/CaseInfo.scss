@@ -1,0 +1,103 @@
+@import "../../scss/var2";
+.titleWrap {
+  font-size: $font-size-14;
+  .title {
+    font-size: $font-size-18;
+    font-weight: 700;
+    a {
+      color: $gray-500;
+      &:hover {
+        color: $secondary-3;
+      }
+      &:visited {
+        color: $visited;
+      }
+    }
+  }
+  .demandNo {
+    display: flex;
+    align-items: center;
+    color: $gray-500;
+    margin-top: 8px;
+    span + span {
+      margin-left: 8px;
+    }
+  }
+  .caseOwner {
+    margin-top: 8px;
+  }
+}
+
+.price {
+  display: inline-block;	
+  align-items: center;
+  color: $primary-4;
+  font-weight: 500;
+  font-size: $font-size-16;
+}
+
+.info {
+  display: flex;
+  align-items: center;
+  vertical-align: center;
+  margin-top: 8px;
+  div + div {
+  padding-left: 8px;
+  margin-left: 8px;
+  border-left: 1px solid $gray-500;
+  }
+}
+
+
+.area, .person {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  svg {
+    font-size: $font-size-16;
+    margin-right: 8px;
+  }
+  .text {
+    font-size: $font-size-14;
+    
+  }
+}
+.person {
+  padding-left:20px;
+  margin-left: 20px;
+}
+
+@media only screen and (max-width: 768px) {
+  .title {
+    font-size: $font-size-14;
+    font-weight: 500;
+    .close {
+      color: $danger;
+      font-weight: normal;
+      margin-left: 10px;
+    }
+  }
+  .infoNo {
+    font-size: $font-size-14;
+  }
+  .price {
+    margin-top: 8px;
+    display: block;	
+    align-items: center;
+    font-weight: 500;
+    font-size: $font-size-14;
+  }  
+  .area, .person {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    svg {
+      font-size: $font-size-16;
+      margin-right: 8px;
+    }
+    .text {
+      font-size: $font-size-14;
+      
+    }
+  }
+}

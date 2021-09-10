@@ -1,0 +1,75 @@
+@import "../../scss/var2";
+
+
+.wrap {
+  background-color: $gray-100;
+  padding: 50px;
+  margin-bottom: 48px;
+  &.mobile {
+    padding: 24px 14px;
+    margin-bottom: 0;
+    h2.title {
+      font-size: $font-size-26;
+      text-align: center;
+      align-items: flex-start;
+    }
+    .substandard {
+      font-size: $font-size-16;
+      width: 100%;
+    }
+  }
+}
+
+h2.title {
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  font-size: $font-size-28;
+  font-weight: bold;
+  color: $secondary-5;
+}
+
+.substandard {
+  color: $secondary-5;
+  font-size: $font-size-18;
+  font-weight: bold;
+  text-align: center;
+  width: 557px;
+  margin: 0 auto 24px;
+  line-height: 1.8;
+}
+
+.stepWrap {
+  background-color: $secondary-5;
+  padding: 29px 48px;
+  margin-top: 27px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  img {
+    width: 90px;
+    height: 90px;
+  }
+  .step {
+    display: flex;
+  }
+  .right {
+    margin-left: 8px;
+    width: 147px;
+  }
+  .title {
+    color: $white;
+    font-size: $font-size-16;
+    font-weight: normal;
+    align-items: flex-start;
+    justify-content: flex-start;
+    margin-top: 8px;
+  }
+  .text {
+    color: $primary-4;
+    font-size: $font-size-14;
+    list-style: 1.8;
+    margin-top: 4px;
+  }
+}
+

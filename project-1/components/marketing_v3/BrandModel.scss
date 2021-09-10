@@ -1,0 +1,85 @@
+@import "../../scss/var";
+.loading {
+  text-align: center;
+  margin-top: 10em;
+}
+.brand {
+  :global {
+    .ant-form-item-children-icon {
+      display: none;
+    }
+    form .has-feedback > .ant-select .ant-select-arrow, form .has-feedback > .ant-select .ant-select-selection__clear, form .has-feedback :not(.ant-input-group-addon) > .ant-select .ant-select-arrow, form .has-feedback :not(.ant-input-group-addon) > .ant-select .ant-select-selection__clear {
+      right: 10px;
+    }
+    .ant-form-item {
+      margin-bottom: 0;
+    }
+  }
+  .block{
+    margin-top: 8px;
+    &.selectWrap {
+      width: 50%;
+      margin: auto;
+      text-align: left;
+      margin-top: 20px;
+    }
+    &.checkboxWrap {
+      text-align: left;
+      margin-left: 3.5em;
+      position: relative;
+      .specText {
+        position: absolute;
+        top: 9px;
+        left: 25px;
+      }
+    }
+    .select {
+      display: block;
+      height: 32px;
+      -webkit-box-sizing: border-box;
+      box-sizing: border-box;
+      background-color: #fff;
+      border: 1px solid #d9d9d9;
+      border-top-width: 1.02px;
+      border-radius: 4px;
+      outline: none;
+      -webkit-transition: all .3s cubic-bezier(.645, .045, .355, 1);
+      transition: all .3s cubic-bezier(.645, .045, .355, 1);
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+    }
+    .error {
+      color: $errorTip;
+      margin-top: 2px;
+      display: block;
+    }
+  }
+  .validate {
+    color: $errorTip;
+    margin-top: 8px;
+    display: block;
+  }
+  .open {
+    visibility: visible;
+  }
+  .text {
+    line-height: 1.8;
+    text-align: center;
+  }
+  :global {
+    .ant-modal-body {
+      padding-top:20px;
+      text-align: center;
+    }
+  }
+}
+
+.btnWrap {
+  text-align: center;
+  margin-top: 20px;
+  button + button {
+    margin-left: 8px;
+  }
+}

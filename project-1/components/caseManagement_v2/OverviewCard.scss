@@ -1,0 +1,64 @@
+@import "../../scss/var";
+@import "../../scss/_var2.scss";
+@import "./Card.scss";
+
+.card {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.card + .card {
+  @include cardSpace('overview');
+}
+
+.price {
+  display: inline-block;	
+  align-items: center;
+  color: $primary-4;
+  font-weight: 600;
+  font-size: $font-size-16;
+  margin-top: 8px;
+}
+.title {
+  font-size: $font-size-16;
+  font-weight: 600;
+}
+.info {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 8px;
+}
+.area + .person {
+  padding-left: 8px;
+  margin-left: 8px;
+  border-left: 1px solid $gray-200;
+}
+.area, .person {
+  color: $black;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  svg {
+    font-size: $font-size-16;
+    margin-right: 8px;
+  }
+  .text {
+    font-size: $font-size-14;
+    
+  }
+}
+.person {
+  padding-left:20px;
+  margin-left: 20px;
+  border-left: 1px solid $gray-200;
+}
+.dateInfo {
+  margin-top: 8px;
+  display: flex;
+  justify-content: space-between;
+  font-size: $font-size-14;
+}
+.dateChange {
+  color: $gray-300;
+}

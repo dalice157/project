@@ -1,0 +1,20 @@
+@import "../../../scss/var";
+@import "../../../scss/var2";
+
+.link {
+  background-color: $secondary-1;
+  line-height: 20px;
+  color: $secondary-5;
+  border-radius: 15px;
+  padding: 4px 8px;
+  margin-right: 4px;
+  font-size: $font-size-14;
+  &:hover {
+    background-color: $primary-3;
+    color: $white;
+  }
+}
+
+.link:nth-child(n){
+  margin-bottom: 8px;
+}

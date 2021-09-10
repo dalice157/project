@@ -1,0 +1,195 @@
+@import "../../scss/var2";
+.bg {
+  height: 100%;
+  background-color: $gray-100;
+}
+.wrap {
+  width: 1200px;
+  margin: 128px auto 0;
+  padding-top: 24px;
+  padding-bottom: 120px;
+  color: $gray-500;
+  &.mobile {
+    width: 100%;
+    margin: 0 auto;
+    padding: 60px 16px 122px;
+    .block {
+      border: 1px solid $gray-300;
+      .title {
+        font-size: $font-size-18;
+      }
+      .profileInfo{
+        display: block;
+        .label {
+          font-size: $font-size-16;
+          color: $gray-400;
+          padding-bottom: 12px;
+        }
+        .item {
+          font-size: $font-size-14;
+          display: flex;
+          align-items: center;
+          :global {
+            .MuiSvgIcon-root {
+              color: $primary-4;
+            }
+          }
+          + .item {
+            margin-top: 8px;
+          }
+        }
+        + .profileInfo {
+          margin-top: 24px;
+        }
+      }
+    }
+    
+  }
+}
+.block {
+  padding: 24px;
+  background-color: $white;
+  border-radius: 6px;
+  font-size: $font-size-16;
+  .title {
+    color: $gray-500;
+    font-size: $font-size-20;
+    font-weight: 500;
+    border-bottom: 1px solid $gray-300;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+  }
+  .info {
+    font-size: $font-size-14;
+    color: $gray-400;
+    &.type {
+      font-weight: 500;
+      font-size: $font-size-14;
+      color: $primary-4;
+    }
+    + .info {
+      margin-top: 8px;
+    }
+  }
+  .profileInfo {
+    display: flex;
+    align-items: center;
+    font-size: $font-size-14;
+    
+    .label {
+      color: $gray-400;
+      margin-right: 2%;
+    }
+    .item {
+      color: $gray-500;
+    }
+    + .profileInfo {
+      margin-top: 8px;
+    }
+  }
+  + .block {
+    margin-top: 28px;
+  }
+}
+
+.border {
+  border: 1px solid $gray-300;
+}
+
+
+.formItem {
+  display: flex;
+  align-items: flex-start;
+  + .formItem {
+    margin-top: 40px;
+  }
+  .label {
+    margin-right: 8px;
+    font-weight: 500;
+    width: 10%;
+  }
+  .required {
+    color: $primary-4;
+  }
+  .radioBlock {
+    display: block;
+  }
+  .formControl {
+    display: flex;
+    align-items: center;
+    :global {
+      .ant-radio-wrapper {
+        font-size: $font-size-16;
+      }
+      .ant-input {
+        width: 195px;
+        margin-left: 10px;
+        margin-right: 10px;
+      }
+    }
+  }
+}
+
+.step {
+  button + button {
+    margin-left: 8px;
+  }
+  &.mobile {
+    > div {
+      margin: 0;
+      padding-left: 5%;
+      padding-right: 5%;
+    }
+  }
+}
+
+.cancelBtn {
+  :global {
+    .ant-btn {
+      left: 0 !important;
+    }
+  }
+}
+
+.table {
+  width: 100%;
+  border: none;
+  + .table {
+    margin-top: 16px;
+  }
+   td {
+    padding: 4px;
+  }
+  .totalWrap {
+    text-align: right;
+    color: $gray-400;
+    font-size: $font-size-14;
+    padding: 8px;
+  }
+  .price {
+    color: $gray-500;
+    font-weight: 500;
+    &.total {
+      color: $primary-4;
+    }
+  }
+  .ps {
+    color: $gray-300;
+    font-size: $font-size-12;
+  }
+  &.borderTop {
+    border-top: 1px solid $gray-200 ;
+  }
+}
+
+.warning {
+  font-size: $font-size-16;
+  color: $danger;
+  margin-top: 16px;
+  margin-bottom: 16px;
+  text-align: center;
+  .btn {
+    margin-top: 8px;
+    color: $gray-500;
+  }
+}

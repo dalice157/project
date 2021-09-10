@@ -1,0 +1,70 @@
+.sales-table {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    td, th {
+        border: 1px solid rgb(0, 0, 0);
+        padding: 8px;
+        text-align: center;
+    }
+    tr > td:first-child {
+        background-color: rgb(248, 247, 247);
+        font-weight: bold;
+    }
+    tr:nth-child(even){
+        background-color: #f2f2f2;
+    }
+    th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        background-color: #9cd5f0;
+        color: rgb(0, 0, 0);
+    }
+    .sales-table-row-highlight {
+        background-color: #faf7e4 !important;
+    }
+}
+
+.chart-header {
+    text-align: center;
+    margin-top: 50px;
+}
+
+.chart-date-tip {
+    margin-left: 30px;
+    font-weight: bold;
+    span + span {
+        margin-left: 70px;
+    }
+}
+    
+.oldSiteNum {
+    color: rgb(182, 144, 73);
+    font-weight: bold;
+}
+
+.guide-table {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    max-width: 70%;
+    margin-top: 20px;
+    td, th {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+    tr > td:first-child {
+        background-color: rgb(248, 247, 247);
+        font-weight: bold;
+    }
+    th {
+        padding-top: 12px;
+        padding-bottom: 12px;
+        background-color: #00adb6;
+        color: white;
+    }
+}
+
+
+.collapse-table {
+    margin-top: 20px !important;
+}
+

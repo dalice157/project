@@ -1,0 +1,14 @@
+.member-ship-wrap {
+  margin-bottom: 20px;
+  padding: 20px;
+  .type {
+    &-block{
+      width: 85%;
+      margin-bottom: 16px;
+    }
+    &-title {
+      text-align: center;
+      font-size: 1rem;
+    }
+  }
+}

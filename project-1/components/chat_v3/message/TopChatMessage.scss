@@ -1,0 +1,10 @@
+@import "../../../scss/var2";
+.messages {
+    background-color: $white;
+    width: 100%;
+    min-height: 85vh;
+    margin-top: -46px;
+    &.mobile {
+      margin-top: 5px;
+    }
+}

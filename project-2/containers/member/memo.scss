@@ -1,0 +1,27 @@
+.memoWrap {
+  position: relative;
+  .menu {
+    background: transparent;
+    margin-bottom: 16px;
+    li {
+      margin-right: 23px;
+    }
+  }
+}
+
+.noData {
+  text-align: center;
+  line-height: 100px;
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.more {
+  margin-top: 15px;
+}
+
+.searchWrap {
+  display: flex;
+  align-items: center; 
+  margin-top: 20px;
+}

@@ -1,0 +1,268 @@
+@import "../../scss/var";
+.dNone {
+  display: none !important;
+}
+.bg {	
+  background-color: $white;
+  height: 100%; 
+  padding: 0; 
+  box-sizing: border-box ; 
+}	
+.wrap {
+  min-height: 100%;
+  width: 1200px;
+  margin: 100px auto 0;
+  height: 100%;
+  background-color: $white;
+  :global {
+    .ant-breadcrumb-link, .ant-breadcrumb-separator, .ant-breadcrumb a {
+      color: $black;
+    }
+    .ant-breadcrumb a {
+      text-decoration: underline;
+    }
+  }
+  .title {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: $font-size-32;
+    font-weight: 400;
+    .button {
+      display: flex;
+      align-items: center;
+      :global {
+        .ant-btn {
+          margin-left: 4px;
+          width: 160px;
+          margin-left: 20px;
+        }
+      }
+    }
+    .select {
+      width: 225px;
+    }
+  }
+  .pagination {
+    margin-top: 40px;
+  }
+}
+
+.mobileWrap {
+  margin-top: 40px;
+  .titleWrap {
+    padding: 20px;
+    background-color: $gray-150;
+  }
+  .title {
+    margin-top: 8px;
+    font-size: $font-size-24;
+    font-weight: normal;
+  }
+  :global {
+    .ant-breadcrumb-link, .ant-breadcrumb-separator, .ant-breadcrumb a {
+      color: $black;
+      font-size: $font-size-14;
+    }
+    .ant-breadcrumb a {
+      text-decoration: underline;
+    }
+    .ant-select {
+      display: block;
+    }
+  }
+  .select {
+    width: 90%;
+    margin: 20px auto;
+  }
+  .cardWarp {
+    width: 90%;
+    margin: auto;
+  }
+  .pagination {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+}
+
+.title {
+  color: $black;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+}
+.cardWarp {
+  margin-top: 20px;
+}
+.pagination {
+  text-align: center;
+  :global {
+    .ant-pagination-item {
+      &:hover {
+        background-color: $main-2-hover;
+        border-color: $main-2-hover;
+        a {
+          color: $white;
+        }
+      }
+    }
+    .ant-pagination-prev:focus .ant-pagination-item-link, .ant-pagination-next:focus .ant-pagination-item-link, .ant-pagination-prev:hover .ant-pagination-item-link, .ant-pagination-next:hover .ant-pagination-item-link {
+      background-color: $main-2-hover;
+      border-color: $main-2-hover;
+      color: $white;
+    }
+
+    .ant-pagination-disabled a, .ant-pagination-disabled:hover a, .ant-pagination-disabled:focus a, .ant-pagination-disabled .ant-pagination-item-link, .ant-pagination-disabled:hover .ant-pagination-item-link, .ant-pagination-disabled:focus .ant-pagination-item-link {
+          border-color: #d9d9d9;
+          color: rgba(0, 0, 0, 0.25);
+          cursor: not-allowed;
+          background-color: $white;
+    }
+    .ant-pagination-item-active {
+      background-color: $main-2;
+      border-color: $main-2;
+      a {
+        color: $white;
+      }
+      &:hover {
+        background-color: $main-2-hover;
+        border-color: $main-2-hover;
+      }
+    }
+    .ant-pagination-jump-prev .ant-pagination-item-container .ant-pagination-item-link-icon, .ant-pagination-jump-next .ant-pagination-item-container .ant-pagination-item-link-icon {
+      color: $main-2;
+    }
+  }
+}
+
+#prodCss {
+  &.bg {	
+    background-color: $white;
+    height: 100%; 
+    padding: 0; 
+    box-sizing: border-box ; 
+    position: relative;
+  }	
+  .wrap {
+  width: 1200px;
+  margin: 80px auto 0;
+  background-color: $white;
+  :global {
+    .ant-breadcrumb-link, .ant-breadcrumb-separator, .ant-breadcrumb a {
+      color: $black;
+    }
+    .ant-breadcrumb a {
+      text-decoration: underline;
+    }
+  }
+  .title {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    font-size: $font-size-32;
+    font-weight: 400;
+    .button {
+      display: flex;
+      align-items: center;
+      :global {
+        .ant-btn {
+          margin-left: 4px;
+        }
+      }
+    }
+    .select {
+      width: 225px;
+    }
+  }
+  .pagination {
+    margin-top: 40px;
+  }
+}
+
+.mobileWrap {
+  margin-top: 60px;
+  .titleWrap {
+    padding: 20px;
+    background-color: #f8f8f8;
+  }
+  .title {
+    margin-top: 8px;
+    font-size: $font-size-24;
+    font-weight: normal;
+  }
+  :global {
+    .ant-breadcrumb-link, .ant-breadcrumb-separator, .ant-breadcrumb a {
+      color: $black;
+      font-size: $font-size-14;
+    }
+    .ant-breadcrumb a {
+      text-decoration: underline;
+    }
+    .ant-select {
+      display: block;
+    }
+  }
+  .select {
+    width: 90%;
+    margin: 20px auto;
+  }
+  .cardWarp {
+    width: 90%;
+    margin: auto;
+  }
+  .pagination {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+}
+
+.title {
+  color: $black;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+}
+.cardWarp {
+  margin-top: 20px;
+}
+.pagination {
+  text-align: center;
+  :global {
+    .ant-pagination-item {
+      &:hover {
+        background-color: $main-2-hover;
+        border-color: $main-2-hover;
+        a {
+          color: $white;
+        }
+      }
+    }
+    .ant-pagination-prev:focus .ant-pagination-item-link, .ant-pagination-next:focus .ant-pagination-item-link, .ant-pagination-prev:hover .ant-pagination-item-link, .ant-pagination-next:hover .ant-pagination-item-link {
+      background-color: $main-2-hover;
+      border-color: $main-2-hover;
+      color: $white;
+    }
+
+    .ant-pagination-disabled a, .ant-pagination-disabled:hover a, .ant-pagination-disabled:focus a, .ant-pagination-disabled .ant-pagination-item-link, .ant-pagination-disabled:hover .ant-pagination-item-link, .ant-pagination-disabled:focus .ant-pagination-item-link {
+          border-color: #d9d9d9;
+          color: rgba(0, 0, 0, 0.25);
+          cursor: not-allowed;
+          background-color: $white;
+    }
+    .ant-pagination-item-active {
+      background-color: $main-2;
+      border-color: $main-2;
+      a {
+        color: $white;
+      }
+      &:hover {
+        background-color: $main-2-hover;
+        border-color: $main-2-hover;
+      }
+    }
+    .ant-pagination-jump-prev .ant-pagination-item-container .ant-pagination-item-link-icon, .ant-pagination-jump-next .ant-pagination-item-container .ant-pagination-item-link-icon {
+      color: $main-2;
+    }
+  }
+}
+}

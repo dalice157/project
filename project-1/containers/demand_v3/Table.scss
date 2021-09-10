@@ -1,0 +1,52 @@
+@import "../../scss/_var2";
+
+.score {
+  color: $third-3;
+  font-weight: bold;
+}
+
+.paging {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+}
+.table {
+  margin-top: 20px;
+  :global {
+    .ant-table-thead th:last-child {
+      display: block;
+    }
+  }
+}
+
+.dealCount {
+  display: flex;
+  align-items: center;
+  :global {
+    .MuiSvgIcon-root {
+      margin-left: 4px;
+      color: $third-3;
+      width: 16px;
+      height: 16px;
+    }
+  }
+}
+
+.error {
+  color: $danger;
+}
+.candidateBtnWrap {
+  button + button {
+    margin-top: 8px;
+  }
+}
+.btnWrap {
+  button {
+    display: block;
+    & + button {
+      margin-top: 8px;
+    }
+  }
+}
+  

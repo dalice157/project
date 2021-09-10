@@ -1,0 +1,8 @@
+@import '../../scss/var';
+#memberList {
+  .topNickName:visited {
+    > span {
+      color: $visited;
+    }
+  }
+}

@@ -1,0 +1,148 @@
+@import "../../scss/var";	
+$width: 470px;
+.bg {
+  background-color: $white;
+  height: 100%;
+}	
+.cardWarp {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -10px;
+  margin-right: -10px;
+  margin-bottom: -20px;
+}	
+.wrap {	
+  margin: 150px auto 80px;
+  background-color: $white;
+  width: 1200px;
+  &.mobile {
+    width: 100%;
+    margin-top: 50px;
+    margin-bottom: 50px;
+    .layout {
+      width: 95%;
+      margin: 10px auto 0;
+      padding-bottom: 20px;
+    }
+    .title {
+      background-color: transparent;
+      &:before {
+        border-radius: 2px;
+      }
+    }
+    .cardWarp {
+      display: block;
+      margin: 0;
+    }
+    :global {
+      .ant-breadcrumb {
+        width: 95%;
+        margin: 0 auto;
+        font-size: $font-size-14;
+      }
+    }
+  }
+  :global {
+    .ant-layout {
+      background: transparent;
+    }
+    .ant-layout-has-sider {
+      margin-top: 20px;
+    }	
+    .ant-breadcrumb-separator {	
+      color: $black;	
+    }	
+    .ant-breadcrumb-link {	
+      color: $black;	
+      a {	
+        color: $black;	
+        text-decoration: underline;	
+        &:hover {	
+          text-decoration: none;	
+        }	
+      }	
+    }	
+    .ant-layout.ant-layout-has-sider>.ant-layout, .ant-layout.ant-layout-has-sider>.ant-layout-content {	
+      overflow: initial;	
+    }	
+  }	
+}	
+.sider {	
+  position: relative;	
+  background-color: transparent;	
+  width: 240px !important;	
+  flex: 0 0 240px !important;	
+  max-width: 240px !important;	
+  min-width: 240px !important;	
+  margin-right: 20px;	
+}	
+.layout {	
+  width: 940px;	
+  position: relative;	
+  .title {	
+    background-color: $white;	
+    padding: 8px 8px 8px 14px;	
+    position: relative;	
+    font-size: $font-size-16;	
+    border-radius: 2px;	
+    &.top {	
+      position: fixed;	
+      top: 60px;	
+      z-index: 1;	
+      width: 100%;	
+    }	
+    &:before {	
+      position: absolute;	
+      left: 0;	
+      z-index: 0;	
+      content:' ';	
+      width: 4px;	
+      height: 40px;	
+      top:0;	
+      background-color: $gray-200;	
+    }	
+  }	
+}
+.contactWrap {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  z-index: 1000;
+  width: 100%;
+  box-shadow: 0 -2px 6px 0 rgba(0, 0, 0, 0.2);
+  background-color: $white;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  .userName {
+    margin-left: 20px;
+    font-size: $font-size-16;
+    color: #000;
+  }
+  .nameWarp {
+    display: inline-flex;
+    font-size: 1rem;
+    color: #000;
+    max-width: 70%;
+    justify-content: space-between;
+  }
+  .name {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 70%;
+  }
+  .sex {
+    width: 33px;
+    display: inline-block;
+  }
+  :global {
+    .ant-btn {
+      width: 40%;
+      margin-right: 20px;
+    }
+  }
+}

@@ -1,0 +1,12 @@
+.model {
+  > div:nth-child(2) {
+    > div > div > div:nth-child(1) > div {
+      margin-top: 0;
+    }
+    > div > div > div:nth-child(2) {
+      float: none;
+      display: block;
+      text-align: center;
+    }
+  }
+}

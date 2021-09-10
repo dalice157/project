@@ -1,0 +1,55 @@
+@import "../../scss/var2";	
+
+.btnWrap {	
+  margin-top: 20px;
+  text-align: center;
+  a + button, button + button, a + a {
+    margin-left: 8px;
+  }
+}	
+
+.radioStyle{
+  display: block;
+  line-height: 1.6;
+}
+.radioStyle + .radioStyle {
+  margin-top: 4px;
+}
+.error {
+  color: $danger
+}
+.radio {
+  margin-right: 4px;
+  float: left;
+  height: 23px !important;
+}
+
+.choose {
+  font-weight: 700;
+  font-size: $font-size-15;
+  line-height: 1.8;
+  margin-top: 0.5em;
+}
+.cashMember {
+  color: $primary-4;
+}
+.wrap {
+  padding-top: 1em;
+  &.center {
+    font-size: $font-size-18;
+    text-align: center;
+  }
+}
+
+.frequency {
+  font-weight: 700;
+  font-size: $font-size-16;
+  &.remain {
+    color: $secondary-3;
+  }
+}
+
+.note {
+  color: $danger;
+  margin-left: 10px;
+}

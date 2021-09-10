@@ -1,0 +1,45 @@
+@import "../../scss/var2";
+.card {
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 16px;
+  color: $gray-500;
+}
+
+@mixin cardSpace($direction){
+  $size: 8px;
+  @if $direction == 'overview' {
+    margin-left: $size;
+  } @else {
+    margin-top: $size * 2;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .card {
+    .infoNo {
+      margin-top: 8px;
+      span + span {
+        margin-left: 10px;
+      }
+      .contactDate {
+        color: $gray-400;
+      }
+      .read {
+        color: $gray-500;
+        font-weight: 500;
+      }
+    }
+    .btnWrap {
+      button {
+        min-width: 120px;
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 320px) {
+  .card {
+    padding: 10px;
+  }
+}

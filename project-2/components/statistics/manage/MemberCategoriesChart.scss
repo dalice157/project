@@ -1,0 +1,18 @@
+.member-categories-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 20px;
+  .type {
+    &-block{
+      width: 49%;
+      margin-bottom: 16px;
+    }
+    &-title {
+      text-align: center;
+      font-size: 1rem;
+    }
+  }
+}

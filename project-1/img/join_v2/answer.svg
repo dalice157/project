@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="34" viewBox="0 0 32 34">
+    <g fill="none" fill-rule="evenodd">
+        <g>
+            <g>
+                <g>
+                    <g transform="translate(-726 -1943) translate(710 1891) translate(0 44) translate(16 8)">
+                        <rect width="32" height="34" fill="#B8F6EC" rx="16"/>
+                        <text fill="#00CDAB" font-family="Arial-Black, Arial Black" font-size="18" font-weight="700">
+                            <tspan x="10" y="24">A</tspan>
+                        </text>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

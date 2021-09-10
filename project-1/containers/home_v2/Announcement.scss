@@ -1,0 +1,53 @@
+@import "../../scss/var";
+@import "../../scss/var2";
+
+.news {
+  background-color: $primary-2;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+}
+.wrap {
+  width: 1000px;
+  margin: 0 auto;
+  color: $primary-5;
+  font-size: $font-size-16;
+    font-weight: bold;
+  .title {
+    margin-left: 16px;
+  }
+  a {
+    color: $primary-5;
+    &:hover {
+      color: $primary-4;
+    }
+  }
+}
+
+@media screen and (max-width: 767px) {
+  .news {
+    text-align: left;
+    height: auto;
+    display: block;
+    padding: 8px 14px;
+  }
+  .wrap {
+    width: 100%;
+    margin: auto;
+    font-size: $font-size-14;
+    font-weight: normal;
+    .title {
+      margin-left: 0;
+    }
+    img {
+      margin-top: 0.5em;
+      float: left;
+      margin-right: 16px;
+      width: 30px;
+    }
+    a {
+      line-height: 1.7;
+    }
+  }
+}

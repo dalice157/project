@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="43" height="42" viewBox="0 0 43 42">
+    <defs>
+        <path id="ithbopcixa" d="M21.969 19.223v-8.239h-3.526v-.853c0-2.004.217-3.618.65-4.843.433-1.225 1.082-2.072 1.948-2.542V0c-2.45.618-4.28 2.016-5.492 4.193-1.212 2.177-1.819 5.134-1.819 8.87v6.16h8.239zm-13.73 0v-8.239H4.712v-.853c0-2.004.216-3.618.65-4.843.432-1.225 1.082-2.072 1.948-2.542V0C4.86.618 3.03 2.016 1.818 4.193.606 6.37 0 9.327 0 13.063v6.16h8.238z"/>
+    </defs>
+    <g fill="none" fill-rule="evenodd">
+        <g>
+            <g>
+                <g>
+                    <g transform="translate(-440 -747) translate(287 747) translate(153.5) translate(10 11)">
+                        <mask id="0u86m7jo2b" fill="#fff">
+                            <use xlink:href="#ithbopcixa"/>
+                        </mask>
+                        <use fill="#005378" fill-rule="nonzero" xlink:href="#ithbopcixa"/>
+                        <path fill="#005378" d="M-10 -11H32V31H-10z" mask="url(#0u86m7jo2b)"/>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

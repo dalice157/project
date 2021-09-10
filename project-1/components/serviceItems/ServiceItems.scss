@@ -1,0 +1,268 @@
+@import '../../scss/var2';
+$img-height: 150px;
+:global {
+  .ant-modal-confirm .ant-modal-confirm-btns {
+    text-align: center;
+    float: none;
+  }
+}
+.popover {
+  min-width: 200px;
+}
+div[role="listbox"] {
+  padding: 10px 0 0;
+  :global {
+    .ant-select-tree-title {
+      display: block;
+      overflow : hidden;
+      text-overflow : ellipsis;
+      white-space : nowrap;
+      width : 200px;
+    }
+    .ant-select-tree li span.ant-select-tree-switcher, .ant-select-tree li span.ant-select-tree-iconEle {
+      line-height: 10px;
+    }
+  }
+}
+.treeSelect {
+  border: 1px solid #d9d9d9;
+  border-radius: 4px;
+  position: relative;
+  .overflow {
+    display: none;
+    padding: 5px 10px;
+    text-align: center;
+    color: $danger;
+    font-size: $font-size-13;
+    &.open {
+      display: block;
+    }
+  }
+  :global {
+    .ant-select-selection {
+      border: none;
+    }
+    .ant-select-open .ant-select-selection {
+      box-shadow: none;
+    }
+    .ant-select-selection{
+      &:focus {
+        border: none;
+        box-shadow: none;
+      }
+    }
+  }
+}
+.main {
+    position: relative;
+    text-align: left;
+    padding:15px 15px 30px;
+    border: 3px solid $white;
+    margin: 10px 25px;
+    width: 300px;
+    .error {
+      color: $danger;
+      font-weight: normal;
+    }
+    .serviceInp {
+      border: none;
+      padding: 8px;
+      border-radius: 4px;
+      margin-bottom: 8px;
+      font-size: $font-size-18;
+      width: 100%;
+      &:focus {
+        outline: none;
+      }
+      &::-webkit-input-placeholder { color: #bfbfbf;}
+      &.validate {
+        border: 1px solid $danger;
+      }
+    }
+    .textArea {
+      margin-top: 5px;
+      line-height: 1.8;
+    }
+    .title {
+      font-size: $font-size-20;
+      color: $black;
+      padding-left: 0;
+      margin-bottom: 10px;
+      &[contenteditable=true]:empty::before {
+        content: attr(placeholder);
+        color: $danger;
+      }
+    }
+    .setting {
+      display: none;
+      line-height: 10px;
+      padding: 5px;
+      position: absolute;
+      z-index: 2;
+      box-shadow: 0 2px 5px 0 rgba(0,0,0,0.5);
+      border-radius: 10px;
+      background: $white;
+      top: calc(100% - 15px);
+      left: calc(50% - 40px);
+      a {
+        svg {
+          width: $font-size-34;
+        }
+        &:hover {
+          svg {
+            color: $gray-200;
+          }
+        }
+      }
+    }
+    &:hover {
+        border-radius: 6px;
+        border: 3px solid $gray-200;
+        .setting {
+          display: inline-block;
+        }
+    }
+    .row {
+        margin-top: 10px;
+        font-size: $font-size-13;
+    }
+    svg {
+      padding: 0 5px;
+      width: $font-size-24;
+    }
+    :global {
+      .ant-select-selection__choice {
+        overflow : hidden;
+        text-overflow : ellipsis;
+        white-space : nowrap;
+        width : 120px;
+      }
+      .ant-tag{
+        margin-top: 10px;
+      }
+        textarea.ant-input{
+            font-size:  $font-size-13;
+            margin-top: 10px;
+        }
+        .ant-select-enabled {
+            position: relative;
+            &::after {
+                content: "∨";
+                font-size: $font-size-10;
+                position: absolute;
+                right: 10px;
+                top: 5px;
+                color: $black;
+            }
+            &.ant-select-focused {
+               &::after {
+                  content: "∧";
+                  position: absolute;
+                  right: 10px;
+                  top: 5px;
+                  color: $black;
+                } 
+            }
+        }
+    }
+    .img {
+        height: $img-height;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+        svg {
+          width: $font-size-34;
+          height: $font-size-34;
+        }
+        :global {
+            .edit-wrapper {
+              width: 100%;
+              height: $img-height;
+            }
+            .children-main {
+              img {
+                width: 100%;
+                height: $img-height;
+              }
+            }
+        }
+    }
+}
+.data {
+  cursor: pointer;
+  color: $black;
+  .warning {
+    color: $danger;
+  }
+}
+.btnWrap {
+  margin-top: 10px;
+  &.hasValidate {
+    display: flex;
+    justify-content:space-between;
+  }
+  &.noValidate {
+    text-align: right;
+  }
+  .validate {
+    line-height: 32px;
+    color: $danger;
+    visibility: hidden;
+  }
+  .open {
+    visibility: visible;
+  }
+}
+.validate {
+  line-height: 32px;
+  color: $danger;
+}
+.checkbox {
+  :global {
+    .ant-checkbox-group-item {
+      display: block;
+      margin-bottom: 8px;
+    }
+  }
+}
+.area {
+  margin-bottom: 15px;
+  width: 330px;
+  :global {
+    .ant-checkbox-group {
+      margin-left: 25px;
+      margin-top: 5px;
+      line-height: 1.8
+    }
+  }
+}
+.tags {
+  border-top: 1px solid $gray-200;
+  margin-top: 10px;
+  .tag {
+    background: $white;
+    border-Style: 'dashed'
+  }
+  :global {
+    .ant-input {
+      font-size: $font-size-12;
+      padding: 0 10px;
+      margin-top: 10px;
+    }
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .main {
+    border: none;
+    width: 100%;
+    margin: 10px auto;
+    .serviceInp {
+      &.validate {
+        border: 1px solid $danger;
+      }
+      
+    }
+  }
+}

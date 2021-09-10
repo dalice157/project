@@ -1,0 +1,137 @@
+@import "../../scss/var2";
+
+.bg {
+  height: 100vh;
+  background-color: $gray-100;
+}
+
+.wrap {
+  width: 1200px;
+  margin: 150px auto 0;
+  padding-bottom: 122px;
+  color: $gray-500;
+}
+
+.card {
+  padding: 24px;
+  background-color: $white;
+  border-radius: 6px;
+  font-size: $font-size-16;
+  + .card {
+    margin-top: 28px;
+  }
+  .title {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    width: 100%;
+    color: $gray-500;
+    font-size: $font-size-20;
+    font-weight: 500;
+    border-bottom: 1px solid $gray-300;
+    padding-bottom: 8px;
+    margin-bottom: 16px;
+  }
+  .infoWrap {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+  }
+  .info {
+    font-size: $font-size-14;
+    width: 59%;
+    &:nth-child(2) {
+      display: flex;
+      align-items: flex-end;
+      width: 39%;
+    }
+    .productName {
+      font-size: $font-size-16;
+      font-weight: 700;
+    }
+    li {
+      padding-top: 6px;
+      padding-bottom: 6px;
+    }
+  }
+  .productName {
+    font-weight: 700;
+  }
+  .upgradeProductName {
+    @extend .productName;
+    color: $primary-4;
+  }
+  .item {
+    font-weight: 700;
+    &:before {
+      content: attr(data-label);
+      font-weight: normal;
+    }
+    &.payment {
+      font-size: $font-size-14;
+      margin-left: -25%;
+    }
+  }
+
+  .day {
+    color: $primary-4;
+    display: inline-block;
+    margin-left: 4px;
+    margin-right: 4px;
+  }
+  .currentPrice {
+    color: $danger;
+  }
+
+  .price {
+    color: $primary-4;
+    font-size: $font-size-20;
+  }
+  .countDown {
+    color: $danger;
+    font-size: $font-size-16;
+  }
+}
+
+
+@media only screen and (max-width: 768px) {
+  .wrap {
+    width: 93%;
+    margin: 60px auto 0;
+  }
+  .card {
+    padding: 16px;
+    .info {
+      display: block;
+      width: 100%;
+      margin-bottom: 0;
+      &:nth-child(2) {
+        width: 100%;
+      }
+    }
+    .countDown {
+      font-size: $font-size-14;
+    }
+    .title {
+      display: block;
+      position: relative;
+    }
+    .item {
+      &.payment {
+        position: absolute;
+        right: 0;
+        top: 0;
+        z-index: 1;
+        margin: 0;
+      }
+    }
+  }
+  .step {
+    > div {
+      max-width: 100%;
+      margin: 0;
+      padding-left: 5%;
+      padding-right: 5%;
+    }
+  }
+}

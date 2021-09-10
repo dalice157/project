@@ -1,0 +1,124 @@
+@import "../../scss/var2";
+
+.bg {
+  margin-top: 128px;
+  height: 380px;
+  background-image: url('../../img/join_v3/banner-1.jpg');
+  background-size: cover;
+  background-position: center center;
+  > a {
+    width: 100%;
+    display: block;
+    height: 100%;
+  }
+}
+
+h2.title {
+  color: $secondary-6;
+  font-size: $font-size-28;
+  text-align: center;
+}
+
+.stepWrap {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 30px;
+  li {
+    text-align: center;
+    width: 258px;
+    display: block;
+    :global {
+      .ant-btn {
+        background: none;
+        border: none;
+        border-radius: 0;
+        border-bottom: 1px solid $white;
+        color:  $white;
+        font-size: $font-size-18;
+        font-weight: 500;
+        &:hover {
+          color: $companyCI-2;
+          border-color:  $companyCI-2;
+        }
+      }
+    }
+  }
+}
+
+.img {
+  width: 258px;
+  margin: 0 auto;
+}
+.imgTitle {
+  width: 212px;
+  margin-top: 23px;
+  margin: 23px auto 8px;
+}
+.introduction {
+  text-align: left;
+  margin: 8px auto 10px;
+  width: 212px;
+  color: $secondary-6;
+  font-size: $font-size-14;
+  font-weight: bold;
+}
+.link {
+  width: 212px;
+  color:  $white;
+  font-size: $font-size-18;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-bottom: 1px solid $white;
+  &:hover {
+    color: $companyCI-2;
+    border-color:  $companyCI-2;
+  }
+}
+
+.pic {
+  position: relative;
+  padding-top: 24px;
+  padding-bottom: 45px;
+  width: 90% !important;
+  min-height: 390px;
+  display: block !important;
+  margin: 0 auto; 
+  top: auto;
+  background-color: rgba(255, 255, 0255, 0.4);
+  border: 1px solid $white;
+  .link {
+    border-top: 1px solid $white;
+  }
+  :global {
+    .ant-btn {
+      background: none;
+      border: none;
+      border-radius: 0;
+      border-top: 1px solid $white;
+      border-bottom: 1px solid $white;
+      color:  $white;
+      font-size: $font-size-18;
+      font-weight: 500;
+      &:hover {
+        color: $companyCI-2;
+        border-color:  $companyCI-2;
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 800px) {
+  .bg {
+    margin-top: 40px;
+    height: 200px;
+    background-image: url('../../img/join_v3/banner-1-MP.jpg');
+    background-size: cover;
+    background-position: center center;
+    > a {
+      display: block;
+      height: 100%;
+    }
+  }
+}
+
+

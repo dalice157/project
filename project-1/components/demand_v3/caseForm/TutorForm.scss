@@ -1,0 +1,260 @@
+@import "../../../scss/var2";
+
+.form {
+  margin-top: 20px;
+  .formType {
+    font-size: 18px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+  }
+  .demandFormWrap {
+    padding-bottom: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .flex {
+    display: flex;
+    align-items: center;
+  }
+  
+  .errorBord {
+    border-color: $danger;
+    :global {
+      .ant-checkbox-inner, .ant-radio-inner, .ant-select-selection, .ant-input, .ant-select-selection {
+        border: 1px $danger solid;
+      }
+    }
+  }
+  .error {
+    color: $danger;
+    margin-top: 2px;
+    display: block;
+  }
+  
+  .btnWrap {
+    text-align: center;
+    margin-top: 20px;
+    button + button {
+      margin-left: 8px;
+    }
+  }
+  
+  .telWrap {
+    input {
+      &:first-child {
+        width: 30%;
+      }
+    }
+    input + input {
+      margin-left: 8px;
+    }
+  }
+  
+  .specWrap {
+    margin-top: 20px;
+    label {
+      margin-right: 10px;
+    }
+    :global {
+      .ant-checkbox-wrapper {
+        display: inline-block;
+        margin-right: 8px;
+      }
+    }
+  }
+  
+  .checkIcon {
+    display: inline-flex;
+    vertical-align: middle;
+    margin-left: 4px;
+    color: $gray-200;
+    &.verification {
+      color: $primary-4;
+      svg {
+        color: $primary-4;
+      }
+    }
+    svg {
+      font-size: $font-size-20;
+      color: $gray-400;
+      margin-right: 4px;
+    }
+  }
+  .subTitle {
+    display: block;
+    font-size: 16px;
+    font-weight: 500;
+  }
+  
+  .memberForm {
+    .remind {
+      color: $danger;
+      font-size: $font-size-13;
+    }
+  }
+
+  .field {
+    .fieldName {
+      margin: 5px;
+    }
+    label {
+      margin-right: 10px;
+    }
+    .fieldPublishTitle {
+      display: inline-block;
+      margin-bottom: 5px;
+      margin-top: 5px;
+      margin-right: 10px;
+      svg {
+        display: inline-block;
+        vertical-align: -6px;
+        font-size: 23px;
+        margin-left: 4px;
+        color: $primary-4;
+      }
+    }
+    .contactTimes {
+      display: flex;
+      flex-direction: column;
+      .contactTimeRadio {
+        margin: 5px;
+      }
+    }
+
+    .county {
+      display: inline-block;
+      white-space: nowrap;
+      padding: 5px 10px;
+      border: $gray-300 1px solid;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-right: 10px;
+      i {
+        margin-left: 8px;
+        color: $gray-300;
+      }
+    }
+    
+    .addressField {
+      display: flex;
+      .county {
+        width: 25%;
+      }
+      .address {
+        width: 100%;
+      }
+    }
+    
+    .industry {
+      white-space: nowrap;
+      padding: 5px 10px;
+      border: $gray-300 1px solid;
+      border-radius: 5px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      cursor: pointer;
+      i {
+        margin-left: 8px;
+        font-size: 12px;
+        color: $gray-300;
+      }
+    }
+
+    .userWrap {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .name {
+      max-width: 200px;
+      margin-right: 10px;
+    }
+
+    .sex {
+      white-space: nowrap;
+    }
+
+    .remind {
+      color: $danger;
+      font-size: $font-size-13;
+    }
+    .priceLink {
+      margin: auto 10px;
+    }
+    .select {
+      width: 150px;
+    }
+    :global {
+      .ant-checkbox-wrapper {
+        display: inline-block;
+      }
+      .ant-checkbox-group {
+        display: inline-block;
+      }
+      .ant-checkbox-group-item, .ant-checkbox-wrapper {
+        margin: 5px;;
+      }
+    }
+    .userName {
+      white-space: nowrap;
+    }
+    .phoneField {
+      display: flex;
+      .telArea {
+        width: 15%;
+        margin-right: 10px;
+      }
+      .tel {
+        width: 100%;
+      }
+    }
+    
+    .label {
+      margin-left: 10px;
+    }
+  
+    &.specWrap {
+      margin-top: 20px;
+      :global {
+        .ant-checkbox-wrapper {
+          display: inline-block;
+        }
+      }
+    }
+    :global {
+      .ant-radio-wrapper {
+        display: inline-block;
+      }
+      .ant-form-item {
+        margin-bottom: 0;
+      }
+      .ant-form-item-children-icon {
+        display: none;
+      }
+      .ant-btn {
+        margin-left: 8px;
+      }
+      .ant-select-arrow {
+        right: 16px !important;
+      }
+    }
+  }
+  .field + .field {
+    margin-top: 10px;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .form {
+    padding: 10px;
+    .county {
+      min-width: 130px;
+    }
+    .telArea {
+      min-width: 70px;
+    }
+  }
+}

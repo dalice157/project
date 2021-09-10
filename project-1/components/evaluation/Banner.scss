@@ -1,0 +1,103 @@
+@import "../../scss/var2";
+.banner {
+  background-color: $third-1;
+  :global {
+    .ant-breadcrumb-link a{
+      text-decoration: underline;
+      color: $black;
+      &:hover {
+        text-decoration: none;
+        color: $black;
+      }
+    }
+  }
+  .wrap {
+    padding: 20px 0;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 1200px;
+  }
+  .title {
+    font-size: $font-size-26;
+    color: $black;
+    font-weight: 400;
+    margin-top: 20px;
+    align-items: center; 
+    display: flex;
+    :global {
+      .ant-avatar {
+        margin-right: 20px;
+      }
+    }
+  }
+  .block {
+    padding: 20px 40px;
+    margin-top: 20px;
+    box-sizing: border-box;
+    height: 103px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+    background-color: $white;
+    display: flex;
+    align-items: center; 
+    justify-content: space-between;
+    .point {
+      color: $primary-4;
+      font-weight: bold;
+    }
+    .lager {
+      font-size: $font-size-46;
+      font-weight: 600;
+      margin-left: 16px;
+    }
+    .percentage {
+      color: $secondary-3;
+    }
+  }
+  .all {
+    display: flex;
+    align-items: center; 
+    &::after {
+      content: " ";
+      width: 1px;
+      background-color: $gray-200;
+      height: 66px;
+      display: inline-block;
+      margin-left: 45px;
+      margin-right: 45px;
+    }
+  }
+  .ranging {
+    display: flex;
+    align-items: center; 
+    list-style-type: none;
+    font-size: $font-size-14;
+    margin-top: 16px;
+    li {
+      margin-left: 20px;
+      margin-right: 20px;
+      .point {
+        margin-left: 4px;
+      }
+      &:first-child {
+        margin-left: 0;
+      }
+    }
+    &::after {
+      content: " ";
+      width: 1px;
+      background-color: $gray-200;
+      height: 69px;
+      display: inline-block;
+      margin-left: 45px;
+      margin-right: 45px;
+    }
+  }
+  .quantity {
+    display: flex;
+    align-items: center; 
+    &:last-child {
+      margin-left: 20px;
+    }
+  }
+}

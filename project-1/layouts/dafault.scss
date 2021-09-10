@@ -1,0 +1,86 @@
+@import "../scss/var2";
+@import "../components/ui/message/message.scss";
+@import url('https://fonts.googleapis.com/css?family=Oswald:200,300,400,500,600,700');
+* {
+  margin: 0; padding: 0; list-style: none;
+}
+html {
+  scroll-behavior: smooth;
+}
+.layoutWrap {
+    height: 100%;
+    background-color: $white;
+    font-family: $font-family;
+  :global {
+    .ant-spin-nested-loading, .ant-spin-container{
+      height: 100%;
+    }
+    .ant-spin-blur {
+      height: 100%;
+      opacity: 0.3;
+      z-index: 1001;
+    }
+    .ant-spin-nested-loading > div > .ant-spin {
+      max-height: none;
+      z-index: 1002;
+    }
+  }
+}
+
+.wrap {
+  margin-top: 20px;
+  line-height: 1.8;
+  min-height: 70px;
+}
+
+.btnWrap {
+  text-align: center;
+  margin-top: 20px;
+  button + button {
+    margin-left: 8px;
+  }
+}
+
+:global {
+    .ant-select-dropdown-menu-item:hover,
+    .ant-dropdown-menu-item:hover, 
+    .ant-dropdown-menu-submenu-title:hover {
+        background-color: $gray-200;
+    }
+  .category-picker-btn-primary {
+    border-radius: 16px !important;
+    background-color: $primary-4 !important;
+    border: 1px solid $primary-4 !important;
+    line-height: 32px !important;
+    &:hover {
+      background-color: $primary-5 !important;
+      border: 1px solid $primary-5 !important;
+    }
+  }
+  .customer-theme.category-picker .category-item--focus .arrow:after {
+    border-color: $primary-4;
+  }
+  .customer-theme.category-picker .category-item .count-tip {
+    background-color: $primary-4;
+  }
+  .customer-theme.category-picker .category-picker-checkbox-input--checked:before, .customer-theme.category-picker .category-picker-checkbox-input--indeterminate:before {
+    background-color: $primary-4;
+  }
+  .customer-theme.category-picker .category-picker-checkbox-input--checked+span {
+    color: $primary-5;
+    font-weight: 600;
+  }
+  .customer-theme.category-picker .category-picker-checkbox:hover>span:first-child:before {
+    border-color: $primary-4;
+  }
+  .customer-theme.category-picker .category-item--level-one:hover, .customer-theme.category-picker .category-item--level-three:hover, .customer-theme.category-picker .category-item--level-two:hover {
+    background-color: $primary-2;
+  }
+  .customer-theme.category-picker .category-item--focus.category-item--level-one .category-picker-checkbox-input--checked+span, .customer-theme.category-picker .category-item--focus.category-item--level-one .category-picker-checkbox-input--indeterminate+span {
+    color: $primary-4;
+  }
+  .customer-theme.category-picker .category-picker__conditions .has-selected{
+    font-weight: 600;
+    color: $primary-5;
+  }
+}

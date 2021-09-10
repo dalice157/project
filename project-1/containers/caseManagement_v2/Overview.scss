@@ -1,0 +1,25 @@
+@import "../../scss/_var.scss";
+
+.bg {	
+  background-color: $gray-150;
+  min-height: 100vh;
+}	
+
+.wrap {
+  margin: 0 auto;	
+  padding-top: 150px;
+  height: 100%;	
+  width: 1200px;
+  background-color: $gray-150;
+  :global {
+    .ant-layout {
+      height: 100%;	
+      margin-top: 40px;
+      background-color: $gray-150;
+    }
+  }
+  @media only screen and (max-width: 768px) {
+    padding-top: 0px;
+    width: 100%;
+  }
+}

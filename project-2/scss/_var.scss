@@ -1,0 +1,69 @@
+/**
+ * 顏色
+ */
+ $white: #FFFFFF !default;
+ $black: #4a4a4a;
+ $complete: #80c037;
+ 
+ $gray-100: #f6f6f6 !default;
+ $gray-150: #f8f8f8 !default;
+ $gray-200: #dddddd !default;
+ $gray-300: #979797 !default;
+ 
+ $main-1: #f5b524 !default;
+ $main-1-hover: #dea118 !default;
+ $main-10: rgba(245, 181, 36, 0.1) !default;
+ $main-2 : #00bada !default;
+ $main-2-hover: #009db7 !default;
+ 
+ $errorTip: #e66c6c !default;
+ 
+ $visited: #78269f;
+ 
+ $menuHover: #fef7e9 !default;
+ /**
+  * 文字大小
+  * 計算器 https://www.w3schools.com/tags/ref_pxtoemconversion.asp
+  */
+ $font_html: 16px !default;  //rem root value for html element.
+ $font-base: 1rem !default;
+ $font-size-5: ($font-base * .3125) !default;
+ $font-size-6: ($font-base * .375) !default;
+ $font-size-7: ($font-base * .4375) !default;
+ $font-size-8: ($font-base * .5) !default;
+ $font-size-9: ($font-base * .5625) !default;
+ $font-size-10: ($font-base * .625) !default;
+ $font-size-12: ($font-base * .75) !default;
+ $font-size-13: ($font-base * .8125) !default;
+ $font-size-14: ($font-base * .875) !default;
+ $font-size-15: ($font-base * .9375) !default;
+ $font-size-16: ($font-base * 1) !default;
+ $font-size-17: ($font-base * 1.0625) !default;
+ $font-size-18: ($font-base * 1.125) !default;
+ $font-size-19: ($font-base * 1.1875) !default;
+ $font-size-20: ($font-base * 1.25) !default;
+ $font-size-22: ($font-base * 1.375) !default;
+ $font-size-23: ($font-base * 1.4375) !default;
+ $font-size-24: ($font-base * 1.5) !default;
+ $font-size-26: ($font-base * 1.6 ) !default;
+ $font-size-28: ($font-base * 1.75 ) !default;
+ $font-size-30: ($font-base * 1.875 ) !default;
+ $font-size-32: ($font-base * 2) !default;
+ $font-size-33: ($font-base * 2.0625) !default;
+ $font-size-34: ($font-base * 2.125) !default;
+ $font-size-36: ($font-base * 2.25) !default;
+ $font-size-38: ($font-base * 2.375) !default;
+ $font-size-40: ($font-base * 2.5) !default;
+ $font-size-44: ($font-base * 2.75) !default;
+ $font-size-46: ($font-base * 2.875) !default;
+ $font-size-62: ($font-base * 3.875) !default;
+ 
+ $sidebar: 580px; 
+ $message: 626px;
+ 
+ $breakpoint-s: 720px;
+ $breakpoint-m: 1120px;
+ 
+ $border: #f0f0f0;
+ 
+ $font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, Ubuntu, "Microsoft JhengHei", "微軟正黑體", Arial, sans-serif;

@@ -1,0 +1,75 @@
+@import "../../scss/_var.scss";
+
+.btnWrap {
+  text-align: center;
+  margin-top: 16px;
+  button + button {
+    margin-left: 8px;
+  }
+}
+.info {
+  :global {
+    .ant-modal-confirm-title {
+      font-size: $font-size-18;
+      font-weight: 700;
+    }
+  }
+}
+.title {
+  font-size: $font-size-16;
+  font-weight: 500;
+}
+.list {
+  margin-top:16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid $gray-200;
+  li + li {
+    margin-top: 8px;
+  }
+}
+
+.select {
+  color: $black;
+  margin-top: 16px;
+  margin-bottom: 8px;
+  :global {
+    .ant-select {
+      margin-left: 8px;
+      width: 56%;
+    }
+  }
+}
+
+
+.alert {
+  position: fixed;
+  top: 40%;
+  left: 40%;
+  z-index: 1001;
+  text-align: left;
+}
+
+
+.rate {
+    width: 100%;
+    margin: auto;
+    .item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+        span {
+          display:inline-block;
+          color: $black;
+        }
+    }
+}
+
+.desc {
+    background-color: $gray-150;
+    margin-top: 16px;
+    padding: 20px;
+    border-radius: 4px;
+    box-sizing: border-box;
+    color: $black;
+    font-weight: 200;
+  }

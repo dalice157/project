@@ -1,0 +1,74 @@
+@import "../../../scss/var2";
+:global {
+    .ant-btn-lg {
+      width: 160px;
+      height: 32px;
+      font-size: $font-size-14;
+    }
+    .ant-btn{
+      border-radius: 100px;
+      box-shadow: none;
+      text-shadow: none;
+      font-weight: normal;
+      background-color: $white;
+      border: 1px solid $gray-400;
+      color: $gray-400;
+      i {
+        color: $gray-400;
+      }
+      &:hover, &:focus, &:active {
+        border: 1px solid $gray-500;
+        color: $gray-500;
+        background-color: $white;
+        i {
+          color: $gray-500;
+        }
+      }
+    }
+    .ant-btn-disabled, .ant-btn.disabled, .ant-btn[disabled], .ant-btn-disabled:hover, .ant-btn.disabled:hover, .ant-btn[disabled]:hover, .ant-btn-disabled:focus, .ant-btn.disabled:focus, .ant-btn[disabled]:focus, .ant-btn-disabled:active, .ant-btn.disabled:active, .ant-btn[disabled]:active, .ant-btn-disabled.active, .ant-btn.disabled.active, .ant-btn[disabled].active {
+      background-color: $gray-100;
+      border: 1px solid $gray-300;
+      color: $gray-400;
+    }
+    .ant-btn-primary {
+      background-color: $primary-4;
+      border: 1px solid $primary-4;
+      color: $white;
+      &:hover, &:focus, &:active {
+        background-color: $primary-5;
+        border: 1px solid $primary-5;
+        color: $white;
+      }
+    }
+    .ant-btn-danger {
+      background-color: $third-4;
+      border: 1px solid $third-4;
+      color: $white;
+      i {
+        color:  $white;
+      }
+      &:hover, &:focus, &:active {
+        background-color: $third-5;
+        border: 1px solid $third-5;
+        color: $white;
+        i {
+          color: $white;
+        }
+      }
+    }
+    .ant-btn-background-ghost {
+      background-color: $white !important;
+    }
+    .ant-btn-background-ghost.ant-btn-primary {
+      color: $primary-4;
+      border-color: $primary-4;
+    }
+    .ant-btn-background-ghost.ant-btn-primary:hover, .ant-btn-background-ghost.ant-btn-primary:focus {
+      color: $primary-5;
+      border-color: $primary-5;
+    }
+    .ant-btn-background-ghost.ant-btn-primary:active, .ant-btn-background-ghost.ant-btn-primary.active {
+      color: $primary-5;
+      border-color: $primary-5;
+    }
+  }

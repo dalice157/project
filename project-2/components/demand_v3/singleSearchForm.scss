@@ -1,0 +1,29 @@
+
+.single-form-demand {
+  .keyType {
+    width: 200px;
+    margin: 10px;
+  }
+  
+  .content {
+    width: 200px;
+    margin: auto 10px;
+  }
+  
+  .nameField {
+    margin: 10px auto auto auto;
+    .lastName {
+      width: 150px;
+      margin: auto 10px;
+    }
+    .firstName {
+      width: 150px;
+      margin: auto 10px;
+    }
+  }
+  
+  .isContacter {
+    margin: 20px 10px;
+    display: flex;
+  }  
+}

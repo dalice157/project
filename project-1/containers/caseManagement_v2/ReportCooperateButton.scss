@@ -1,0 +1,21 @@
+@import "../../scss/_var.scss";
+
+
+.info {
+  :global {
+    .ant-modal-confirm-title {
+      font-size: $font-size-18;
+      font-weight: 700;
+    }
+  }
+}
+.title {
+  font-size: $font-size-16;
+  font-weight: 500;
+}
+.list {
+  margin-top:16px;
+  li + li {
+    margin-top: 8px;
+  }
+}

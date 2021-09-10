@@ -1,0 +1,43 @@
+@import "../../scss/var";
+.wrap {
+  margin-top: 2.5em;
+}
+.warning {
+  color: $errorTip;
+}
+.remind {
+  font-weight: 700;
+  font-size: $font-size-15;
+  margin-top:20px;
+}
+.btnWrap {
+  text-align: center;
+  margin-top: 2.5em;
+  button + button {
+    margin-left: 8px;
+  }
+}
+.content {
+  margin-top:10px;
+}
+.frequency {
+  font-weight: 700;
+  font-size: $font-size-16;
+  &.remain {
+    color: $main-2;
+  }
+}
+
+.info {
+  .title {
+    font-size: $font-size-16;
+    font-weight: 500;
+  }
+  .list {
+    margin-top:16px;
+    padding-bottom: 16px;
+    li + li {
+      margin-top: 8px;
+    }
+  }
+}

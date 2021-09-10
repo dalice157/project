@@ -1,0 +1,332 @@
+@import "../../scss/var2";
+.loading {
+  text-align: center;
+  margin-top: 10em;
+}
+.show {
+  display: block;
+}
+.hide {
+  display: none;
+}
+.wrap {
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  background-color: $white;
+  padding: 20px;
+  box-sizing: border-box;
+  margin-bottom: 20px;
+  &.refunded{
+    background-color: $gray-100;
+    .title {
+      color: $gray-400;
+    }
+  }
+  &.violation {
+    border-color: $danger;
+    background-color: rgba(245, 36, 36, 0.05);
+    .title {
+      color: $gray-400;
+    }
+  }
+  .titleWrap {
+    font-size: $font-size-20;
+    font-weight: 350;
+    display: flex;
+    vertical-align: middle;
+    align-items: center;
+    .title {
+      margin-right: 20px; 
+    }
+    a.title {
+      color: $black;
+    }
+    a.title:hover {
+      color: $secondary-3;
+    }
+    :global {
+      .ant-tag {
+        margin-right: 8px;
+      }
+    }
+  }
+  .dataWrap {
+    float: right;
+    font-size: $font-size-14;
+  }
+  .date {
+    color: $gray-400;
+    margin-top: 8px;
+    &.invoice {
+      color: $black;
+    }
+    a.text {
+      color: $gray-400;
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+  .refunded {
+    color: $third-3;
+  }
+  .violationRecord {
+    color: $danger;
+  }
+  .marginStatus {
+    margin-top: 8px;
+  }
+  .status {
+    font-size: $font-size-14;
+    font-weight: 600;
+    color: $black;
+  }
+  .statusWarp {
+    display: inline-block;
+    &.mobileStatus {
+      display: inline-flex;
+      width: 70%;
+      align-items: center;
+      justify-content:space-between;
+    }
+  }
+  .payOk {
+    color: #2cb700;
+    margin-right: 8px;
+  }
+  .violation {
+    color: $danger;
+  }
+  .content {
+    margin-top: 8px;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    .text {
+      color: $gray-400;
+      font-size: $font-size-14; 
+    }
+  }
+  .desc {
+    display: inline-block;
+    width: 95%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    word-break: break-all;
+  }
+  .area, .person {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    svg {
+      font-size: $font-size-16;
+      margin-right: 8px;
+    }
+    .text {
+      font-size: $font-size-14;
+    }
+  }
+  .person {
+    border-left: 1px solid $gray-500;
+    padding-left:20px;
+    margin-left: 20px;
+  }
+  .footer {
+    margin-left: -20px;
+    margin-right: -20px;
+    padding: 20px 20px 0;
+    display: flex;
+    justify-content: space-between;
+    .blockWrap {
+      width: 45%;
+      display: inline-flex;
+      justify-content: space-between;
+    }
+    .block {
+      width: 50%;
+      > a+a, > span+span, a+span, span+a {
+        margin-left: 4px;
+      }
+      
+    }
+    .block + .block {
+      &::before {
+        content: '|';
+        padding-right: 20px;
+        margin-left: 20px;
+        color: $gray-300;
+      }
+    }
+    button + button {
+      margin-left: 8px;
+    }
+  }
+  .btnWrap {
+    button {
+      width: 120px;
+    }
+  }
+}
+.mobile {
+  .icon {
+      color: $black;
+    }
+  .noViolation {
+    color: $gray-300;
+  }
+  .tagWrap {
+    .tagText { 
+      font-size: $font-size-12;
+    }
+    svg {
+      font-size: $font-size-14;
+    }
+  }
+  .titleWrap {
+    font-size: $font-size-20;
+    font-weight: 350;
+    display: block;
+    align-items: center;
+    max-width: 95%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-wrap: break-word;
+    word-break: break-all;
+    a.title {
+      text-decoration: underline;
+    }
+  }
+  .dataWrap{
+    float: none;
+    font-size: $font-size-12;
+    .date {
+      display: inline-block;
+      &:nth-child(2) {
+        &:after {
+          content: '';
+          padding-right: 0;
+          margin-left: 0;
+        }
+      }
+      &:after {
+        content: '|';
+        padding-right: 10px;
+        margin-left: 10px;
+        color: $gray-300;
+      }
+      a.title {
+        text-decoration: underline;
+        color: $gray-400;
+      }
+    }
+    :global {
+      .anticon {
+        margin-left: 8px;
+      }
+    }
+  }
+  .area {
+    margin-top: 4px;
+  }
+  .tags {
+    margin-top: 10px;
+  }
+  .violationWrap {
+    font-size: $font-size-12;
+  }
+  .target {
+    font-size: $font-size-14;
+    margin-top: 4px;
+  }
+  .content {
+    margin-top: 20px;
+  }
+  .btnBlock {
+    float: none;
+    margin-top: 8px;
+    margin-bottom: 20px;
+    :global {
+      .ant-btn {
+        width: 100%;
+      }
+    }
+  }
+  .content {
+    .text {
+      /**
+        CSS 多行省略失效(-webkit-box-orient 失效)解決的方式
+      **/
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 3;
+      overflow: hidden;
+      /*! autoprefixer: ignore next */
+      -webkit-box-orient: vertical;
+    }
+  }
+  .footer {
+    display: block;
+    .blockWrap {
+      width: 100%;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+    .block {
+      width: 100%;
+      .label {
+        font-size: $font-size-12;
+      }
+      .people {
+        margin-top: 4px;
+      }
+    }
+    .block + .block {
+      margin-top: 0;
+      &::before {
+        position: absolute;
+        content: '';
+      }
+    }
+    .btnWrap {
+      border-top: 1px solid $gray-300;
+      margin-top: 20px;
+      padding-top: 20px;
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      button {
+        width: 120px;
+        margin-left: 0;
+        margin-bottom: 8px;
+      }
+      button + button {
+        margin-left: 4px;
+      }
+    }
+  }
+}
+.mobileIcon {
+  display: flex;
+  justify-content: center;
+  margin: 20px auto;
+  svg {
+    color: $gray-300;
+  }
+}
+.tagWrap {
+  margin-top: 8px;
+  color: $gray-400;
+  display: flex;
+  align-items: center;
+  .tagText {
+    font-size: $font-size-14;
+    margin-left: 8px; 
+  }
+  svg {
+    font-size: $font-size-16;
+  }
+}

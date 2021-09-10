@@ -1,0 +1,109 @@
+@import "../../scss/var2";
+.ellipsis{
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.banner {
+  background-color: #fef7e9;
+  width: 100%;
+  .wrap {
+    padding: 20px 0;
+    margin: 0;
+    width: 100%;
+  }
+  .avatar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  h2.title {
+    font-size: $font-size-26;
+    color: $black;
+    font-weight: 400;
+    margin-top: 8px;
+    justify-content: center;
+    align-items: center; 
+    display: flex;
+    a {
+      color: $black;
+      text-decoration: underline;
+    }
+    .ellipsis {
+      max-width: 300px;
+      text-align: center;
+      display: block;
+    }
+  }
+  .block {
+    padding: 0 20px 10px;
+    margin: 20px;
+    box-sizing: border-box;
+    &.type{ 
+      border-radius: 4px;
+      box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.1);
+      background-color: $white;
+    }
+    .point {
+      color: $primary-4;
+      font-weight: 600;
+    }
+    .lager {
+      font-size: $font-size-46;
+      font-weight: 600;
+      margin-left: 16px;
+    }
+    .percentage {
+      font-size: $font-size-30;
+      font-weight: 600;
+      color: $secondary-3;
+    }
+  }
+  .all {
+    display: flex;
+    align-items: center; 
+    justify-content: space-between;
+    border-bottom: 1px solid $gray-100;
+    .title {
+      font-weight: 600;
+    }
+  }
+  .ranging {
+    list-style-type: none;
+    font-size: $font-size-14;
+    margin-top: 16px;
+    li {
+      display: flex;
+      align-items: center; 
+      justify-content: space-between;
+      line-height: 1.8;
+      .point {
+        margin-left: 4px;
+      }
+    }
+  }
+  .col {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-bottom: 0;
+  }
+  .line {
+    width: 1px;
+    background-color: $gray-200;
+    height: 60px;
+    margin-left: 15px;
+    margin-right: 15px;
+  }
+  .quantity {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    &:last-child {
+      text-align: right;
+    }
+  }
+}

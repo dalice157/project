@@ -1,0 +1,139 @@
+@import "../../scss/_var2.scss";
+
+.publishWrap {
+  margin-top: 20px;
+  border-radius: 4px;
+  border: 1px solid $gray-200;
+  padding: 20px 25px;
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  .pic {
+    width: 98px;
+    height: 72px;
+  }
+  .content {
+    color: $black;
+    font-size: $font-size-16;
+    margin-bottom: 0;
+    margin-left: 40px;
+    width: 80%;
+    :global {
+      .MuiSvgIcon-root {
+        color: $primary-4;
+        font-size: $font-size-24;
+        margin-left: 8px;
+      }
+    }
+    .line {
+      display: flex;
+      align-items: center;
+      &.sbw {
+        justify-content: space-between;
+      }
+      p {
+        font-weight: 500;
+      }
+    }
+    .line + .line {
+      margin-top: 8px;
+    }
+    .date {
+      font-weight: 600;
+    }
+    .no {
+      color: $primary-4;
+    }
+    :global {
+      .ant-btn {
+        margin-left: 8px;
+      }
+    }
+  }
+}
+
+.planList {
+  border-radius: 4px;
+  border: solid 1px $gray-300;
+  margin: 20px 15px 20px 15px;
+  .planElement {
+    position: relative;
+    padding: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    .arrow {
+      position: absolute;
+      top: 40%;
+      right: 5%;
+      color: $black;
+    }
+    .planInfo {
+      .used {
+        display: inline-block;
+        border-radius: 4px;
+        background-color: $gray-500;
+        color: white;
+        width: 70px;
+        height: 25px;
+        p {
+          width: 100%;
+          margin: 2px auto;
+          text-align: center;
+        }
+      }
+      .unused {
+        display: inline-block;
+        border-radius: 4px;
+        background-color:$gray-200;
+        color: $gray-400;
+        width: 70px;
+        height: 25px;
+        p {
+          width: 100%;
+          margin: 2px auto;
+          text-align: center;
+        }
+      }
+      .planDate {
+        display: inline-block;
+        color: $gray-400;
+        margin-left: 10px;
+        font-size: 16px;
+      }
+    }
+    .planContent {
+      color: $gray-500;
+      font-size: 16px;
+      margin-top: 5px;
+      .no {
+        color:  $primary-4;
+      }
+      .month {
+        text-decoration: underline;
+      }
+      a {
+        color:  $primary-4;
+        text-decoration: underline;
+      }
+    }
+    .planSummary {
+      margin-top: 5px;
+      .underline {
+        text-decoration: underline;
+      }
+      .no {
+        color: $primary-4;
+        font-weight: bold;
+      }
+    }
+  }
+  .planElement + .planElement {
+    border-top: 1px solid $gray-200;
+  }
+}
+
+.alert {
+  color: $danger;
+  font-weight: bold;
+}

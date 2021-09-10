@@ -1,0 +1,201 @@
+@import "../../scss/var2";
+$width: 470px;
+.cardWarp {
+  margin-top: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: -10px;
+  margin-right: -10px;
+}
+.wrap {
+  margin: 160px auto 60px;
+  background-color: $white;
+  max-width: 1200px;
+  .brand {
+    width: 128px;
+    height: 45px;
+    font-size: 32px;
+    font-weight: normal;
+    font-stretch: normal;
+    font-style: normal;
+    line-height: normal;
+    letter-spacing: normal;
+    color: $black;
+    margin: 16px 0px;
+  }
+  :global {
+    .ant-layout {
+      background: transparent;
+    }
+    .ant-layout-has-sider {
+      margin-top: 20px;
+    }
+    .ant-breadcrumb-separator {
+      color: $black;
+    }
+    .ant-breadcrumb-link {
+      color: $black;
+      a {
+        color: $black;
+        text-decoration: underline;
+        &:hover {
+          text-decoration: none;
+        }
+      }
+    }
+    .ant-layout.ant-layout-has-sider>.ant-layout, .ant-layout.ant-layout-has-sider>.ant-layout-content {
+      overflow: initial;
+    }
+  }
+  
+}
+
+.layout {
+  width: 940px;
+  .pagination {
+    text-align: center;
+    margin-top: 40px;
+    :global {
+      .ant-pagination-item {
+        &:hover {
+          background-color: $primary-2;
+          border-color: $primary-2;
+          a {
+            color: $white;
+          }
+        }
+      }
+      .ant-pagination-prev:focus .ant-pagination-item-link, .ant-pagination-next:focus .ant-pagination-item-link, .ant-pagination-prev:hover .ant-pagination-item-link, .ant-pagination-next:hover .ant-pagination-item-link {
+        background-color: $primary-2;
+        border-color: $primary-2;
+        color: $white;
+      }
+
+      .ant-pagination-disabled a, .ant-pagination-disabled:hover a, .ant-pagination-disabled:focus a, .ant-pagination-disabled .ant-pagination-item-link, .ant-pagination-disabled:hover .ant-pagination-item-link, .ant-pagination-disabled:focus .ant-pagination-item-link {
+            border-color: #d9d9d9;
+            color: rgba(0, 0, 0, 0.25);
+            cursor: not-allowed;
+            background-color: $white;
+      }
+      .ant-pagination-item-active {
+        background-color: $primary-3;
+        border-color: $primary-3;
+        a {
+          color: $white;
+        }
+        &:hover {
+          background-color: $primary-2;
+          border-color: $primary-2;
+        }
+      }
+      .ant-pagination-jump-prev .ant-pagination-item-container .ant-pagination-item-link-icon, .ant-pagination-jump-next .ant-pagination-item-container .ant-pagination-item-link-icon {
+        color: $primary-3;
+      }
+    }
+  }
+}
+
+.mobileWrap {
+  margin-top: 40px;
+  .pagination {
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 40px;
+    :global {
+      .ant-pagination-item {
+        &:hover {
+          background-color: $primary-2;
+          border-color: $primary-2;
+          a {
+            color: $white;
+          }
+        }
+      }
+      .ant-pagination-prev:focus .ant-pagination-item-link, .ant-pagination-next:focus .ant-pagination-item-link, .ant-pagination-prev:hover .ant-pagination-item-link, .ant-pagination-next:hover .ant-pagination-item-link {
+        background-color: $primary-2;
+        border-color: $primary-2;
+        color: $white;
+      }
+
+      .ant-pagination-disabled a, .ant-pagination-disabled:hover a, .ant-pagination-disabled:focus a, .ant-pagination-disabled .ant-pagination-item-link, .ant-pagination-disabled:hover .ant-pagination-item-link, .ant-pagination-disabled:focus .ant-pagination-item-link {
+            border-color: #d9d9d9;
+            color: rgba(0, 0, 0, 0.25);
+            cursor: not-allowed;
+            background-color: $white;
+      }
+      .ant-pagination-item-active {
+        background-color: $primary-3;
+        border-color: $primary-3;
+        a {
+          color: $white;
+        }
+        &:hover {
+          background-color: $primary-2;
+          border-color: $primary-2;
+        }
+      }
+      .ant-pagination-jump-prev .ant-pagination-item-container .ant-pagination-item-link-icon, .ant-pagination-jump-next .ant-pagination-item-container .ant-pagination-item-link-icon {
+        color: $primary-3;
+      }
+    }
+  }
+  .banner {
+    height: 60px;
+    background-color: $gray-100;
+    margin-bottom: 20px;
+    .bannerCrumb {
+      margin-left: 20px;
+      padding-top: 15px;
+    }
+    .bannerTitle {
+      margin: 10px auto;
+      width: 360px;
+      height: 30px;
+      font-size: 24px;
+      font-weight: normal;
+      font-stretch: normal;
+      font-style: normal;
+      text-align: center;
+      color: $black;
+    }
+  }
+  
+}
+
+.filterWrap {
+  position: fixed;
+  top: 0;
+  z-index: 1000;
+  width: 100%;
+  height: 100%;
+  background-color: $white;
+  color: $gray-100;
+  overflow: auto;
+  .header {
+    background-color: #f8f8f8;
+    padding: 8px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1001;
+  }
+  .title {
+    font-size: $font-size-22;
+  }
+}
+
+.noData {
+  text-align: center;
+  margin-top: 10em;
+  font-weight: 600;
+  font-size: $font-size-16;
+}
+
+@media only screen and (max-width: 320px) {
+  .banner > .bannerTitle {
+    max-width: 320px;
+  }
+}

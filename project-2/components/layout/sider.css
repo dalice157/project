@@ -1,0 +1,19 @@
+.logo {
+        width: 130px;
+        margin: 8px auto;
+      }
+.logo-img {
+            display: inline-block;
+            background: url('http://static.104.com.tw/logo/104logo_o_180x26.svg') left 14px no-repeat;
+            text-indent:-9999px;
+            white-space:nowrap;
+            width: 55px;
+            line-height: 64px;
+        }       
+.logo-title {
+          display: inline-block;
+          color: #646464;
+          font-size: 26px;
+          font-weight: 600;
+          margin-left: 5px;
+        }

@@ -1,0 +1,14 @@
+@import "../../../scss/var2";
+
+:global{
+  .ant-message {
+    top: 25%; // Top Position Here
+    pointer-events: none;
+  }
+  .ant-message-notice > div {
+    background-color: $gray-500;
+    font-size: $font-size-16;
+    color: $white;
+    padding: 19px;
+  }
+}

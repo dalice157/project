@@ -1,0 +1,26 @@
+#manageMult {
+  .label {
+    font-weight: bold;
+  }
+  .selectList {
+    display: flex;
+    align-items: top;
+  }
+  .select {
+    width: 150px;
+  }
+  .arc {
+    width: 10px;
+    height: 10px;
+  }
+  .mtStyle {
+    margin-top: 10px;
+  }
+  .mrStyle {
+    margin-right: 10px;
+  }
+  .btnWrap {
+    text-align: center;
+    margin-top: 24px;
+  }
+}

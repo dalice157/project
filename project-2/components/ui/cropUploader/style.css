@@ -1,0 +1,62 @@
+.edit-wrapper {
+  position: relative;
+}
+.edit-wrapper .crop-icon {
+  display: none;
+}
+.edit-wrapper:hover .crop-icon {
+  display: block;
+}
+.force-display-block {
+  display: block !important;
+}
+.tag-position {
+  text-align: left;
+}
+
+.ant-tabs-nav .ant-tabs-tab {
+  margin-right: 0;
+}
+
+.submit-div {
+  text-align: center;
+}
+.icon-crop_icon,
+.icon-overlay_icon {
+  font-size: 38px;
+}
+.crop-wrapper {
+  text-align: center;
+}
+.crop_img_wap {
+  padding-bottom: 56%;
+  width: 100%;
+  position: relative;
+}
+.crop_img_wap img {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+.crop_mask_menu {
+  display: flex;
+  flex-wrap: wrap;
+}
+.crop_mask_menu > div {
+  margin-right: 10px;
+  height: 34px;
+  cursor: pointer;
+}
+.crop_mask_menu > div:last-child {
+  margin-right: 0;
+}
+.ant-tooltip {
+  z-index: 2101;
+}
+.children-main {
+  position: relative;
+  width: 100%;
+}

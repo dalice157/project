@@ -1,0 +1,66 @@
+@import "../../scss/var2";
+@import "./Card.scss";
+
+.card + .card {
+  @include cardSpace('other');
+}
+
+.status {
+  margin-top: 8px;
+}
+
+.card {
+  font-size: $font-size-14;
+  .footer {
+    padding-top: 8px;
+    .dateInfo {
+      display: flex;
+      justify-content: flex-start;
+      color: $gray-500;
+      font-size: $font-size-14;
+      .infoNo + .infoNo {
+        margin-left: 8px;
+      }
+      .reject {
+        color: $danger;
+        font-weight: 500;
+      }  
+    }
+    &.mobile {
+      justify-content: space-around;
+      button {
+        &:nth-child(3) {
+          margin-top:8px;
+        }
+      }
+    }
+  }
+  .btnWrap {
+    text-align: right;
+    button {
+      width: 140px;
+    }
+    button + button {
+      margin-left: 8px;
+    }
+  }
+}
+
+
+@media only screen and (max-width: 768px) {
+  .card > .footer {
+    .dateInfo {
+      display: block;
+      .infoNo + .infoNo {
+        margin-top: 8px;
+        margin-left: 0;
+      }
+    }
+    .btnWrap {
+      padding-top: 8px;
+      text-align: center;
+    }
+  }
+  
+}
+

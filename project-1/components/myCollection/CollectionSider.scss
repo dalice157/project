@@ -1,0 +1,49 @@
+@import "../../scss/var2";
+
+.sider {
+    background-color: $white;
+    width: 200px !important;
+    flex: 0 0 240px !important;
+    max-width: 240px !important;
+    min-width: 240px !important;
+    margin-right: 20px;
+    top: 20px;
+    .collection {
+        list-style-type: none;
+        padding-left: 0px;
+        .option {
+            width: 240px;
+            height: 60px;
+            border-radius: 4px;
+            border: solid 1px #dddddd;
+            background-color: var(--white);
+            position: relative;
+            overflow: hidden;
+            .optionSide {
+                width: 4px;
+                height: 60px;
+                background-color: $primary-3;
+                margin: 0;
+                position: relative;
+            }
+            .optionTitle {
+                width: 150px;
+                height: 22px;
+                font-family: PingFangTC;
+                font-size: $font-size-16;
+                font-weight: normal;
+                font-stretch: normal;
+                font-style: normal;
+                line-height: normal;
+                letter-spacing: normal;
+                color: var(--black);
+                
+                position: absolute;
+                top: 19px;
+                left: 19px;
+                margin: 0;
+            }
+        }
+    }
+}
+

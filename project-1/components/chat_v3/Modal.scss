@@ -1,0 +1,175 @@
+@import "../../scss/var";
+%modal_marginTop {
+    margin-top: 15px;
+}
+%text {
+    color: $black;
+    font-size: $font-size-14;
+    line-height: 1.5;
+}
+$img-height: 150px;
+.modal {
+    .innerText {
+        @extend %text;
+    }
+    .userName, .type, .description, .attach {
+        @extend %modal_marginTop;
+    }
+    .textArea,.upload {
+        margin-top: 10px;
+    }
+    .attach {
+        span {
+            font-size: $font-size-12;
+        }
+    }
+    .img {
+      height: $img-height;
+      margin-bottom: 15px;
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      svg {
+        padding: 5px;
+      }
+      :global {
+          .edit-wrapper {
+            width: 100%;
+            height: $img-height;
+          }
+          .children-main {
+            img {
+              width: 100%;
+              height: $img-height;
+            }
+          }
+      }
+  }
+  :global {
+    .ant-checkbox-wrapper {
+        display: block;
+    }
+    .ant-checkbox-wrapper + .ant-checkbox-wrapper {
+        margin-left: 0;
+        margin-top: 8px;
+    }
+  }
+    .error {
+      color: $errorTip;
+      margin-left: 0;
+      padding:0;
+      &.errorMg {
+        margin-left: 8px;
+        display: inline-block;
+      }
+    }
+    :globa {
+        .ant-modal-footer {
+            div + div {
+                margin-left: 15px;
+            }
+        }
+    }
+}
+.quickCaseContent {
+    .text {
+        @extend %text;
+        margin-bottom: 15px;
+    }
+    .noCaseText {
+        color: $black;
+        font-size: $font-size-14;
+        line-height: 1.6;
+    }
+    :global {
+        .ant-checkbox-group-item {
+            display: block;
+            margin-bottom: 10px;
+        }
+    }
+}
+.buttonModal {
+    &.case {
+        :global {
+            .ant-checkbox-wrapper {
+                width: 100%;
+            }
+            .ant-select {
+                width: 320px;
+                margin-left: 10px;
+            }
+        }
+    }
+    .text {
+        @extend %text;
+        margin-top: 8px;
+        margin-bottom: 8px;
+    }
+    .danger {
+        font-size: $font-size-12;
+        line-height: 1.5;
+        color: $errorTip;
+        margin-top: 6px;
+    }
+    .user {
+        @extend .person;
+        font-size: $font-size-16;
+    }
+    .person {
+        color: $main-2;
+        font-weight: 500;
+    }
+    .select {
+        .label {
+            display: inline-block;
+            width: 70px;
+        }
+    }
+    .select + .select {
+        margin-top: 10px;
+    }
+
+    .rate {
+        .item {
+            display: flex;
+            align-items: center;
+            .rateType {
+                width: 200px;
+                display:inline-block;
+                color: $black;
+            }
+            .rateWrap {
+                display: inline-block;
+                position: relative;
+                padding-top: 20px;
+                .lowRate {
+                  position: absolute;
+                  left: 0;
+                  top: 0;
+                  width: auto;
+                  margin-left: 8px;
+                }
+                .highRate {
+                  position: absolute;
+                  right: 0;
+                  top: 0;
+                  width: auto;
+                }
+              }
+        }
+    }
+    :global {
+        .ant-checkbox-group {
+            display: block;
+            margin-top: 15px;
+        }
+        .ant-checkbox-wrapper + .ant-checkbox-wrapper {
+            margin-left: 0;
+            margin-top: 5px;
+        }
+    }
+}
+
+.error {
+  color: $errorTip;
+}

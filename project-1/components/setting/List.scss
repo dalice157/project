@@ -1,0 +1,70 @@
+@import "../../scss/var";
+.wrap {
+  padding: 0; 
+  background: $white;
+}
+.noData {
+  margin-top: 35%;
+  text-align: center;
+  font-size: $font-size-20;
+}
+.title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: $font-size-16;
+  color: #000000;
+  border-left: 4px solid $main-1;
+  padding-left: 8px;
+  font-weight: 400;
+}
+.list {
+  margin-top: 20px;
+  margin-bottom: 30px;
+  border-radius: 4px;
+  color: $black;
+  border: 1px solid $gray-200;
+  thead {
+    tr {
+      border-bottom: 1px solid $gray-200;
+      th {
+        &:first-child {
+          padding: 20px;
+        }
+        padding: 20px 20px 20px 10px;
+      }
+    }
+  }
+  tbody {
+    tr:first-child {
+      td {
+        padding-top: 20px;
+      }
+    }
+    tr:last-child {
+      td {
+        padding-bottom: 20px;
+      }
+    }
+    td:first-child {
+      padding-left: 20px;
+    }
+    td:last-child {
+      padding-right: 20px;
+    }
+    td {
+      padding: 10px;
+      vertical-align: top;
+      line-height: 1.7;
+    }
+  }
+  :global {
+    .ant-checkbox-group {
+      display: contents;
+    }
+  }
+}
+
+.btnWrap {
+  text-align: center;
+}

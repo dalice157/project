@@ -1,0 +1,12 @@
+.sales-chart-wrap {
+  margin-bottom: 20px;
+  padding: 20px;
+  .type-title {
+    text-align: center;
+    font-size: 1.25rem;
+    &.compared {
+      display: flex;
+      justify-content: space-around;
+    }
+  }
+}

@@ -1,0 +1,86 @@
+body {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.errorStyle {
+  color: red;
+  margin-top: 2px;
+  display: block;
+}
+
+#importReviewForm {
+  h1 {
+    margin-bottom: 20px;
+    font-size: 20px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+  }
+  .app {
+    padding: 15px;
+  }
+  .field {
+    display: flex;
+    &.commentTextArea {
+      display: block;
+      .commentSelect {
+        margin-left: 172px;
+        width: 60%;
+      }
+      .comment {
+        margin-left: 172px;
+        width: 60%;
+        height: 100px;
+      }
+      .errorStyle {
+        margin-left: 172px;
+        margin-top: 5px;
+      }
+    }
+  }
+
+  .field + .field {
+    margin-top: 10px;
+  }
+  .field-control {
+    margin-bottom: 10px;
+  }
+
+  label {
+    display: block;
+    min-width: 150px;
+    margin-right: 10px;
+    font-weight: 700;
+  }
+  .ant-radio-wrapper {
+    min-width: auto;
+    width: auto;
+    display: inline-block;
+    font-weight: normal;
+  }
+  .error-message {
+    margin-left: 60px;
+    color: red;
+    font-size: 13px;
+  }
+  .button-group {
+    text-align: center;
+    margin-top:20px;
+  }
+  button {
+    margin-right: 10px;
+  }
+  button:last-child {
+    margin-right: 0;
+  }
+  .oldReview {
+    font-size: 14px;
+    margin-left: 20px;
+    color: red;
+    display: flex;
+  }
+  .commentType {
+    display: flex;
+  }
+}

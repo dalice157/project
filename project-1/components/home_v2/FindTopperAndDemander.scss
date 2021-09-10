@@ -1,0 +1,106 @@
+@import "../../scss/var2";
+
+.wrap {
+  width: 1000px;
+  margin: 48px auto 50px;
+  &.mobile {
+    width: 100%;
+    margin-top: 32px;
+    :global {
+      .ant-tabs-bar {
+        width: 95%;
+        margin: 0 auto 8px;
+      }
+      .ant-tabs-tab-prev.ant-tabs-tab-arrow-show, .ant-tabs-tab-next.ant-tabs-tab-arrow-show {
+        display: none;
+      }
+      .ant-tabs-nav-container-scrolling {
+        padding: 0;
+      }
+      .ant-tabs-nav-scroll {
+        overflow-x: scroll;
+      }
+      .ant-tabs-nav .ant-tabs-tab {
+        width: auto;
+        border-radius: 0;
+        padding: 8px;
+      }
+    }
+  }
+  :global {
+    .ant-tabs-bar {
+      margin-bottom: 0;
+    }
+    .ant-tabs-nav .ant-tabs-tab {
+      width: 244px;
+      background-color: $gray-300;
+      -webkit-border-top-left-radius: 15px;
+      -webkit-border-top-right-radius: 15px;
+      -moz-border-radius-topleft: 15px;
+      -moz-border-radius-topright: 15px;
+      border-top-left-radius: 15px;
+      border-top-right-radius: 15px;
+      padding: 0 24px;
+      color: $gray-500;
+    }
+    .ant-tabs-nav .ant-tabs-tab-active, .ant-tabs-nav .ant-tabs-tab:hover {
+      color: $white;
+      background-color: $primary-4;
+      
+    }
+    .ant-tabs-ink-bar {
+      display: none !important;
+    }
+  }
+}
+
+.tabWrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  &.mobile {
+    justify-content: space-between;
+    .small, .lager {
+      display: block;
+    }
+    .small {
+      font-size: $font-size-12;
+    }
+    .lager {
+      margin-left: 0;
+      font-size: $font-size-20;
+    }
+    .imgBord {
+      width: 30px;
+      height: 30px;
+      img {
+        width: auto;
+        height: 30px;
+      }
+    }
+  }
+  .small {
+    font-size: $font-size-14;
+      font-weight: normal;
+  }
+  .lager {
+    font-size: $font-size-22;
+    font-weight: bold;
+    margin-left: 4px;
+  }
+  .imgBord {
+    width: 60px;
+    height: 60px;
+    text-align: center;
+    margin-left: 8px;
+    img {
+      width: auto;
+      height: 60px;
+    }
+  }
+}
+.content {
+  background-color: $secondary-1;
+  padding: 50px;
+}
+

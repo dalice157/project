@@ -1,0 +1,205 @@
+@import "../../scss/var";	
+
+.sider {	
+  background-color: $white;	
+  padding: 20px;	
+  text-align: center;	
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  :global {
+    .ant-btn {
+      width: 190px;
+      margin-top: 20px;
+    }
+  }
+  &.mobile {
+    margin-bottom: 10px;
+    .siderWrap {
+      width: 80%;
+      margin-left: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    }
+    .userName {
+      text-align: left;
+      margin-top: 0;
+      font-size: $font-size-12;
+    }
+    .layout {
+      display: flex;
+    }
+    .number {
+      font-size: $font-size-14;
+    }
+    .numberLink {
+      color: $black;
+      margin-left: 4px;
+      a {
+        color: $main-2;
+        text-decoration: underline;	
+        &:hover {	
+          color: #00daff;	
+        }
+      }
+    }
+    .list {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+      li + li {	
+        margin-top: 0;	
+      }
+    }
+    .btnWrap {
+      margin-top: 20px;
+      :global {
+        .ant-btn {
+          width: 130px;
+        }
+      }
+    }
+  }
+}	
+
+.userName {	
+  font-size: $font-size-18;	
+  font-weight: normal;	
+  margin-top: 20px;	
+  word-wrap: break-word;	
+  word-break: break-all;	
+  display: flex;	
+  justify-content: space-between;
+  
+  .title {
+    color: $black;
+  }
+  .nameWarp {
+    display: inline-flex;
+    color: #000;
+    text-align: right;
+    max-width: 155px;
+    justify-content: space-between;
+  }
+  .name {
+    display: inline-block;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    max-width: 105px;
+  }
+}	
+.jobTitle {	
+  color: $gray-300;	
+  font-size: $font-size-14;	
+  margin-top: 8px;	
+}	
+.btnWrap {	
+  margin-top: 20px;
+  text-align: center;
+  a + button, button + button {
+    margin-left: 8px;
+  }
+}	
+.hr {	
+  border: 0;	
+  height: 0;	
+  width: 80px;	
+  margin: 20px auto;	
+  border-top: 1px solid $gray-200;	
+  border-bottom: 1px solid $white;	
+}	
+
+.list {	
+  list-style: none;	
+  color: $gray-300;
+  margin-top: 8px;
+  margin-bottom: 0;
+  &.mobile {
+    display: flex;
+    box-shadow: 0 7px 8px rgba(0,0,0,.15);
+    background-color: $white;
+    margin:0 0 10px;
+    padding: 0 10px 20px;
+    border-radius: 0 0 4px 4px;
+    color: $black;
+    li+li{
+      margin: 0;
+    }
+    .title {
+      padding: 0 0 0 10px;
+      width: 80%;
+    }
+  }
+  li {	
+    display: flex;	
+    justify-content: space-between;	
+    &.allWrap {	
+      display: block;	
+    }	
+  }	
+  li + li {	
+    padding: 0;	
+    margin: 8px 0 0;	
+  }	
+  .all {	
+    display: flex;	
+    justify-content: space-between;	
+    margin-top: -10px;	
+    .title {	
+      color: $black;	
+      display: flex;	
+      justify-content: center;	
+      align-items: center	
+    }	
+    .number {	
+      color: $main-1;	
+      font-size: $font-size-46;	
+      font-weight: 600;	
+    }	
+    .nothing {	
+      text-align: center;	
+      width: 100%;	
+      font-size: $font-size-16;	
+    }	
+  }	
+  .title {	
+    width: 60px;	
+    display: inline-block;	
+    text-align: left;	
+  }	
+  .number {	
+    text-align: right;	
+    display: inline-block;	
+    min-width: 26px;	
+  }	
+  a.number {	
+    color: $main-2;	
+    text-decoration: underline;	
+    &:hover {	
+      color: #00daff;	
+    }	
+  }	
+}
+.radioStyle{
+  display: block;
+  line-height: 1.6;
+}
+.radioStyle + .radioStyle {
+  margin-top: 4px;
+}
+.error {
+  color: $errorTip
+}
+.radio {
+  margin-right: 4px;
+  float: left;
+  height: 23px !important;
+}
+
+.choose {
+  font-weight: 700;
+  font-size: $font-size-15;
+  line-height: 1.8;
+  margin-top: 0.5em;
+}

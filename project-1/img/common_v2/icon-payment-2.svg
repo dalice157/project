@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="62" height="56" viewBox="0 0 62 56">
+    <defs>
+        <path id="2tif76fzxa" d="M0 0.464L30.496 0.464 30.496 46.697 0 46.697z"/>
+        <path id="wvsnupq6xc" d="M0.149 0.077L30.302 0.077 30.302 17.646 0.149 17.646z"/>
+    </defs>
+    <g fill="none" fill-rule="evenodd">
+        <g>
+            <g>
+                <g>
+                    <g>
+                        <g transform="translate(-1057 -761) translate(688 761) translate(369) translate(13 7) translate(0 .624)">
+                            <mask id="ome0oajpkb" fill="#fff">
+                                <use xlink:href="#2tif76fzxa"/>
+                            </mask>
+                            <path fill="#000" d="M17.887.857s8.994.587 12.263 19.11C33.42 38.492 12.7 51.325 3.656 45.114-5.39 38.903 4.87 33.198 7.485 28.098c2.614-5.1-1.285-4.835-2.134-8.94-.85-4.105 3.16-21.511 12.536-18.301" mask="url(#ome0oajpkb)"/>
+                        </g>
+                        <path fill="#FFE9C3" d="M12.137 12.625s-2.464 1.935-1.167 8.728c1.297 6.793 4.532 6.158 6.45 4.6l-.38 5.865-4.933 3.284s5.31 5.287 8.526 3.971c3.402-1.444 7.645-5.47 7.645-5.47l-5.98-1.723-1.39-8.175 1.525-6.03-2.765-.113.331 1.219s-5.123-2.243-7.862-6.156" transform="translate(-1057 -761) translate(688 761) translate(369) translate(13 7)"/>
+                        <g transform="translate(-1057 -761) translate(688 761) translate(369) translate(13 7) translate(5.202 30.85)">
+                            <mask id="1t0tpc1j8d" fill="#fff">
+                                <use xlink:href="#wvsnupq6xc"/>
+                            </mask>
+                            <path fill="#8AD0E7" d="M8.704 3.265l6.171 3.877 4.684-5.151s7.544-7.575 9.147 7.419l1.596 8.236H.149S2.533-.613 8.704 3.265" mask="url(#1t0tpc1j8d)"/>
+                        </g>
+                        <path fill="#FFC06F" d="M17.42 25.954L21.061 23.101 17.04 31.818z" transform="translate(-1057 -761) translate(688 761) translate(369) translate(13 7)"/>
+                        <path fill="#FFE9C3" d="M10.475 16.68l-.818 4.87h3.175l-1.745-7.164s-.397 1.008-.612 2.295" transform="translate(-1057 -761) translate(688 761) translate(369) translate(13 7)"/>
+                        <path fill="#000" d="M17.42 25.954s1.63 19.115-5.256 13.759c-5.195-4.043-6.813 6.874-6.813 6.874l-1.27-10.35L17.42 25.955z" transform="translate(-1057 -761) translate(688 761) translate(369) translate(13 7)"/>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

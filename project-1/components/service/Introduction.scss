@@ -1,0 +1,205 @@
+@import "../../scss/var";	
+
+.wrap {	
+  background-color: $white;	
+  border-radius: 4px;	
+  margin-top: 20px;	
+  margin-bottom: 20px;	
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  &.mobile {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 20px 10px;
+    .sort {
+      display: flex;
+      justify-content: space-between;
+    }
+    .icon {
+      text-align: center;
+    }
+    .banner {
+      height: 197px;
+      margin-top: 20px;
+      img {	
+        width: 100%;	
+        height: 100%;	
+      }	
+    }
+    .money {
+      margin-top: 10px;
+    }
+    .tagWrap {
+      :global {
+        .ant-tag {
+          margin-right: 10px;
+          margin-bottom: 10px;
+          font-size: $font-size-13;
+          padding: 4px 6px;
+        }
+      }
+    }
+    .intro {
+      .info {
+        width: 84%;
+      }
+    }
+    .btnWrap {
+      padding-left: 0;
+      text-align: center;
+      margin-top: 20px;
+      :global {
+        .ant-btn {
+          width: 200px;
+        }
+      }
+    }
+  }
+}
+
+.userInfo {
+  display: flex;
+  align-items: center;
+  margin-top: 10px;
+  .userName {
+    font-size: $font-size-12;
+    color: $black;
+    text-decoration: underline;
+    margin-left: 8px;
+
+  }
+}
+
+.sort {	
+  font-size: $font-size-18;	
+  font-weight: normal;
+  display: flex;
+  justify-content: space-between;
+  .icon {
+    width: 40px;
+    cursor: pointer;
+    svg {
+      font-size: $font-size-26;
+    }	
+  }
+  .titleWrap {
+    display: flex;
+    align-items: center;
+    & > .hide {
+      display: none;
+    }
+  }
+  .headerTitle {	
+    font-size: $font-size-20;	
+    font-weight: normal;
+    color: #000;
+  }
+}	
+.money {	
+  font-size: $font-size-18;	
+  font-weight: 600;	
+  color: $main-2-hover;	
+  margin-top: 4px;
+  .priceType {	
+    color: $black;	
+    font-weight: normal;	
+    font-size: $font-size-16;	
+    margin-right: 8px;	
+  }	
+  .up {	
+    font-weight: normal;	
+    font-size: $font-size-12;	
+  }	
+  .starWarp {	
+    float: right;	
+    display: flex;	
+    align-items: center;
+  }	
+  .icon {	
+    font-weight: 500;	
+    font-size: $font-size-14;	
+    color: $main-1;
+    svg {
+      font-size: $font-size-16;	
+      color: $main-1;	
+    }	
+  }	
+  .reviewCount {	
+    margin-left: 4px;	
+    font-size: $font-size-14;	
+    color: $black;	
+    font-weight: normal;	
+    a {	
+      text-decoration: underline;	
+      &:hover {	
+        text-decoration: none;	
+      }	
+    }	
+  }	
+}	
+.banner {	
+  width: 100%;	
+  height: 340px;
+  margin-bottom: 20px;	
+  overflow: hidden;
+  text-align: center;
+  position: relative;
+  .blur {
+    position: absolute;
+    left: 0;
+    top: 0;
+    z-index: 1;
+    width: 100%;	
+    height: auto;	  
+    filter: blur(100px);
+  }
+  .img {
+    position: relative;
+    z-index: 2;
+    width: auto;	
+    height: 340px;	  
+  }
+}	
+.intro {	
+  margin-top: 20px;	
+  li {	
+    display: flex;	
+    font-size: $font-size-16;	
+  }	
+  li + li {	
+    margin-top: 8px;	
+  }	
+  .title {	
+    font-weight: 600;	
+    width: 50px;	
+  }	
+  .info {	
+    width: 95%;
+    line-height: 1.8;
+    word-wrap: break-word;
+    word-break: break-all;
+  }	
+}	
+.btnWrap {	
+  padding-left: 50px;	
+}	
+.tagWrap {	
+  border-top: 1px solid $gray-100;	
+  margin-top: 20px;	
+  padding-top: 20px;	
+  :global {
+    .ant-tag {
+      font-size: $font-size-13;
+      padding: 4px 6px;
+    }
+  }
+} 
+
+
+@media only screen and (max-width: 768px) {
+  .userInfo {
+    .userName {
+      font-size: $font-size-14;
+    }
+  }
+}

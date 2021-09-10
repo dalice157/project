@@ -1,0 +1,17 @@
+.searchShow {
+  margin-top: 3em;
+  td {
+    line-height: 2
+  }
+  .dateHR {
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    &:last-child {
+      display: none;
+    }
+  }
+}
+
+.btnWrap {
+  text-align: right;
+}

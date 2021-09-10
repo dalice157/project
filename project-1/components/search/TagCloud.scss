@@ -1,0 +1,33 @@
+@import "../../scss/var2";
+
+.label {
+  color: $gray-500;
+  display: inline-block;
+}
+.tag {
+  > span {
+    font-size: $font-size-14;
+  }
+}
+.tagCloud {
+  width: 100%;
+  margin: 0 auto 20px;
+  border-bottom: 1px solid $gray-200;
+  padding-bottom: 1em;
+}
+@media only screen and (max-width: 768px) {
+  .label {
+    display: block;
+  }
+  .tag {
+    margin-bottom: 10px;
+    display: inline-block;
+  }
+  .tagCloud {
+    width: 90%;
+    padding-top: 20px;
+    padding-bottom: 0;
+    border: none;
+    margin-bottom: 0;
+  }
+}

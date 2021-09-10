@@ -1,0 +1,63 @@
+.editDemandField {
+    display: table-row;
+    .fieldName {
+      display: table-cell;
+      vertical-align: top;
+      font-weight: bolder;
+      margin-right: 20px;
+      padding-right: 50px;
+      padding-bottom: 20px;
+      font-size: 14px;
+    }
+    .fieldContent {
+      display: table-cell;
+      vertical-align: top;
+      padding-bottom: 10px;
+      width: 400px;
+      img {
+        width: 100%;
+        height: 100%;
+        margin: auto 20px 10px auto;
+      }
+      .removePreviewImage {
+        margin: 10px auto;
+      }
+      .unit {
+        width: 35%;
+        display: inline-block;
+        margin: auto 10px auto auto;
+      }
+      .price {
+        width: 45%;
+        display: inline-block;
+        margin: auto 10px;
+      }
+      .description {
+        width: 100%;
+        height: 200px;
+      }
+      .fieldContentPlace + .fieldContentPlace, .fieldContentTime + .fieldContentTime {
+        margin-top: 10px;
+      }
+      
+    }
+
+    .fieldContent > span {
+      margin: auto 10px;
+    }
+    .fieldContent > .datePicker {
+      margin: auto;
+    }
+    .validate {
+      display: table-cell;
+      vertical-align: top;
+      color: red;
+    }
+}
+.notice {
+  color: red;
+  margin-top: 8px;
+}
+.datePickerBtn {
+  margin-left: 8px;
+}

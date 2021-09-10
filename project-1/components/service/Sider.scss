@@ -1,0 +1,227 @@
+@import "../../scss/var2";	
+
+.sider {	
+  background-color: $white;	
+  padding: 20px;	
+  text-align: center;	
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.15);
+  :global {
+    .ant-btn {
+      min-width: 74px;
+    }
+    .ant-avatar {
+      margin-bottom: 10px;
+    }
+  }
+  &.top {	
+    position: fixed;	
+    top: 63px;	
+    z-index: 1;	
+    width: 240px;	
+  }
+  &.mobile {
+    margin-bottom: 10px;
+    padding: 10px;
+    .badgeInfo {
+      width: auto;
+      margin: 4px 0;
+      justify-content: flex-start;
+      img {
+        width: 45px;
+        + img {
+          margin-left: 4px;
+        }
+      }
+    }
+    .userBadge {
+      display: flex;
+      justify-content: space-between;
+    }
+    .siderWrap {
+      width: 80%;
+      margin-left: 10px;
+    }
+    .userName {
+      text-align: left;
+      margin: 0;
+      font-size: $font-size-16;
+    }
+    .jobTitle {
+      text-align: left;
+      font-size: $font-size-14;
+      color: #009db7;
+    }
+    .layout {
+      display: flex;
+    }
+    .allWrap {
+      font-size: $font-size-14;
+      display: flex;
+      justify-content: flex-start;
+      .title{
+        width: auto;
+        color: $gray-400;
+        font-weight: normal;
+        margin-right: 4px;
+      }
+    }
+    .number {
+      display: flex;
+      justify-content: space-evenly;
+      min-width: auto;
+      font-size: $font-size-14;
+      color: $third-3;
+      font-weight: 600;
+    }
+    .numberLink {
+      color: $black;
+      margin-left: 4px;
+      a {
+        color: $secondary-3;
+        text-decoration: underline;	
+        &:hover {	
+          color: $secondary-2;	
+        }	
+      }
+    }
+    .list {
+      display: flex;
+      width: 100%;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 8px;
+      li + li {	
+        margin-top: 0;	
+      }
+    }
+    .btnWrap {
+      width: 95%;
+      margin: 20px auto 0;
+      :global {
+        .ant-btn {
+          width: 100%;
+        }
+      }
+    }
+  }
+}	
+
+.userName {	
+  font-size: $font-size-18;	
+  font-weight: normal;	
+  margin-top: 10px;	
+  word-wrap: break-word;	
+  word-break: break-all;	
+  /**	
+    CSS 多行省略失效(-webkit-box-orient 失效)解決的方式	
+  **/	
+  display: -webkit-box;	
+  -webkit-line-clamp: 2;	
+  overflow: hidden;	
+  /* autoprefixer: ignore next */
+  -webkit-box-orient: vertical;	
+}	
+.jobTitle {	
+  color: $gray-300;	
+  font-size: $font-size-14;	
+  margin-top: 8px;	
+}	
+.btnWrap {	
+  width: 80%;	
+  margin: 8px auto ;	
+  display: flex;	
+  justify-content: space-around;
+}	
+.hr {	
+  border: 0;	
+  height: 0;	
+  width: 80px;	
+  margin: 20px auto;	
+  border-top: 1px solid $gray-300;	
+  border-bottom: 1px solid $white;	
+}	
+
+.list {	
+  list-style: none;	
+  color: $gray-400;	
+  width: 80%;	
+  margin: 0 auto;	
+  li {	
+    display: flex;	
+    justify-content: space-between;	
+    &.allWrap {	
+      display: block;	
+    }	
+  }	
+  li + li {	
+    padding: 0;	
+    margin: 8px 0 0;	
+  }	
+  .all {	
+    display: flex;	
+    justify-content: space-between;	
+    margin-top: -10px;	
+    .title {	
+      color: $black;	
+      display: flex;	
+      justify-content: center;	
+      align-items: center	
+    }	
+    .number {	
+      color: $third-3;	
+      font-size: $font-size-46;	
+      font-weight: 600;	
+    }	
+    .nothing {	
+      text-align: center;	
+      width: 100%;	
+      font-size: $font-size-16;	
+    }	
+  }	
+  .title {	
+    width: 60px;	
+    display: inline-block;	
+    text-align: left;	
+  }	
+  .number {	
+    text-align: right;	
+    display: inline-block;	
+    min-width: 26px;	
+  }	
+  a.number {	
+    color: $secondary-3;	
+    text-decoration: underline;	
+    &:hover {	
+      color: $secondary-2;	
+    }	
+  }	
+}	
+
+.btnAllWrap {	
+  width: 100%;	
+  display: block;	
+  margin-bottom: 16px;	
+  :global {	
+    .ant-btn {	
+      width: 100%;	
+    }	
+  }	
+} 
+
+.badgeInfo {
+  width: 60%;
+  margin: 8px auto 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  img {
+    width: 60px;
+    &:first-child {
+      cursor: pointer;
+    }
+    + img{
+      margin-left: 4px;
+    }
+  }
+}

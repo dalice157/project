@@ -1,0 +1,95 @@
+@import '../../../scss/var';
+
+.topMenu {
+  position: fixed;
+  z-index: 10;
+  top: 60px;
+  width: 100%;
+  line-height: 45px;
+  opacity: 0;
+  background-color: $white;
+  border-bottom: 1px solid $gray-200;    -webkit-transform: rotateX(90deg);
+    transform: rotateX(90deg);
+  .category {
+    display: flex;
+    justify-content: space-around;
+    list-style-type: none;
+    max-width: 1200px;
+    margin:0 auto;
+    li {
+      text-align: center;
+      width: 20%;
+      position: relative;
+      z-index: 1;
+      &.active {
+        background-color: $menuHover;
+      }
+      &:hover {
+        background-color: $menuHover;
+        .dropdown {
+          opacity: 1;
+          visibility: visible;
+        }
+      }
+      &:nth-child(n+5) .dropdown {
+          right: 0;
+          left: auto;
+      }
+      a {
+        display: block;
+        color: $black;
+        text-align: center;
+        &:focus {
+          text-decoration: none;
+        }
+      }
+    }
+    .dropdown {
+      background: $white;
+      position: absolute;
+      opacity: 0;
+      z-index: 100;
+      top: 100%;
+      left: 0;
+      width: 400px;
+      visibility: hidden;
+      border: 1px solid $gray-200;
+      padding: 10px 0;
+      -webkit-transition: opacity .1s;
+      transition: opacity .1s;
+      -webkit-transition-delay: .2s;
+      transition-delay: .2s;
+      white-space: nowrap;
+      display: flex;
+      flex-wrap: wrap;
+      li {
+        width: 50%;
+        display: block;
+        padding: 0 20px;
+        height: auto;
+        &:hover {
+            background-color: $white;
+        }
+        a {
+          text-align: left;
+          &:hover {
+            color: $gray-300;
+          }
+        }
+      }
+    }
+  }
+  &.showBar {
+    -webkit-transition: -webkit-transform .2s;
+    transition: -webkit-transform .2s;
+    transition: transform .2s;
+    transition: transform .2s,-webkit-transform .2s;
+    opacity: 1;
+    -webkit-transform: rotateX(0deg);
+    transform: rotateX(0deg);
+  }
+}
+.menu {
+  margin-left: -20px;
+  margin-right: -20px;
+}

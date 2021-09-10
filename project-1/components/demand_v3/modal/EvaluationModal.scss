@@ -1,0 +1,124 @@
+@import "../../../scss/var";
+.form {
+    margin-top: 20px;
+    background-color: $white;
+    .sign {
+      height: 4px;
+      width: 30px;
+      background-color: $main-2;
+      display: inline-block;
+      margin-right: 20px;
+    }
+    .detail {
+      font-weight: bold;
+      .titleList {
+        width: 200px;
+      }
+    }
+    .require {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+    .require:before {
+      color: $errorTip;
+      margin-right: 5px;
+      content: '*';
+    }
+    .pageTitle {
+        font-size: 20px;
+        display: inline-block;
+    }
+    .brand {
+      margin: 15px 15px auto 15px;
+    }
+    .row + .row {
+        margin-top: 10px;
+    }
+    .gigSelection {
+      width: 200px;
+    }
+    .rateTitle {
+      margin-right: 20px;
+    }
+    .comment {
+      width: 100%;
+    }
+    .commentTextarea {
+      width: 100%;
+      height: 100px;
+    }
+    .btn {
+      margin-top: 20px;
+      width: 100%;
+      text-align: center;
+    }
+    .error {
+      color: $errorTip;
+      margin-left: 10px;
+      display: inline-block;
+    }
+    .row {
+      display: flex;
+      align-items: flex-start;
+      .rateWrap {
+        position: relative;
+        padding-top: 20px;
+        .lowRate {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: auto;
+          margin-left: 8px;
+        }
+        .highRate {
+          position: absolute;
+          right: 0;
+          top: 0;
+          width: auto;
+        }
+      }
+    }
+    
+    &.mobile {
+      width: 100%;
+    }
+    :global {
+      .ant-layout.ant-layout-has-sider > .ant-layout, .ant-layout.ant-layout-has-sider > .ant-layout-content {
+        overflow: initial;
+      }
+    }
+  }
+
+  :global {
+      .ant-modal-confirm-content {
+          margin: 0;
+      }
+  }
+
+  @media only screen and (max-width: 768px) {
+    .form {
+      width: 100%;
+      :global {
+        .ant-select {
+          width: 100%;
+        }
+      }
+      .rateIcon {
+        font-size: $font-size-26;
+        display: flex;
+        justify-content: space-around;
+      }
+      .rate {
+        display: block;
+        .rateTitle {
+          display: block;
+          font-weight: 400;
+          margin-right: 0;
+          margin-bottom: 8px;
+        }
+        .rateWrap{
+          width: 80%;
+        }
+      }
+    }
+  }

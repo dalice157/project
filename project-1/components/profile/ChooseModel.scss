@@ -1,0 +1,70 @@
+@import "../../scss/var";
+.choose {
+  .validate {
+    line-height: 32px;
+    color: $errorTip;
+    display: block;
+    visibility: hidden;
+  }
+  .open {
+    visibility: visible;
+  }
+  .text {
+    line-height: 1.8;
+  }
+  .checkboxWrap {
+    margin-top: 20px;
+  }
+  :global {
+    .ant-modal-body {
+      padding-top:20px;
+    }
+    .ant-modal-footer {
+      div+div {
+        margin-left: 8px;
+      }
+    }
+    .ant-modal-footer {
+        border:none;
+        text-align: center;
+        padding: 0px 16px 20px;
+        .ant-btn-primary {
+            background-color: $main-1 !important;
+            border-color:  $main-1 !important;
+            &:hover {
+                background-color: $main-1-hover !important;
+                border-color:  $main-1-hover !important;
+            }
+        }
+    }
+    .ant-checkbox-wrapper {
+      margin-bottom: 8px;
+      display: block;
+    }
+    .ant-checkbox-wrapper + .ant-checkbox-wrapper {
+      margin-left: 0;
+    }
+  }
+  .btnWrap {
+    text-align: center;
+    margin-top: 20px;
+    button + button {
+      margin-left: 8px;
+    }
+  }
+  .error {
+    color: $errorTip;
+    margin-left: 0;
+    padding:0;
+    &.errorMg {
+      margin-left: 8px;
+      display: inline-block;
+    }
+  }
+
+  .aready {
+    color: $main-2;
+    margin-left: 8px;
+    display: inline-block;
+  }
+}

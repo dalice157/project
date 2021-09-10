@@ -1,0 +1,44 @@
+.memoContent {
+  background: #fff;
+  min-height: 300px;
+  border: 1px solid #e8e8e8;
+  padding: 24px;
+  zoom: 1;
+  border-radius: 2px;
+}
+
+.table {
+  margin-top: 20px;
+  color: rgba(0,0,0,.65);
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  tr{
+    border: 1px solid #ebedf0;
+    &.title {
+      background-color: #f0f0f0;
+      font-size: 16px;
+      font-weight: 700;
+    }
+    &.no {
+      background-color: #fafafa;
+    }
+  }
+  th, td{
+    border: 1px solid #ebedf0;
+    line-height: 1.8;
+  }
+  th {
+    padding: 12px 15px;
+  }
+  td {
+    padding: 10px;
+  }
+}
+
+.date {
+  font-size: 13px;
+}
+.name {
+  font-weight: 600;
+}

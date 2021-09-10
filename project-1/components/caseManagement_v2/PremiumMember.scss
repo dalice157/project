@@ -1,0 +1,209 @@
+@import "../../scss/_var2.scss";
+
+.publishWrap {
+  margin-top: 20px;
+  border-radius: 4px;
+  border: 1px solid $gray-200;
+  padding: 20px 25px;
+  .item {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+  .item + .item {
+    border-top: 1px solid $gray-200;
+    margin-top: 16px;
+    padding-top: 16px;
+  }
+  .pic {
+    width: 98px;
+    height: 72px;
+  }
+  .content {
+    color: $black;
+    font-size: $font-size-16;
+    margin-bottom: 0;
+    margin-left: 16px;
+    width: 100%;
+    :global {
+      .MuiSvgIcon-root {
+        color: $primary-4;
+        font-size: $font-size-24;
+        margin-left: 8px;
+      }
+    }
+    .upgrade {
+      display: block;
+      text-align: right;
+      margin-top: -28px;
+      :global {
+        .ant-btn {
+          border-color: $primary-4;
+          color: $primary-4;
+          background-color: $white;
+          &:hover, &:focus {
+            border-color: $primary-5;
+            color: $primary-5;
+          }
+        }
+      }
+    }
+    .line {
+      &.premium {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+      }
+      p {
+        font-weight: 500;
+      }
+    }
+    .line + .line {
+      margin-top: 12px;
+    }
+    .date {
+      font-weight: 600;
+    }
+    .no {
+      color: $primary-4;
+    }
+    :global {
+      .ant-btn {
+        margin-left: 8px;
+      }
+    }
+  }
+}
+
+.note {
+  float: right;
+  font-weight: normal;
+  .date {
+    color: $gray-300;
+    font-size: $font-size-14;
+    font-weight: normal !important;
+  }
+  .tag {
+    border-radius: 4px;
+    font-size: $font-size-12;
+    padding: 2px 8px;
+    font-weight: normal;
+    margin-left: 8px;
+    &.use {
+      background-color: $black;
+      color: $white;
+    }
+    &.notUse {
+      background-color: $gray-200;
+      color: $gray-300;
+    }
+  }
+}
+
+.planList {
+  border-radius: 4px;
+  border: solid 1px #dddddd;
+  margin: 20px 15px 20px 15px;
+  .planElement {
+    // margin: 10px;
+    padding: 16px;
+    :global {
+      .ant-btn {
+        margin-top: 8px;
+      }
+    }
+    .upgrade {
+      display: block;
+      :global {
+        .ant-btn {
+          border-color: $primary-4;
+          color: $primary-4;
+          background-color: $white;
+          &:hover, &:focus {
+            border-color: $primary-5;
+            color: $primary-5;
+          }
+        }
+      }
+    }
+    .planInfo {
+      .used {
+        display: inline-block;
+        border-radius: 4px;
+        background-color: $gray-500;
+        color: white;
+        width: 70px;
+        height: 25px;
+        p {
+          width: 100%;
+          margin: 2px auto;
+          text-align: center;
+        }
+      }
+      .unused {
+        display: inline-block;
+        border-radius: 4px;
+        background-color:$gray-200;
+        color:$gray-400;
+        width: 70px;
+        height: 25px;
+        p {
+          width: 100%;
+          margin: 2px auto;
+          text-align: center;
+        }
+      }
+      .planDate {
+        display: inline-block;
+        color: $gray-400;
+        margin-left: 10px;
+        font-size: 16px;
+      }
+    }
+    .planContent {
+      color: $gray-500;
+      font-size: 16px;
+      margin-top: 5px;
+    }
+    .planSummary {
+      margin-top: 5px;
+      .underline {
+        text-decoration: underline;
+      }
+      .no {
+        color: $primary-4;
+        font-weight: bold;
+      }
+    }
+    .footer {
+      display: flex;
+      justify-content: center;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid$gray-200;
+    }
+  }
+  .planElement + .planElement {
+    border-top: 1px solid $gray-200;
+  }
+}
+
+.alert {
+  color: $danger;
+}
+
+.block {
+  width: 180px;
+}
+
+.warn {
+  color: $danger;
+  font-size: $font-size-14;
+  margin-top: 8px;
+  .ps {
+    color: $primary-4;
+  }
+}
+.or {
+  color: $gray-500;
+}

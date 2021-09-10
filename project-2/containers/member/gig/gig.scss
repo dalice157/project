@@ -1,0 +1,116 @@
+
+.btnWrap {
+  text-align: center;
+  margin: 20px auto 0;
+  button + button {
+    margin-left: 8px;
+  }
+}
+
+.gigWrap {
+  margin-top: 2em;
+  > div {
+    margin-bottom: 20px;
+  }
+  table {
+    margin-top: 8px;
+  }
+}
+
+.dateWrap {
+  margin-top:10px;
+  margin-bottom: 10px;
+  span + button {
+    margin-left: 10px;
+  }
+  > form {
+    margin-left: 8px;
+    display: inline-block;
+  }
+}
+
+.memo {
+  margin-bottom: 3em;
+  margin-top: 10px;
+}
+
+.memoBtn {
+  width: 580px;
+  margin-top: 10px;
+  text-align: right;
+}
+
+.field + .field {
+  margin-top: 10px;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  &.alignTop {
+    align-items: flex-start;
+  }
+  > div, > span, > input {
+    margin-left: 10px;
+  }
+  label {
+    min-width: 170px;
+  }
+  .rowInput{
+    &.alignTop {
+      align-items: flex-start;
+      margin-top: 8px;
+    }
+    &.displayBlock {
+      display: block;
+    }
+    align-items: center;
+    display: flex;
+    width: 100%;
+    > button {
+      margin-left: 8px;
+    }
+  }
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+}
+.psText {
+  font-size: 12px;
+  color: #999;
+}
+.searchShow {
+  margin-top: 3em;
+  td {
+    line-height: 2
+  }
+  .dateHR {
+    border: none;
+    border-top: 1px solid #e0e0e0;
+    &:last-child {
+      display: none;
+    }
+  }
+}
+
+.pageWrap {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modalTitle {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.modalSelect {
+  width: 100%;
+}
+
+.modalBtn {
+  text-align: center;
+  margin-top: 20px;
+}

@@ -1,0 +1,40 @@
+@import "../../scss/var2";
+
+.title {
+  font-size: $font-size-28;
+  color: $secondary-5;
+  font-weight: 500;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding-top: 48px;
+  margin-bottom: 24px;
+  &.mobile {
+    padding-top: 24px;
+  }
+}
+
+.ps {
+  font-size: $font-size-16;
+  font-weight: 500;
+  color: $secondary-5;
+  margin-top: 14px;
+}
+
+.proposal {
+  font-size: $font-size-16;
+  color: $gray-500;
+  margin-bottom: 16px;
+  > .plan {
+    color: $primary-4;
+    font-weight: 500;
+  }
+}
+.info {
+  font-size: $font-size-14;
+  color: $gray-500;
+}
+
+.btnWrap {
+  margin-top: 24px;
+}

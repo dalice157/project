@@ -1,0 +1,364 @@
+@import "../../scss/_var.scss";
+@import "../../scss/_var2.scss";
+
+.nav {
+  border: none;
+  background: none;
+  .wrap {
+    display: contents;
+  }
+  &.mobile {
+    width: 100%;
+    margin: 0 auto;
+    overflow-x: scroll;
+    .wrap {
+      width: 738px;
+      display: block;
+    }
+    .item, .item span {
+      font-size: $font-size-16;
+    }
+    :global {
+      .ant-menu-horizontal {
+      scroll-snap-type:inline;
+      }
+      .ant-menu-item, .ant-menu-submenu-title {
+        padding: 0 16px;
+      }
+    }
+  }
+  :global {
+    .ant-menu-horizontal {
+      border: none;
+      background: none;
+    }
+    .ant-menu-horizontal > .ant-menu-item:hover, .ant-menu-horizontal > .ant-menu-submenu:hover, .ant-menu-horizontal > .ant-menu-item-active, .ant-menu-horizontal > .ant-menu-submenu-active, .ant-menu-horizontal > .ant-menu-item-open, .ant-menu-horizontal > .ant-menu-submenu-open, .ant-menu-horizontal > .ant-menu-item-selected, .ant-menu-horizontal > .ant-menu-submenu-selected, .ant-menu-horizontal > .ant-menu-item:hover a, .ant-menu-horizontal > .ant-menu-submenu:hover a, .ant-menu-horizontal > .ant-menu-item-active a, .ant-menu-horizontal > .ant-menu-submenu-active a, .ant-menu-horizontal > .ant-menu-item-open a, .ant-menu-horizontal > .ant-menu-submenu-open a, .ant-menu-horizontal > .ant-menu-item-selected a, .ant-menu-horizontal > .ant-menu-submenu-selected a{
+      color: $gray-500;
+      font-weight: 500;
+      border-bottom: none;
+    }
+    .ant-menu-horizontal > .ant-menu-item:hover, .ant-menu-horizontal > .ant-menu-submenu:hover, .ant-menu-horizontal > .ant-menu-item-active, .ant-menu-horizontal > .ant-menu-submenu-active, .ant-menu-horizontal > .ant-menu-item-open, .ant-menu-horizontal > .ant-menu-submenu-open, .ant-menu-horizontal > .ant-menu-item-selected, .ant-menu-horizontal > .ant-menu-submenu-selected {
+      border-bottom: 4px solid $primary-3;
+    }
+    .MuiSvgIcon-root {
+      font-size: $font-size-18;
+    }
+  }
+  .item, .item span {
+    font-weight: normal;
+    color: $gray-500;
+    background-color: $white;
+    border-radius: 4px 4px 0 0;
+    font-size: $font-size-20;
+    vertical-align: middle;
+  }
+  .item ~ .item {
+    margin-left: 2px;
+  }
+  .item {
+    .icon {
+      display: flex;
+      align-items: center;
+      :global {
+        .MuiSvgIcon-root {
+          margin-right: 8px;
+        }
+      }
+    }
+  }
+}
+
+.content {
+  background-color: $white;
+  border-radius: 0 4px 4px 4px;
+  padding: 20px 20px 40px;
+  margin-bottom: 20px;
+  width: 100%;
+}
+.chatMsg {
+  background-color: $gray-150;
+  border-radius: 4px;
+  padding: 15px 20px;
+  color: $black;
+  display: flex;
+  font-size: $font-size-16;
+  align-items: center;
+  cursor: pointer;
+  .msg {
+    color: $primary-4;
+    margin-right: 8px;
+  }
+  :global {
+    .ant-badge {
+      margin-right: 8px;
+    }
+  }
+}
+.caseNoWrap {
+  display: flex;
+  margin-top: 20px;
+  justify-content: space-between;
+  text-align: center;
+  align-items: center;
+  li {
+    padding: 15px 0;
+    cursor: pointer;
+    width: 130px;
+  }
+  li:hover {
+    transition: all 0.5s;
+    background-color: $secondary-1;
+  }
+  .line {
+    width: 1px;
+    height: 80px;
+    background-color: $gray-200;
+  }
+  .bg {
+    background-color: $primary-1;
+    border-radius: 4px;
+  }
+  .title {
+    display: block;
+    font-size: $font-size-16;
+    background: transparent;
+    padding: 20px;
+    :global {
+      .MuiSvgIcon-root {
+        margin-right: 8px;
+        font-size: $font-size-16;
+      }
+    }
+  }
+  .no {
+    color: $primary-4;
+    font-size: $font-size-24;
+    display: block;
+  }
+}
+
+
+h3.title {
+  color: $black;
+  font-size: $font-size-18;
+  width: 100%;
+  text-align: left;
+  padding: 0;
+  margin-top: 20px;
+}
+.importWrap {
+  margin-top: 16px;
+  height: 100px;
+  li {
+    list-style-type: square;
+    margin-left: 20px;
+    line-height: 1.8;
+  }
+  li + li {
+    margin-top: 8px;
+  }
+}
+
+.topPicLink {
+  width: 360px;
+  display: block;
+  float: right;
+}
+
+.topPic {
+  width: 360px;
+  float: right;
+}
+
+.tabs {
+  margin-top: 16px;
+  margin-bottom: 20px;
+  div[role="tab"] + div[role="tab"] {
+    margin-left: 8px;
+  }
+  .div [aria-selected="true"] {
+    .no {
+      color: $white;
+    }
+  }
+  .div [aria-selected="false"] {
+    .no {
+      color: $secondary-5;
+    }
+  }
+  :global {
+    .ant-tabs-bar {
+      border: none;
+    }
+    .ant-tabs-ink-bar {
+      background: transparent;
+    }
+    .ant-tabs-nav-wrap {
+      margin-bottom:0;
+    }
+    .ant-tabs-nav .ant-tabs-tab {
+      padding: 5px 10px;
+      font-size: $font-size-12;
+      background-color: $secondary-1;
+      font-weight: bold;
+      color: $secondary-5;
+      border-radius: 50px;
+    }
+    .ant-tabs-nav .ant-tabs-tab:hover{
+      background-color: $primary-3;
+      border-radius: 50px;
+      transition: all 0.5s;
+    }
+    .ant-tabs-nav .ant-tabs-tab-disabled:hover{
+      background-color: $gray-100;
+      border-radius: 50px;
+      transition: all 0.5s;
+    }
+    .ant-tabs-nav .ant-tabs-tab-active {
+      border-radius: 50px;
+      background-color: $primary-4;
+      color: $white;
+      font-weight: bold;
+    }
+    .ant-tabs-nav .ant-tabs-tab-disabled {
+      border-radius: 50px;
+      background-color: $gray-100;
+      color: $secondary-5;
+      font-weight: bold;
+
+    }
+  }
+}
+.cardWrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  padding-bottom: 16px;
+}
+
+
+// AWD 手機版
+.layout {
+  .topPic {
+    float: none;
+  }
+  .manage {
+    background-color: $white;
+    padding-bottom: 10px;
+    padding-top: 10px;
+    .title {
+      width: 130px;
+      padding: 20px;
+      font-size: $font-size-20;
+      font-weight: normal;
+      text-align: center;
+      border-radius: 4px 4px 0 0 ;
+      background-color: $white;
+      color: $black;
+      .text {
+        padding-bottom: 10px;
+        border-bottom: 4px solid $primary-4;
+      }
+    }
+    .statusList {
+      display: flex;
+      justify-content: space-evenly;
+      margin: 20px 15px 20px 15px;
+      .statusElement {
+        .statusTitle {
+          font-size: 16px;
+          color: $black;
+          text-align: center;
+        }
+        .numOfStatus {
+          font-size: 18px;
+          color: $primary-4;
+          text-align: center;
+          margin-top: 8px;
+        }
+      }
+      .statusElement + .statusElement {
+        border-left: 1px solid $gray-200;
+        padding-left: 20px;
+      }
+    }
+  
+    .actionList {
+      margin: 20px 15px 20px 15px;
+      display: flex;
+      justify-content: center;
+      .actionElement {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        background-color: $primary-1;
+        border-radius: 4px;
+        width: 200px;
+        height: 50px;
+        padding: 10px;
+        margin: 5px;
+        * {
+          flex-direction: row;
+        }
+        .actionTitle {
+          font-size: 16px;
+        }
+        .actionNo {
+          font-size: 16px;
+        }
+      }
+    }
+  }
+  
+  .interest {
+    margin-top: 10px;
+    background-color: $white;
+    padding: 20px;
+    .interestTitle {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      margin-bottom: 10px;
+      .interestText {
+        font-weight: normal;
+        font-size: 18px;
+      }
+    }
+    .cardList {
+      overflow-x: scroll;
+      overflow-y: hidden;
+      white-space: nowrap;
+      margin-top: 20px;
+      -webkit-overflow-scrolling: touch;
+    }
+  }
+  
+  .announcement{
+    padding: 20px;
+    background-color: $white;
+    margin-top: 20px;
+    .announcementTitle {
+      font-weight: normal;
+      font-size: 18px;
+    }
+    a {
+      display: inline-block;
+    }
+  }
+}
+
+
+@media only screen and (max-width: 768px) {
+  .layout{
+    .announcement {
+      a {
+        font-size: $font-size-14;
+      }
+      .topPic {
+        width: 100%;
+        float: right;
+      }
+    }
+  }
+}

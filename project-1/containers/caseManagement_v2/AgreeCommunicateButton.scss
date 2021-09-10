@@ -1,0 +1,15 @@
+@import "../../scss/_var.scss";
+.wrap {
+  margin-top: 16px;
+  p + p {
+    margin-top: 8px;
+  }
+}
+
+.btnWrap {
+  text-align: center;
+  margin-top: 16px;
+  button + button {
+    margin-left: 8px;
+  }
+}

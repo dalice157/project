@@ -1,0 +1,489 @@
+@import "../../../scss/var2";
+//MessageHeader 
+.header {
+    padding: 10px;
+    line-height: 47px;
+    border-bottom: 1px solid $gray-200;
+    position: relative;
+    .mainHeader {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      .dropdownArea {
+        display: flex;
+        align-items: center;
+        margin: auto 10px;
+        .demandlistTrigger {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          color: $gray-500;
+          cursor: pointer;
+        }
+        .disableDropdown {
+          cursor: not-allowed;
+          color: $gray-400;
+        }
+      }
+      .userWrap {
+        display: flex;
+        justify-content: flex-start;
+        width: 50%;
+        .disableAvatar {
+          pointer-events: none;
+          cursor: default;
+        }
+        .userName {
+          overflow: hidden;
+          white-space: nowrap;
+          text-overflow: ellipsis;          
+          font-size: $font-size-14;
+          display: inline-block;
+        }
+        .arrow {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: 40px;
+          svg {
+            font-size: $font-size-20;
+            color: $black;
+          }
+        }
+        :global {
+          .ant-avatar {
+            margin: auto 8px;
+          }
+        }
+      }
+    }
+    .bar {
+        margin-left: 15px;
+        color: $black;
+        font-size: $font-size-20;
+        display: inline-block;
+        height: 43px;
+        vertical-align: middle;
+        &:hover {
+            color: $gray-400;
+        }
+    }
+    .caseList {
+        color: $black;
+        text-decoration: none;
+        &:hover {
+            color: $gray-400;
+        }
+    }
+    .report {
+        margin-top: -10px;
+    }
+    &.mobile {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: fixed;
+      top: 35px;
+      width: 100%;
+      background-color: #fff;
+      z-index: 1;
+      .mainHeader {
+        max-width: 100vw;
+      }
+      .dropdownArea {
+        float: none;
+        display: inline-flex;
+        align-items: center; 
+        min-width: 36%;
+        justify-content: flex-end;
+      }
+    }
+}
+
+.uploadFileStatus {
+  line-height: 1.5;
+  width: 650px;
+  margin: 8px 15px;
+  word-wrap: break-word;
+  word-break: break-all;
+  text-align: right;
+  font-size:  $font-size-15;
+  font-weight: normal;
+  color: $gray-500;
+  i {
+    margin: 10px;
+  }
+  &.mobile {
+    width: auto;
+    margin: 8px 20px;
+  }
+}
+
+//Message
+.wrap {
+    line-height: 1.5;
+    width: 650px;
+    margin: 8px 15px;
+    word-wrap: break-word;
+    word-break: break-all;
+    text-align: left;
+    &.mobile {
+      width: auto;
+      margin: 8px 20px;
+    }
+    &.log {
+        color: $black;
+        .messageWrap {
+          display: flex;
+          justify-content: center;
+          align-items: flex-end;
+          .message {
+              background-color: $white;
+              font-size:  $font-size-15;
+              text-align: center;
+          }
+          .messageNote {
+            white-space: nowrap;   
+            font-size:  $font-size-14;
+            margin: 0 5px;          
+          }
+        }
+    }
+    &.other {
+      text-align: left;
+      .messageNote {
+        white-space: nowrap; 
+        font-size:  $font-size-14;  
+        margin: 0 5px;        
+      }
+      .messageWrap {
+        display: flex;
+        align-items: flex-end;
+        .message {
+            background-color: $primary-1;
+            font-size:  $font-size-15;
+            color: $gray-500;
+        }
+      }
+      
+      .downloadFileWrap {
+        display: flex;
+        justify-content: flex-start;
+        align-items: flex-end;
+        .downloadFile {
+          display: flex;
+          align-items: center;
+          cursor: pointer;
+          overflow: hidden;
+          height: auto;
+          background-color: $primary-1;
+          color: $gray-500;
+          border-radius: 8px;
+          padding: 20px;
+          border-radius: 10px;
+          max-width: 80%;
+          .downloadWrap {
+            display: flex;
+            align-items: flex-start;
+            svg {
+              margin-right: 5px;
+            }
+            .fileDesc {
+              text-align: left;
+              .fileName {
+                display: flex;
+                align-items: center;
+                font-weight: bold;
+              }
+              .fileSize {
+                margin-top: 8px;
+                font-size: $font-size-14;
+              }
+            }
+          }
+        }
+      }
+      
+    }
+    &.me {
+        text-align: right;
+        .messageNote {
+          white-space: nowrap;   
+          font-size:  $font-size-14;
+          margin: 0 5px;          
+        }
+        .messageWrap {
+          display: flex;
+          flex-direction: row-reverse;
+          justify-content: flex-start;
+          align-items: flex-end;
+          .message {
+            background-color: $third-1;
+            font-size:  $font-size-15;
+            color: $gray-500;
+          }
+        }
+        .downloadFileWrap {
+          display: flex;
+          flex-direction: row-reverse;
+          justify-content: flex-start;
+          align-items: flex-end;
+          .downloadFile {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            overflow: hidden;
+            height: auto;
+            background-color: $third-1;
+            color: $gray-500;
+            border-radius: 8px;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 80%;
+            .downloadWrap {
+              display: flex;
+              align-items: flex-start;
+              svg {
+                margin-right: 5px;
+              }
+              .fileDesc {
+                text-align: left;
+                .fileName {
+                  display: flex;
+                  align-items: center;
+                  font-weight: bold;
+                }
+                .fileSize {
+                  margin-top: 8px;
+                  font-size: $font-size-14;
+                }
+              }
+            }
+          }
+        }
+    }
+    &.sysMsg {
+      .messageWrap {
+        display: flex;
+        justify-content: center;
+        align-items: flex-end;
+        .message {
+          background-color: $gray-100;
+          font-size:  $font-size-15;
+          color: $gray-400;
+          width: 80%;
+          margin-left: 10%;
+        }
+        .messageNote {
+          white-space: nowrap;   
+          color: $gray-400;
+          font-size:  $font-size-14;
+          margin: 0 5px;
+        }
+      }
+    }
+    .author {
+        &.me {
+          color: $danger;
+        };
+    }
+    
+    .message {
+        display: inline-block;
+        position:relative;
+        min-height: 40px;
+        font-size: $font-size-12;
+        word-break: break-all;
+        border-radius: 8px;
+        background-color: $gray-100;
+        padding: 20px;
+        color: $black;
+        text-align: left;
+    }
+    .author {
+        font-weight: bold;
+        color: $gray-400;
+        margin: 0 5px 0 0;
+        width: 65px;
+    }
+    .btnWrap {
+      margin-top: 15px;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+    .dateWrap {
+      margin-top: 20px;
+      margin-bottom: 20px;
+      font-size:  $font-size-16;
+      text-align: center;
+    }
+}
+//MessageList
+.MessageList {
+  height: 385px;
+  overflow-y: auto;
+  padding: 4px;
+  background-color: $white;
+  &.mobile {
+    padding-bottom: 8vh;
+    height: auto;
+    :global {
+      textarea.ant-input{
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+@keyframes loadingMessage {
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0 50%;
+  }
+}
+
+.MessageLoading {
+  line-height: 1.5;
+  // margin: 8px 15px;
+  word-wrap: break-word;
+  word-break: break-all;
+  text-align: left;
+  &.mobile {
+    width: auto;
+    margin: 8px 20px;
+  }
+  .loadingBlock {
+    background-color: $gray-100;
+    color: $gray-400;
+    display: block;
+    width: 80%;
+    margin:20px auto;
+    height: 100px;
+    border-radius: 20px;
+    -webkit-animation: loadingMessage 1.4s ease infinite; 
+    animation: loadingMessage 1.4s ease infinite;
+    background: -webkit-gradient(linear, left top, right top, color-stop(25%, rgba($gray-300, 0.2)), color-stop(37%, rgba($gray-400, 0.24)), color-stop(63%, rgba($gray-300, 0.2)));
+    background: linear-gradient(90deg, rgba($gray-300, 0.2) 25%, rgba($gray-400, 0.24) 37%, rgba($gray-300, 0.2) 63%);
+    background-size: 400% 100%;
+    &:before{
+        content: " ";
+        position: absolute;
+        top: 9px;
+        left: 100%;
+        border: none;
+    };
+    &:after{
+      content: attr(data-time-meta);
+      position: absolute;
+      bottom: -1 px;
+      right: -55px;         
+      border: none;
+    };
+  }
+}
+
+.MessageForm {
+    position: relative;
+    padding:20px 25px;
+    border-top: 1px solid $gray-100;
+    &.mobile {
+      background-color: #f8f8f8;
+      width: 100%;
+      border: none;
+      display: flex;
+      padding: 0 10px;
+      align-items: center; 
+      position: fixed;
+      bottom: 0px;
+      height: 50px;
+      textarea {
+        margin-right: 8px;
+        border-radius: 14px;
+        border: solid 1px #dddddd;
+        margin-bottom: 0;
+        resize : none;
+      }
+      .bar {
+        margin-right: 8px;
+      }
+      svg {
+        line-height: 32px;
+      }
+    }
+    .btn {
+        background-color: $gray-200;
+        border-color: $gray-200;
+        &:hover {
+            background-color: $gray-400;
+            border-color: $gray-400;
+            .icon {
+              color: $white;
+            }
+        }
+    }
+    .icon {
+        color: $gray-400;
+        font-size: $font-size-16;
+    }
+    .upload {
+        display: inline-block;
+        margin-right: 5px;
+        :global {
+          .ant-btn[disabled]:hover i {
+            color: $gray-400 !important;
+          }
+        }
+    }
+    .buttonContainer {
+        margin-top: 10px;
+        text-align: right;
+        :global {
+          .ant-btn {
+            margin-right: 10px;
+          }
+        }
+    }
+
+    .goDown {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+      z-index: 1000;
+      background-color: $secondary-1;
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      cursor: pointer;
+      bottom: 270px;
+      right: 220px;
+      &.mobile {
+        bottom: 70px;
+        right: 25px;
+      }
+    }
+}
+.questionMobile {
+  :global {
+    .ant-btn, .ant-btn-disabled, .ant-btn.disabled, .ant-btn[disabled], .ant-btn-disabled:hover, .ant-btn.disabled:hover, .ant-btn[disabled]:hover, .ant-btn-disabled:focus, .ant-btn.disabled:focus, .ant-btn[disabled]:focus, .ant-btn-disabled:active, .ant-btn.disabled:active, .ant-btn[disabled]:active, .ant-btn-disabled.active, .ant-btn.disabled.active, .ant-btn[disabled].active{
+      background-color: #fff !important;
+      border: none !important;
+    }
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  .wrap > &.sysMsg > .messageWrap > .message {
+    width: 90%;
+    margin-left: 5%;
+  }
+}
+
+@media only screen and (max-width: 320px) {
+  .MessageList {
+    margin-top: 20px;
+  }
+}

@@ -1,0 +1,17 @@
+@import "../../scss/_var2.scss";
+
+.title {
+  font-size: $font-size-16;
+  font-weight: 500;
+}
+.list {
+  margin-top:16px;
+  padding-bottom: 16px;
+  li + li {
+    margin-top: 8px;
+  }
+  .note {
+    color: $danger;
+    margin-left: 10px;
+  }
+}

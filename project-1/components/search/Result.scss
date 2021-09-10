@@ -1,0 +1,69 @@
+@import "../../scss/var2";
+
+.result {
+  color: $black;
+  font-size: $font-size-14;
+  line-height: 1.5;
+}
+
+.filter {
+  display: flex;
+  align-items: center;
+  :global {
+    .ant-switch {
+      margin-right: 4px;
+    }
+    .ant-switch-checked {
+      background-color: $primary-4;
+    }
+  }
+  .select {
+    margin-left: 16px;
+  }
+}
+
+.items {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  .number {
+    line-height: 32px;
+    color: $black;
+  }
+}
+.mobile {
+  padding: 20px;
+  margin-bottom: 0;
+  .result {
+    background-color: #f8f8f8;
+    margin-left: -20px;
+    margin-right: -20px;
+    padding: 20px;
+  }
+  .filter {
+    justify-content: flex-end;
+  }
+  .items {
+    margin-top: 20px;
+  }
+  .searchAll {
+    display: inline-block;
+    vertical-align: top;
+  }
+  :global {
+    .ant-tag {
+      margin-bottom: 8px;
+      padding-right: 20px;
+      max-width: 202px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+      position: relative;
+    }
+    .ant-tag .anticon-close {
+        position: absolute;
+        right: 5px;
+        top: 4px;
+    }
+  }
+}

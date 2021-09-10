@@ -1,0 +1,223 @@
+@import "../../scss/var";
+$unit: 20px;
+$color-white: #F8F8F8;
+
+.steps{
+    background-color: #eeeeee;
+    padding: 40px 0 80px;
+    .alignCenter {
+      margin-top: 40px;
+    }
+    .stepList{
+      margin: 0 auto;
+      max-width: 1200px;
+      width: 90%;
+      display: flex;
+      justify-content: space-between;
+      list-style: none;
+      li {
+        width: 280px;
+        text-align: center;
+        flex:1;
+        border-right: 1px solid $gray-200;
+        a {
+          text-decoration: none;
+        }
+        &:nth-of-type(1){
+          padding-right:50px;
+        }
+        &:nth-of-type(2){
+          padding-left:50px;
+          padding-right:50px;
+        }
+        &:nth-of-type(3){
+          padding-left:50px;
+          border: none;
+        }
+      }
+      h3 {
+        font-weight: 600;
+        margin-top: 35px;
+      }
+      p {
+        font-size: $font-size-16;
+        color: $black;
+        text-align: left;
+        margin-top: 20px;
+        line-height: 1.8;
+      }
+    }
+    @media only screen and (max-width: 1024px){
+      svg {
+        font-size: $font-size-36;
+      }
+      :global {
+        .ant-carousel .slick-prev, .ant-carousel .slick-next {
+            background: $main-1;
+            &::before {
+              display: none;
+            }
+          }
+          .ant-carousel .slick-prev {
+            left: -35px;
+          }
+          .ant-carousel .slick-next {
+            right: -19px;
+          }
+          .ant-carousel .slick-slide {
+            text-align: center;
+            height: 400px;
+            overflow: hidden;
+            li {
+              border: none;
+              width: auto;
+              &:nth-of-type(1){
+                padding-right:0;
+              }
+              &:nth-of-type(2){
+                padding-left:0;
+                padding-right:0;
+              }
+              &:nth-of-type(3){
+                padding-left:0;
+              }
+            }
+            img {
+              margin: 0 auto;
+            }
+          }
+      }
+      .stepList {
+        display: block;
+        width: 80%;
+        p {
+          font-size: $font-size-14;
+        }
+      }
+    }
+    .more {
+        position: absolute;
+        right: 130px;
+        color: black;
+        padding: auto;
+        .moreTitle {
+            display:inline;
+            font-size: 14px;
+        }
+        .arrow {
+            display:inline;
+            position: absolute;
+            transform: translateY(-50%);
+            top: 50%;
+        }
+    }
+    @media only screen and (max-width: 600px) {
+        padding-bottom: 0px !important;
+        .stepList {
+            margin: 0 auto;
+        }
+    }
+}
+
+.steps.join{
+    padding: 40px 0 80px;
+    margin-top: 120px;
+    background-color: $color-white;
+    .alignCenter {
+      margin-top: 40px;
+    }
+    .stepList{
+      margin: 0 auto;
+      max-width: 1200px;
+      width: 90%;
+      display: flex;
+      justify-content: space-between;
+      list-style: none;
+      li {
+        width: 280px;
+        text-align: center;
+        flex:1;
+        border-right: 1px solid $gray-200;
+        a {
+          text-decoration: none;
+        }
+        &:nth-of-type(1){
+          padding-right:50px;
+        }
+        &:nth-of-type(2){
+          padding-left:50px;
+          padding-right:50px;
+        }
+        &:nth-of-type(3){
+          padding-left:50px;
+          border: none;
+        }
+      }
+      h3 {
+        font-weight: 600;
+        margin-top: 35px;
+      }
+      p {
+        font-size: $font-size-16;
+        color: $black;
+        text-align: left;
+        margin-top: 20px;
+        line-height: 1.8;
+      }
+    }
+    @media only screen and (max-width: 1024px){
+      padding-top: 40px;
+      margin-top: 40px;
+      svg {
+        font-size: $font-size-36;
+      }
+      :global {
+        .ant-carousel .slick-prev, .ant-carousel .slick-next {
+            background: $main-1;
+            &::before {
+              display: none;
+            }
+          }
+          .ant-carousel .slick-prev {
+            left: -35px;
+          }
+          .ant-carousel .slick-next {
+            right: -19px;
+          }
+          .ant-carousel .slick-slide {
+            text-align: center;
+            height: 400px;
+            overflow: hidden;
+            li {
+              border: none;
+              width: auto;
+              &:nth-of-type(1){
+                padding-right:0;
+              }
+              &:nth-of-type(2){
+                padding-left:0;
+                padding-right:0;
+              }
+              &:nth-of-type(3){
+                padding-left:0;
+              }
+            }
+            img {
+              margin: 0 auto;
+            }
+          }
+      }
+      .stepList {
+        display: block;
+        width: 80%;
+        p {
+          font-size: $font-size-14;
+        }
+      }
+    }
+}
+
+.alignCenter{
+    text-align: center;
+}
+.mgBM{margin-bottom: $unit*2;}
