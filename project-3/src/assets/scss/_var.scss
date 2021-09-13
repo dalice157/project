@@ -1,0 +1,103 @@
+/**
+* 文字大小
+* 計算器 https://www.w3schools.com/tags/ref_pxtoemconversion.asp
+*/
+$font_html: 16px !default; //rem root value for html element.
+$font-base: 1rem !default;
+$font-size-5: ($font-base * 0.3125) !default;
+$font-size-6: ($font-base * 0.375) !default;
+$font-size-7: ($font-base * 0.4375) !default;
+$font-size-8: ($font-base * 0.5) !default;
+$font-size-9: ($font-base * 0.5625) !default;
+$font-size-10: ($font-base * 0.625) !default;
+$font-size-12: ($font-base * 0.75) !default;
+$font-size-13: ($font-base * 0.8125) !default;
+$font-size-14: ($font-base * 0.875) !default;
+$font-size-15: ($font-base * 0.9375) !default;
+$font-size-16: ($font-base * 1) !default;
+$font-size-17: ($font-base * 1.0625) !default;
+$font-size-18: ($font-base * 1.125) !default;
+$font-size-19: ($font-base * 1.1875) !default;
+$font-size-20: ($font-base * 1.25) !default;
+$font-size-22: ($font-base * 1.375) !default;
+$font-size-24: ($font-base * 1.5) !default;
+$font-size-26: ($font-base * 1.6) !default;
+$font-size-28: ($font-base * 1.75) !default;
+$font-size-30: ($font-base * 1.875) !default;
+$font-size-32: ($font-base * 2) !default;
+$font-size-34: ($font-base * 2.125) !default;
+$font-size-36: ($font-base * 2.25) !default;
+$font-size-38: ($font-base * 2.375) !default;
+$font-size-40: ($font-base * 2.5) !default;
+$font-size-42: ($font-base * 2.625) !default;
+$font-size-44: ($font-base * 2.75) !default;
+$font-size-46: ($font-base * 2.875) !default;
+$font-size-48: ($font-base * 3) !default;
+$font-size-62: ($font-base * 3.875) !default;
+
+/**
+* 顏色
+*/
+$black: #000000 !default;
+$white: #ffffff !default;
+
+$gray-100: #f3f3f3 !default;
+$gray-200: #eeeeee !default;
+$gray-300: #dddddd !default;
+$gray-400: #a9a9a9 !default;
+$gray-500: #7e7e7e !default;
+$gray-600: #292929 !default;
+
+$primary-1: #fff7f0 !default;
+$primary-2: #ffeedf !default;
+$primary-3: #ffd6b2 !default;
+$primary-4: #ff9100 !default;
+$primary-5: #ff7800 !default;
+
+$assist-1: #39c8d0 !default;
+$assist-2: #00afb8 !default;
+
+$title: #868047 !default;
+$danger: #ea475b !default;
+$visited: #78269f !default;
+$link: #1654b9 !default;
+$link-hover: #4e91ff !default;
+$font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto,
+  Ubuntu, "Microsoft JhengHei", "微軟正黑體", Arial, sans-serif !default;
+
+$gb-gray: #f3f3f3; /*背景色、輸入框填色*/
+$pale-gray: #eee; /*白底分隔線、輸入框線*/
+$silver-gray: #ddd; /*灰底分隔線、白底短分隔線*/
+$light-gray: #a9a9a9; /*陰影、弱化文字、灰底短分隔線*/
+$warm-gray: #7e7e7e; /*次要文字*/
+$dark-gray: #292929; /*主要文字*/
+
+$darkish-pink: #ea475b; /*警示顏色*/
+$pumpkin-orange: #ff7800; /*企業色、重點色、圖標*/
+$sun-orange: #ff9100; /*產品主色、填充區域*/
+$peach-orange: #ffd6b2; /*企業色*/
+$light-orange: #ffeedf; /*背景填色*/
+
+$lake-blue: #39c8d0; /*輔助色*/
+$turquoise-blue: #00afb8; /*輔助色陰影*/
+$apple-green: #92cf53; /*點綴綠色*/
+$grass-green: #6fb827; /*點綴綠色陰影*/
+$honey-yellow: #ffc31b; /*點綴黃色*/
+
+$dark-blue: #1654b9; /*文字超連結*/
+$light-blue: #4e91ff; /*文字超連結 hover*/
+$purple: #78269f; /*文字超連結 clicked*/
+
+/* 漸層：#FFC31B - #FF9100 */
+
+$link: #1654b9 !default;
+$link-hover: #4e91ff !default;
+
+$block-bg: #c59375;
+
+$font-family: Arial, "微軟正黑體", "Microsoft JhengHei", Roboto, "PingFangTC",
+  sans-serif !default;
+
+@mixin transition() {
+  transition: all 0.3s ease;
+}

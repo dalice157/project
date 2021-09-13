@@ -1,0 +1,179 @@
+<div class="index">
+
+  <h1 hidden>高年級人力銀行</h1>
+
+  <!-- 桌機、平板、小平板 -->
+  <div class="searchBar forDesktop">
+      <div class="title">查門市工作</div>
+      <div class="inputBorder">
+        <div class="inner">
+          <select name="search_area">
+            <option value="">地區</option>
+          </select>
+          <div class="line"></div>
+          <select name="search_job">
+            <option value="">全部工作</option>
+          </select>
+        </div>
+      </div>
+      <a href="#" class="btn btn-primary">搜尋</a>
+  </div>
+
+  <!-- 手機 -->
+  <div class="searchBar forMobile">
+    <div class="floatingBar" :class="{ open : isMobileOpenSearchActive }">
+      <select name="search_area">
+        <option value="">地區</option>
+      </select>
+      <div class="line"></div>
+      <select name="search_job">
+        <option value="">全部工作</option>
+      </select>
+      <a href="#" class="btn btn-primary">搜尋</a>
+    </div>
+    <div class="fakeInupt" @click="isMobileOpenSearch">
+      <span>想找什麼門市工作？</span>
+      <img src="~/assets/image/icon/icon_search.svg" />
+    </div>
+  </div>
+
+  <div class="banner" @click="closeSearchBar">
+    <img src="~/assets/image/index/banner.jpg" />
+  </div>
+
+  <div class="intro" @click="closeSearchBar">
+    <div class="text">
+      <div class="tag">
+        <img src="~/assets/image/index/tag_talent.png" />
+      </div>
+      <h2>門市人員職場計畫</h2>
+      <p>職場計畫是專為50歲以上高年級人才設計的服務，由104為您媒合工作、提供職前訓練、職場試做，<b>解決高年級人才找工作的四大難題</b>。</p>
+    </div>
+    <div class="tags">
+      <div class="tag4"><img src="~/assets/image/index/tag4.svg"></div>
+      <div class="tag3"><img src="~/assets/image/index/tag3.svg"></div>
+      <div class="tag2"><img src="~/assets/image/index/tag2.svg"></div>
+      <div class="tag1"><img src="~/assets/image/index/tag1.svg"></div>
+      <div class="gray3"></div>
+      <div class="gray2"></div>
+      <div class="gray1"></div>
+    </div>
+  </div>
+
+  <div class="plan" @click="closeSearchBar">
+
+    <div class="title">
+      <h2>如何加入計畫</h2>
+      <hr/>
+    </div>
+
+    <div class="flow">
+
+      <div class="step s1">
+        <div class="pic">
+          <img src="~/assets/image/icon/icon_how1.svg" />
+        </div>
+        <div class="subttl">
+          <h3>01. <span>申請加入</span></h3>
+        </div>
+        <p>只要您符合下列條件，歡迎申請加入！</p>
+        <ul>
+          <li>50歲以上求職者</li>
+          <li>居住台北市、新北市</li>
+          <li>對門市工作有興趣</li>
+          <li>有耐心、喜歡接觸人群、體力充沛</li>
+        </ul>
+      </div>
+
+      <div class="step s2">
+        <div class="pic">
+          <img src="~/assets/image/icon/icon_how2.svg" />
+        </div>
+        <div class="subttl">
+          <h3>02. <span>參加課程</span></h3>
+        </div>
+        <p>培訓內容：</p>
+        <ul>
+          <li>職場計畫與嚴選會員說明</li>
+          <li>門市人才必備技能</li>
+          <li>視訊面談與簡歷心法</li>
+          <li>高年級職場溝通術</li>
+          <li>自我健康管理小撇步、職場體適能</li>
+        </ul>
+      </div>
+
+      <div class="step s3">
+        <div class="pic">
+          <img src="~/assets/image/icon/icon_how3.svg" />
+        </div>
+        <div class="subttl">
+          <h3>03. <span>成為高年級人才會員</span></h3>
+        </div>
+        <p>全程參與課程結束後，我們將與您進行意願面談，有意願加入就可以成為我們高年級人才會員，享有以下服務：</p>
+        <ul>
+          <li>依照您的意願媒合工作機會</li>
+          <li>安排到企業面談</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <a href="#" class="thisBtn">
+      <span>立即申請加入</span>
+      <img src="~/assets/image/icon/icon_arrow_right.svg" />
+    </a>
+
+  </div>
+
+  <div class="article" @click="closeSearchBar">
+
+    <div class="title">
+      <h2>50+人才職場力</h2>
+      <hr/>
+    </div>
+
+    <div class="boxs">
+
+      <a href="https://blog.104.com.tw/what-preparations-are-needed-for-senior-employment/" target="_blank" class="box">
+        <div class="pic">
+          <img src="~/assets/image/index/article_pic1.jpg" />
+        </div>
+        <h4>我年長但專業！中高齡長者延長職涯，如何發揮戰力成為企業不可或缺的人才？</h4>
+        <div class="moreBtn">
+          <span>看全文</span>
+          <img src="~/assets/image/icon/icon_arrow_right.svg" />
+        </div>
+      </a>
+
+      <a href="https://blog.104.com.tw/podcast-ep52/" target="_blank" class="box">
+        <div class="pic">
+          <img src="~/assets/image/index/article_pic2.jpg" />
+        </div>
+        <h4>中年轉職不往「管理職」發展，還能擁有高薪和成長機會嗎？</h4>
+        <div class="moreBtn">
+          <span>看全文</span>
+          <img src="~/assets/image/icon/icon_arrow_right.svg" />
+        </div>
+      </a>
+
+      <a href="https://blog.104.com.tw/be-careful-of-rights-and-interests-in-reemployment/" target="_blank" class="box">
+        <div class="pic">
+          <img src="~/assets/image/index/article_pic3.jpg" />
+        </div>
+        <h4>高齡者再就業，務必留意勞保權益！</h4>
+        <div class="moreBtn">
+          <span>看全文</span>
+          <img src="~/assets/image/icon/icon_arrow_right.svg" />
+        </div>
+      </a>
+
+    </div>
+
+    <a href="#" class="thisBtn">
+      <span>更多文章</span>
+      <img src="~/assets/image/icon/icon_arrow_right.svg" />
+    </a>
+
+  </div>
+
+</div>

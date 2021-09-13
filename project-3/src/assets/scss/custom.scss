@@ -1,0 +1,13 @@
+@import 'bootstrap/scss/bootstrap.scss';
+@import 'bootstrap-vue/src/index.scss';
+* {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	box-sizing: border-box;
+}
+
+body {
+	font-family: $font-family;
+	font-size:16px;
+}

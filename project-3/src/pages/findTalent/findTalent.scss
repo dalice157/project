@@ -1,0 +1,285 @@
+%wrap {
+  width: 1040px;
+  margin: auto;
+  @media screen and (max-width: 767px) {
+    width: 100%;
+    margin: auto;
+    padding: 0 10px;
+  }
+}
+.bg {
+  background-color: $white;
+  padding-bottom: 65px;
+}
+.banner {
+  height: 500px;
+  background: url("../../assets/image/findTalent/banner.jpg") center no-repeat;
+  background-size: cover;
+  margin-bottom: 110px;
+}
+.main {
+  @extend %wrap;
+  display: flex;
+  justify-content: space-between;
+  & + .main {
+    margin-top: 80px;
+  }
+  &.noFlex {
+    display: block;
+  }
+  .img {
+    width: 400px;
+  }
+}
+.article {
+  width: 400px;
+}
+.title {
+  font-size: $font-size-34;
+  color: $title;
+  margin-top: 14px;
+  font-weight: 500;
+}
+.label {
+  width: 175px;
+  height: 44px;
+}
+.paragraph {
+  color: $gray-600;
+  font-size: $font-size-18;
+  font-weight: 300;
+  line-height: 1.7;
+  margin-top: 30px;
+}
+.listBg {
+  margin-top: 20px;
+  height: 126px;
+  background: rgb(224, 221, 205);
+  background: linear-gradient(
+    180deg,
+    rgba(224, 221, 205, 1) 0%,
+    rgba(200, 197, 175, 1) 100%
+  );
+  .wrap {
+    @extend %wrap;
+    height: 126px;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+}
+
+.cardWrap {
+  @extend %wrap;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  margin-top: -1.5em;
+  margin-bottom: 80px;
+  &.pc {
+    display: flex;
+  }
+  &.mp {
+    display: none;
+  }
+}
+
+.stepWrap {
+  @extend %wrap;
+  display: flex;
+  justify-content: space-between;
+  .bg {
+    padding: 10px;
+    background-color: $primary-1;
+    width: 330px;
+    align-items: flex-start;
+  }
+  .arrow {
+    width: 28px;
+    background: url("../../assets/image/findTalent/arrow-level.svg") center
+      no-repeat;
+  }
+  .top {
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    border-left: 7px solid $primary-5;
+    padding-left: 10px;
+    line-height: 1.2;
+    .step {
+      font-size: $font-size-32;
+      font-weight: bold;
+    }
+    .title {
+      color: $gray-600;
+      font-size: $font-size-24;
+      font-weight: 500;
+      margin: 0;
+    }
+  }
+  .list {
+    margin-top: 20px;
+    padding-left: 20px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid $gray-300;
+    &.space {
+      padding-bottom: 48px;
+    }
+    li {
+      list-style-type: disc;
+      list-style-position: inside;
+      font-size: $font-size-18;
+      font-weight: 200;
+      line-height: 1.6;
+    }
+  }
+  .advantages {
+    color: $gray-600;
+    font-size: $font-size-18;
+    font-weight: 500;
+    margin-top: 20px;
+    margin-bottom: 15px;
+    .badge-secondary {
+      margin-right: 10px;
+      font-size: $font-size-18;
+      padding: 8px 10px;
+      background-color: $block-bg;
+    }
+  }
+}
+
+.btnWrap {
+  margin-top: 50px;
+  text-align: center;
+  .btn-outline-primary {
+    border-color: $primary-5;
+    color: $primary-5;
+    font-size: $font-size-20;
+    font-weight: 600;
+    padding-left: 20px;
+    padding-right: 20px;
+    min-width: 220px;
+    &:hover {
+      border-color: $primary-4;
+      color: $primary-4;
+      background-color: $white;
+      img {
+        opacity: 0.8;
+      }
+    }
+    &:focus,
+    &.focus {
+      box-shadow: none;
+    }
+  }
+  .btn-outline-primary:not(:disabled):not(.disabled):active:focus,
+  .btn-outline-primary:not(:disabled):not(.disabled).active:focus,
+  .show > .btn-outline-primary.dropdown-toggle:focus {
+    box-shadow: none;
+  }
+  .btn-outline-primary:not(:disabled):not(.disabled):active,
+  .btn-outline-primary:not(:disabled):not(.disabled).active,
+  .show > .btn-outline-primary.dropdown-toggle {
+    border-color: $primary-4;
+    color: $primary-4;
+    background-color: $white;
+  }
+}
+.titleBg {
+  position: relative;
+  padding: 0 65px;
+  text-align: center;
+  margin-top: 90px;
+  @extend %wrap;
+  &:before {
+    content: "";
+    position: absolute;
+    top: calc(50% - 1px);
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: $gray-300;
+  }
+  .title {
+    position: relative;
+    padding: 0 1em;
+    background: #fff;
+  }
+}
+
+.hrWrap {
+  @extend %wrap;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 50px;
+}
+
+@media screen and (max-width: 767px) {
+  .banner {
+    width: 100%;
+    height: 260px;
+    margin-bottom: 30px;
+  }
+  .main {
+    & + .main {
+      margin-top: 35px;
+    }
+    .img {
+      display: none;
+    }
+  }
+  .title {
+    font-size: $font-size-28;
+  }
+  .label {
+    width: 130px;
+    height: auto;
+  }
+  .paragraph {
+    margin-top: 20px;
+    margin-bottom: 30px;
+  }
+  .listBg {
+    height: auto;
+    .wrap {
+      display: block;
+      height: auto;
+      padding-top: 35px;
+      padding-bottom: 5em;
+      li + li {
+        margin-top: 30px;
+      }
+      img {
+        width: 285px;
+      }
+    }
+  }
+  .cardWrap {
+    margin-top: -3em;
+    margin-bottom: 35px;
+    &.pc {
+      display: none;
+    }
+    &.mp {
+      display: block;
+    }
+  }
+  .stepWrap {
+    display: block;
+    .bg {
+      width: 100%;
+    }
+    .arrow {
+      width: 100%;
+      height: 40px;
+      background: url("../../assets/image/findTalent/arrow-vertical.svg") center
+        no-repeat;
+    }
+  }
+  .titleBg {
+    margin-top: 50px;
+  }
+  .hrWrap {
+    display: block;
+  }
+}
