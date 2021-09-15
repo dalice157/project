@@ -1,0 +1,27 @@
+<div class="tableList">
+  <div class="tr">
+    <div class="td company">
+      <h4><a :href="jobURL" target="_blank">{{careerName}}</a></h4>
+      <h5>{{companyName}}</h5>
+    </div>
+    <div class="td income">
+      <p>月薪 {{jobSalary}} 元</p>
+      <p>{{jobType}}</p>
+      <div v-show="tagList" class="tags">
+        <span>{{tagList}}</span>
+      </div>
+    </div>
+    <div class="td location">
+      <p>
+        <img src="~/assets/image/icon/icon_location.svg" />
+        <span>{{jobLocation}}</span>
+      </p>
+    </div>
+    <div class="td experience">
+      <span>{{experienceList}}</span>
+    </div>
+    <div class="td applyBtn">
+      <a :href="btnURL" class="btn btn-outline-primary" target="_blank">應徵</a>
+    </div>
+  </div>
+</div>

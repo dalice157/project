@@ -1,0 +1,32 @@
+{
+  "code": 200,
+  "message": "success",
+  "data": {
+    "jobs": [
+      {
+        "jobNo": "00000",
+        "jobName": "職缺名稱",
+        "jobHashNo": "11111",
+        "custName": "公司名稱",
+        "workShiftType": "1",
+        "workShiftTypeDesc": ["日班", "晚班"],
+        "workNeedShift": false,
+        "workTime": "依公司規定",
+        "salaryType": "60",
+        "salaryTypeDesc": "薪資類型_描述",
+        "salaryHigh": 62000,
+        "salaryLow": 42000,
+        "addressAreaDesc": "上班地點_縣市區",
+        "minEdu": "-1",
+        "minEduDesc": "最低學歷_描述",
+        "workExp": 6,
+        "workExpDesc": "工作經歷_描述"
+      }
+    ]
+  },
+  "page": {
+    "total": 2,
+    "limit": 10,
+    "offset": 0
+  }
+}

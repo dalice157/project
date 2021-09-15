@@ -1,0 +1,178 @@
+.index {
+  // 50+人才職場力
+  .article {
+    .boxs {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 1020px;
+      margin: 0 auto;
+      padding: 50px 0;
+
+      .box {
+        position: relative;
+        flex: 1;
+        display: block;
+        max-width: 330px;
+        min-height: 510px;
+        // border:1px solid #CCC;
+        border-radius: 20px;
+        padding: 30px 20px 90px 20px;
+        text-decoration: none;
+        box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.2);
+
+        .pic img {
+          width: 100%;
+          margin-bottom: 30px;
+        }
+
+        h4 {
+          font-size: 26px;
+          color: $dark-gray;
+          text-decoration: none;
+          display: -webkit-box;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          -webkit-line-clamp: 3;
+          -webkit-box-orient: vertical;
+        }
+
+        .moreBtn {
+          position: absolute;
+          bottom: 20px;
+          left: calc(50% - 90px);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: 180px;
+          height: 50px;
+          line-height: 50px;
+          text-align: center;
+          font-size: 22px;
+          font-weight: bold;
+          color: #fff;
+          text-decoration: none;
+          padding: 0;
+          margin: 0;
+          border-radius: 5px;
+          background-color: #c59375;
+
+          img {
+            margin-left: 5px;
+            filter: invert(97%) sepia(100%) saturate(0%) hue-rotate(302deg)
+              brightness(105%) contrast(102%);
+          }
+        }
+
+        &:hover {
+          box-shadow: 0 2px 8px 3px rgba(0, 0, 0, 0.2);
+          .moreBtn {
+            opacity: 0.8;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+@media only screen and (max-width: 1159px) {
+  .index {
+    .article {
+      padding: 0 10px;
+    }
+  }
+}
+
+@media only screen and (max-width: 1023px) {
+  .index {
+    .article {
+      .box {
+        max-width: 33% !important;
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 991px) {
+  .index {
+    .article {
+      .boxs {
+        .box {
+          min-height: 440px;
+        }
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 767px) {
+	.index {
+		.article {
+			.boxs {
+				display:block;
+        max-width:520px;
+				.box {
+					width:100% !important;
+					max-width:unset !important;
+					min-height:560px !important;
+					margin-bottom:20px;
+				}
+				.slick-dots {
+					bottom:25px;
+				}
+				.slick-arrow {
+					z-index:997;
+				}
+				.slick-arrow::before {
+					font-size:40px !important;
+					color:$dark-gray !important;
+				}
+				.slick-arrow.slick-next {
+					right:-5px;
+				}
+			}
+		}
+	}
+}
+
+@media only screen and (max-width: 579px)
+{
+	.index {
+		.article {
+			.title {
+				h2 {
+					font-size:28px;
+					padding:0 20px;
+				}
+			}
+			.thisBtn {
+				width:205px;
+				height:45px;
+				font-size:20px;
+			}
+			.boxs {
+				max-width:90%;
+				.box {
+					min-height:380px !important;
+					padding:20px 20px 90px 20px;
+					.pic img {
+						margin-bottom:20px;
+					}
+					h4 {
+						font-size:20px;
+					}
+					.moreBtn {
+						width:130px;
+						left:calc( 50% - 65px );
+						font-size:18px;
+					}
+				}
+				.slick-arrow.slick-next {
+					right:-5px;
+				}
+			}
+		}
+	}
+}

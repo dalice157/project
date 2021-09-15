@@ -11,3 +11,28 @@ body {
 	font-family: $font-family;
 	font-size:16px;
 }
+
+// 類目選單調整
+.category-picker .category-item--title {
+	display: none !important;
+}
+.category-picker .second-floor-rect {
+	height: 100% !important;
+}
+
+.category-picker .category-picker-checkbox-input+span {
+	font-size: $font-size-16 !important;
+}
+.selected-info {
+	.selected-max {
+		display: inline-block !important;
+	}
+}
+
+.forMobile {display:none !important;}
+
+@media only screen and (max-width: 767px)
+{
+	.forDesktop {display:none !important;}
+	.forMobile {display:block !important;}
+}

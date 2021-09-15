@@ -79,7 +79,8 @@
 }
 @media screen and (max-width: 767px) {
   .card {
-    width: 100%;
+    width: 90% !important;
+    margin: 1em;
     height: auto;
   }
   .label {

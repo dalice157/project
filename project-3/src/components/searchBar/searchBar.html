@@ -1,0 +1,35 @@
+<div class="searchBar">
+  <div class="title">查門市工作</div>
+
+  <div class="inputBorder" :class="{ open : isMobileOpenSearchActive }">
+    <div class="inner">
+      <AreaBox v-on:areasVal="getAreas" />
+      <div class="line"></div>
+      <select name="search_job" v-model="jobTypeOpt">
+        <option value="null">全部工作</option>
+        <option value="1">中高齡優先</option>
+        <option value="2">無經驗可</option>
+        <option value="3">兼職</option>
+        <option value="4">月薪</option>
+      </select>
+    </div>
+    <nuxt-link
+      :to="`/list?area=${areas}&type=${jobTypeOpt}`"
+      class="btn btn-primary forMobile"
+      @click="onclickSearch(areas, jobTypeOpt)"
+      >搜尋</nuxt-link
+    >
+  </div>
+
+  <nuxt-link
+    :to="`/list?area=${areas}&type=${jobTypeOpt}`"
+    class="btn btn-primary forDesktop"
+    @click="onclickSearch(areas, jobTypeOpt)"
+    >搜尋</nuxt-link
+  >
+
+  <div class="fakeInupt forMobile" @click="isMobileOpenSearch">
+    <span>想找什麼門市工作？</span>
+    <img src="~/assets/image/icon/icon_search.svg" />
+  </div>
+</div>

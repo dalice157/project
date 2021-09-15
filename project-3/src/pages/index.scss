@@ -1,490 +1,307 @@
 
 .index {
+  // 大圖
+  .banner {
+    img {
+      width: 100%;
+      height: auto;
+    }
+  }
 
-	// 上方搜尋區塊
-	.searchBar {
-		position:sticky;
-		z-index:999;
-		top:58px;
-		left:0;
-		display:flex;
-		align-items:center;
-		justify-content: center;
-		width:100%;
-		height:72px;
-		text-align:center;
-		padding:14px 0;
-		background-color:rgba(255,255,255,0.8);
+  // 門市人員職場計畫
+  .intro {
+    width: 100%;
+    max-width: 1140px;
+    padding: 70px 60px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
-		.title {
-			display:inline-block;
-			font-size:20px;
-			font-weight:bold;
-			color:$dark-gray;
-			line-height:44px;
-		}
+    .text {
+      width: 450px;
+      padding-right: 40px;
 
-		.inputBorder {
-			display:inline-block;
-			width:600px;
-			height:44px;
-			border:1px solid $pumpkin-orange;
-			border-radius:4px;
-			margin:0 18px;
-			background-color:#FFF;
+      .tag {
+        width: 170px;
+        img {
+          width: 100%;
+        }
+      }
+      h2 {
+        font-size: 34px;
+        font-weight: bold;
+        line-height: 1;
+        color: #868047;
+        margin: 15px 0 35px 0;
+      }
+      p {
+        font-size: 18px;
+        color: $dark-gray;
+      }
+    }
 
-			.inner {
-				display:flex;
-				align-items: center;
-				justify-content: center;
+    .tags {
+      position: relative;
+      width: 580px;
+      height: 370px;
+      overflow: hidden;
 
-				select {
-					width:48%;
-					height:40px;
-					font-size:18px;
-					color:$warm-gray;
-					border:0;
-					outline:0;
-				}
+      & > div {
+        position: absolute;
+      }
 
-				.line {
-					width:1px;
-					height:18px;
-					font-size:0;
-					line-height:0;
-					margin:0 5px;
-					background-color:$light-gray;
-				}
-			}
-		}
+      .gray1,
+      .gray2,
+      .gray3 {
+        border-radius: 14px;
+        background-color: $gb-gray;
+      }
 
-		.btn {
-			display:block;
-			width:166px;
-			height:44px;
-			line-height:44px;
-			font-size:18px;
-			font-weight:bold;
-			color:#FFF;
-			padding:0;
-			background-color:$pumpkin-orange !important;
-			border-color:$pumpkin-orange !important;
+      .gray1 {
+        z-index: 31;
+        top: 0;
+        left: 100px;
+        width: 205px;
+        height: 60px;
+      }
 
-			&:hover {
-				background-color:#ff6000 !important;
-				border-color:#ff6000 !important;
-			}
-		}
+      .gray2 {
+        z-index: 32;
+        top: 130px;
+        left: 430px;
+        width: 125px;
+        height: 35px;
+      }
 
-		&.forMobile {display:none}
-	}
+      .gray3 {
+        z-index: 33;
+        top: 265px;
+        left: 315px;
+        width: 205px;
+        height: 60px;
+      }
 
-	// 大圖
-	.banner {
-		img {
-			width:100%;
-			height:auto;
-		}
-	}
+      .tag1 {
+        z-index: 34;
+        top: 20px;
+        left: 155px;
+        width: 310px;
+        height: auto;
+      }
 
-	// 門市人員職場計畫
-	.intro {
-		width:100%;
-		max-width:1140px;
-		padding:70px 60px;
-		margin:0 auto;
-		display:flex;
-		align-items:center;
-		justify-content: center;
+      .tag2 {
+        z-index: 35;
+        top: 130px;
+        left: 0px;
+        width: 310px;
+        height: auto;
+      }
 
-		.text {
-			width:450px;
-			padding-right:40px;
-			
-			.tag {
-				width:170px;
-				img {
-					width:100%;
-				}
-			}
-			h2 {
-				font-size:34px;
-				font-weight:bold;
-				line-height:1;
-				color:#868047;
-				margin:15px 0 35px 0;
-			}
-			p {
-				font-size:18px;
-				color:$dark-gray;   
-			}
-		}
+      .tag3 {
+        z-index: 36;
+        top: 265px;
+        left: 50px;
+        width: 310px;
+        height: auto;
+      }
 
-		.tags {
-			position: relative;
-			width:580px;
-			height:370px;
-			overflow:hidden;
+      .tag4 {
+        z-index: 37;
+        top: 190px;
+        left: 255px;
+        width: 310px;
+        height: auto;
+      }
+    }
+  }
 
-			& > div {
-				position: absolute;
-			}
+  // 如何加入計畫、50+人才職場力
+  .plan,
+  .article {
+    width: 100%;
+    max-width: 1140px;
+    margin: 0 auto;
 
-			.gray1, .gray2, .gray3 {
-				border-radius:14px;
-				background-color:$gb-gray;
-			}
+    .title {
+      position: relative;
+      height: 40px;
+      white-space: nowrap;
 
-			.gray1 {
-				z-index:31;
-				top:0;
-				left:100px;
-				width:205px;
-				height:60px;
-			}
+      h2 {
+        display: block;
+        position: absolute;
+        font-size: 34px;
+        font-weight: bold;
+        color: #868047;
+        line-height: 40px;
+        padding: 0 40px;
+        margin: 0;
+        background-color: #fff;
+        left: 50%;
+        transform: translateX(-50%);
+      }
 
-			.gray2 {
-				z-index:32;
-				top:130px;
-				left:430px;
-				width:125px;
-				height:35px;
-			}
+      hr {
+        width: 100%;
+        height: 20px;
+        border: 0;
+        margin: 0;
+        border-bottom: 1px solid #c4c4c4;
+      }
+    }
 
-			.gray3 {
-				z-index:33;
-				top:265px;
-				left:315px;
-				width:205px;
-				height:60px;
-			}
+    .thisBtn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 220px;
+      height: 50px;
+      line-height: 50px;
+      text-align: center;
+      font-size: 22px;
+      font-weight: bold;
+      color: $pumpkin-orange;
+      text-decoration: none;
+      padding: 0 25px;
+      margin: 0 auto 80px auto;
+      border-radius: 25px;
+      border: 1px solid $pumpkin-orange;
 
-			.tag1 {
-				z-index:34;
-				top:20px;
-				left:155px;
-				width:310px;
-				height:auto;
-			}
+      img {
+        margin-left: 5px;
+        filter: invert(73%) sepia(60%) saturate(6953%) hue-rotate(1deg)
+          brightness(104%) contrast(104%);
+      }
 
-			.tag2 {
-				z-index:35;
-				top:130px;
-				left:0px;
-				width:310px;
-				height:auto;
-			}
+      &:hover {
+        color: #fff;
+        background-color: $pumpkin-orange;
 
-			.tag3 {
-				z-index:36;
-				top:265px;
-				left:50px;
-				width:310px;
-				height:auto;
-			}
+        img {
+          filter: invert(97%) sepia(100%) saturate(0%) hue-rotate(302deg)
+            brightness(105%) contrast(102%);
+        }
+      }
+    }
+  }
 
-			.tag4 {
-				z-index:37;
-				top:190px;
-				left:255px;
-				width:310px;
-				height:auto;
-			}
-		}
-	}
+  // 如何加入計畫
+  .plan {
+    .flow {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 1020px;
+      margin: 0 auto;
+      padding: 60px 0;
 
-	// 如何加入計畫、50+人才職場力
-	.plan , .article {
-		width:100%;
-		max-width:1140px;
-		margin:0 auto;
+      .step {
+        position: relative;
+        width: 310px;
 
-		.title {
-			position: relative;
-			height:40px;
-			white-space:nowrap;
-			
-			h2 {
-				display:block;
-				position: absolute;
-				font-size:34px;
-				font-weight:bold;
-				color:#868047;
-				line-height:40px;
-				padding:0 40px;
-				margin:0;
-				background-color:#FFF;
-				left:50%;
-				transform:translateX(-50%);
-			}
+        .pic {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          height: 110px;
+          margin-bottom: 35px;
+        }
 
-			hr {
-				width:100%;
-				height:20px;
-				border:0;
-				margin:0;
-				border-bottom:1px solid #c4c4c4;
-			}
-		}
+        .subttl {
+          font-size: 32px;
+          padding-left: 10px;
+          margin-bottom: 15px;
 
-		.thisBtn {
-			display:flex;
-			align-items:center;
-			justify-content:center;
-			width:220px;
-			height:50px;
-			line-height:50px;
-			text-align:center;
-			font-size:22px;
-			font-weight:bold;
-			color:$pumpkin-orange;
-			text-decoration:none;
-			padding:0 25px;
-			margin:0 auto 80px auto;
-			border-radius:25px;
-			border:1px solid $pumpkin-orange;
+          span {
+            display: block;
+            font-size: 22px;
+          }
+        }
 
-			img {
-				margin-left:5px;
-				filter:invert(73%) sepia(60%) saturate(6953%) hue-rotate(1deg) brightness(104%) contrast(104%);
-			}
+        &.s1 .subttl {
+          border-left: 7px solid #dfe9ff;
+        }
 
-			&:hover {
-				color:#FFF;
-				background-color:$pumpkin-orange;
+        &.s2 .subttl {
+          border-left: 7px solid #eae8d4;
+        }
 
-				img {
-					filter: invert(97%) sepia(100%) saturate(0%) hue-rotate(302deg) brightness(105%) contrast(102%);
-				}
-			}
-		}
-	}
+        &.s3 .subttl {
+          border-left: 7px solid #fde0de;
+        }
 
-	// 如何加入計畫
-	.plan {
+        p,
+        ul li {
+          font-size: 18px;
+          line-height: 30px;
+        }
 
-		.flow {
-			display:flex;
-			align-items:flex-start;
-			justify-content:space-between;
-			width:100%;
-			max-width:1020px;
-			margin:0 auto;
-			padding:60px 0;
+        p {
+          margin-bottom: 5px;
+        }
 
-			.step {
-				position: relative;
-				width:310px;
+        ul li img {
+          vertical-align: baseline;
+        }
 
-				.pic {
-					display:flex;
-					align-items:center;
-					justify-content:center;
-					height:110px;
-					margin-bottom:35px;
-				}
-
-				.subttl {
-					font-size:32px;
-					padding-left:10px;
-					margin-bottom:15px;
-
-					span {
-						display:block;
-						font-size:22px;
-					}
-				}
-
-				&.s1 .subttl {
-					border-left:7px solid #dfe9ff;
-				}
-
-				&.s2 .subttl {
-					border-left:7px solid #eae8d4;
-				}
-
-				&.s3 .subttl {
-					border-left:7px solid #fde0de;
-				}
-
-				p , ul li {
-					font-size:18px;
-					line-height:30px;
-				}
-
-				p {
-					margin-bottom:5px;
-				}
-
-				ul li img {
-					vertical-align:baseline;
-				}
-
-				ul li {
-					margin-left:24px;
-					list-style-image: url(~/assets/image/icon/icon_hook.svg);
-				}
-			}
-		}
-
-	}
-
-	// 50+人才職場力
-	.article {
-		
-		.boxs {
-			display:flex;
-			align-items:flex-start;
-			justify-content:space-between;
-			width:100%;
-			max-width:1020px;
-			margin:0 auto;
-			padding:50px 0;
-
-			.box {
-				position: relative;
-				flex:1;
-				display:block;
-				max-width:330px;
-				min-height:510px;
-				// border:1px solid #CCC;
-				border-radius:20px;
-				padding:30px 20px 90px 20px;
-				text-decoration:none;
-				box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.2);
-
-				.pic img {
-					width:100%;
-					margin-bottom:30px;
-				}
-
-				h4 {
-					font-size:26px;
-					color:$dark-gray;
-					text-decoration:none;
-					display:-webkit-box;
-					overflow:hidden;
-					text-overflow:ellipsis;
-					-webkit-line-clamp:3;
-					-webkit-box-orient:vertical;
-				}
-
-				.moreBtn {
-					position: absolute;
-					bottom:20px;
-					left:calc( 50% - 90px );
-					display:flex;
-					align-items:center;
-					justify-content:center;
-					width:180px;
-					height:50px;
-					line-height:50px;
-					text-align:center;
-					font-size:22px;
-					font-weight:bold;
-					color:#FFF;
-					text-decoration:none;
-					padding:0;
-					margin:0;
-					border-radius:5px;
-					background-color:#c59375;
-		
-					img {
-						margin-left:5px;
-						filter: invert(97%) sepia(100%) saturate(0%) hue-rotate(302deg) brightness(105%) contrast(102%);
-					}
-				}
-
-				&:hover {
-					box-shadow: 0 2px 8px 3px rgba(0, 0, 0, 0.2);
-					.moreBtn {
-						opacity: 0.8;
-					}
-				}
-			}
-		}
-	}
+        ul li {
+          margin-left: 24px;
+          list-style-image: url(~/assets/image/icon/icon_hook.svg);
+        }
+      }
+    }
+  }
 
 }
 
-
-@media only screen and (max-width: 1159px)
-{
-	.index {
-		.intro {
-			padding:70px 10px;
-			.tags {
-				zoom:0.85;
-			}
-		}
-		.plan , .article {
-			padding:0 10px;
-		}
-	}
+@media only screen and (max-width: 1159px) {
+  .index {
+    .intro {
+      padding: 70px 10px;
+      .tags {
+        zoom: 0.85;
+      }
+    }
+    .plan {
+      padding: 0 10px;
+    }
+  }
 }
 
-@media only screen and (max-width: 1023px)
-{
-	.index {
-		.article {
-			.box {
-				max-width:33% !important;
-			}
-		}
-	}
+@media only screen and (max-width: 1023px) {
+
 }
 
-@media only screen and (max-width: 991px)
-{
-	.index {
-		.searchBar {
-			.inputBorder {
-				width:500px;
-			}
-			.btn {
-				width:100px;
-			}
-		}
-		.intro {
-			display:block;
+@media only screen and (max-width: 991px) {
+  .index {
+    .intro {
+      display: block;
 
-			.text {
-				width:580px;
-				padding:0;
-				margin:0 auto;
-			}
-			
-			.tags {
-				zoom:1;
-				margin:0 auto;
-			}
-		}
-		.plan {
-			.flow {
-				.step {
-					width:33%;
-				}
-			}
-		}
-		.article {
-			.boxs {
-				.box {
-					min-height:440px;
-				}
-			}
-		}
-	}
+      .text {
+        width: 580px;
+        padding: 0;
+        margin: 0 auto;
+      }
+
+      .tags {
+        zoom: 1;
+        margin: 0 auto;
+      }
+    }
+    .plan {
+      .flow {
+        .step {
+          width: 33%;
+        }
+      }
+    }
+  }
 }
 
-@media only screen and (max-width: 767px)
-{
+@media only screen and (max-width: 767px) {
 	.index {
-		.searchBar {
-			top:44px;
-			.inputBorder {
-				width:340px;
-			}
-		}
 		.plan {
 			.flow {
 				display:block;
@@ -509,15 +326,9 @@
 				}
 			}
 		}
-		.article {
-			.boxs {
-				display:block;
-				.box {
-					width:100% !important;
-					max-width:unset !important;
-					min-height:unset !important;
-					margin-bottom:20px;
-				}
+		.intro {
+			.text , .tags {
+				width:100%;
 			}
 		}
 	}
@@ -526,61 +337,12 @@
 @media only screen and (max-width: 579px)
 {
 	.index {
-		.searchBar {
-			height:60px;
-			padding:10px 0;
-			background-color:$light-orange;
-			.floatingBar {
-				position: absolute;
-				top:-300px;
-				left:5%;
-				width:90%;
-				height:180px;
-				padding:15px;
-				border-radius: 4px;
-				box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.15);
-				background-color: #fff;
-				transition: all .6s ease;
-				select {
-					width:100%;
-					height:44px;
-					font-size:18px;
-					color:$warm-gray;
-					border-radius: 4px;
-					border:1px solid $pumpkin-orange;
-					outline:0;
-					margin-bottom:8px;
-				}
-				.btn {
-					width:100%;
-					height:44px;
-					outline:0;
-				}
-				&.open {
-					top:10px;
-				}
-			}
-			.fakeInupt {
-				display:flex;
-				align-items:center;
-				justify-content: space-between;
-				width:90%;
-				height:40px;
-				font-size:18px;
-				line-height:40px;
-				color:$warm-gray;
-				border-radius: 4px;
-				padding:0 7px;
-				margin:0 auto;
-				box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.15);
-				background-color: #fff;
-			}
-			&.forDesktop {display:none}
-			&.forMobile {display:block;}
-		}
 		.banner {
+			position: relative;
 			overflow:hidden;
+			height:260px;
 			img {
+				position: absolute;
 				width:auto;
 				height:260px;
 				left:50%;
@@ -588,8 +350,10 @@
 			}
 		}
 		.intro {
+			position: relative;
 			overflow:hidden;
 			padding:35px 10px 60px 10px;
+			height:570px;
 			.text {
 				width:100%;
 				h2 {
@@ -598,7 +362,8 @@
 				}
 			}
 			.tags {
-				zoom: 0.7;
+				position: absolute;
+				zoom: 0.65;
 				left:50%;
 				transform:translateX(-50%);
 			}
@@ -611,7 +376,7 @@
 				}
 			}
 			.thisBtn {
-				width:195px;
+				width:205px;
 				height:45px;
 				font-size:20px;
 			}
@@ -619,24 +384,6 @@
 		.plan {
 			.flow {
 				padding-bottom:0;
-			}
-		}
-		.article {
-			.boxs {
-				.box {
-					padding:20px 20px 90px 20px;
-					.pic img {
-						margin-bottom:20px;
-					}
-					h4 {
-						font-size:20px;
-					}
-					.moreBtn {
-						width:130px;
-						left:calc( 50% - 65px );
-						font-size:18px;
-					}
-				}
 			}
 		}
 	}

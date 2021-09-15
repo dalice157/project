@@ -60,7 +60,7 @@
     <Card />
   </div>
   <div class="cardWrap mp">
-    <VueSlickCarousel v-bind="settings">
+    <VueSlickCarousel v-bind="slickOptions">
       <Card />
       <Card />
       <Card />
@@ -128,7 +128,7 @@
     /></b-button>
   </div>
   <h2 class="titleBg"><span class="title">人資充電</span></h2>
-  <div class="hrWrap">
+  <div class="hrWrap pc">
     <HrCard
       :img-url="require('~/assets/image/findTalent/hr-img-1.jpg')"
       article="搞懂中高齡就業專法不困難，看完這10題人資精選QA就夠了！｜法律小教搞懂中高齡就業專法不困難，看完這10題人資精選QA就夠了！｜法律小教"
@@ -141,6 +141,22 @@
       :img-url="require('~/assets/image/findTalent/hr-img-3.jpg')"
       article="企業僱用中高齡工作者，諸多可行捷徑可創造雙贏！"
     />
+  </div>
+  <div class="hrWrap mp">
+    <VueSlickCarousel v-bind="hrOptions">
+      <HrCard
+        :img-url="require('~/assets/image/findTalent/hr-img-1.jpg')"
+        article="搞懂中高齡就業專法不困難，看完這10題人資精選QA就夠了！｜法律小教搞懂中高齡就業專法不困難，看完這10題人資精選QA就夠了！｜法律小教"
+      />
+      <HrCard
+        :img-url="require('~/assets/image/findTalent/hr-img-2.jpg')"
+        article="企業僱用中高齡工作者，諸多可行捷徑可創造雙贏！"
+      />
+      <HrCard
+        :img-url="require('~/assets/image/findTalent/hr-img-3.jpg')"
+        article="企業僱用中高齡工作者，諸多可行捷徑可創造雙贏！"
+      />
+    </VueSlickCarousel>
   </div>
   <div class="btnWrap">
     <b-button pill variant="outline-primary" size="lg" href="#"

@@ -1,0 +1,129 @@
+
+.list {
+  background-color: #f6f6f6;
+
+  .result {
+    width: 100%;
+    max-width: 1040px;
+    font-size: 16px;
+    color: $warm-gray;
+    line-height: 25px;
+    padding-top: 35px;
+    margin: 0 auto;
+
+    b {
+      color: $pumpkin-orange;
+    }
+  }
+
+  .frame {
+    width: 100%;
+    max-width: 1040px;
+    margin: 0 auto;
+
+    .tableTTL,
+    .tableList {
+      display: table;
+      width: 100%;
+      padding: 0 20px;
+
+      .tr {
+        display: table-row;
+
+        .td {
+          display: table-cell;
+          padding-right: 20px;
+          vertical-align: middle;
+        }
+      }
+
+      .company {
+        width: 35%;
+      }
+
+      .income {
+        width: 25%;
+      }
+
+      .location {
+        width: 15%;
+      }
+
+      .experience {
+        width: 15%;
+      }
+
+      .applyBtn {
+        width: 10%;
+      }
+    }
+
+    .tableTTL {
+      height: 35px;
+      background-color: #e0e0d1;
+
+      .td {
+        font-size: 16px;
+        font-weight: bold;
+        color: $dark-gray;
+        line-height: 35px;
+      }
+    }
+  }
+
+  .listPagination {
+    text-align: center;
+    padding: 40px 0 60px 0;
+    margin: 0 auto;
+
+    .inner {
+      display: inline-block;
+
+      .page-item .page-link {
+        border: 0;
+        color: $warm-gray;
+        background-color: transparent;
+      }
+
+      .page-item.active .page-link {
+        background-color: $pumpkin-orange;
+        border-radius: 4px;
+        color: #fff;
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 1159px) {
+}
+
+@media only screen and (max-width: 1023px) {
+  .list {
+    .result,
+    .frame {
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+  }
+}
+
+@media only screen and (max-width: 991px) {
+}
+
+@media only screen and (max-width: 767px) {
+  .list {
+    .result {
+      padding: 10px;
+      text-align: center;
+    }
+    .frame {
+      .tableTTL {
+        display: none;
+      }
+    }
+  }
+  
+}
+
+@media only screen and (max-width: 579px) {
+}

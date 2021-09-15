@@ -1,0 +1,125 @@
+.list {
+  .frame {
+    .tableList {
+      padding: 30px 20px !important;
+      border-bottom: 1px solid #c4c4c4;
+      background-color: #fff;
+
+      .td {
+        font-size: 16px;
+        color: $dark-gray;
+        line-height: 25px;
+
+        p {
+          margin: 0;
+        }
+      }
+
+      .company {
+        h4 {
+          font-size: 20px;
+          color: $dark-blue;
+          line-height: 25px;
+          margin: 0;
+
+          a {
+            color: $dark-blue;
+          }
+        }
+        h5 {
+          font-size: 16px;
+          font-weight: normal;
+          color: $dark-gray;
+          line-height: 25px;
+          margin: 0;
+        }
+      }
+
+      .income {
+        p:nth-child(1) {
+          font-weight: bold;
+          color: $pumpkin-orange;
+        }
+        .tags span {
+          font-size: 14px;
+          color: $warm-gray;
+          background-color: $gb-gray;
+          padding: 2px 8px;
+          border-radius: 12px;
+          margin-right: 5px;
+        }
+      }
+
+      .location {
+        p {
+          font-weight: bold;
+        }
+      }
+
+      .experience {
+      }
+
+      .applyBtn {
+        a {
+          width: 76px;
+          font-size: 16px;
+          color: $pumpkin-orange;
+          border: 1px solid $pumpkin-orange;
+
+          &:hover {
+            color: #fff;
+            background-color: $pumpkin-orange;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media only screen and (max-width: 1159px) {
+}
+
+@media only screen and (max-width: 1023px) {
+}
+
+@media only screen and (max-width: 991px) {
+}
+
+@media only screen and (max-width: 767px) {
+  .list {
+    .frame {
+      .tableList,
+      .tableList .tr,
+      .tableList .td {
+        display: block !important;
+        width: 100% !important;
+      }
+      .tableList {
+        padding: 15px;
+        .tr {
+          position: relative;
+        }
+        .company {
+          margin-bottom: 10px;
+        }
+        .income {
+          margin-bottom: 20px;
+        }
+        .experience {
+          display: none !important;
+        }
+        .applyBtn {
+          position: absolute;
+          width: unset !important;
+          right: 0;
+          bottom: 0;
+          padding-right: 0 !important;
+        }
+      }
+    }
+  }
+  
+}
+
+@media only screen and (max-width: 579px) {
+}
