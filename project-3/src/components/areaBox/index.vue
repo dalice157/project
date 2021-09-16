@@ -31,6 +31,7 @@ export default {
             this.$emit("areasVal", this.assignPlace.no);
           }
         });
+
         setTimeout(() => {
           $(".category-item.category-item--level-one").click();
           $(".selected-max").hide();

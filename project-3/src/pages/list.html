@@ -1,10 +1,15 @@
 <div class="list">
   <h1 hidden>高年級人力銀行 搜尋結果</h1>
 
-  <SearchBar ref="childComponent" onclickSearch="onclickSearch" />
+  <SearchBar
+    ref="childComponent"
+    onclickSearch="onclickSearch"
+    @emit-list-data="getChildListData"
+    @emit-body-params="getBodyParamData"
+  />
 
   <div class="result" @click="clickClose">
-    符合條件共 <b>{{dataList.page.total}}</b> 筆結果
+    符合條件共 <b>{{total}}</b> 筆結果
   </div>
 
   <div class="frame" @click="clickClose">
@@ -17,164 +22,32 @@
         <div class="td applyBtn"></div>
       </div>
     </div>
-
-    <div class="tableList">
-      <div class="tr">
-        <div class="td company">
-          <h4><a href="" target="_blank">台北北大店時薪收銀服務專員</a></h4>
-          <h5>法商家樂福總公司_家福股份有限公司</h5>
-        </div>
-        <div class="td income">
-          <p>月薪32,000~42,000元</p>
-          <p>日班、晚班、大夜班、假日班</p>
-        </div>
-        <div class="td location">
-          <p>
-            <img src="~/assets/image/icon/icon_location.svg" />
-            <span>新北市新莊區</span>
-          </p>
-        </div>
-        <div class="td experience">
-          <!-- 底下兩項要用 <span> -->
-          <span>學歷不拘</span>
-          <span>3年以上</span>
-        </div>
-        <div class="td applyBtn">
-          <a href="" class="btn btn-outline-primary">應徵</a>
-        </div>
-      </div>
+    <div v-if="total!= 0" v-for="item in dataList">
+      <ResultList
+        :addressAreaDesc="item.addressAreaDesc"
+        :custName="item.custName"
+        :jobHashNo="item.jobHashNo"
+        :jobName="item.jobName"
+        :minEduDesc="item.minEduDesc"
+        :salaryTypeDesc="item.salaryTypeDesc"
+        :salaryLow="item.salaryLow"
+        :salaryHigh="item.salaryHigh"
+        :workShiftTypeDesc="item.workShiftTypeDesc"
+        :workExpDesc="item.workExpDesc"
+        :workTime="item.workTime"
+        :workNeedShift="item.workNeedShift"
+      />
     </div>
-
-    <div class="tableList">
-      <div class="tr">
-        <div class="td company">
-          <h4><a href="" target="_blank">專職大夜</a></h4>
-          <h5>OK超商_來來超商股份有限公司</h5>
-        </div>
-        <div class="td income">
-          <p>月薪32,000~42,000元</p>
-          <p>日班、晚班、大夜班、假日班</p>
-          <div class="tags">
-            <!-- 底下兩項要用 <span> -->
-            <span>需輪班</span>
-            <span>週休二日</span>
-          </div>
-        </div>
-        <div class="td location">
-          <p>
-            <img src="~/assets/image/icon/icon_location.svg" />
-            <span>新北市新莊區</span>
-          </p>
-        </div>
-        <div class="td experience">
-          <!-- 底下兩項要用 <span> -->
-          <span>學歷不拘</span>
-          <span>3年以上</span>
-        </div>
-        <div class="td applyBtn">
-          <a href="" class="btn btn-outline-primary">應徵</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- <ResultList
-      jobURL="https://www.104.com.tw/"
-      careerName="台北北大店時薪收銀服務專員"
-      companyName="法商家樂福總公司_家福股份有限公司"
-      jobSalary="32,000~42,000"
-      jobType="日班、晚班、大夜班、假日班"
-      jobLocation="新北市新莊區"
-      experienceList="學歷不拘 3年以上"
-      btnURL="https://senior.104.com.tw/"
-    />
-
-    <ResultList
-      jobURL="https://www.104.com.tw/"
-      careerName="專職大夜專職大夜"
-      companyName="OK超商_來來超商股份有限公司"
-      jobSalary="32,000~42,000"
-      jobType="日班、晚班、大夜班、假日班"
-      tagList="需輪班,週休二日"
-      jobLocation="新北市新莊區"
-      experienceList="學歷不拘 3年以上"
-      btnURL="https://senior.104.com.tw/"
-    />
-
-    <ResultList
-      jobURL="https://www.104.com.tw/"
-      careerName="台北北大店時薪收銀服務專員"
-      companyName="法商家樂福總公司_家福股份有限公司"
-      jobSalary="32,000~42,000"
-      jobType="日班、晚班、大夜班、假日班"
-      jobLocation="新北市新莊區"
-      experienceList="學歷不拘 3年以上"
-      btnURL="https://senior.104.com.tw/"
-    />
-
-    <ResultList
-      jobURL="https://www.104.com.tw/"
-      careerName="專職大夜專職大夜"
-      companyName="OK超商_來來超商股份有限公司"
-      jobSalary="32,000~42,000"
-      jobType="日班、晚班、大夜班、假日班"
-      tagList="需輪班,週休二日"
-      jobLocation="新北市新莊區"
-      experienceList="學歷不拘 3年以上"
-      btnURL="https://senior.104.com.tw/"
-    />
-
-    <ResultList
-      jobURL="https://www.104.com.tw/"
-      careerName="台北北大店時薪收銀服務專員"
-      companyName="法商家樂福總公司_家福股份有限公司"
-      jobSalary="32,000~42,000"
-      jobType="日班、晚班、大夜班、假日班"
-      jobLocation="新北市新莊區"
-      experienceList="學歷不拘 3年以上"
-      btnURL="https://senior.104.com.tw/"
-    />
-
-    <ResultList
-      jobURL="https://www.104.com.tw/"
-      careerName="專職大夜專職大夜"
-      companyName="OK超商_來來超商股份有限公司"
-      jobSalary="32,000~42,000"
-      jobType="日班、晚班、大夜班、假日班"
-      tagList="需輪班,週休二日"
-      jobLocation="新北市新莊區"
-      experienceList="學歷不拘 3年以上"
-      btnURL="https://senior.104.com.tw/"
-    />
-
-    <ResultList
-      jobURL="https://www.104.com.tw/"
-      careerName="台北北大店時薪收銀服務專員"
-      companyName="法商家樂福總公司_家福股份有限公司"
-      jobSalary="32,000~42,000"
-      jobType="日班、晚班、大夜班、假日班"
-      jobLocation="新北市新莊區"
-      experienceList="學歷不拘 3年以上"
-      btnURL="https://senior.104.com.tw/"
-    />
-
-    <ResultList
-      jobURL="https://www.104.com.tw/"
-      careerName="專職大夜專職大夜"
-      companyName="OK超商_來來超商股份有限公司"
-      jobSalary="32,000~42,000"
-      jobType="日班、晚班、大夜班、假日班"
-      tagList="需輪班,週休二日"
-      jobLocation="新北市新莊區"
-      experienceList="學歷不拘 3年以上"
-      btnURL="https://senior.104.com.tw/"
-    /> -->
   </div>
 
   <div class="listPagination" @click="clickClose">
     <div class="inner">
       <b-pagination
         v-model="currentPage"
-        :link-gen="linkGen"
+        limit="5"
+        :total-rows="rows"
+        :per-page="perPage"
+        @change="handlePageChange"
         :number-of-pages="10"
         use-router
       ></b-pagination>

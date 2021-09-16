@@ -4,7 +4,14 @@
       padding: 30px 20px !important;
       border-bottom: 1px solid #c4c4c4;
       background-color: #fff;
-
+      .link {
+        &.forDesktop {
+          display: block;
+        }
+        &.forMobile {
+          display: none;
+        }
+      }
       .td {
         font-size: 16px;
         color: $dark-gray;
@@ -40,7 +47,7 @@
           font-weight: bold;
           color: $pumpkin-orange;
         }
-        .tags span {
+        .tags {
           font-size: 14px;
           color: $warm-gray;
           background-color: $gb-gray;
@@ -60,6 +67,12 @@
       }
 
       .applyBtn {
+        &.forDesktop {
+          display: block;
+        }
+        &.forMobile {
+          display: none;
+        }
         a {
           width: 76px;
           font-size: 16px;
@@ -96,6 +109,14 @@
       }
       .tableList {
         padding: 15px;
+        .link {
+          &.forDesktop {
+            display: block;
+          }
+          &.forMobile {
+            display: none;
+          }
+        }
         .tr {
           position: relative;
         }
@@ -114,11 +135,16 @@
           right: 0;
           bottom: 0;
           padding-right: 0 !important;
+          &.forDesktop {
+            display: block;
+          }
+          &.forMobile {
+            display: none;
+          }
         }
       }
     }
   }
-  
 }
 
 @media only screen and (max-width: 579px) {

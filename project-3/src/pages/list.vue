@@ -1,6 +1,7 @@
 <script>
 import SearchBar from "../components/searchBar";
 import ResultList from "../components/resultList";
+
 export default {
   components: {
     SearchBar,
@@ -12,18 +13,20 @@ export default {
       app,
       route
     } = context;
-    const areaArr =
-      Object.keys(route.query).length === 0 ? null : area.split(",");
+    const areaArr = area && area.length > 0 ? area.split(",") : [];
+    const bodyParams =
+      type === "0"
+        ? { areas: areaArr, offset: 1, limit: 10 }
+        : { areas: areaArr, type: type, offset: 1, limit: 10 };
     try {
-      const { data } = await app.$apis.findJob.postJobSearch({
-        areas: areaArr,
-        type: type,
-        offset: 1,
-        limit: 15
-      });
-      console.log("XXX", data);
+      const { data } = await app.$apis.findJob.postJobSearch(bodyParams);
+      console.log("list data:", data);
+      const total = data.page.total - 1;
       return {
-        dataList: data
+        dataList: data.data.jobs,
+        total: total,
+        rows: total,
+        offset: 1
       };
     } catch (error) {
       console.log("error", error);
@@ -31,17 +34,47 @@ export default {
   },
   data() {
     return {
-      rows: 100,
       currentPage: 1,
-      dataList: null
+      rows: 100,
+      perPage: 10,
+      dataList: null,
+      total: 0,
+      jobTypeOpt: "0",
+      areas: [],
+      offset: 0
     };
   },
   methods: {
     clickClose() {
       this.$refs.childComponent.closeSearchBar();
     },
-    linkGen(pageNum) {
-      return pageNum === 1 ? "?" : `?page=${pageNum}`;
+    getBodyParamData(data) {
+      this.areas = data.area;
+      this.jobTypeOpt = data.type;
+    },
+    async handlePageChange(pageNum) {
+      this.offset = pageNum === 1 ? 1 : this.total - 10;
+      console.log("offset:", this.offset);
+      const isTypeLengthZero = this.jobTypeOpt === "0";
+      const areaArr = this.areas && this.areas.length > 0 ? this.areas : [];
+      const bodyParams = isTypeLengthZero
+        ? { areas: areaArr, offset: this.offset, limit: 10 }
+        : { areas: areaArr, type: type, offset: this.offset, limit: 10 };
+      console.log("page params:", bodyParams);
+      const { data } = await this.$apis.findJob.postJobSearch(bodyParams);
+      console.log("page data:", data);
+      const total = data.page.total - 1;
+      this.dataList = data.data.jobs;
+      this.total = total;
+      this.rows = total;
+      const getPageNum = pageNum === 1 ? "?" : `?page=${pageNum}`;
+      this.$router.push({ path: `/list${getPageNum}`, query: {} });
+    },
+    getChildListData(data) {
+      const total = data.page.total - 1;
+      this.dataList = data.data.jobs;
+      this.total = total;
+      this.rows = total;
     }
   },
   mounted() {}

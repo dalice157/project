@@ -1,27 +1,57 @@
 <div class="tableList">
   <div class="tr">
     <div class="td company">
-      <h4><a :href="jobURL" target="_blank">{{careerName}}</a></h4>
-      <h5>{{companyName}}</h5>
+      <h4>
+        <a
+          class="link forDesktop"
+          :href="`https://www.104-dev.com.tw/job/${jobHashNo}?jobsource=50talent`"
+          target="_blank"
+          >{{jobName}}</a
+        >
+        <a
+          class="link forMobile"
+          :href="`https://www.104-dev.com.tw/job/${jobHashNo}?jobsource=m_careu&app_jobsource=m_50talent`"
+          target="_blank"
+          >{{jobName}}</a
+        >
+      </h4>
+      <h5>{{custName}}</h5>
     </div>
     <div class="td income">
-      <p>月薪 {{jobSalary}} 元</p>
-      <p>{{jobType}}</p>
-      <div v-show="tagList" class="tags">
-        <span>{{tagList}}</span>
-      </div>
+      <p>
+        {{salaryTypeDesc}}
+        <span v-show="salaryTypeDesc!=='面議'">
+          {{moneyFormat(salaryLow)}} ~ {{moneyFormat(salaryHigh)}} 元
+        </span>
+      </p>
+      <p>{{workshifts(workShiftTypeDesc)}}</p>
+      <p>
+        <span v-show="workNeedShift" class="tags">需輪班</span>
+        <span v-show="workTime" class="tags">{{workTime}}</span>
+      </p>
     </div>
     <div class="td location">
       <p>
         <img src="~/assets/image/icon/icon_location.svg" />
-        <span>{{jobLocation}}</span>
+        <span>{{addressAreaDesc}}</span>
       </p>
     </div>
     <div class="td experience">
-      <span>{{experienceList}}</span>
+      <span>{{minEduDesc}} | {{workExpDesc}}</span>
     </div>
     <div class="td applyBtn">
-      <a :href="btnURL" class="btn btn-outline-primary" target="_blank">應徵</a>
+      <a
+        :href="`https://www.104-dev.com.tw/job/${jobHashNo}?jobsource=50talent`"
+        class="btn btn-outline-primary forDesktop"
+        target="_blank"
+        >應徵</a
+      >
+      <a
+        :href="`https://www.104-dev.com.tw/job/${jobHashNo}?jobsource=m_careu&app_jobsource=m_50talent`"
+        class="btn btn-outline-primary forMobile"
+        target="_blank"
+        >應徵</a
+      >
     </div>
   </div>
 </div>
