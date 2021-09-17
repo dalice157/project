@@ -1,19 +1,6 @@
 <script>
 export default {
-  props: [
-    "addressAreaDesc",
-    "custName",
-    "jobHashNo",
-    "jobName",
-    "minEduDesc",
-    "salaryTypeDesc",
-    "salaryLow",
-    "salaryHigh",
-    "workShiftTypeDesc",
-    "workExpDesc",
-    "workTime",
-    "workNeedShift"
-  ],
+  props: ["resultItem"],
   data() {
     return {};
   },

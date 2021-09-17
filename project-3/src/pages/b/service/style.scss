@@ -1,6 +1,6 @@
 %wrap {
   width: 100%;
-  max-width: 1140px;
+  max-width: 1040px;
   margin: auto;
   @media screen and (max-width: 767px) {
     width: 100%;
@@ -8,10 +8,10 @@
     padding: 0 10px;
   }
 }
-
-.bg {
+/*
+.findTalent {
   background-color: $white;
-  padding-bottom: 65px;
+  padding-bottom: 80px;
 }
 .banner {
   height: 500px;
@@ -19,18 +19,27 @@
   background-size: cover;
   margin-bottom: 110px;
 }
+*/
 .main {
   @extend %wrap;
   display: flex;
   justify-content: space-between;
-  & + .main {
-    margin-top: 80px;
+  // & + .main {
+  //   margin-top: 80px;
+  // }
+  &.first {
+    margin:110px auto 80px auto;
   }
   &.noFlex {
     display: block;
   }
   .img {
     width: 400px;
+    margin-right:100px;
+    img {
+      width:100%;
+      height:auto;
+    }
   }
 }
 .article {
@@ -69,6 +78,9 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    li {
+      width:330px;
+    }
   }
 }
 
@@ -98,7 +110,7 @@
   }
   .arrow {
     width: 28px;
-    background: url("../../assets/image/findTalent/arrow-level.svg") center
+    background: url("../../../assets/image/findTalent/arrow-level.svg") center
       no-repeat;
   }
   .top {
@@ -189,8 +201,8 @@
 }
 .titleBg {
   position: relative;
-  padding: 0 65px;
   text-align: center;
+  max-width:1140px;
   margin-top: 90px;
   @extend %wrap;
   &:before {
@@ -222,12 +234,15 @@
 }
 
 @media screen and (max-width: 767px) {
-  .banner {
-    width: 100%;
-    height: 260px;
-    margin-bottom: 30px;
-  }
+  // .banner {
+  //   width: 100%;
+  //   height: 260px;
+  //   margin-bottom: 30px;
+  // }
   .main {
+    &.first {
+      margin:40px auto;
+    }
     & + .main {
       margin-top: 35px;
     }
@@ -279,7 +294,7 @@
     .arrow {
       width: 100%;
       height: 40px;
-      background: url("../../assets/image/findTalent/arrow-vertical.svg") center
+      background: url("../../../assets/image/findTalent/arrow-vertical.svg") center
         no-repeat;
     }
   }
@@ -287,15 +302,30 @@
     margin-top: 50px;
   }
   .hrWrap {
+    max-width:520px !important;
+    padding:0 !important;
     &.pc {
       display: none;
     }
     &.mp {
       display: block;
     }
+    /deep/.slick-dots {
+      bottom:25px;
+    }
+    /deep/.slick-arrow {
+      z-index:997;
+    }
+    /deep/.slick-arrow::before {
+      font-size:40px !important;
+      color:$dark-gray !important;
+    }
+    /deep/.slick-arrow.slick-next {
+      right:-5px;
+    }
   }
   /deep/.slick-prev {
-    left: -4px;
+    // left: -4px;
     z-index: 10;
   }
   /deep/.slick-prev:before {
@@ -322,3 +352,68 @@
 //     width: 280px !important;
 //   }
 // }
+
+
+@media only screen and (max-width: 1159px) {
+  .findTalent {
+    .main , .listBg , .cardWrap , .titleBg , .stepWrap , .hrWrap {
+      padding:0 10px;
+    }
+    .titleBg::before {
+      width:calc( 100% - 20px );
+      left:10px;
+    }
+  }
+}
+
+
+@media only screen and (max-width: 1023px) {
+  .findTalent {
+    .listBg {
+      .wrap {
+        li {
+          width:315px;
+        }
+      }
+    }
+  }
+}
+
+
+@media only screen and (max-width: 991px) {
+  .findTalent {
+    .main.first {
+      .article {
+        flex:1;
+        width:unset;
+      }
+      .img {
+        flex:1;
+        width:unset;
+        height:auto;
+        margin:0;
+      }
+    }
+    .listBg {
+      .wrap {
+        li {
+          width:33%;
+          img {
+            width:100%;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+@media only screen and (max-width: 579px)
+{
+  .hrWrap {
+    max-width:90% !important;
+    .slick-arrow.slick-next {
+      right:-5px;
+    }
+  }
+}

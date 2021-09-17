@@ -3,8 +3,8 @@
 import VueSlickCarousel from "vue-slick-carousel";
 import "vue-slick-carousel/dist/vue-slick-carousel.css";
 import "vue-slick-carousel/dist/vue-slick-carousel-theme.css";
-import Card from "../../components/card";
-import HrCard from "../../components/hrCard";
+import Card from "../../../components/card";
+import HrCard from "../../../components/hrCard";
 
 export default {
   name: "findTalent",
@@ -50,5 +50,5 @@ export default {
   }
 };
 </script>
-<template src="./findTalent.html" />
-<style lang="scss" src="./findTalent.scss" scoped />
+<template src="./template.html" />
+<style lang="scss" src="./style.scss" scoped />

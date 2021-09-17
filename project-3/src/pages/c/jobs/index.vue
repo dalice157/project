@@ -1,7 +1,6 @@
 <script>
-import SearchBar from "../components/searchBar";
-import ResultList from "../components/resultList";
-
+import SearchBar from "../../../components/searchBar";
+import ResultList from "../../../components/resultList";
 export default {
   components: {
     SearchBar,
@@ -9,24 +8,23 @@ export default {
   },
   async asyncData(context) {
     const {
-      query: { area, type },
-      app,
-      route
+      query: { area, type, page },
+      app
     } = context;
+    console.log("context:", context);
     const areaArr = area && area.length > 0 ? area.split(",") : [];
     const bodyParams =
       type === "0"
-        ? { areas: areaArr, offset: 1, limit: 10 }
-        : { areas: areaArr, type: type, offset: 1, limit: 10 };
+        ? { areas: areaArr, offset: 1, limit: 15 }
+        : { areas: areaArr, type: type, offset: 1, limit: 15 };
     try {
       const { data } = await app.$apis.findJob.postJobSearch(bodyParams);
-      console.log("list data:", data);
       const total = data.page.total - 1;
       return {
         dataList: data.data.jobs,
         total: total,
         rows: total,
-        offset: 1
+        currentPage: page || 1
       };
     } catch (error) {
       console.log("error", error);
@@ -36,12 +34,12 @@ export default {
     return {
       currentPage: 1,
       rows: 100,
-      perPage: 10,
+      perPage: 15,
       dataList: null,
       total: 0,
       jobTypeOpt: "0",
       areas: [],
-      offset: 0
+      offset: 1
     };
   },
   methods: {
@@ -53,22 +51,21 @@ export default {
       this.jobTypeOpt = data.type;
     },
     async handlePageChange(pageNum) {
-      this.offset = pageNum === 1 ? 1 : this.total - 10;
-      console.log("offset:", this.offset);
+      const firstNum = pageNum === 1 ? 1 : this.offset - 15;
+      this.offset = pageNum > this.currentPage ? this.offset + 15 : firstNum;
       const isTypeLengthZero = this.jobTypeOpt === "0";
       const areaArr = this.areas && this.areas.length > 0 ? this.areas : [];
       const bodyParams = isTypeLengthZero
-        ? { areas: areaArr, offset: this.offset, limit: 10 }
-        : { areas: areaArr, type: type, offset: this.offset, limit: 10 };
-      console.log("page params:", bodyParams);
+        ? { areas: areaArr, offset: this.offset, limit: 15 }
+        : { areas: areaArr, type: type, offset: this.offset, limit: 15 };
       const { data } = await this.$apis.findJob.postJobSearch(bodyParams);
-      console.log("page data:", data);
       const total = data.page.total - 1;
       this.dataList = data.data.jobs;
       this.total = total;
       this.rows = total;
-      const getPageNum = pageNum === 1 ? "?" : `?page=${pageNum}`;
-      this.$router.push({ path: `/list${getPageNum}`, query: {} });
+      this.currentPage = pageNum;
+      const getPageNum = pageNum === 1 ? "?page=1" : `?page=${pageNum}`;
+      this.$router.push({ path: `/c/jobs${getPageNum}`, query: {} });
     },
     getChildListData(data) {
       const total = data.page.total - 1;
@@ -80,5 +77,5 @@ export default {
   mounted() {}
 };
 </script>
-<template src="./list.html" />
-<style lang="scss" src="./list.scss" />
+<template src="./template.html" />
+<style lang="scss" src="./style.scss" />

@@ -3,13 +3,12 @@
 
   <SearchBar
     ref="childComponent"
-    onclickSearch="onclickSearch"
     @emit-list-data="getChildListData"
     @emit-body-params="getBodyParamData"
   />
 
   <div class="result" @click="clickClose">
-    符合條件共 <b>{{total}}</b> 筆結果
+    符合條件共 <b>{{total < 0 ? 0 : total}}</b> 筆結果
   </div>
 
   <div class="frame" @click="clickClose">
@@ -22,22 +21,12 @@
         <div class="td applyBtn"></div>
       </div>
     </div>
-    <div v-if="total!= 0" v-for="item in dataList">
-      <ResultList
-        :addressAreaDesc="item.addressAreaDesc"
-        :custName="item.custName"
-        :jobHashNo="item.jobHashNo"
-        :jobName="item.jobName"
-        :minEduDesc="item.minEduDesc"
-        :salaryTypeDesc="item.salaryTypeDesc"
-        :salaryLow="item.salaryLow"
-        :salaryHigh="item.salaryHigh"
-        :workShiftTypeDesc="item.workShiftTypeDesc"
-        :workExpDesc="item.workExpDesc"
-        :workTime="item.workTime"
-        :workNeedShift="item.workNeedShift"
-      />
-    </div>
+    <ResultList
+      v-if="total!= 0"
+      v-for="item in dataList"
+      :key="item.jobHashNo"
+      :resultItem="item"
+    />
   </div>
 
   <div class="listPagination" @click="clickClose">
@@ -48,7 +37,6 @@
         :total-rows="rows"
         :per-page="perPage"
         @change="handlePageChange"
-        :number-of-pages="10"
         use-router
       ></b-pagination>
     </div>

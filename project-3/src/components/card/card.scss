@@ -77,9 +77,26 @@
     }
   }
 }
+
+
+@media only screen and (max-width: 1023px) {
+  .card {
+    width:315px;
+    height:315px;
+  }
+}
+
+
+@media only screen and (max-width: 991px) {
+  .card {
+    width:49%;
+    height:315px;
+  }
+}
+
 @media screen and (max-width: 767px) {
   .card {
-    width: 90% !important;
+    width: calc( 100% - 2em ) !important;
     margin: 1em;
     height: auto;
   }

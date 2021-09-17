@@ -36,3 +36,27 @@ body {
 	.forDesktop {display:none !important;}
 	.forMobile {display:block !important;}
 }
+
+.index , .findTalent {
+	padding-bottom:80px;
+	// 大圖
+	.banner {
+		img {
+			width: 100%;
+			height: auto;
+		}
+	}
+}
+
+
+
+@media only screen and (max-width: 579px)
+{
+	.index , .findTalent {
+		.banner {
+			position: relative;
+			overflow:hidden;
+			height:260px;
+		}
+	}
+}

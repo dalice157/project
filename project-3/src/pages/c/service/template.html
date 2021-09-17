@@ -152,57 +152,28 @@
     </div>
 
     <VueSlickCarousel
-      v-bind="settings"
+      v-bind="articleCard"
       :arrows="true"
       :dots="true"
       class="boxs forMobile"
     >
-      <a
-        href="https://blog.104.com.tw/what-preparations-are-needed-for-senior-employment/"
-        target="_blank"
-        class="box"
-      >
-        <div class="pic">
-          <img src="~/assets/image/index/article_pic1.jpg" />
-        </div>
-        <h4>
-          我年長但專業！中高齡長者延長職涯，如何發揮戰力成為企業不可或缺的人才？
-        </h4>
-        <div class="moreBtn">
-          <span>看全文</span>
-          <img src="~/assets/image/icon/icon_arrow_right.svg" />
-        </div>
-      </a>
+      <ArticleCard
+        :img-url="require('~/assets/image/index/article_pic1.jpg')"
+        articleTTL="我年長但專業！中高齡長者延長職涯，如何發揮戰力成為企業不可或缺的人才？"
+        articleURL="https://blog.104.com.tw/what-preparations-are-needed-for-senior-employment/"
+      />
 
-      <a
-        href="https://blog.104.com.tw/podcast-ep52/"
-        target="_blank"
-        class="box"
-      >
-        <div class="pic">
-          <img src="~/assets/image/index/article_pic2.jpg" />
-        </div>
-        <h4>中年轉職不往「管理職」發展，還能擁有高薪和成長機會嗎？</h4>
-        <div class="moreBtn">
-          <span>看全文</span>
-          <img src="~/assets/image/icon/icon_arrow_right.svg" />
-        </div>
-      </a>
+      <ArticleCard
+        :img-url="require('~/assets/image/index/article_pic2.jpg')"
+        articleTTL="中年轉職不往「管理職」發展，還能擁有高薪和成長機會嗎？"
+        articleURL="https://blog.104.com.tw/podcast-ep52/"
+      />
 
-      <a
-        href="https://blog.104.com.tw/be-careful-of-rights-and-interests-in-reemployment/"
-        target="_blank"
-        class="box"
-      >
-        <div class="pic">
-          <img src="~/assets/image/index/article_pic3.jpg" />
-        </div>
-        <h4>高齡者再就業，務必留意勞保權益！</h4>
-        <div class="moreBtn">
-          <span>看全文</span>
-          <img src="~/assets/image/icon/icon_arrow_right.svg" />
-        </div>
-      </a>
+      <ArticleCard
+        :img-url="require('~/assets/image/index/article_pic3.jpg')"
+        articleTTL="高齡者再就業，務必留意勞保權益！"
+        articleURL="https://blog.104.com.tw/be-careful-of-rights-and-interests-in-reemployment/"
+      />
     </VueSlickCarousel>
 
     <a href="#" class="thisBtn">

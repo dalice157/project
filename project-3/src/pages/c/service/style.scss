@@ -1,12 +1,5 @@
 
 .index {
-  // 大圖
-  .banner {
-    img {
-      width: 100%;
-      height: auto;
-    }
-  }
 
   // 門市人員職場計畫
   .intro {
@@ -164,7 +157,7 @@
       color: $pumpkin-orange;
       text-decoration: none;
       padding: 0 25px;
-      margin: 0 auto 80px auto;
+      margin: 0 auto;
       border-radius: 25px;
       border: 1px solid $pumpkin-orange;
 
@@ -193,7 +186,7 @@
       align-items: flex-start;
       justify-content: space-between;
       width: 100%;
-      max-width: 1020px;
+      max-width: 1040px;
       margin: 0 auto;
       padding: 60px 0;
 
@@ -251,6 +244,10 @@
           list-style-image: url(~/assets/image/icon/icon_hook.svg);
         }
       }
+    }
+
+    .thisBtn {
+      margin-bottom:80px;
     }
   }
 
@@ -337,18 +334,6 @@
 @media only screen and (max-width: 579px)
 {
 	.index {
-		.banner {
-			position: relative;
-			overflow:hidden;
-			height:260px;
-			img {
-				position: absolute;
-				width:auto;
-				height:260px;
-				left:50%;
-				transform:translateX(-50%);
-			}
-		}
 		.intro {
 			position: relative;
 			overflow:hidden;

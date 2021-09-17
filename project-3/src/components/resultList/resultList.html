@@ -4,50 +4,53 @@
       <h4>
         <a
           class="link forDesktop"
-          :href="`https://www.104-dev.com.tw/job/${jobHashNo}?jobsource=50talent`"
+          :href="`https://www.104-dev.com.tw/job/${resultItem.jobHashNo}?jobsource=50talent`"
           target="_blank"
-          >{{jobName}}</a
+          >{{resultItem.jobName}}</a
         >
         <a
           class="link forMobile"
-          :href="`https://www.104-dev.com.tw/job/${jobHashNo}?jobsource=m_careu&app_jobsource=m_50talent`"
+          :href="`https://www.104-dev.com.tw/job/${resultItem.jobHashNo}?jobsource=m_careu&app_jobsource=m_50talent`"
           target="_blank"
-          >{{jobName}}</a
+          >{{resultItem.jobName}}</a
         >
       </h4>
-      <h5>{{custName}}</h5>
+      <h5>{{resultItem.custName}}</h5>
     </div>
     <div class="td income">
       <p>
-        {{salaryTypeDesc}}
-        <span v-show="salaryTypeDesc!=='面議'">
-          {{moneyFormat(salaryLow)}} ~ {{moneyFormat(salaryHigh)}} 元
+        {{resultItem.salaryTypeDesc}}
+        <span v-show="resultItem.salaryTypeDesc!=='面議'">
+          {{moneyFormat(resultItem.salaryLow)}} ~
+          {{moneyFormat(resultItem.salaryHigh)}} 元
         </span>
       </p>
-      <p>{{workshifts(workShiftTypeDesc)}}</p>
+      <p>{{workshifts(resultItem.workShiftTypeDesc)}}</p>
       <p>
-        <span v-show="workNeedShift" class="tags">需輪班</span>
-        <span v-show="workTime" class="tags">{{workTime}}</span>
+        <span v-show="resultItem.workNeedShift" class="tags">需輪班</span>
+        <span v-show="resultItem.workTime" class="tags"
+          >{{resultItem.workTime}}</span
+        >
       </p>
     </div>
     <div class="td location">
       <p>
         <img src="~/assets/image/icon/icon_location.svg" />
-        <span>{{addressAreaDesc}}</span>
+        <span>{{resultItem.addressAreaDesc}}</span>
       </p>
     </div>
     <div class="td experience">
-      <span>{{minEduDesc}} | {{workExpDesc}}</span>
+      <span>{{resultItem.minEduDesc}} | {{resultItem.workExpDesc}}</span>
     </div>
     <div class="td applyBtn">
       <a
-        :href="`https://www.104-dev.com.tw/job/${jobHashNo}?jobsource=50talent`"
+        :href="`https://www.104-dev.com.tw/job/${resultItem.jobHashNo}?jobsource=50talent`"
         class="btn btn-outline-primary forDesktop"
         target="_blank"
         >應徵</a
       >
       <a
-        :href="`https://www.104-dev.com.tw/job/${jobHashNo}?jobsource=m_careu&app_jobsource=m_50talent`"
+        :href="`https://www.104-dev.com.tw/job/${resultItem.jobHashNo}?jobsource=m_careu&app_jobsource=m_50talent`"
         class="btn btn-outline-primary forMobile"
         target="_blank"
         >應徵</a

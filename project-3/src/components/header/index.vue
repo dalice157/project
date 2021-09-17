@@ -1,5 +1,12 @@
 <script>
+import MainPaths from '~/common/LinkPath'
+
 export default {
+  data() {
+    return {
+      MainPaths,
+    }
+  }
 }
 </script>
 <template src="./header.html" />
