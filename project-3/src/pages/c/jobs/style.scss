@@ -1,4 +1,4 @@
-.list {
+.listPage {
   background-color: #f6f6f6;
 
   .result {
@@ -72,7 +72,7 @@
 
   .listPagination {
     text-align: center;
-    padding: 40px 0 60px 0;
+    padding-top: 40px;
     margin: 0 auto;
 
     .inner {
@@ -97,7 +97,7 @@
 }
 
 @media only screen and (max-width: 1023px) {
-  .list {
+  .listPage {
     .result,
     .frame {
       padding-left: 10px;
@@ -110,7 +110,7 @@
 }
 
 @media only screen and (max-width: 767px) {
-  .list {
+  .listPage {
     .result {
       padding: 10px;
       text-align: center;

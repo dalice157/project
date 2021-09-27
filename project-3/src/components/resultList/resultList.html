@@ -20,9 +20,12 @@
     <div class="td income">
       <p>
         {{resultItem.salaryTypeDesc}}
-        <span v-show="resultItem.salaryTypeDesc!=='面議'">
+        <span v-show="resultItem.salaryTypeDesc!=='面議'&&resultItem.salaryHigh!==9999999">
           {{moneyFormat(resultItem.salaryLow)}} ~
           {{moneyFormat(resultItem.salaryHigh)}} 元
+        </span>
+        <span v-show="resultItem.salaryHigh===9999999">
+          {{moneyFormat(resultItem.salaryLow)}} 元以上
         </span>
       </p>
       <p>{{workshifts(resultItem.workShiftTypeDesc)}}</p>

@@ -96,7 +96,9 @@
 
 @media screen and (max-width: 767px) {
   .card {
-    width: calc( 100% - 2em ) !important;
+    // width: calc( 100% - 2em ) !important;
+    width: 500px !important;
+    max-width: unset !important;
     margin: 1em;
     height: auto;
   }
@@ -113,5 +115,13 @@
     li {
       font-size: $font-size-16;
     }
+  }
+}
+
+
+@media screen and (max-width: 579px) {
+  .card {
+    width: 300px !important;
+    margin: 10px;
   }
 }

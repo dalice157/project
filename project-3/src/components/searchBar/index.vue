@@ -1,14 +1,22 @@
 <script>
-import AreaBox from "../areaBox";
+import AreaBox from '../areaBox';
+import MainPaths from '~/common/LinkPath';
+
 export default {
   components: {
     AreaBox
   },
   data() {
+    const { query } = this.$route;
+    const hasQuery = JSON.stringify(query) === '{}';
     return {
+      MainPaths,
       isMobileOpenSearchActive: false,
-      jobTypeOpt: "0",
-      areas: []
+      jobTypeOpt: hasQuery || !query.type ? '0' : query.type,
+      areas: {
+        des: hasQuery || !query.areaDesc ? '地區' : query.areaDesc,
+        no: hasQuery || !query.areaNo ? '' : query.areaNo.split(',')
+      }
     };
   },
   methods: {
@@ -22,33 +30,41 @@ export default {
       this.areas = val;
     },
     getQuery(isType, area, type) {
-      if (isType && area && area > 0) {
-        return { area: this.areas || [] };
-      } else if (isType && !(area && area > 0)) {
+      if (isType && area.no && area.no.length > 0) {
+        return {
+          areaNo: this.areas.no || [],
+          areaDesc: this.areas.des || '地區'
+        };
+      } else if (isType && !(area.no && area.no.length > 0)) {
         return {};
       } else {
-        return { area: this.areas || [], type: type };
+        return {
+          areaNo: this.areas.no || [],
+          areaDesc: this.areas.des || [],
+          type
+        };
       }
     },
 
     async onclickSearch(type) {
-      const isTypeLengthZero = type === "0";
-      const areaArr =
-        this.areas && this.areas.length > 0 ? this.areas.split(",") : [];
+      const isTypeLengthZero = type === '0';
+      const getAreaArr =
+        this.areas.no && typeof this.areas.no === 'string'
+          ? this.areas.no.split(',')
+          : this.areas.no;
+      const areaArr = getAreaArr.length > 0 ? getAreaArr : [];
       const bodyParams = isTypeLengthZero
-        ? { areas: areaArr, offset: 1, limit: 15 }
-        : { areas: areaArr, type: type, offset: 1, limit: 15 };
-      const path = $nuxt.$route.path;
-      const bodyParamData = { area: areaArr, type: type };
+        ? { areas: areaArr, offset: 0, limit: 15 }
+        : { areas: areaArr, type, offset: 0, limit: 15 };
+      const bodyParamData = { area: areaArr, type };
       const queryParam = this.getQuery(isTypeLengthZero, this.areas, type);
       this.$router.push({
-        path: "/c/jobs",
+        path: '/c/jobs',
         query: queryParam
       });
       const { data } = await this.$apis.findJob.postJobSearch(bodyParams);
-      this.$emit("emit-list-data", data);
-      this.$emit("emit-body-params", bodyParamData);
-      return false;
+      this.$emit('emit-list-data', data);
+      this.$emit('emit-body-params', bodyParamData);
     }
   }
 };

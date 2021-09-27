@@ -8,18 +8,7 @@
     padding: 0 10px;
   }
 }
-/*
-.findTalent {
-  background-color: $white;
-  padding-bottom: 80px;
-}
-.banner {
-  height: 500px;
-  background: url("../../assets/image/findTalent/banner.jpg") center no-repeat;
-  background-size: cover;
-  margin-bottom: 110px;
-}
-*/
+
 .main {
   @extend %wrap;
   display: flex;
@@ -28,39 +17,41 @@
   //   margin-top: 80px;
   // }
   &.first {
+    padding-right:70px;
     margin:110px auto 80px auto;
   }
   &.noFlex {
     display: block;
   }
   .img {
-    width: 400px;
-    margin-right:100px;
+    width:100%;
+    max-width: 400px;
     img {
       width:100%;
       height:auto;
     }
   }
-}
-.article {
-  width: 400px;
-}
-.title {
-  font-size: $font-size-34;
-  color: $title;
-  margin-top: 14px;
-  font-weight: 500;
-}
-.label {
-  width: 175px;
-  height: 44px;
-}
-.paragraph {
-  color: $gray-600;
-  font-size: $font-size-18;
-  font-weight: 300;
-  line-height: 1.7;
-  margin-top: 30px;
+  .article {
+    max-width: 400px;
+    margin:unset;
+  }
+  .title {
+    font-size: $font-size-34;
+    color: $title;
+    margin-top: 14px;
+    font-weight: 500;
+  }
+  .label {
+    width: 175px;
+    height: 44px;
+  }
+  .paragraph {
+    color: $gray-600;
+    font-size: $font-size-18;
+    font-weight: 300;
+    line-height: 1.7;
+    margin-top: 30px;
+  }
 }
 .listBg {
   margin-top: 20px;
@@ -76,8 +67,9 @@
     height: 126px;
     list-style: none;
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
+    padding-top:30px;
     li {
       width:330px;
     }
@@ -98,6 +90,10 @@
   }
 }
 
+.cardWrap.mp {
+  padding:0 !important;
+}
+
 .stepWrap {
   @extend %wrap;
   display: flex;
@@ -110,7 +106,7 @@
   }
   .arrow {
     width: 28px;
-    background: url("../../../assets/image/findTalent/arrow-level.svg") center
+    background: url("~/assets/image/findTalent/arrow-level.svg") center
       no-repeat;
   }
   .top {
@@ -163,7 +159,7 @@
 }
 
 .btnWrap {
-  margin-top: 50px;
+  margin: 50px 0;
   text-align: center;
   .btn-outline-primary {
     border-color: $primary-5;
@@ -233,6 +229,85 @@
   margin-top: 50px;
 }
 
+.article {
+  width: 100%;
+  max-width: 1140px;
+  margin: 0 auto;
+
+  .title {
+    position: relative;
+    height: 40px;
+    white-space: nowrap;
+
+    h2 {
+      display: block;
+      position: absolute;
+      font-size: 34px;
+      font-weight: bold;
+      color: #868047;
+      line-height: 40px;
+      padding: 0 40px;
+      margin: 0;
+      background-color: #fff;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    hr {
+      width: 100%;
+      height: 20px;
+      border: 0;
+      margin: 0;
+      border-bottom: 1px solid #c4c4c4;
+    }
+  }
+
+  .thisBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 220px;
+    height: 50px;
+    line-height: 50px;
+    text-align: center;
+    font-size: 22px;
+    font-weight: bold;
+    color: $pumpkin-orange;
+    text-decoration: none;
+    padding: 0 25px;
+    margin: 0 auto;
+    border-radius: 25px;
+    border: 1px solid $pumpkin-orange;
+
+    img {
+      margin-left: 5px;
+      filter: invert(73%) sepia(60%) saturate(6953%) hue-rotate(1deg)
+        brightness(104%) contrast(104%);
+    }
+
+    &:hover {
+      color: #fff;
+      background-color: $pumpkin-orange;
+
+      img {
+        filter: invert(97%) sepia(100%) saturate(0%) hue-rotate(302deg)
+          brightness(105%) contrast(102%);
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 1039px) {
+  .main.first {
+    .article  {
+      max-width:50%;
+    }
+    .img {
+      max-width:45%;
+    }
+  }
+}
+
 @media screen and (max-width: 767px) {
   // .banner {
   //   width: 100%;
@@ -242,6 +317,9 @@
   .main {
     &.first {
       margin:40px auto;
+      .article {
+        max-width:100%;
+      }
     }
     & + .main {
       margin-top: 35px;
@@ -294,7 +372,7 @@
     .arrow {
       width: 100%;
       height: 40px;
-      background: url("../../../assets/image/findTalent/arrow-vertical.svg") center
+      background: url("~/assets/image/findTalent/arrow-vertical.svg") center
         no-repeat;
     }
   }
@@ -345,6 +423,8 @@
     opacity: 1;
     color: $primary-5;
   }
+
+  
 }
 
 // @media screen and (max-width: 320px) {
@@ -397,7 +477,7 @@
     .listBg {
       .wrap {
         li {
-          width:33%;
+          // width:33%;
           img {
             width:100%;
           }
@@ -414,6 +494,19 @@
     max-width:90% !important;
     .slick-arrow.slick-next {
       right:-5px;
+    }
+  }
+  .article {
+    .title {
+      h2 {
+        font-size:28px;
+        padding:0 20px;
+      }
+    }
+    .thisBtn {
+      width:205px;
+      height:45px;
+      font-size:20px;
     }
   }
 }

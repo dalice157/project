@@ -1,14 +1,18 @@
 <div class="findTalent">
-  <div class="banner">
-    <img src="~/assets/image/index/banner.jpg" />
+  <div class="banner bannerB">
+    <div class="txt">
+      <img src="~/assets/image/index/titleB.svg">
+      <p><b>＿＿＿＿</b><br/>＿＿＿＿</p>
+    </div>
   </div>
   <div class="main first">
     <div class="article">
       <img
         class="label"
-        src="../../../assets/image/findTalent/label-1.png"
+        src="~/assets/image/findTalent/label-1.png"
         alt="嚴選人才"
       />
+      <h1 hidden>找人才：嚴選人才企業服務介紹</h1>
       <h2 class="title">解決門市缺工問題</h2>
       <p class="paragraph">
         「花時間一一看履歷，辛苦面談的人選，實際上班幾天後就不做！?」面對找人的辛酸，104
@@ -17,7 +21,7 @@
     </div>
     <div class="img">
       <img
-        src="../../../assets/image/findTalent/store.png"
+        src="~/assets/image/findTalent/store.png"
         alt="解決門市缺工問題"
       />
     </div>
@@ -26,7 +30,7 @@
     <div class="article">
       <img
         class="label"
-        src="../../../assets/image/findTalent/label-1.png"
+        src="~/assets/image/findTalent/label-1.png"
         alt="嚴選人才"
       />
       <h2 class="title">即戰力高年級人才</h2>
@@ -36,19 +40,19 @@
     <ul class="wrap">
       <li>
         <img
-          src="../../../assets/image/findTalent/item-img-1.svg"
+          src="~/assets/image/findTalent/item-img-1.svg"
           alt="已嚴選面談"
         />
       </li>
       <li>
         <img
-          src="../../../assets/image/findTalent/item-img-2.svg"
+          src="~/assets/image/findTalent/item-img-2.svg"
           alt="上手速度快"
         />
       </li>
       <li>
         <img
-          src="../../../assets/image/findTalent/item-img-3.svg"
+          src="~/assets/image/findTalent/item-img-3.svg"
           alt="配合度較高"
         />
       </li>
@@ -126,44 +130,66 @@
     </div>
   </div>
   <div class="btnWrap">
-    <b-button pill variant="outline-primary" size="lg" href="#"
-      >立即加入合作企業 <img src="../../../assets/image/findTalent/icon_down.svg"
+    <b-button pill variant="outline-primary" size="lg" href="https://forms.office.com/r/CN3aeMp9Af" target="_blank"
+      >立即加入合作企業
+      <img src="~/assets/image/findTalent/icon_down.svg"
     /></b-button>
   </div>
-  <h2 class="titleBg"><span class="title">人資充電</span></h2>
-  <div class="hrWrap pc">
-    <HrCard
-      :img-url="require('~/assets/image/findTalent/hr-img-1.jpg')"
-      article="搞懂中高齡就業專法不困難，看完這10題人資精選QA就夠了！｜法律小教搞懂中高齡就業專法不困難，看完這10題人資精選QA就夠了！｜法律小教"
-    />
-    <HrCard
-      :img-url="require('~/assets/image/findTalent/hr-img-2.jpg')"
-      article="企業僱用中高齡工作者，諸多可行捷徑可創造雙贏！"
-    />
-    <HrCard
-      :img-url="require('~/assets/image/findTalent/hr-img-3.jpg')"
-      article="企業僱用中高齡工作者，諸多可行捷徑可創造雙贏！"
-    />
-  </div>
-  <div class="hrWrap mp">
-    <VueSlickCarousel v-bind="hrOptions">
-      <HrCard
+
+  <div class="article">
+    <div class="title">
+      <h2>人資充電</h2>
+      <hr />
+    </div>
+
+    <div class="boxs forDesktop">
+      <ArticleCard
         :img-url="require('~/assets/image/findTalent/hr-img-1.jpg')"
-        article="搞懂中高齡就業專法不困難，看完這10題人資精選QA就夠了！｜法律小教搞懂中高齡就業專法不困難，看完這10題人資精選QA就夠了！｜法律小教"
+        articleTTL="搞懂中高齡就業專法不困難，看完這10題人資精選QA就夠了！｜法律小教室"
+        articleURL="https://blog.104.com.tw/middle-and-senior-age-law-10-qa/#06"
       />
-      <HrCard
+
+      <ArticleCard
         :img-url="require('~/assets/image/findTalent/hr-img-2.jpg')"
-        article="企業僱用中高齡工作者，諸多可行捷徑可創造雙贏！"
+        articleTTL="企業僱用中高齡工作者，諸多可行捷徑可創造雙贏！"
+        articleURL="https://blog.104.com.tw/hire-senior-workers/"
       />
-      <HrCard
+
+      <ArticleCard
         :img-url="require('~/assets/image/findTalent/hr-img-3.jpg')"
-        article="企業僱用中高齡工作者，諸多可行捷徑可創造雙贏！"
+        articleTTL="「中高齡就業專法」上路，僱用高年級即戰力，HR務必留心的獎與罰！"
+        articleURL="https://blog.104.com.tw/senior-employment-law-hr-must-read/"
+      />
+    </div>
+
+    <VueSlickCarousel
+      v-bind="articleCard"
+      :arrows="true"
+      :dots="true"
+      class="boxs forMobile"
+    >
+      <ArticleCard
+        :img-url="require('~/assets/image/findTalent/hr-img-1.jpg')"
+        articleTTL="搞懂中高齡就業專法不困難，看完這10題人資精選QA就夠了！｜法律小教室"
+        articleURL="https://blog.104.com.tw/middle-and-senior-age-law-10-qa/#06"
+      />
+
+      <ArticleCard
+        :img-url="require('~/assets/image/findTalent/hr-img-2.jpg')"
+        articleTTL="企業僱用中高齡工作者，諸多可行捷徑可創造雙贏！"
+        articleURL="https://blog.104.com.tw/hire-senior-workers/"
+      />
+
+      <ArticleCard
+        :img-url="require('~/assets/image/findTalent/hr-img-3.jpg')"
+        articleTTL="「中高齡就業專法」上路，僱用高年級即戰力，HR務必留心的獎與罰！"
+        articleURL="https://blog.104.com.tw/senior-employment-law-hr-must-read/"
       />
     </VueSlickCarousel>
-  </div>
-  <div class="btnWrap">
-    <b-button pill variant="outline-primary" size="lg" href="#"
-      >更多文章 <img src="../../../assets/image/findTalent/icon_down.svg"
-    /></b-button>
+
+    <a href="https://blog.104.com.tw/category/topic/senior/" target="_blank" class="thisBtn">
+      <span>更多文章</span>
+      <img src="~/assets/image/icon/icon_arrow_right.svg" />
+    </a>
   </div>
 </div>

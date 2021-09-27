@@ -1,4 +1,4 @@
-.list {
+.listPage {
   .frame {
     .tableList {
       padding: 30px 20px !important;
@@ -99,7 +99,7 @@
 }
 
 @media only screen and (max-width: 767px) {
-  .list {
+  .listPage {
     .frame {
       .tableList,
       .tableList .tr,

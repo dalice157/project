@@ -1,10 +1,13 @@
 <div class="index">
-  <h1 hidden>高年級人力銀行</h1>
+  <h1 hidden>找工作：嚴選人才職場計畫說明</h1>
 
   <SearchBar ref="childComponent" />
 
-  <div class="banner" @click="clickClose">
-    <img src="~/assets/image/index/banner.jpg" />
+  <div class="banner bannerC" @click="clickClose">
+    <div class="txt">
+      <img src="~/assets/image/index/titleC.svg">
+      <p><b>＿＿＿＿</b><br/>＿＿＿＿</p>
+    </div>
   </div>
 
   <div class="intro" @click="clickClose">
@@ -53,7 +56,7 @@
 
       <div class="step s2">
         <div class="pic">
-          <img src="~/assets/image/icon/icon_how2.svg" />
+          <img src="~/assets/image/icon/icon_how2.png" />
         </div>
         <div class="subttl">
           <h3>02. <span>參加課程</span></h3>
@@ -85,7 +88,7 @@
       </div>
     </div>
 
-    <a href="#" class="thisBtn">
+    <a href="https://forms.office.com/r/7SgxXgZDXv" target="_blank" class="thisBtn">
       <span>立即申請加入</span>
       <img src="~/assets/image/icon/icon_arrow_right.svg" />
     </a>
@@ -98,6 +101,7 @@
     </div>
 
     <div class="boxs forDesktop">
+
       <ArticleCard
         :img-url="require('~/assets/image/index/article_pic1.jpg')"
         articleTTL="我年長但專業！中高齡長者延長職涯，如何發揮戰力成為企業不可或缺的人才？"
@@ -115,40 +119,7 @@
         articleTTL="高齡者再就業，務必留意勞保權益！"
         articleURL="https://blog.104.com.tw/be-careful-of-rights-and-interests-in-reemployment/"
       />
-      <!--
-      <a href="https://blog.104.com.tw/what-preparations-are-needed-for-senior-employment/" target="_blank" class="box">
-        <div class="pic">
-          <img src="~/assets/image/index/article_pic1.jpg" />
-        </div>
-        <h4>我年長但專業！中高齡長者延長職涯，如何發揮戰力成為企業不可或缺的人才？</h4>
-        <div class="moreBtn">
-          <span>看全文</span>
-          <img src="~/assets/image/icon/icon_arrow_right.svg" />
-        </div>
-      </a>
 
-      <a href="https://blog.104.com.tw/podcast-ep52/" target="_blank" class="box">
-        <div class="pic">
-          <img src="~/assets/image/index/article_pic2.jpg" />
-        </div>
-        <h4>中年轉職不往「管理職」發展，還能擁有高薪和成長機會嗎？</h4>
-        <div class="moreBtn">
-          <span>看全文</span>
-          <img src="~/assets/image/icon/icon_arrow_right.svg" />
-        </div>
-      </a>
-
-      <a href="https://blog.104.com.tw/be-careful-of-rights-and-interests-in-reemployment/" target="_blank" class="box">
-        <div class="pic">
-          <img src="~/assets/image/index/article_pic3.jpg" />
-        </div>
-        <h4>高齡者再就業，務必留意勞保權益！</h4>
-        <div class="moreBtn">
-          <span>看全文</span>
-          <img src="~/assets/image/icon/icon_arrow_right.svg" />
-        </div>
-      </a>
--->
     </div>
 
     <VueSlickCarousel
@@ -176,7 +147,7 @@
       />
     </VueSlickCarousel>
 
-    <a href="#" class="thisBtn">
+    <a href="https://blog.104.com.tw/category/topic/senior/" target="_blank" class="thisBtn">
       <span>更多文章</span>
       <img src="~/assets/image/icon/icon_arrow_right.svg" />
     </a>
