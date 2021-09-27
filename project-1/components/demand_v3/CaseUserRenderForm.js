@@ -227,7 +227,7 @@ class CaseUserRenderForm extends Component {
                 className={styles.category}
                 onClick={() => this.onIndustClick(validateField, setFieldValue, values.industry.no)}
               >
-                { values.industry.des || '請選擇產業類型'}
+                {values.industry.des || '請選擇產業類型'}
                 <Icon type="down" />
               </div>
             )}
@@ -315,7 +315,7 @@ class CaseUserRenderForm extends Component {
                   className={`${styles.category} ${styles.county}`}
                   onClick={() => this.onAreaClick(validateField, setFieldValue, values.postNum.no)}
                 >
-                  { values.postNum.des || '請選擇地區' }
+                  {values.postNum.des || '請選擇地區'}
                   <Icon type="down" />
                 </div>
               )}
@@ -469,7 +469,7 @@ class CaseUserRenderForm extends Component {
         </>
         <div className={styles.btnWrap}>
           <Button onClick={onBackPage}>取消回上一頁</Button>
-          <Button type="primary" htmlType="submit">立即啟用</Button>
+          <Button type="primary" htmlType="submit" disabled>立即啟用</Button>
         </div>
       </form>
     );

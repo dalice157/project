@@ -44,11 +44,11 @@ class Manage extends Component {
       title: '您已選擇以下付款方式',
       content: (
         <div>
-          { atmVirtualAccount || ibonVirtualAccount ? <p>付款方式：{atmVirtualAccount ? paymentTypes[5] : paymentTypes[3]}</p> : null}
-          { atmVirtualAccount ? <p>銀行代碼：{bankAccount}</p> : null}
-          { atmVirtualAccount || ibonVirtualAccount ? <p>銷帳編號：{atmVirtualAccount || ibonVirtualAccount}</p> : null}
-          { price ? <p>應付金額：{price}</p> : null}
-          { paymentDueDate ? <p>付款期限：{dayjs(paymentDueDate).format(dateFormat)} 前完成付款</p> : null}
+          {atmVirtualAccount || ibonVirtualAccount ? <p>付款方式：{atmVirtualAccount ? paymentTypes[5] : paymentTypes[3]}</p> : null}
+          {atmVirtualAccount ? <p>銀行代碼：{bankAccount}</p> : null}
+          {atmVirtualAccount || ibonVirtualAccount ? <p>銷帳編號：{atmVirtualAccount || ibonVirtualAccount}</p> : null}
+          {price ? <p>應付金額：{price}</p> : null}
+          {paymentDueDate ? <p>付款期限：{dayjs(paymentDueDate).format(dateFormat)} 前完成付款</p> : null}
           <br />
           {
             ibonVirtualAccount
@@ -186,7 +186,7 @@ class Manage extends Component {
                 </li>
               ))}
             </ul>
-            <img className={styles.topPic} src={addTopMobile} alt="歡迎加入 高手行列" />
+            {/* <img className={styles.topPic} src={addTopMobile} alt="歡迎加入 高手行列" /> */}
           </div>
           <Modal
             visible={showModal}
@@ -294,7 +294,7 @@ class Manage extends Component {
                 )
                 : null
             }
-            <img className={styles.topPic} src={addTop} alt="歡迎加入 高手行列" />
+            {/* <img className={styles.topPic} src={addTop} alt="歡迎加入 高手行列" /> */}
             <h3 className={styles.title}>重要通知</h3>
             <ul className={styles.importWrap}>
               {

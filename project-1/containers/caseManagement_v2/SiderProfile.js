@@ -106,7 +106,7 @@ class SiderProfile extends Component {
                 </div>
                 <div className={styles.userInfo}>
                   <div className={styles.titleWrap}>
-                    { publishing ? <Link className={styles.username} to={`/profile/${basicId}`}>{topperNameUI}</Link> : topperNameUI }
+                    {publishing ? <Link className={styles.username} to={`/profile/${basicId}`}>{topperNameUI}</Link> : topperNameUI}
                     {
                       publishing === 'true' && (
                         <Button type="normal" className={styles.edit}><Link to="/editor?publish=success">編輯</Link></Button>
@@ -127,9 +127,9 @@ class SiderProfile extends Component {
 
                           {
                             activeInSevenDays === 'true' && (
-                            <a href={blogUrl} target="_blank" rel="noreferrer">
-                              <img src={bronze} alt="活躍" />
-                            </a>
+                              <a href={blogUrl} target="_blank" rel="noreferrer">
+                                <img src={bronze} alt="活躍" />
+                              </a>
                             )
                           }
                         </div>
@@ -141,46 +141,46 @@ class SiderProfile extends Component {
             </div>
             {
               (medal === '1' && compareReviewAvgScore && Number(dealCount) === 9 && Number(reviewCount) >= 5) && (
-              <div className={styles.medalTips}>
-                <div className={styles.img}>
-                  <img src={goldIcon} alt="獎牌提示" />
+                <div className={styles.medalTips}>
+                  <div className={styles.img}>
+                    <img src={goldIcon} alt="獎牌提示" />
+                  </div>
+                  <div className={styles.tips}>
+                    <span className={styles.keyPoint}>再1個合作，</span>
+                    晉升金牌高手！
+                  </div>
                 </div>
-                <div className={styles.tips}>
-                  <span className={styles.keyPoint}>再1個合作，</span>
-                  晉升金牌高手！
-                </div>
-              </div>
               )
             }
             {
               (medal === '1' && compareReviewAvgScore && Number(dealCount) >= 10 && Number(reviewCount) === 4) && (
-              <div className={styles.medalTips}>
-                <div className={styles.img}>
-                  <img src={goldIcon} alt="獎牌提示" />
+                <div className={styles.medalTips}>
+                  <div className={styles.img}>
+                    <img src={goldIcon} alt="獎牌提示" />
+                  </div>
+                  <div className={styles.tips}>
+                    <span className={styles.keyPoint}>再1個評價，</span>
+                    晉升金牌高手！
+                  </div>
                 </div>
-                <div className={styles.tips}>
-                  <span className={styles.keyPoint}>再1個評價，</span>
-                  晉升金牌高手！
-                </div>
-              </div>
               )
             }
             <div className={styles.userRate}>
               {
-                  hasReviewCount ? (
-                    <div className={styles.rateWrap} onClick={() => history.push(`/evaluation/${basicId}`)}>
-                      <span className={styles.evaluationNo}>{hasReviewCount ? reviewAvgScore : '-'}</span>
-                      <Star style={{ color: '#00cdab', width: '20px', height: '20px' }} />
-                      <span className={styles.rateNo}>{hasReviewCount ? `(${reviewCount})` : ''}</span>
-                    </div>
-                  ) : (
-                    <div className={styles.rateWrap}>
-                      <span className={styles.evaluationNo}>{hasReviewCount ? reviewAvgScore : '-'}</span>
-                      <Star style={{ color: '#00cdab', width: '20px', height: '20px' }} />
-                      <span className={styles.rateNo}>{hasReviewCount ? `(${reviewCount})` : ''}</span>
-                    </div>
-                  )
-                }
+                hasReviewCount ? (
+                  <div className={styles.rateWrap} onClick={() => history.push(`/evaluation/${basicId}`)}>
+                    <span className={styles.evaluationNo}>{hasReviewCount ? reviewAvgScore : '-'}</span>
+                    <Star style={{ color: '#00cdab', width: '20px', height: '20px' }} />
+                    <span className={styles.rateNo}>{hasReviewCount ? `(${reviewCount})` : ''}</span>
+                  </div>
+                ) : (
+                  <div className={styles.rateWrap}>
+                    <span className={styles.evaluationNo}>{hasReviewCount ? reviewAvgScore : '-'}</span>
+                    <Star style={{ color: '#00cdab', width: '20px', height: '20px' }} />
+                    <span className={styles.rateNo}>{hasReviewCount ? `(${reviewCount})` : ''}</span>
+                  </div>
+                )
+              }
               <div className={styles.reviewWrap}>
                 瀏覽
                 {' '}
@@ -230,9 +230,9 @@ class SiderProfile extends Component {
                 }
                 {
                   activeInSevenDays === 'true' && (
-                  <a href={blogUrl} target="_blank" rel="noreferrer">
-                    <img src={bronze} alt="活躍" />
-                  </a>
+                    <a href={blogUrl} target="_blank" rel="noreferrer">
+                      <img src={bronze} alt="活躍" />
+                    </a>
                   )
                 }
               </div>
@@ -240,65 +240,64 @@ class SiderProfile extends Component {
           }
           {
             (medal === '1' && compareReviewAvgScore && Number(dealCount) === 9 && Number(reviewCount) >= 5) && (
-            <div className={styles.medalTips}>
-              <div className={styles.img}>
-                <img src={goldIcon} alt="獎牌提示" />
+              <div className={styles.medalTips}>
+                <div className={styles.img}>
+                  <img src={goldIcon} alt="獎牌提示" />
+                </div>
+                <div className={styles.tips}>
+                  <span className={styles.keyPoint}>再1個合作，</span>
+                  <br />
+                  晉升金牌高手！
+                </div>
               </div>
-              <div className={styles.tips}>
-                <span className={styles.keyPoint}>再1個合作，</span>
-                <br />
-                晉升金牌高手！
-              </div>
-            </div>
             )
           }
 
           {
             (medal === '1' && compareReviewAvgScore && Number(dealCount) >= 10 && Number(reviewCount) === 4) && (
-            <div className={styles.medalTips}>
-              <div className={styles.img}>
-                <img src={goldIcon} alt="獎牌提示" />
+              <div className={styles.medalTips}>
+                <div className={styles.img}>
+                  <img src={goldIcon} alt="獎牌提示" />
+                </div>
+                <div className={styles.tips}>
+                  <span className={styles.keyPoint}>再1個評價，</span>
+                  <br />
+                  晉升金牌高手！
+                </div>
               </div>
-              <div className={styles.tips}>
-                <span className={styles.keyPoint}>再1個評價，</span>
-                <br />
-                晉升金牌高手！
-              </div>
-            </div>
             )
           }
 
           <div className={styles.title}>
             {
-            publishing
-              ? <Link className={styles.username} to={`/profile/${basicId}`}>{topperName}</Link>
-              : topperName
+              publishing
+                ? <Link className={styles.username} to={`/profile/${basicId}`}>{topperName}</Link>
+                : topperName
             }
           </div>
           {
-              publishing === 'true' && (
-              <Button type="normal" className={styles.edit}><Link to="/editor?publish=success">編輯檔案</Link></Button>)
-            }
+            <Button type="normal" className={styles.edit}><Link to={`/editor${publishing === 'true' ? '?publish=success' : ''}`}>編輯檔案</Link></Button>
+          }
           {
-              hasReviewCount
-                ? (
-                  <div style={{ cursor: 'pointer' }} onClick={() => history.push(`/evaluation/${basicId}`)}>
-                    <div className={styles.evaluationNo}>{hasReviewCount ? reviewAvgScore : '-'}</div>
-                    <div className={styles.rateWrap}>
-                      <Rate allowHalf disabled value={starScore} />
-                      <span className={styles.rateNo}>{hasReviewCount ? `(${reviewCount || '-'})` : ''}</span>
-                    </div>
+            hasReviewCount
+              ? (
+                <div style={{ cursor: 'pointer' }} onClick={() => history.push(`/evaluation/${basicId}`)}>
+                  <div className={styles.evaluationNo}>{hasReviewCount ? reviewAvgScore : '-'}</div>
+                  <div className={styles.rateWrap}>
+                    <Rate allowHalf disabled value={starScore} />
+                    <span className={styles.rateNo}>{hasReviewCount ? `(${reviewCount || '-'})` : ''}</span>
                   </div>
-                ) : (
-                  <>
-                    <div className={styles.evaluationNo}>{hasReviewCount ? reviewAvgScore : '-'}</div>
-                    <div className={styles.rateWrap}>
-                      <Rate allowHalf disabled value={starScore} />
-                      <span className={styles.rateNo}>{hasReviewCount ? `(${reviewCount || '-'})` : ''}</span>
-                    </div>
-                  </>
-                )
-            }
+                </div>
+              ) : (
+                <>
+                  <div className={styles.evaluationNo}>{hasReviewCount ? reviewAvgScore : '-'}</div>
+                  <div className={styles.rateWrap}>
+                    <Rate allowHalf disabled value={starScore} />
+                    <span className={styles.rateNo}>{hasReviewCount ? `(${reviewCount || '-'})` : ''}</span>
+                  </div>
+                </>
+              )
+          }
           <div className={styles.reviewWrap}>
             瀏覽數
             {' '}

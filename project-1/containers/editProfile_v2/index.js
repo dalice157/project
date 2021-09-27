@@ -29,6 +29,7 @@ import { productsDesc } from '../../config/constant';
 import ScrollToError from '../common_v2/ScrollToError';
 import Step from '../../components/ui/step';
 import styles from './EditProfile.scss';
+import TerminateModal from '../../components/terminateModal';
 
 class EditProfile extends Component {
   constructor(props) {
@@ -385,19 +386,19 @@ class EditProfile extends Component {
                 <div className={styles.priceItem}>
                   <Radio name="productNo" disabled={isDisabled} className={styles.radioBlock} value={selectValue} />
                   {!isQueryType && (
-                  <div className={styles.priceWrap}>
-                    <span className={`${styles.price} ${isDiscountPriceStyle}`}>
-                      $
-                      {getPrice}
-                    </span>
-                    ・
-                    {contentQuantity}
-                    {productUnit}
-                    <div className={styles.priceSmall}>
-                      平均每個月 $
-                      {average}
+                    <div className={styles.priceWrap}>
+                      <span className={`${styles.price} ${isDiscountPriceStyle}`}>
+                        $
+                        {getPrice}
+                      </span>
+                      ・
+                      {contentQuantity}
+                      {productUnit}
+                      <div className={styles.priceSmall}>
+                        平均每個月 $
+                        {average}
+                      </div>
                     </div>
-                  </div>
                   )
                   }
                   {
@@ -444,6 +445,18 @@ class EditProfile extends Component {
       </>
     );
   }
+
+  modalContext = (
+    <>
+      <p>
+        1. 2021年10月1日(五)起，將停止販售 超值型NT$399/60天、無限型NT$1980/60天 等接案方案。
+        <br />
+        2. 免費體驗同步停止申請。
+      </p>
+      <br />
+      <p>感謝您的使用與支持，造成您的不便敬請見諒。</p>
+    </>
+  )
 
   renderForm = (props) => {
     const isMobile = uaIsMobile();
@@ -565,44 +578,44 @@ class EditProfile extends Component {
         </h2>
         <div className={`${styles.block} ${styles.noBorder} ${isMobileStyle}`}>
           <Radio.Group name="productNo" onChange={this.onProductNoChange}>
-            {
+            {/* {
               payInfoData && payInfoData.experiencePlan && (
-              <div className={`${styles.chooseWrap} ${styles.freeTrial} ${isMobileStyle}`}>
-                <div className={styles.header}>
-                  <img src={icon1} alt="新手體驗" />
-                  <div className={styles.textBlock}>
-                    <h3 className={styles.title}>新手體驗</h3>
-                    <div className={styles.depiction}>
-                      {productsDesc.freeTrial}
-                    </div>
-                  </div>
-                </div>
-                <div className={styles.acceptable}>
-                  在線案件 &nbsp; 外包約
-                  {' '}
-                  <span className={styles.number}>{outsourceDemandCount}</span>
-                  {' '}
-                  件，家教約
-                  {' '}
-                  <span className={styles.number}>{tutorDemandCount}</span>
-                  {' '}
-                  件
-                </div>
-                <ul>
-                  <li className={styles.table}>
-                    <div className={styles.priceItem}>
-                      <Radio name="productNo" className={styles.radioBlock} value="freeTrial" />
-                      <div className={styles.priceWrap}>
-                        <span className={styles.price}>$0</span>
-                        ・30天
-                        <div className={styles.newMemberPs}>首次發佈刊登之接案者，免費體驗1次。</div>
+                <div className={`${styles.chooseWrap} ${styles.freeTrial} ${isMobileStyle}`}>
+                  <div className={styles.header}>
+                    <img src={icon1} alt="新手體驗" />
+                    <div className={styles.textBlock}>
+                      <h3 className={styles.title}>新手體驗</h3>
+                      <div className={styles.depiction}>
+                        {productsDesc.freeTrial}
                       </div>
                     </div>
-                  </li>
-                </ul>
-              </div>
+                  </div>
+                  <div className={styles.acceptable}>
+                    在線案件 &nbsp; 外包約
+                    {' '}
+                    <span className={styles.number}>{outsourceDemandCount}</span>
+                    {' '}
+                    件，家教約
+                    {' '}
+                    <span className={styles.number}>{tutorDemandCount}</span>
+                    {' '}
+                    件
+                  </div>
+                  <ul>
+                    <li className={styles.table}>
+                      <div className={styles.priceItem}>
+                        <Radio name="productNo" className={styles.radioBlock} value="freeTrial" />
+                        <div className={styles.priceWrap}>
+                          <span className={styles.price}>$0</span>
+                          ・30天
+                          <div className={styles.newMemberPs}>首次發佈刊登之接案者，免費體驗1次。</div>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
               )
-            }
+            } */}
             {
               renderCard.map(item => (
                 <div className={`${styles.chooseWrap} ${isMobileStyle}`}>
@@ -616,33 +629,33 @@ class EditProfile extends Component {
                     </div>
                   </div>
                   {
-                      (item.title).includes('無限型') ? (
-                        <div className={styles.acceptable}>
-                          在線案件 &nbsp;約
-                          {' '}
-                          <span className={styles.number}>{allDemandCount}</span>
-                          {' '}
-                          件
-                        </div>
-                      ) : (
-                        <div className={styles.acceptable}>
-                          在線案件 &nbsp; 外包約
-                          {' '}
-                          <span className={styles.number}>{outsourceDemandCount}</span>
-                          {' '}
-                          件，家教約
-                          {' '}
-                          <span className={styles.number}>{tutorDemandCount}</span>
-                          {' '}
-                          件
-                        </div>
-                      )
-                      }
-                  <ul>
+                    (item.title).includes('無限型') ? (
+                      <div className={styles.acceptable}>
+                        在線案件 &nbsp;約
+                        {' '}
+                        <span className={styles.number}>{allDemandCount}</span>
+                        {' '}
+                        件
+                      </div>
+                    ) : (
+                      <div className={styles.acceptable}>
+                        在線案件 &nbsp; 外包約
+                        {' '}
+                        <span className={styles.number}>{outsourceDemandCount}</span>
+                        {' '}
+                        件，家教約
+                        {' '}
+                        <span className={styles.number}>{tutorDemandCount}</span>
+                        {' '}
+                        件
+                      </div>
+                    )
+                  }
+                  {/* <ul>
                     {
-                        this.renderPayChooseV2(cardDataSort, item.title)
-                      }
-                  </ul>
+                      this.renderPayChooseV2(cardDataSort, item.title)
+                    }
+                  </ul> */}
                 </div>
               ))
             }
@@ -915,20 +928,20 @@ class EditProfile extends Component {
                         </Button>
                       </Link>
                       {' '}
-&nbsp;&nbsp;
+                      &nbsp;&nbsp;
                     </>
                   )
                 }
                 {
                   !isQueryType && (
-                    <Button type="danger" htmlType="submit" loading={isSubmitting}>
+                    <Button type="danger" htmlType="submit" loading={isSubmitting} disabled>
                       下一步
                     </Button>
                   )
                 }
                 {
                   isQueryType && (
-                    <Button type="primary" htmlType="submit" loading={isSubmitting}>
+                    <Button type="primary" htmlType="submit" loading={isSubmitting} disabled>
                       確認轉換刊登
                     </Button>
                   )
@@ -991,7 +1004,7 @@ class EditProfile extends Component {
                 <span className={styles.frequency}>乙</span>
                 次， 無需付費
                 {' '}
-                { experiencePlan && '或  先體驗後再轉換'}
+                {experiencePlan && '或  先體驗後再轉換'}
               </div>
             )
           }
@@ -1001,7 +1014,7 @@ class EditProfile extends Component {
                 <Icon type="info-circle" />
                 您尚有外包刊期殘餘天數，優先轉換  無限方案  ，將無需付費
                 {' '}
-                { experiencePlan && '或  先體驗後再轉換'}
+                {experiencePlan && '或  先體驗後再轉換'}
               </div>
             )
           }
@@ -1011,6 +1024,10 @@ class EditProfile extends Component {
             validationSchema={getValidate}
             render={this.renderForm}
             enableReinitialize
+          />
+          <TerminateModal
+            title="104高手方案販售變更通知"
+            context={this.modalContext}
           />
         </div>
       </Spin>

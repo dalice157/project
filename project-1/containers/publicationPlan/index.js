@@ -12,9 +12,21 @@ import checkV from '../../img/common_v2/icon-arrow.svg';
 import BeTopperButton from '../common_v2/BeTopperButton';
 import Footer from '../../components/footer_v3';
 import styles from './PublicationPlan.scss';
+import TerminateModal from '../../components/terminateModal';
 
 const { TabPane } = Tabs;
 class PublicationPlan extends PureComponent {
+  modalContext = (
+    <>
+      <p>
+        1. 2021年10月1日(五)起，將停止販售 超值型NT$399/60天、無限型NT$1980/60天 等接案方案。<br />
+        2. 免費體驗同步停止申請。
+      </p>
+      <br />
+      <p>感謝您的使用與支持，造成您的不便敬請見諒。</p>
+    </>
+  )
+
   render() {
     const isMobile = uaIsMobile();
     const isMobileStyle = isMobile ? styles.mobile : '';
@@ -227,6 +239,10 @@ class PublicationPlan extends PureComponent {
           </div>
         </div>
         <Footer memberCheck={this.props.chkActiveProcess} />
+        <TerminateModal
+          title="104高手方案販售變更通知"
+          context={this.modalContext}
+        />
       </>
     );
   }

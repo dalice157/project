@@ -170,7 +170,7 @@ class BeTopperButton extends Component {
         dataGtmPlan: '立即購買',
       },
     };
-    const linkToLoginCheck = isBanner ? <a onClick={() => this.showTopperEditorModal(this.redirectToProfile, this.redirectToTopper)} {...gtmConfig[gtmFrom]} title={text} /> : <Button type="primary" onClick={() => this.showTopperEditorModal(this.redirectToProfile, this.redirectToTopper)} {...gtmConfig[gtmFrom]}>{text}</Button>;
+    const linkToLoginCheck = isBanner ? <a onClick={() => this.showTopperEditorModal(this.redirectToProfile, this.redirectToTopper)} {...gtmConfig[gtmFrom]} title={text} /> : <Button type="primary" onClick={() => this.showTopperEditorModal(this.redirectToProfile, this.redirectToTopper)} {...gtmConfig[gtmFrom]} disabled>{text}</Button>;
 
     return (
       <>

@@ -316,8 +316,9 @@ class BrandModel extends Component {
         dataGtmMarketing={dataGtmMarketing}
         dataGtmJoin={dataGtmJoin}
         dataGtmPlan={dataGtmPlan}
+        disabled
       >
-        { btnText }
+        {btnText}
       </Button>
     );
 

@@ -7,6 +7,7 @@ import { acDateFormat } from '../../config/constant';
 import { catSearch } from '../../util/categoryUtils';
 import { validateCaseUser } from '../../components/common_v2/Validates';
 import CaseUserRenderForm from '../../components/demand_v3/CaseUserRenderForm';
+import TerminateModal from '../../components/terminateModal';
 import { loadStaticArea, loadStaticIndust } from '../../actions/common';
 import { getFormDefault, saveTopForm } from '../../actions/basic';
 import styles from './EnableCaseUser.scss';
@@ -101,6 +102,11 @@ class EnableCaseUser extends Component {
     actions.setSubmitting(false);
   }
 
+  modalContext = (
+    <>
+      <p>104高手預計於 2021年11月30日(二) 結束平台服務，即日起停止加入會員，感謝您的使用與支持，造成您的不便敬請見諒。</p>
+    </>
+  )
 
   render() {
     const {
@@ -167,6 +173,10 @@ class EnableCaseUser extends Component {
               />
             )}
             enableReinitialize
+          />
+          <TerminateModal
+            title="104高手平台服務終止通知"
+            context={this.modalContext}
           />
         </div>
       </Spin>
