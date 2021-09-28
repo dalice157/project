@@ -3,7 +3,7 @@
     <nuxt-link to="/"><img src="~/assets/image/header/logo.svg" alt="104高年級人力銀行" /></nuxt-link>
     <ul class="nav">
       <li><nuxt-link :to="MainPaths.bService">找人才</nuxt-link></li>
-      <li><nuxt-link :to="MainPaths.cService">找工作</nuxt-link></li>
+      <li><nuxt-link :class="{ active: this.$route.path === '/c/jobs' }" :to="MainPaths.cService">找工作</nuxt-link></li>
     </ul>
   </div>
 </header>

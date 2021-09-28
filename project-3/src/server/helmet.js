@@ -29,7 +29,8 @@ const helmetMid = (app) => {
           '*.podcasts.apple.com',
           '*.music.apple.com',
           '*.mzstatic.com',
-          '*.apple.com'
+          '*.apple.com',
+          'analytics.google.com',
         ],
         scriptSrc: [
           "'self'", "'unsafe-inline'", "'unsafe-eval'",

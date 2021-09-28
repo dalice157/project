@@ -56,7 +56,6 @@ export default {
       const bodyParams = isTypeLengthZero
         ? { areas: areaArr, offset: 0, limit: 15 }
         : { areas: areaArr, type, offset: 0, limit: 15 };
-      const bodyParamData = { area: areaArr, type };
       const queryParam = this.getQuery(isTypeLengthZero, this.areas, type);
       this.$router.push({
         path: '/c/jobs',
@@ -64,7 +63,6 @@ export default {
       });
       const { data } = await this.$apis.findJob.postJobSearch(bodyParams);
       this.$emit('emit-list-data', data);
-      this.$emit('emit-body-params', bodyParamData);
     }
   }
 };

@@ -4,8 +4,10 @@ import MainPaths from '~/common/LinkPath'
 export default {
   data() {
     return {
-      MainPaths,
+      MainPaths
     }
+  },
+  methods: {
   }
 }
 </script>

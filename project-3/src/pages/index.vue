@@ -1,5 +1,5 @@
 <script>
-import MainPaths from "~/common/LinkPath";
+import MainPaths from '~/common/LinkPath';
 
 export default {
   asyncData(context) {

@@ -7,4 +7,4 @@ export const c = {
   cJobs: '/c/jobs'
 }
 
-export default { ...b, ...c}
+export default { ...b, ...c }

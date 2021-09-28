@@ -1,5 +1,5 @@
-import loginAPI from "./loginAPI";
-import findJobAPI from "./findJobAPI";
+import loginAPI from './loginAPI';
+import findJobAPI from './findJobAPI';
 
 export default $axios => ({
   login: loginAPI($axios),
