@@ -31,9 +31,7 @@
       <p>{{workshifts(resultItem.workShiftTypeDesc)}}</p>
       <p>
         <span v-show="resultItem.workNeedShift" class="tags">需輪班</span>
-        <span v-show="resultItem.workTime" class="tags"
-          >{{resultItem.workTime}}</span
-        >
+        <span v-show="resultItem.workTime === '週休二日'" class="tags">{{resultItem.workTime}}</span>
       </p>
     </div>
     <div class="td location">

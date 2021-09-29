@@ -1,6 +1,7 @@
 <script>
 import AreaBox from '../areaBox';
 import MainPaths from '~/common/LinkPath';
+import { cJobsListPerPage } from '~/common/const'
 
 export default {
   components: {
@@ -54,8 +55,8 @@ export default {
           : this.areas.no;
       const areaArr = getAreaArr.length > 0 ? getAreaArr : [];
       const bodyParams = isTypeLengthZero
-        ? { areas: areaArr, offset: 0, limit: 15 }
-        : { areas: areaArr, type, offset: 0, limit: 15 };
+        ? { areas: areaArr, offset: 0, limit: cJobsListPerPage }
+        : { areas: areaArr, type, offset: 0, limit: cJobsListPerPage };
       const queryParam = this.getQuery(isTypeLengthZero, this.areas, type);
       this.$router.push({
         path: '/c/jobs',
