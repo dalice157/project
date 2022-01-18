@@ -1,4 +1,4 @@
-# userWeb
+# Chat
 
 ## Project setup
 ```
