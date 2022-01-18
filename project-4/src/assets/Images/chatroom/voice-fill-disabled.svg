@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>voice-fill-disabled</title>
+    <g id="Guideline" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="icon" transform="translate(-30.000000, -446.000000)" fill-rule="nonzero">
+            <g id="voice-fill-disabled" transform="translate(30.000000, 446.000000)">
+                <rect id="Rectangle" fill="#000000" opacity="0" x="0" y="0" width="32" height="32"></rect>
+                <path d="M16,22.054 C19.309,22.054 22,19.363 22,16.054 L22,8.061 C22,4.752 19.309,2.061 16,2.061 C12.691,2.061 10,4.752 10,8.061 L10,16.054 C10,19.362 12.691,22.054 16,22.054 Z M27,14.993 L27,11 C27,10.448 26.553,10 26,10 C25.447,10 25,10.448 25,11 L25,14.993 C25,19.998 20.963,24.07 16,24.07 C11.038,24.07 7,19.998 7,14.993 L7,11 C7,10.448 6.552,10 6,10 C5.448,10 5,10.448 5,11 L5,14.993 C5,20.762 9.402,25.508 15,26.019 L15,28 L9,28 C8.448,28 8,28.447 8,29 C8,29.553 8.448,30 9,30 L23,30 C23.553,30 24,29.553 24,29 C24,28.447 23.553,28 23,28 L17,28 L17,26.02 C22.598,25.508 27,20.762 27,14.993 Z" id="Shape" fill="#3E3E3E"></path>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="375px" height="176px" viewBox="0 0 375 176" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>樣式-通話</title>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="375" height="176"></rect>
+    </defs>
+    <g id="Style" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="小網/通話" transform="translate(0.000000, -94.000000)">
+            <rect fill="#FFFFFF" x="0" y="0" width="375" height="812"></rect>
+            <g id="樣式-通話" transform="translate(0.000000, 94.000000)">
+                <mask id="mask-2" fill="white">
+                    <use xlink:href="#path-1"></use>
+                </mask>
+                <g id="Mask"></g>
+                <g mask="url(#mask-2)">
+                    <g transform="translate(-65.000000, -207.000000)">
+                        <path d="M50.7508382,330.628272 L0,190.946177 L523.698959,0 L657,366.885935 C657,366.885935 554.22625,408.497937 374.846573,357.983776 C195.468556,307.466043 109.332624,309.268734 50.7508382,330.628272" id="Fill-1-Copy-4" fill="#FFF1CF"></path>
+                        <path d="M47.3998301,308.430796 L7,197.560412 L423.88669,46 L530,337.209724 C530,337.209724 448.187715,370.238572 305.393847,330.143781 C162.601301,290.046154 94.0334281,291.477011 47.3998301,308.430796" id="Fill-1-Copy-5" fill="#FFB400"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,68 @@
+/**
+* 字體
+*/
+$font-family: "蘋方體", "PingFangTC", "微軟正黑體", "Microsoft JhengHei", Arial, sans-serif !default;
+
+/**
+* 文字大小
+* 計算器 https://www.w3schools.com/tags/ref_pxtoemconversion.asp
+*/
+$font_html: 16px !default; //rem root value for html element.
+$font-base: 1rem !default;
+$font-size-5: ($font-base * 0.3125) !default;
+$font-size-6: ($font-base * 0.375) !default;
+$font-size-7: ($font-base * 0.4375) !default;
+$font-size-8: ($font-base * 0.5) !default;
+$font-size-9: ($font-base * 0.5625) !default;
+$font-size-10: ($font-base * 0.625) !default;
+$font-size-12: ($font-base * 0.75) !default;
+$font-size-13: ($font-base * 0.8125) !default;
+$font-size-14: ($font-base * 0.875) !default;
+$font-size-15: ($font-base * 0.9375) !default;
+$font-size-16: ($font-base * 1) !default;
+$font-size-17: ($font-base * 1.0625) !default;
+$font-size-18: ($font-base * 1.125) !default;
+$font-size-19: ($font-base * 1.1875) !default;
+$font-size-20: ($font-base * 1.25) !default;
+$font-size-22: ($font-base * 1.375) !default;
+$font-size-24: ($font-base * 1.5) !default;
+$font-size-26: ($font-base * 1.6) !default;
+$font-size-28: ($font-base * 1.75) !default;
+$font-size-30: ($font-base * 1.875) !default;
+$font-size-32: ($font-base * 2) !default;
+$font-size-34: ($font-base * 2.125) !default;
+$font-size-36: ($font-base * 2.25) !default;
+$font-size-38: ($font-base * 2.375) !default;
+$font-size-40: ($font-base * 2.5) !default;
+$font-size-42: ($font-base * 2.625) !default;
+$font-size-44: ($font-base * 2.75) !default;
+$font-size-46: ($font-base * 2.875) !default;
+$font-size-48: ($font-base * 3) !default;
+
+/**
+* 顏色
+*/
+$black: #000000 !default;
+$white: #ffffff !default;
+
+$gray-1: #3e3e3e !default;
+$gray-2: #505050 !default;
+$gray-3: #8b8b8b !default;
+$gray-4: #aeaeae !default;
+$gray-5: #e4e4e4 !default;
+$gray-6: #e3e3e3 !default;
+$gray-7: #efefef !default;
+$gray-8: #f9f9f9 !default;
+
+$border-line: #ececec !default;
+
+$primary-1: #ffb400 !default;
+$primary-2: #ffcf5e !default;
+$primary-3: #fff1cf !default;
+
+$danger: #df3636 !default;
+
+/**
+* sider 寬度
+*/
+$siderWidth: 330px;

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>send</title>
+    <g id="Guideline" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="icon" transform="translate(-30.000000, -298.000000)" fill-rule="nonzero">
+            <g id="send" transform="translate(30.000000, 298.000000)">
+                <rect id="Rectangle" fill="#000000" opacity="0" x="0" y="0" width="24" height="24"></rect>
+                <polygon id="Path" fill="#FFB400" points="3.33066907e-16 24 2.496 12.888 16.296 12.024 2.496 11.088 0 0 24 12"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>

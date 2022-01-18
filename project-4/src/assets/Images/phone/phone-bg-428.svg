@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="480px" height="201px" viewBox="0 0 480 201" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>樣式-通話_428</title>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="480" height="201"></rect>
+    </defs>
+    <g id="Style" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="小網/428/通話" transform="translate(26.000000, 0.000000)">
+            <g id="樣式-通話_428" transform="translate(-26.000000, 0.000000)">
+                <mask id="mask-2" fill="white">
+                    <use xlink:href="#path-1"></use>
+                </mask>
+                <g id="Mask"></g>
+                <g id="樣式-通話" mask="url(#mask-2)">
+                    <g transform="translate(-48.000000, -237.000000)">
+                        <path d="M57.9347468,377.244269 L0,217.868092 L597.829862,0 L750,418.613978 C750,418.613978 632.678367,466.092947 427.907047,408.456685 C223.137621,350.816346 124.808931,352.873203 57.9347468,377.244269" id="Fill-1-Copy-4" fill="#FFF1CF"></path>
+                        <path d="M54.1093951,351.917122 L7.99086758,225.414883 L483.888916,52.4856397 L605.022831,384.753654 C605.022831,384.753654 511.629811,422.43931 348.623113,376.691468 C185.617924,330.94039 107.344096,332.572986 54.1093951,351.917122" id="Fill-1-Copy-5" fill="#FFB400"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
