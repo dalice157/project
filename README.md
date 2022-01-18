@@ -1,8 +1,24 @@
-# project
+# userWeb
 
-公司專案的程式
+## Project setup
+```
+npm install
+```
 
--   project-1: React、Redux、Router
--   project-2: React、Redux、Router
--   project-3: Vux、Nuxt
--   project-4: Vue 3、Pinia
+### Compiles and hot-reloads for development
+```
+npm run serve
+```
+
+### Compiles and minifies for production
+```
+npm run build
+```
+
+### Lints and fixes files
+```
+npm run lint
+```
+
+### Customize configuration
+See [Configuration Reference](https://cli.vuejs.org/config/).
