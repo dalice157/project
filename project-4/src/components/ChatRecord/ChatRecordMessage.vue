@@ -113,16 +113,17 @@ import { ref, onMounted, watchEffect, watch, onUpdated } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { NAvatar, NEllipsis, NModal, NCard } from "naive-ui";
 import { nanoid } from "nanoid";
-import { getFileExtension } from "../../util/commonUtil";
 import { storeToRefs } from "pinia";
-import { useApiStore } from "../../store/api";
-import { useSearchStore } from "../../store/search";
-import { useChatRecordStore } from "../../store/chatRecord";
-import { useModelStore } from "../../store/model";
 import dayjs from "dayjs";
 import isYesterday from "dayjs/plugin/isYesterday";
 import isToday from "dayjs/plugin/isToday";
-import UserInfoModel from "../UserInfoModel.vue";
+
+import { getFileExtension } from "@/util/commonUtil";
+import { useApiStore } from "@/store/api";
+import { useSearchStore } from "@/store/search";
+import { useChatRecordStore } from "@/store/chatRecord";
+import { useModelStore } from "@/store/model";
+import UserInfoModel from "@/components/UserInfoModel.vue";
 import config from "@/config/config";
 
 dayjs.extend(isToday);
@@ -295,8 +296,8 @@ const hideChatRoomBox = (item: any) => {
 </script>
 
 <style lang="scss" scoped>
-@import "../../assets/scss/extend";
-@import "../../assets/scss/var";
+@import "~@/assets/scss/extend";
+@import "~@/assets/scss/var";
 
 .description {
     width: 100%;
@@ -379,7 +380,8 @@ const hideChatRoomBox = (item: any) => {
             .time {
                 padding-top: 15px;
                 color: $gray-3;
-                @extend %h4;
+                font-size: $font-size-14;
+                font-weight: 500;
             }
             .badge {
                 display: flex;

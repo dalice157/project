@@ -19,7 +19,8 @@
 import { defineComponent, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute } from "vue-router";
-import { useSearchStore } from "../../store/search";
+
+import { useSearchStore } from "@/store/search";
 
 const searchStore = useSearchStore();
 const { onSearchRecordResult, onClickGoto, clearRecordKeyWord } = searchStore;
@@ -28,8 +29,8 @@ const { recordKeyWord } = storeToRefs(searchStore);
 const route = useRoute();
 </script>
 <style lang="scss" scoped>
-@import "../../assets/scss/var";
-@import "../../assets/scss/extend";
+@import "~@/assets/scss/var";
+@import "~@/assets/scss/extend";
 .searchBar {
     display: flex;
     border-radius: 20px;

@@ -20,9 +20,10 @@ import { defineComponent, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute } from "vue-router";
 import { NInput, NIcon, NAvatar, NEllipsis } from "naive-ui";
-import { useSearchStore } from "../../store/search";
-import { useApiStore } from "../../store/api";
-import { getFileExtension } from "../../util/commonUtil";
+
+import { useSearchStore } from "@/store/search";
+import { useApiStore } from "@/store/api";
+import { getFileExtension } from "@/util/commonUtil";
 
 // api store
 const apiStore = useApiStore();
@@ -36,8 +37,8 @@ const route = useRoute();
 getEventListApi(route.query.chatToken);
 </script>
 <style lang="scss" scoped>
-@import "../../assets/scss/var";
-@import "../../assets/scss/extend";
+@import "~@/assets/scss/var";
+@import "~@/assets/scss/extend";
 .searchBar {
     display: flex;
     border-radius: 20px;

@@ -32,8 +32,16 @@
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from "pinia";
+import adapter from "webrtc-adapter";
+import Janus from "@/assets/js/janus";
+import { nanoid } from "nanoid";
+import bootbox from "bootbox";
+import { defineComponent, ref, onMounted, computed, watchEffect } from "vue";
+import { NModal, NCard } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
-import { txt, ITransactions, IAttachPlugin, IMessageList } from "../util/interfaceUtil";
+
+import { txt, ITransactions, IAttachPlugin, IMessageList } from "@/util/interfaceUtil";
 import {
     processDataEvent,
     onRegistered,
@@ -43,16 +51,11 @@ import {
     onError,
     randomString,
     sendPrivateMsg,
-} from "../util/chatUtil";
-import { useApiStore } from "../store/api";
-import { useChatStore } from "../store/chat";
-import { usePhoneCallStore } from "../store/phoneCall";
-import { storeToRefs } from "pinia";
-import adapter from "webrtc-adapter";
-import Janus from "../assets/js/janus";
-import { nanoid } from "nanoid";
-import bootbox from "bootbox";
-import { currentTime, currentDate } from "../util/dateUtil";
+} from "@/util/chatUtil";
+import { useApiStore } from "@/store/api";
+import { useChatStore } from "@/store/chat";
+import { usePhoneCallStore } from "@/store/phoneCall";
+import { currentTime, currentDate } from "@/util/dateUtil";
 import {
     localStorageMsg,
     ME_USER_NAME,
@@ -61,18 +64,15 @@ import {
     JANUS_URL,
     chatroomID,
     convertTime,
-} from "../util/commonUtil";
-import { defineComponent, ref, onMounted, computed, watchEffect } from "vue";
-import NavBar from "../components/Chat/NavBar.vue";
-import MessageBox from "../components/Chat/MessageBox";
-import SearchBar from "../components/Chat/SearchBar.vue";
-import Input from "../components/Chat/Input";
-import UserInfo from "../components/UserInfo.vue";
-import hangUpIcon from "../assets/Images/common/close-round-red.svg";
-import incomingIcon from "../assets/Images/common/connect-round.svg";
-
-import { NModal, NCard } from "naive-ui";
-import UserInfoModel from "../components/UserInfoModel.vue";
+} from "@/util/commonUtil";
+import NavBar from "@/components/Chat/NavBar.vue";
+import MessageBox from "@/components/Chat/MessageBox";
+import SearchBar from "@/components/Chat/SearchBar.vue";
+import Input from "@/components/Chat/Input";
+import UserInfo from "@/components/UserInfo.vue";
+import hangUpIcon from "@/assets/Images/common/close-round-red.svg";
+import incomingIcon from "@/assets/Images/common/connect-round.svg";
+import UserInfoModel from "@/components/UserInfoModel.vue";
 
 let janus: any = null;
 let myid: any = null;
@@ -279,10 +279,7 @@ const attachTextroomPlugin = () => {
             if (jsep) {
                 textPlugin.value.createAnswer({
                     jsep: jsep,
-                    media: {
-                        data: true,
-                    },
-
+                    media: { audio: false, video: false, data: true },
                     success: function (jsep: any) {
                         // @ts-ignore
                         Janus.debug("text-> Got SDP!", jsep);
@@ -507,9 +504,7 @@ const attachVideocallPlugin = () => {
                             } else {
                                 callPlugin.value.createAnswer({
                                     jsep: jsep,
-                                    media: {
-                                        data: true,
-                                    },
+                                    media: { audio: false, video: false, data: true },
                                     success: function (jsep: any) {
                                         // @ts-ignore
                                         Janus.debug("call-> Got SDP!", jsep);
@@ -600,8 +595,8 @@ const attachVideocallPlugin = () => {
 </script>
 
 <style lang="scss" scoped>
-@import "../assets/scss/extend";
-@import "../assets/scss/var";
+@import "~@/assets/scss/extend";
+@import "~@/assets/scss/var";
 .chatroom {
     position: relative;
     width: 100%;
@@ -640,7 +635,7 @@ const attachVideocallPlugin = () => {
         }
         button.icon {
             border: none;
-            background: url("../assets/Images/common/connect-round.svg") no-repeat center;
+            background: url("~@/assets/Images/common/connect-round.svg") no-repeat center;
         }
     }
     h4.text {

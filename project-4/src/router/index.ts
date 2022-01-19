@@ -1,9 +1,10 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
-import ChatRoom from "../views/ChatRoom.vue";
-import Gallery from "../views/Gallery.vue";
-import Phone from "../views/Phone.vue";
-import MoreChatRoom from "../views/MoreChatRoom.vue";
-import ChatRecord from "../views/ChatRecord.vue";
+
+import ChatRoom from "@/views/ChatRoom.vue";
+import Gallery from "@/views/Gallery.vue";
+import Phone from "@/views/Phone.vue";
+import MoreChatRoom from "@/views/MoreChatRoom.vue";
+import ChatRecord from "@/views/ChatRecord.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {

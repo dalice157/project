@@ -100,17 +100,17 @@
 
 <script setup lang="ts">
 import { defineComponent, onMounted, computed, ref } from "vue";
-import { useApiStore } from "../store/api";
-import { useChatStore } from "../store/chat";
 import { storeToRefs } from "pinia";
 import { NEllipsis, NAvatar } from "naive-ui";
 import { useRoute } from "vue-router";
-import config from "@/config/config";
 import dayjs from "dayjs";
-import { localStorageMsg } from "../util/commonUtil";
-import { currentDate, currentMonth } from "@/util/dateUtil";
 import { api as viewerApi } from "v-viewer";
 
+import { useApiStore } from "@/store/api";
+import { useChatStore } from "@/store/chat";
+import config from "@/config/config";
+import { localStorageMsg } from "@/util/commonUtil";
+import { currentDate, currentMonth } from "@/util/dateUtil";
 //chat store
 const chatStore = useChatStore();
 const { pictures } = storeToRefs(chatStore);
@@ -153,6 +153,7 @@ onMounted(() => {
             (index > 0 &&
                 dayjs(pic.currentDate).format("YYYY/MM") !==
                     dayjs(pictures.value[index - 1].currentDate).format("YYYY/MM"))
+            // index === 0 || (index > 0 && dayjs(arr[index].currentDate).format("YYYY/MM") !== dayjs(arr[index-1].currentDate).format("YYYY/MM"))
         ) {
             result.value.push(dayjs(pic.currentDate).format("YYYY/MM"));
         }
@@ -163,7 +164,7 @@ onMounted(() => {
         })
         .sort()
         .reverse();
-    console.log("dateArr.value:", dateArr.value);
+    // console.log("dateArr.value:", dateArr.value);
 });
 //圖片展示
 const viewPicture: any = ref([]);
@@ -213,8 +214,8 @@ const imgDisplay = (fileid: string) => {
 };
 </script>
 <style lang="scss" scoped>
-@import "../assets/scss/var";
-@import "../assets/scss/extend";
+@import "~@/assets/scss/var";
+@import "~@/assets/scss/extend";
 .gallery {
     width: 100%;
     height: calc(100vh - 125px);
@@ -223,7 +224,7 @@ const imgDisplay = (fileid: string) => {
     .galleryHeader {
         width: calc(100% - $siderWidth);
         height: 125px;
-        background: url("../assets/Images/common/header-bg-pc.svg") no-repeat center top;
+        background: url("~@/assets/Images/common/header-bg-pc.svg") no-repeat center top;
         background-size: cover;
         padding-top: 20px;
         position: fixed;
@@ -394,7 +395,7 @@ const imgDisplay = (fileid: string) => {
         .galleryHeader {
             width: 100%;
             height: 120px;
-            background: url("../assets/Images/gallery/gallery-bg.svg") no-repeat center top;
+            background: url("~@/assets/Images/gallery/gallery-bg.svg") no-repeat center top;
             background-size: cover;
             padding-top: 26px;
             .galleryTitle {

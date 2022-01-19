@@ -1,5 +1,6 @@
 import { defineStore } from "pinia";
-import { localStorageMsg } from "../util/commonUtil";
+
+import { localStorageMsg } from "@/util/commonUtil";
 
 export const useChatStore = defineStore({
     id: "chat",
@@ -7,7 +8,7 @@ export const useChatStore = defineStore({
         messages: <any>[],
         msg: <any>"",
         replyMsg: <any>"",
-        isReplayBox: <boolean>false,
+        isReplyBox: <boolean>false,
         inputVal: <any>null,
         deleteBoolean: <boolean>false,
         deletePopUp: <boolean>false,
@@ -27,14 +28,14 @@ export const useChatStore = defineStore({
             });
 
             this.replyMsg = findId;
-            this.isReplayBox = true;
+            this.isReplyBox = true;
             msg.msgFunctionStatus = false;
             this.inputVal.focus();
             this.inputFunctionBoolean = false;
         },
         // 關閉回訊視窗
         replyHide() {
-            this.isReplayBox = false;
+            this.isReplyBox = false;
             this.replyMsg = "";
         },
         //刪除訊息提示

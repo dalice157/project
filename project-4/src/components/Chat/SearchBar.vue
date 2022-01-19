@@ -81,9 +81,10 @@ import { defineComponent, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute } from "vue-router";
 import { NConfigProvider, NInput, NIcon, NAvatar, NEllipsis } from "naive-ui";
-import { useSearchStore } from "../../store/search";
-import { useApiStore } from "../../store/api";
-import { getFileExtension } from "../../util/commonUtil";
+
+import { useSearchStore } from "@/store/search";
+import { useApiStore } from "@/store/api";
+import { getFileExtension } from "@/util/commonUtil";
 import config from "@/config/config";
 
 // api store
@@ -109,8 +110,8 @@ const themeOverrides = {
 };
 </script>
 <style lang="scss" scoped>
-@import "../../assets/scss/extend";
-@import "../../assets/scss/var";
+@import "~@/assets/scss/extend";
+@import "~@/assets/scss/var";
 
 .searchBar {
     font-family: $font-family;
@@ -231,7 +232,7 @@ const themeOverrides = {
 @media (max-width: 768px) {
     .searchBar {
         width: 100% !important;
-        top: 47px;
+        top: 65px;
         background-color: transparent !important;
     }
     .result {

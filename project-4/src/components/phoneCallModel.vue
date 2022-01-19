@@ -51,12 +51,13 @@ import { defineComponent, computed } from "vue";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
 import { NModal, NCard, NAvatar } from "naive-ui";
-import { useModelStore } from "../store/model";
-import { useApiStore } from "@/store/api";
-import { usePhoneCallStore } from "../store/phoneCall";
-import config from "@/config/config";
 import PulseLoader from "vue-spinner/src/PulseLoader.vue";
 import ScaleLoader from "vue-spinner/src/ScaleLoader.vue";
+
+import { useModelStore } from "@/store/model";
+import { useApiStore } from "@/store/api";
+import { usePhoneCallStore } from "@/store/phoneCall";
+import config from "@/config/config";
 
 //route
 const route = useRoute();
@@ -78,8 +79,8 @@ const { closeModal } = modelStore;
 const { phoneCallModal, info } = storeToRefs(modelStore);
 </script>
 <style lang="scss">
-@import "../assets/scss/var";
-@import "../assets/scss/extend";
+@import "~@/assets/scss/var";
+@import "~@/assets/scss/extend";
 
 .phoneCallModel {
     width: 375px;
@@ -98,7 +99,7 @@ const { phoneCallModal, info } = storeToRefs(modelStore);
             align-items: center;
             width: 375px;
             height: 180px;
-            background: url("../assets/Images/chatRecord/lightboxHeader.svg") no-repeat center top;
+            background: url("~@/assets/Images/chatRecord/lightboxHeader.svg") no-repeat center top;
             background-size: cover;
         }
         .title {

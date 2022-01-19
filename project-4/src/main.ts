@@ -3,10 +3,10 @@ import { createApp } from "vue";
 import App from "./App.vue";
 import { createPinia } from "pinia";
 import router from "./router";
-import filtertime from "./util/dayjs";
-import "viewerjs/dist/viewer.css";
 import Viewer from "v-viewer";
-import "./assets/scss/reset.scss";
+import filtertime from "@/util/dayjs";
+import "@/assets/scss/reset.scss";
+import "viewerjs/dist/viewer.css";
 
 const app = createApp(App);
 app.use(createPinia());

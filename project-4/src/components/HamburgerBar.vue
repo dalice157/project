@@ -48,9 +48,10 @@
 <script lang="ts">
 import { defineComponent, ref, watch, watchEffect, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
-import { useApiStore } from "../store/api";
-import { useSearchStore } from "../store/search";
 import { storeToRefs } from "pinia";
+
+import { useApiStore } from "@/store/api";
+import { useSearchStore } from "@/store/search";
 
 export default defineComponent({
     name: "HamburgerBar",
@@ -107,8 +108,8 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-@import "../assets/scss/var";
-@import "../assets/scss/extend";
+@import "~@/assets/scss/var";
+@import "~@/assets/scss/extend";
 .chatroom-header {
     width: 100%;
     height: 120px;
@@ -116,10 +117,10 @@ export default defineComponent({
     background-size: cover;
     position: relative;
     &.isChatRecord {
-        background-image: url("../assets/Images/chatRecord/chatRecordBg.svg");
+        background-image: url("~@/assets/Images/chatRecord/chatRecordBg.svg");
     }
     &.isMoreChatRoom {
-        background-image: url("../assets/Images/common/moreChatRoomBg.svg");
+        background-image: url("~@/assets/Images/common/moreChatRoomBg.svg");
     }
     //漢堡選單收放動畫
     .hamburger {
@@ -197,7 +198,7 @@ export default defineComponent({
         left: 0;
         bottom: 0;
         z-index: 150;
-        background: url("../assets/Images/common/hambugerMenu.svg") no-repeat center bottom;
+        background: url("~@/assets/Images/common/hambugerMenu.svg") no-repeat center bottom;
         background-size: 100% auto;
     }
     .title_container {

@@ -15,6 +15,7 @@
 <script setup lang="ts">
 import { defineComponent, computed } from "vue";
 import { NAvatar } from "naive-ui";
+
 import config from "@/config/config";
 
 const props = defineProps({
@@ -23,7 +24,7 @@ const props = defineProps({
     },
 });
 
-let userInfo = computed({
+let userInfo: any = computed({
     get() {
         return props.info;
     },
@@ -31,8 +32,8 @@ let userInfo = computed({
 });
 </script>
 <style lang="scss" scoped>
-@import "../assets/scss/extend";
-@import "../assets/scss/var";
+@import "~@/assets/scss/extend";
+@import "~@/assets/scss/var";
 .userPhoto {
     margin-bottom: 1em;
     text-align: center;

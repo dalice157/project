@@ -1,13 +1,14 @@
 import { defineStore } from "pinia";
-import Janus from "../assets/js/janus";
+import Janus from "@/assets/js/janus";
 import { useRoute } from "vue-router";
 import { nanoid } from "nanoid";
-import { currentTime, currentDate, currentMonth } from "../util/dateUtil";
-import { chatroomID } from "../util/commonUtil";
-import { useChatStore } from "../store/chat";
 import { storeToRefs } from "pinia";
-import { localStorageMsg } from "../util/commonUtil";
-import { sendPrivateMsg } from "../util/chatUtil";
+
+import { currentTime, currentDate, currentMonth } from "@/util/dateUtil";
+import { chatroomID } from "@/util/commonUtil";
+import { useChatStore } from "@/store/chat";
+import { localStorageMsg } from "@/util/commonUtil";
+import { sendPrivateMsg } from "@/util/chatUtil";
 
 /**
  * phoneType 狀態
@@ -42,10 +43,7 @@ export const usePhoneCallStore = defineStore({
             const that = this;
             // Call this user
             this.callPlugin.createOffer({
-                media: {
-                    data: true,
-                },
-
+                media: { audio: false, video: false, data: true },
                 success: function (jsep: any) {
                     // @ts-ignore
                     Janus.debug("videocall Got SDP!", jsep);
@@ -71,9 +69,7 @@ export const usePhoneCallStore = defineStore({
             const that = this;
             this.callPlugin.createAnswer({
                 jsep: jsep,
-                media: {
-                    data: true,
-                },
+                media: { audio: false, video: false, data: true },
                 simulcast: true,
                 success: function (jsep: any) {
                     // @ts-ignore

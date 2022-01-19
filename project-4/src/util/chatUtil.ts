@@ -1,10 +1,11 @@
-import Janus from "../assets/js/janus";
-import { useChatStore } from "../store/chat";
-import { usePhoneCallStore } from "../store/phoneCall";
+import Janus from "@/assets/js/janus";
 import { storeToRefs } from "pinia";
-import { IProcessData } from "../util/interfaceUtil";
 import { nanoid } from "nanoid";
-import { MY_ROOM, YOU_USER_NAME } from "./commonUtil";
+
+import { useChatStore } from "@/store/chat";
+import { usePhoneCallStore } from "@/store/phoneCall";
+import { IProcessData } from "@/util/interfaceUtil";
+import { MY_ROOM, YOU_USER_NAME } from "@/util/commonUtil";
 
 //發送私人訊息
 export const sendPrivateMsg = ({ msg = <any>"", textPlugin = <any>"", chatToken = <any>"" }) => {

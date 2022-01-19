@@ -11,14 +11,15 @@
 
 <script setup lang="ts">
 import { defineComponent, ref, onMounted, watchEffect } from "vue";
-import NavBar from "./components/Chat/NavBar.vue";
-import HamburgerBar from "./components/HamburgerBar.vue";
-import UserInfoSider from "./components/UserInfoSider.vue";
-import { useChatStore } from "./store/chat";
-import { storeToRefs } from "pinia";
-import { txt } from "./util/interfaceUtil";
 import VConsole from "vconsole";
 import { useRoute } from "vue-router";
+import { storeToRefs } from "pinia";
+
+import NavBar from "@/components/Chat/NavBar.vue";
+import HamburgerBar from "@/components/HamburgerBar.vue";
+import UserInfoSider from "@/components/UserInfoSider.vue";
+import { useChatStore } from "@/store/chat";
+import { txt } from "@/util/interfaceUtil";
 
 const chatStore = useChatStore();
 const { messages } = storeToRefs(chatStore);
@@ -42,16 +43,7 @@ document.addEventListener("DOMContentLoaded", function () {
     if (Notification.permission !== "granted") Notification.requestPermission();
 });
 
-// 判斷比768小才開啟vConsole
-const screenWidth = ref(0);
-document.addEventListener("resize", function () {
-    screenWidth.value = window.innerWidth;
-    return (() => {
-        if (screenWidth.value < 768) {
-            const vConsole = new VConsole();
-        }
-    })();
-});
+const vConsole = new VConsole();
 </script>
 
 <style lang="scss">
@@ -93,7 +85,7 @@ document.addEventListener("resize", function () {
 }
 </style>
 <style lang="scss" scoped>
-@import "./assets/scss/var";
+@import "~@/assets/scss/var";
 .all {
     height: 100%;
     .userInterface {

@@ -1,31 +1,51 @@
 const webpack = require("webpack");
+const { HashedModuleIdsPlugin } = require("webpack");
+const path = require("path");
+const UglifyJsPlugin = require("uglifyjs-webpack-plugin");
+const isProduction = process.env.NODE_ENV === "production";
+function resolve(dir) {
+    return path.join(__dirname, dir);
+}
 
 module.exports = {
-    //基本路径
     publicPath: "./",
-    //输出文件目录
-    outputDir: "./dist",
+    outputDir: "dist",
+    assetsDir: "static",
     productionSourceMap: false, //不生成map
-    // configureWebpack: {
-    //     plugins: [
-    //         // janus.js does not use 'import' to access to the functionality of webrtc-adapter,
-    //         // instead it expects a global object called 'adapter' for that.
-    //         // Let's make that object available.
-    //         new webpack.ProvidePlugin({ adapter: ["webrtc-adapter", "default"] }),
-    //     ],
-    //     module: {
-    //         rules: [
-    //             // janus.js does not use 'export' to provide its functionality to others, instead
-    //             // it creates a global variable called 'Janus' and expects consumers to use it.
-    //             // Let's use 'exports-loader' to simulate it uses 'export'.
-    //             {
-    //                 test: require.resolve("janus-gateway"),
-    //                 loader: "exports-loader",
-    //                 options: {
-    //                     exports: "Janus",
-    //                 },
-    //             },
-    //         ],
-    //     },
-    // },
+    chainWebpack: (config) => {
+        // 添加别名
+        config.resolve.alias
+            .set("@", resolve("src"))
+            .set("assets", resolve("src/assets"))
+            .set("views", resolve("src/views"))
+            .set("store", resolve("src/store"))
+            .set("util", resolve("src/util"))
+            .set("config", resolve("src/config"))
+            .set("components", resolve("src/components"));
+    },
+    configureWebpack: (config) => {
+        const plugins = [];
+        if (isProduction) {
+            plugins.push(
+                new UglifyJsPlugin({
+                    uglifyOptions: {
+                        output: {
+                            comments: false, // 去掉注释
+                        },
+                        warnings: false,
+                        compress: {
+                            drop_console: true,
+                            drop_debugger: false,
+                            pure_funcs: ["console.log"], //移除 console
+                        },
+                    },
+                })
+            );
+
+            // 用于根据模块的相对路径生成 hash 作为模块 id, 一般用于生产环境
+            plugins.push(new HashedModuleIdsPlugin());
+        }
+
+        return { plugins };
+    },
 };

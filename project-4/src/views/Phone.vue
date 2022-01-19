@@ -58,13 +58,14 @@
 
 <script setup lang="ts">
 import { defineComponent, onMounted, computed, ref } from "vue";
-import { useApiStore } from "../store/api";
-import { usePhoneCallStore } from "../store/phoneCall";
 import { storeToRefs } from "pinia";
 import { NAvatar } from "naive-ui";
 import { useRoute } from "vue-router";
 import PulseLoader from "vue-spinner/src/PulseLoader.vue";
 import ScaleLoader from "vue-spinner/src/ScaleLoader.vue";
+
+import { useApiStore } from "@/store/api";
+import { usePhoneCallStore } from "@/store/phoneCall";
 import config from "@/config/config";
 
 // api store
@@ -87,13 +88,13 @@ getBackendApi(chatToken.value);
 </script>
 
 <style lang="scss" scoped>
-@import "../assets/scss/extend";
-@import "../assets/scss/var";
+@import "~@/assets/scss/extend";
+@import "~@/assets/scss/var";
 
 .phone {
     width: 100%;
     height: 100vh;
-    background: url("../assets/Images/phone/phone-bg.svg") no-repeat center top;
+    background: url("~@/assets/Images/phone/phone-bg.svg") no-repeat center top;
     position: relative;
 
     .avatar {
@@ -167,7 +168,7 @@ getBackendApi(chatToken.value);
     .phone {
         width: 100%;
         height: 100vh;
-        background: url("../assets/Images/phone/phone-bg-428.svg") no-repeat center top;
+        background: url("~@/assets/Images/phone/phone-bg-428.svg") no-repeat center top;
     }
 }
 </style>

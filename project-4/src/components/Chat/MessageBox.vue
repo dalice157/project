@@ -357,15 +357,15 @@
                     <span>{{ text.time }}</span>
                 </div>
             </div>
+            <n-icon
+                size="30"
+                class="scrollToBottom"
+                v-show="chatroomScrolltopAndWindowHeight < chatroomScrollHeight && !text.replyObj"
+                @click="scrollToBottom"
+            >
+                <arrow-down-circle />
+            </n-icon>
         </div>
-        <n-icon
-            size="30"
-            class="scrollToBottom"
-            v-show="chatroomScrolltopAndWindowHeight < chatroomScrollHeight"
-            @click="scrollToBottom"
-        >
-            <arrow-down-circle />
-        </n-icon>
     </div>
     <UserInfoModel />
     <!-- 刪除訊息滿版 poopup 出現
@@ -391,6 +391,7 @@
 </template>
 
 <script setup lang="ts">
+import ScaleLoader from "vue-spinner/src/ScaleLoader.vue";
 import {
     ref,
     computed,
@@ -401,36 +402,35 @@ import {
     nextTick,
     onBeforeUpdate,
 } from "vue";
-import { useApiStore } from "../../store/api";
-import { useChatStore } from "../../store/chat";
-import { useModelStore } from "../../store/model";
-import { usePhoneCallStore } from "../../store/phoneCall";
-import { txt } from "../../util/interfaceUtil";
-import { sendPrivateMsg } from "../../util/chatUtil";
-import ScaleLoader from "vue-spinner/src/ScaleLoader.vue";
-import phoneIcon from "../../assets/Images/common/phone-round.svg";
-import messageIcon from "../../assets/Images/common/message-round.svg";
+import useClipboard from "vue-clipboard3";
+import { api as viewerApi } from "v-viewer";
+import { storeToRefs } from "pinia";
+import axios from "axios";
+import { nanoid } from "nanoid";
+import dayjs from "dayjs";
+import Compressor from "compressorjs";
+import { PlayCircleSharp, PauseCircleSharp, ArrowDownCircle } from "@vicons/ionicons5";
+import { NConfigProvider, NEllipsis, NCheckboxGroup, NCheckbox, NAvatar, NIcon } from "naive-ui";
+import { useRoute } from "vue-router";
+
+import { useApiStore } from "@/store/api";
+import { useChatStore } from "@/store/chat";
+import { useModelStore } from "@/store/model";
+import { usePhoneCallStore } from "@/store/phoneCall";
+import { txt } from "@/util/interfaceUtil";
+import { sendPrivateMsg } from "@/util/chatUtil";
+import phoneIcon from "@/assets/Images/common/phone-round.svg";
+import messageIcon from "@/assets/Images/common/message-round.svg";
 import {
     scrollPageTo,
     localStorageMsg,
     chatroomID,
     convertTime,
     DO_CALL_NAME,
-} from "../../util/commonUtil";
-import { currentTime, currentDate, currentMonth } from "../../util/dateUtil";
-import useClipboard from "vue-clipboard3";
-import { api as viewerApi } from "v-viewer";
-import { storeToRefs } from "pinia";
-import axios from "axios";
-import { nanoid } from "nanoid";
-import { PlayCircleSharp, PauseCircleSharp, ArrowDownCircle } from "@vicons/ionicons5";
-import { NConfigProvider, NEllipsis, NCheckboxGroup, NCheckbox, NAvatar, NIcon } from "naive-ui";
-import { useRoute } from "vue-router";
-import UserInfoModel from "../UserInfoModel.vue";
+} from "@/util/commonUtil";
+import { currentTime, currentDate, currentMonth } from "@/util/dateUtil";
+import UserInfoModel from "@/components/UserInfoModel.vue";
 import config from "@/config/config";
-import dayjs from "dayjs";
-import Compressor from "compressorjs";
-import { find } from "naive-ui/lib/_utils/cssr";
 
 const apiStore = useApiStore();
 const { getBackendApi } = apiStore;
@@ -768,10 +768,6 @@ const chatroomToBottom = (e: any) => {
     chatroomWindowHeight.value = e.target.clientHeight;
     chatroomScrollHeight.value = e.target.scrollHeight;
     chatroomScrolltopAndWindowHeight.value = chatroomScrolltop.value + chatroomWindowHeight.value;
-    // console.log("chatroomScrolltop",chatroomScrolltop.value);
-    // console.log("chatroomWindowHeight",chatroomWindowHeight.value);
-    // console.log("chatroomScrolltopAndWindowHeight",chatroomScrolltopAndWindowHeight.value);
-    // console.log("chatroomScrollHeight",chatroomScrollHeight.value);
 };
 
 //聊天室置底功能
@@ -781,10 +777,6 @@ const scrollHeight: any = ref(0);
 nextTick(() => {
     scrollHeight.value = findScrollHeight.value.scrollHeight;
     scrollToBottom();
-    console.log(findScrollHeight);
-    console.log(findScrollHeight.value.scrollTop);
-    console.log(findScrollHeight.value.scrollHeight);
-    console.log(findScrollHeight.value.clientHeight);
 });
 
 onUpdated(() => {
@@ -801,16 +793,6 @@ const scrollToBottom = (): void => {
     findScrollHeight.value.scrollTop = scrollHeight.value;
     console.log("findScorllHeight:", findScrollHeight.value.scrollTop);
 };
-
-// watchEffect(() => {
-//     if (findScorllHeight.value) {
-//         chatroomScrolltop.value = findScorllHeight.value.scrollTop;
-//         chatroomWindowHeight.value = findScorllHeight.value.clientHeight;
-//         chatroomScrollHeight.value = findScorllHeight.value.scrollHeight;
-//         chatroomScrolltopAndWindowHeight.value =
-//             chatroomScrolltop.value + chatroomWindowHeight.value + 99999;
-//     }
-// });
 
 //重新編輯
 const reEdit = (id: string): void => {
@@ -920,7 +902,7 @@ watchEffect(() => {
 });
 </script>
 <style lang="scss">
-@import "../../assets/scss/var";
+@import "~@/assets/scss/var";
 // 圖片預覽套件下載按鈕
 .download {
     position: fixed;
@@ -937,7 +919,7 @@ watchEffect(() => {
     }
     .downloadImg {
         display: block;
-        background: url("../../assets/Images/common/download.svg");
+        background: url("~@/assets/Images/common/download.svg");
         background-color: rgba(0, 0, 0, 0.8);
         background-size: 95% auto;
         width: 40px;
@@ -953,8 +935,8 @@ watchEffect(() => {
 }
 </style>
 <style lang="scss" scoped>
-@import "../../assets/scss/extend";
-@import "../../assets/scss/var";
+@import "~@/assets/scss/extend";
+@import "~@/assets/scss/var";
 
 @keyframes shakeX {
     from,
@@ -1379,6 +1361,7 @@ watchEffect(() => {
                     flex-direction: column;
                     line-height: 1.5;
                     margin-left: 10px;
+                    user-select: none;
                     &.reply {
                         min-width: 70px;
                     }

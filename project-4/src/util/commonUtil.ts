@@ -1,8 +1,9 @@
 import config from "@/config/config";
+import { randomString } from "@/util/chatUtil";
 // 預設值
-export const ME_USER_NAME = "555"; // 自己
+export const ME_USER_NAME = randomString(3); // 自己
 export const DO_CALL_NAME = "123";
-export const YOU_USER_NAME = ["tony1", "da"]; // 對方
+export const YOU_USER_NAME = ["tony1", "da", randomString(3)]; // 對方
 export const OPAQUEID = "SMS_Plugin-123456789123";
 export const MY_ROOM = 1234; //Demo room
 export const JANUS_URL: any = `${config.janusUrl}/janus`;
@@ -22,7 +23,7 @@ export const scrollPageTo = (replyId: string | null) => {
     if (!replyId) return;
     const element: any = document.getElementById(`${replyId}`);
 
-    element.scrollIntoView({ block: "center", behavior: "smooth" });
+    element.scrollIntoView({ behavior: "smooth", block: "center", nearest: "center" });
 
     const getAnimateClassName = element.childNodes[6].childNodes[0];
 

@@ -2,9 +2,9 @@
     <div class="navbar">
         <div class="navbarFuncitonbar">
             <div class="navbartitle">
-                <a class="back" :href="`/chatRecord?chatToken=${chatToken}`">
+                <router-link class="back" :to="`/chatRecord?chatToken=${chatToken}`">
                     <img src="../../assets/Images/chatroom/arrow-left.svg" alt="#" />
-                </a>
+                </router-link>
                 <!-- NavBar 大頭貼 -->
                 <div class="navbarAvatar">
                     <n-avatar
@@ -48,16 +48,17 @@
 
 <script setup lang="ts">
 import { defineComponent, ref, watch, watchEffect, computed } from "vue";
-import { useApiStore } from "../../store/api";
-import { useSearchStore } from "../../store/search";
 import { storeToRefs } from "pinia";
 import { NAvatar } from "naive-ui";
 import { useRouter, useRoute } from "vue-router";
-import { usePhoneCallStore } from "../../store/phoneCall";
-import { useModelStore } from "../../store/model";
-import { DO_CALL_NAME } from "../../util/commonUtil";
+
+import { useApiStore } from "@/store/api";
+import { useSearchStore } from "@/store/search";
+import { usePhoneCallStore } from "@/store/phoneCall";
+import { useModelStore } from "@/store/model";
+import { DO_CALL_NAME } from "@/util/commonUtil";
 import config from "@/config/config";
-import phoneCallModel from "../phoneCallModel.vue";
+import phoneCallModel from "@/components/phoneCallModel.vue";
 
 // api store
 const apiStore = useApiStore();
@@ -88,14 +89,13 @@ const onPhoneCallModal = () => {
 </script>
 
 <style lang="scss" scoped>
-@import "../../assets/scss/extend";
-@import "../../assets/scss/var";
+@import "~@/assets/scss/extend";
+@import "~@/assets/scss/var";
 
 .navbar {
     width: calc(100% - $siderWidth);
     min-height: 166px;
-    background: transparent url("../../assets/Images/chatroom/header-bg-pc.png") no-repeat center
-        top;
+    background: transparent url("~@/assets/Images/chatroom/header-bg-pc.png") no-repeat center top;
     background-size: cover;
     position: fixed;
     z-index: 100;
@@ -207,8 +207,7 @@ const onPhoneCallModal = () => {
 @media (max-width: 768px) {
     .navbar {
         width: 100%;
-        background: transparent url("../../assets/Images/chatroom/header-bg.png") no-repeat center
-            top;
+        background: transparent url("~@/assets/Images/chatroom/header-bg.png") no-repeat center top;
         background-size: cover;
         .back {
             display: block;
@@ -217,7 +216,7 @@ const onPhoneCallModal = () => {
 }
 @media (max-width: 420px) {
     .navbar {
-        background: transparent url("../../assets/Images/chatroom/header-bg-s.svg") no-repeat center
+        background: transparent url("~@/assets/Images/chatroom/header-bg-s.svg") no-repeat center
             top;
         background-size: cover;
     }

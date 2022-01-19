@@ -1,10 +1,11 @@
 import { defineStore } from "pinia";
-import { useChatStore } from "./chat";
-import { useChatRecordStore } from "./chatRecord";
-import { useApiStore } from "./api";
 import { storeToRefs } from "pinia";
-import { scrollPageTo } from "../util/commonUtil";
 import { useRoute } from "vue-router";
+
+import { useChatStore } from "@/store/chat";
+import { useChatRecordStore } from "@/store/chatRecord";
+import { useApiStore } from "@/store/api";
+import { scrollPageTo } from "@/util/commonUtil";
 
 export const useSearchStore = defineStore({
     id: "search",

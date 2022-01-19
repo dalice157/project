@@ -11,10 +11,11 @@
 import { defineComponent, ref } from "vue";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
-import { useApiStore } from "../store/api";
-import HamburgerBar from "../components/HamburgerBar.vue";
-import ChatRecordSearch from "../components/ChatRecord/SearchBar.vue";
-import ChatRecordMessage from "../components/ChatRecord/ChatRecordMessage.vue";
+
+import { useApiStore } from "@/store/api";
+import HamburgerBar from "@/components/HamburgerBar.vue";
+import ChatRecordSearch from "@/components/ChatRecord/SearchBar.vue";
+import ChatRecordMessage from "@/components/ChatRecord/ChatRecordMessage.vue";
 
 const apiStore = useApiStore();
 const { getEventListApi } = apiStore;

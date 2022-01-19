@@ -11,11 +11,12 @@
 import { defineComponent, ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
-import { useApiStore } from "../store/api.ts";
-import { useSearchStore } from "../store/search.ts";
-import HamburgerBar from "../components/HamburgerBar.vue";
-import ChatRoomList from "../components/MoreChatRoom/ChatRoomList.vue";
-import SeachBar from "../components/MoreChatRoom/SearchBar.vue";
+
+import { useApiStore } from "@/store/api.ts";
+import { useSearchStore } from "@/store/search.ts";
+import HamburgerBar from "@/components/HamburgerBar.vue";
+import ChatRoomList from "@/components/MoreChatRoom/ChatRoomList.vue";
+import SeachBar from "@/components/MoreChatRoom/SearchBar.vue";
 
 //router
 const route = useRoute();
@@ -35,8 +36,8 @@ const menuToggle = (menuBoolean: boolean) => {
 </script>
 
 <style lang="scss" scoped>
-@import "../assets/scss/extend";
-@import "../assets/scss/var";
+@import "~@/assets/scss/extend";
+@import "~@/assets/scss/var";
 .moreChatRoom {
     display: none;
 }

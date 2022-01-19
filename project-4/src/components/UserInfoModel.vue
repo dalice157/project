@@ -33,32 +33,31 @@ import { defineComponent, ref, toRef, watchEffect, computed } from "vue";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
 import { NModal, NCard } from "naive-ui";
-import phoneIcon from "../assets/Images/common/phone-round.svg";
-import messageIcon from "../assets/Images/common/message-round.svg";
-import { useModelStore } from "../store/model";
-import { usePhoneCallStore } from "../store/phoneCall"
-import { DO_CALL_NAME } from "../util/commonUtil";
-import UserInfo from "./UserInfo.vue";
 
+import phoneIcon from "@/assets/Images/common/phone-round.svg";
+import messageIcon from "@/assets/Images/common/message-round.svg";
+import { useModelStore } from "@/store/model";
+import { usePhoneCallStore } from "@/store/phoneCall";
+import { DO_CALL_NAME } from "@/util/commonUtil";
+import UserInfo from "@/components/UserInfo.vue";
 
 const route = useRoute();
 //model store
 const modelStore = useModelStore();
 const { closeModal, gotoPhone, gotoChat } = modelStore;
-const { showModal, info , phoneCallModal} = storeToRefs(modelStore);
+const { showModal, info, phoneCallModal } = storeToRefs(modelStore);
 //phone store
 const phoneCallStore = usePhoneCallStore();
 const { doCall } = phoneCallStore;
 
-
- const onPhoneCallModal = () => {
+const onPhoneCallModal = () => {
     phoneCallModal.value = true;
     doCall(DO_CALL_NAME);
 };
 </script>
 <style lang="scss">
-@import "../assets/scss/extend";
-@import "../assets/scss/var";
+@import "~@/assets/scss/extend";
+@import "~@/assets/scss/var";
 
 .chatRecordCard.n-modal {
     .n-card {
@@ -98,7 +97,7 @@ const { doCall } = phoneCallStore;
 .chatRecordCard.n-card.n-modal {
     width: 300px;
     border-radius: 4px;
-    background: $white url("../assets/Images/chatRecord/lightboxHeader.svg") no-repeat center top;
+    background: $white url("~@/assets/Images/chatRecord/lightboxHeader.svg") no-repeat center top;
     background-size: 100% auto;
     > .n-card-header {
         padding: 0;
@@ -119,12 +118,12 @@ const { doCall } = phoneCallStore;
 }
 </style>
 <style lang="scss" scoped>
-@import "../assets/scss/extend";
-@import "../assets/scss/var";
+@import "~@/assets/scss/extend";
+@import "~@/assets/scss/var";
 .chatRecordCard.n-card.n-modal {
     width: 300px;
     border-radius: 4px;
-    background: $white url("../assets/Images/chatRecord/lightboxHeader.svg") no-repeat center top;
+    background: $white url("~@/assets/Images/chatRecord/lightboxHeader.svg") no-repeat center top;
     background-size: 100% auto;
     .description {
         width: 100%;
@@ -139,19 +138,19 @@ const { doCall } = phoneCallStore;
         margin-top: 30px;
         display: flex;
         justify-content: space-around;
-        .call-mobile{
+        .call-mobile {
             display: none;
         }
-        @media(max-width: 768px){
-            .call-mobile{
+        @media (max-width: 768px) {
+            .call-mobile {
                 display: block;
             }
         }
-        .call-web{
+        .call-web {
             display: block;
         }
-        @media(max-width: 768px){
-            .call-web{
+        @media (max-width: 768px) {
+            .call-web {
                 display: none;
             }
         }

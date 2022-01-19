@@ -1,5 +1,6 @@
 import axios from "axios";
 import { defineStore } from "pinia";
+
 import config from "@/config/config";
 
 export const useApiStore = defineStore({

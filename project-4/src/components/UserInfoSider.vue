@@ -52,12 +52,13 @@
 
 <script lang="ts" setup>
 import { defineComponent, computed, ref } from "vue";
-import { useApiStore } from "../store/api";
-import { useSearchStore } from "../store/search";
 import { storeToRefs } from "pinia";
 import { NAvatar, NDropdown } from "naive-ui";
 import { useRoute } from "vue-router";
+
 import config from "@/config/config";
+import { useApiStore } from "@/store/api";
+import { useSearchStore } from "@/store/search";
 import MoreSeachBar from "@/components/MoreChatRoom/SearchBar.vue";
 import MoreList from "@/components/MoreChatRoom/ChatRoomList.vue";
 import ChatRecordSearch from "@/components/ChatRecord/SearchBar.vue";

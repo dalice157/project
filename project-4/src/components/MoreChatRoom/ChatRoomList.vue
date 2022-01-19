@@ -49,8 +49,9 @@
 import { defineComponent, watchEffect } from "vue";
 import { storeToRefs } from "pinia";
 import { NAvatar, NEllipsis } from "naive-ui";
-import { useApiStore } from "../../store/api";
-import { useSearchStore } from "../../store/search";
+
+import { useApiStore } from "@/store/api";
+import { useSearchStore } from "@/store/search";
 import config from "@/config/config";
 
 const apiStore = useApiStore();
@@ -65,8 +66,8 @@ watchEffect(() => {
 </script>
 
 <style lang="scss" scoped>
-@import "../../assets/scss/var";
-@import "../../assets/scss/extend";
+@import "~@/assets/scss/var";
+@import "~@/assets/scss/extend";
 .chatRoomAll {
     .chatRoomBox {
         display: block;

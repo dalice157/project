@@ -1,6 +1,6 @@
 <template>
     <!-- 回覆視窗 -->
-    <div class="reply" v-if="isReplayBox" @click.prevent="scrollPageTo(replyMsg.id)">
+    <div class="reply" v-if="isReplyBox" @click.prevent="scrollPageTo(replyMsg.id)">
         <div class="usertext">
             <div
                 class="replyText"
@@ -60,10 +60,16 @@
         <div class="input-inner" v-else>
             <span class="attach" @click="inputFunctionSwitch"></span>
             <span class="camera">
-                <input type="file" capture="environment" accept="video/*" @change="uploadImage" />
+                <input
+                    type="file"
+                    name="image"
+                    accept="image/*"
+                    capture="user"
+                    @change="uploadImage"
+                />
             </span>
             <span class="photo">
-                <input type="file" capture="user" accept="image/*" @change="uploadImage" />
+                <input type="file" name="image" accept="image/*" @change="uploadImage" />
             </span>
             <span class="file-folder">
                 <input type="file" multiple @change="onUploadFile" />
@@ -164,12 +170,6 @@
 
 <script setup lang="ts">
 import { defineComponent, ref, onMounted, reactive, watchEffect } from "vue";
-import { txt } from "../../util/interfaceUtil";
-import { sendPrivateMsg } from "../../util/chatUtil";
-import { scrollPageTo, localStorageMsg, isObjToBeZero, chatroomID } from "../../util/commonUtil";
-import { currentTime, currentDate, currentMonth } from "../../util/dateUtil";
-import { useApiStore } from "../../store/api";
-import { useChatStore } from "../../store/chat";
 import { nanoid } from "nanoid";
 import Compressor from "compressorjs";
 import axios from "axios";
@@ -190,11 +190,18 @@ import Recorder from "js-audio-recorder";
 import {} from "googlemaps";
 import { GoogleMap, Marker } from "vue3-google-map";
 import { useRoute } from "vue-router";
-import mapIcon from "../../assets/Images/m_fa_mappin.png";
-import sendIcon from "../../assets/Images/btn_send.png";
-import { convertTime } from "../../util/commonUtil";
-import config from "@/config/config";
 import dayjs from "dayjs";
+
+import { txt } from "@/util/interfaceUtil";
+import { sendPrivateMsg } from "@/util/chatUtil";
+import { scrollPageTo, localStorageMsg, isObjToBeZero, chatroomID } from "@/util/commonUtil";
+import { currentTime, currentDate, currentMonth } from "@/util/dateUtil";
+import { useApiStore } from "@/store/api";
+import { useChatStore } from "@/store/chat";
+import mapIcon from "@/assets/Images/m_fa_mappin.png";
+import sendIcon from "@/assets/Images/btn_send.png";
+import { convertTime } from "@/util/commonUtil";
+import config from "@/config/config";
 
 // api store
 const apiStore = useApiStore();
@@ -207,7 +214,7 @@ const {
     messages,
     pictures,
     msg,
-    isReplayBox,
+    isReplyBox,
     replyMsg,
     inputVal,
     deleteBoolean,
@@ -624,7 +631,7 @@ const uploadImage = (e: any) => {
                             recallStatus: false,
                             recallPopUp: false,
                             time: currentTime(),
-                            // currentDate: "2021-04-30",
+                            // currentDate: "2022-06-07",
                             currentDate: currentDate(),
                             // currentMonth: "2022-2",
                             currentMonth: currentMonth(),
@@ -721,10 +728,10 @@ const onUploadFile = (e: any) => {
                                 recallStatus: false,
                                 recallPopUp: false,
                                 time: currentTime(),
-                                // currentDate: "2021-04-30",
+                                // currentDate: "2022-03-27",
                                 currentDate: currentDate(),
-                                currentMonth: "2022-1",
-                                // currentMonth:currentMonth(),
+                                // currentMonth: "2022-1",
+                                currentMonth: currentMonth(),
                                 expirationDate: dayjs.unix(res.data.data.exp).format("YYYY-MM-DD"),
                                 isExpire: false,
                                 replyObj: replyMsg.value
@@ -845,7 +852,7 @@ const onUploadFile = (e: any) => {
 //功能欄開關
 const inputFunctionSwitch = () => {
     inputFunctionBoolean.value = !inputFunctionBoolean.value;
-    isReplayBox.value = false;
+    isReplyBox.value = false;
 };
 //更改naive-ui 套件主題
 const themeOverrides = {
@@ -865,8 +872,8 @@ const confirmDeletePopup = () => {
 </script>
 
 <style lang="scss" scoped>
-@import "../../assets/scss/extend";
-@import "../../assets/scss/var";
+@import "~@/assets/scss/extend";
+@import "~@/assets/scss/var";
 
 .n-card.map {
     width: 70%;
@@ -979,7 +986,7 @@ const confirmDeletePopup = () => {
         .upload_cover {
             position: relative;
             height: 69px;
-            background-image: url("../../assets/Images/chatroom/file.svg");
+            background-image: url("~@/assets/Images/chatroom/file.svg");
             background-position: center 0;
             background-size: 24px;
             background-repeat: no-repeat;
@@ -1061,7 +1068,7 @@ const confirmDeletePopup = () => {
             min-width: 24px;
             height: 24px;
             margin: 3px 6px 3px 0;
-            background-image: url("../../assets/Images/chatroom/add-round.svg");
+            background-image: url("~@/assets/Images/chatroom/add-round.svg");
             background-size: 24px;
             cursor: pointer;
         }
@@ -1071,7 +1078,7 @@ const confirmDeletePopup = () => {
                 min-width: 24px;
                 height: 24px;
                 margin: 3px 6px 3px 0;
-                background-image: url("../../assets/Images/chatroom/add-round.svg");
+                background-image: url("~@/assets/Images/chatroom/add-round.svg");
                 background-size: 24px;
                 cursor: pointer;
             }
@@ -1081,7 +1088,7 @@ const confirmDeletePopup = () => {
             min-width: 24px;
             height: 24px;
             margin: 3px 6px 3px 0;
-            background-image: url("../../assets/Images/chatroom/Photo.svg");
+            background-image: url("~@/assets/Images/chatroom/Photo.svg");
             background-size: 24px;
             cursor: pointer;
             input {
@@ -1101,7 +1108,7 @@ const confirmDeletePopup = () => {
                 min-width: 24px;
                 height: 24px;
                 margin: 3px 6px 3px 0;
-                background-image: url("../../assets/Images/chatroom/Photo.svg");
+                background-image: url("~@/assets/Images/chatroom/Photo.svg");
                 background-size: 24px;
                 cursor: pointer;
                 input {
@@ -1121,7 +1128,7 @@ const confirmDeletePopup = () => {
             min-width: 24px;
             height: 24px;
             margin: 3px 6px 3px 0;
-            background-image: url("../../assets/Images/chatroom/pic.svg");
+            background-image: url("~@/assets/Images/chatroom/pic.svg");
             background-size: 24px;
             cursor: pointer;
             input {
@@ -1139,7 +1146,7 @@ const confirmDeletePopup = () => {
                 min-width: 24px;
                 height: 24px;
                 margin: 3px 6px 3px 0;
-                background-image: url("../../assets/Images/chatroom/pic.svg");
+                background-image: url("~@/assets/Images/chatroom/pic.svg");
                 background-size: 24px;
                 cursor: pointer;
                 input {
@@ -1157,7 +1164,7 @@ const confirmDeletePopup = () => {
             min-width: 24px;
             height: 24px;
             margin: 3px 6px 3px 0;
-            background-image: url("../../assets/Images/chatroom/file.svg");
+            background-image: url("~@/assets/Images/chatroom/file.svg");
             background-size: 24px;
             cursor: pointer;
             input {
@@ -1175,7 +1182,7 @@ const confirmDeletePopup = () => {
                 min-width: 24px;
                 height: 24px;
                 margin: 3px 6px 3px 0;
-                background-image: url("../../assets/Images/chatroom/file.svg");
+                background-image: url("~@/assets/Images/chatroom/file.svg");
                 background-size: 24px;
                 cursor: pointer;
                 input {
