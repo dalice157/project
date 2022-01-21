@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref, onMounted, watchEffect } from "vue";
+import { onBeforeMount } from "vue";
 import VConsole from "vconsole";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
@@ -31,7 +31,10 @@ const closeChatBubble = (): void => {
     });
 };
 
-const route = useRoute();
+//取消手機長按預設行為
+// const cancelPhonePreset = (e: any) => {
+//     e.preventDefault();
+// };
 
 // notifications test
 document.addEventListener("DOMContentLoaded", function () {
@@ -87,8 +90,10 @@ const vConsole = new VConsole();
 <style lang="scss" scoped>
 @import "~@/assets/scss/var";
 .all {
-    height: 100%;
+    height: 100vh;
+    user-select: none;
     .userInterface {
+        height: 100vh;
         display: flex;
         margin-left: $siderWidth;
     }

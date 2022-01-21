@@ -104,12 +104,14 @@ section {
     box-sizing: border-box;
 }
 body {
-    font-family: "蘋方體", "PingFangTC", "微軟正黑體", "Microsoft JhengHei", Arial, sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, Arial, "微軟正黑體", "Microsoft JhengHei",
+        Roboto, "Segoe UI", "蘋方體", "PingFangTC", sans-serif;
     font-size: 1rem * 0.875;
     font-weight: 500;
     margin: 0;
     padding: 0;
     line-height: 1;
+    touch-action: manipulation;
 }
 ol,
 ul {

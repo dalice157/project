@@ -150,19 +150,15 @@
                         </n-icon>
                     </span>
                 </template>
-                <!--api key 要申請, 目前是暫放demo的api key-->
-                <GoogleMap
-                    class="googleMap"
-                    api-key="AIzaSyAx5g4E7tKTC_Q-ycGlbDMBH5UDOqa7-aY"
-                    :zoom="15"
-                    :center="{ lat: latitude, lng: longitude }"
+                <iframe
+                    width="100%"
+                    height="100%"
+                    style="border: 0"
+                    loading="lazy"
+                    allowfullscreen
+                    :src="`https://www.google.com/maps/embed/v1/place?q=${latitude}, ${longitude}&zoom=14&key=AIzaSyA6MSxbFkvRRh_2_JjFrD6lP4GgcWcn98Y`"
                 >
-                    <Marker
-                        :options="{
-                            position: { lat: latitude, lng: longitude },
-                        }"
-                    />
-                </GoogleMap>
+                </iframe>
             </n-card>
         </n-modal>
     </div>

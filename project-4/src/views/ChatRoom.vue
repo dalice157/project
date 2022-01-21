@@ -90,7 +90,7 @@ const route = useRoute();
 const chatToken = computed(() => route.query.chatToken);
 // api store
 const apiStore = useApiStore();
-const { getEventListApi } = apiStore;
+const { getEventListApi, getBackendApi } = apiStore;
 const { eventInfo } = storeToRefs(apiStore);
 
 //Chat store
@@ -104,6 +104,7 @@ const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime
     storeToRefs(phoneCallStore);
 
 getEventListApi(route.query.chatToken);
+getBackendApi(route.query.chatToken);
 
 onMounted(() => {
     let otherMsg: any = {};

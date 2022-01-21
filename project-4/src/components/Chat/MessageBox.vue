@@ -448,6 +448,7 @@ const { doCall, phoneTime } = phoneCallStore;
 
 //router
 const route = useRoute();
+
 //拿取後端api
 getBackendApi(route.query.chatToken);
 //更改naive-ui 套件主題
@@ -1331,6 +1332,7 @@ watchEffect(() => {
                                 display: block;
                                 color: $gray-1;
                                 border-right: 1px solid $white;
+                                border-bottom: 0;
                                 span {
                                     font-size: $font-size-14;
                                     font-weight: 500;

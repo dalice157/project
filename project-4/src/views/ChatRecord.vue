@@ -18,9 +18,10 @@ import ChatRecordSearch from "@/components/ChatRecord/SearchBar.vue";
 import ChatRecordMessage from "@/components/ChatRecord/ChatRecordMessage.vue";
 
 const apiStore = useApiStore();
-const { getEventListApi } = apiStore;
+const { getEventListApi, getBackendApi } = apiStore;
 const route = useRoute();
 getEventListApi(route.query.chatToken);
+getBackendApi(route.query.chatToken);
 //漢堡選單
 const hamburgerBoolean = ref();
 const menuToggle = (menuBoolean: any) => {
@@ -35,6 +36,7 @@ const menuToggle = (menuBoolean: any) => {
     .chatRecord {
         display: block;
         width: 100%;
+        height: 100%;
         transform: translateX(0px);
         -webkit-transition: all 0.7s ease-in-out;
         -o-transition: all 0.7s ease-in-out;

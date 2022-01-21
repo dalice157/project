@@ -79,6 +79,7 @@ export const useSearchStore = defineStore({
         },
         //歷史紀錄搜尋功能
         onSearchRecordResult(val: any) {
+            // console.log(val);
             const chatRecordStore = useChatRecordStore();
             const { recordMessages } = storeToRefs(chatRecordStore);
             if (val) {
@@ -92,7 +93,6 @@ export const useSearchStore = defineStore({
 
                 const reg = new RegExp(regStr);
                 console.log("recordMessages.value:", recordMessages.value);
-
                 recordMessages.value.forEach((msg: any) => {
                     const regMatch = msg.message.match(reg);
                     if (regMatch) {
@@ -103,9 +103,11 @@ export const useSearchStore = defineStore({
                             );
                         }
 
-                        this.searcRecordMessages.push(msg);
+                        this.searcRecordMessages.unshift(msg);
                     }
                 });
+            } else {
+                this.searcRecordMessages = [];
             }
         },
         //更多聊天室

@@ -6,7 +6,7 @@
         </span>
         <input
             type="text"
-            laceholder="搜尋"
+            placeholder="搜尋"
             v-model.trim="recordKeyWord"
             @input="(e:any) => onSearchRecordResult(e.target.value)"
         />
