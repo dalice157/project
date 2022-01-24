@@ -1,9 +1,11 @@
 <template>
     <div class="chatRecord" :class="{ menuToggle: hamburgerBoolean }">
         <HamburgerBar @menuToggle="menuToggle" />
-        <!-- 聊天室交談紀錄列表 -->
-        <ChatRecordSearch />
-        <ChatRecordMessage />
+        <div class="main">
+            <!-- 聊天室交談紀錄列表 -->
+            <ChatRecordSearch />
+            <ChatRecordMessage />
+        </div>
     </div>
 </template>
 
@@ -30,13 +32,19 @@ const menuToggle = (menuBoolean: any) => {
 </script>
 <style lang="scss" scoped>
 .chatRecord {
+    height: 100%;
+    grid-area: body;
     display: none;
 }
 @media (max-width: 768px) {
     .chatRecord {
-        display: block;
         width: 100%;
-        height: 100%;
+        min-height: 100%;
+        display: grid;
+        grid:
+            "header" 120px
+            "main" 1fr;
+        gap: 0;
         transform: translateX(0px);
         -webkit-transition: all 0.7s ease-in-out;
         -o-transition: all 0.7s ease-in-out;
@@ -47,6 +55,9 @@ const menuToggle = (menuBoolean: any) => {
             -o-transition: all 0.7s ease-in-out;
             transition: all 0.7s ease-in-out;
         }
+    }
+    .main {
+        grid-area: main;
     }
 }
 </style>

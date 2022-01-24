@@ -123,13 +123,7 @@ const handleSelect = (key: any) => {
 @import "../assets/scss/extend";
 @import "../assets/scss/var";
 .siderWrap {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: $siderWidth;
-    height: 100vh;
-    z-index: 100;
-    overflow-y: auto;
+    grid-area: sidebar;
     .search {
         padding: 15px;
     }
@@ -192,7 +186,7 @@ const handleSelect = (key: any) => {
 .userInfo {
     border-top-left-radius: 30px;
     border-top-right-radius: 30px;
-    height: calc(100vh - 106px);
+    height: calc(100% - 106px);
     background: url("../assets/Images/common/sider-bg.svg") no-repeat center bottom;
     .userPhoto {
         display: block;

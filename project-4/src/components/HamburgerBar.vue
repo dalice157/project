@@ -111,11 +111,12 @@ export default defineComponent({
 @import "~@/assets/scss/var";
 @import "~@/assets/scss/extend";
 .chatroom-header {
-    width: 100%;
-    height: 120px;
+    grid-area: header;
     background: no-repeat center top;
     background-size: cover;
-    position: relative;
+    position: sticky;
+    top: 0;
+    z-index: 100;
     &.isChatRecord {
         background-image: url("~@/assets/Images/chatRecord/chatRecordBg.svg");
     }
@@ -169,7 +170,6 @@ export default defineComponent({
             -o-transition: all 0.7s ease-in-out;
             transition: all 0.7s ease-in-out;
             display: block;
-            height: 100vh;
         }
     }
 
@@ -193,7 +193,8 @@ export default defineComponent({
     //漢堡選單
     .container {
         width: 250px;
-        position: absolute;
+        height: 100%;
+        position: fixed;
         top: 0;
         left: 0;
         bottom: 0;

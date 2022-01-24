@@ -6,126 +6,64 @@
         ref="findScrollHeight"
         @scroll="chatroomToBottom($event)"
     >
-        <div class="background"></div>
-        <!-- 對話區塊 -->
-        <div
-            class="dialog-box"
-            :class="{
-                myMsg: text.janusMsg.sender === 1,
-                yourMsg: text.janusMsg.sender === 0,
-                mapMsg: text.janusMsg.msgType === 8,
-                delChoice: deleteBoolean,
-                recallChoice: text.recallStatus,
-                dateMsg:
-                    index === 0 ||
-                    (index > 0 && text.currentDate !== messages[index - 1].currentDate),
-            }"
-            v-for="(text, index) in messages"
-            :key="index"
-            :id="text.id"
-        >
-            <!-- 日期樣板 -->
+        <div class="background">
+            <!-- 對話區塊 -->
             <div
-                v-if="
-                    (index > 0 && text.currentDate !== messages[index - 1].currentDate) ||
-                    (index === 0 && text.currentDate)
-                "
-                class="date"
+                class="dialog-box"
+                :class="{
+                    myMsg: text.janusMsg.sender === 1,
+                    yourMsg: text.janusMsg.sender === 0,
+                    mapMsg: text.janusMsg.msgType === 8,
+                    delChoice: deleteBoolean,
+                    recallChoice: text.recallStatus,
+                    dateMsg:
+                        index === 0 ||
+                        (index > 0 && text.currentDate !== messages[index - 1].currentDate),
+                }"
+                v-for="(text, index) in messages"
+                :key="index"
+                :id="text.id"
             >
-                <div>
-                    {{ text.currentDate === currentDate() ? "今天" : text.currentDate }}
-                </div>
-            </div>
-
-            <n-checkbox-group
-                v-model:value="deleteGroup"
-                v-if="deleteBoolean && !text.recallStatus"
-            >
-                <div class="deleteCheckBox">
-                    <n-config-provider :theme-overrides="themeOverrides">
-                        <n-checkbox :value="text.id" label="" />
-                    </n-config-provider>
-                </div>
-            </n-checkbox-group>
-
-            <!-- 收回訊息樣板 -->
-            <div class="recall" v-if="text.recallStatus">
-                <div>
-                    <p>
-                        您已收回訊息&emsp;
-                        <span @click="reEdit(text.id)" v-if="text.janusMsg.message">
-                            <u>重新編輯</u>
-                        </span>
-                    </p>
-                </div>
-            </div>
-
-            <!-- 聊天對話框樣板-->
-            <div class="dialog" v-else>
-                <div class="dialog-inner">
-                    <div class="msgFunction mobile" v-if="text.msgFunctionStatus">
-                        <ul class="ulList">
-                            <li v-if="text.janusMsg.message" @click.stop="copyMsg(text)">
-                                <span>複製</span>
-                            </li>
-                            <li
-                                v-if="text.janusMsg.msgType === 7 || text.janusMsg.msgType === 6"
-                                @click.stop="downloadImage(text)"
-                            >
-                                <a
-                                    :href="`${config.serverUrl}/file/${route.query.chatToken}/${text.janusMsg.format.Fileid}`"
-                                >
-                                    下載
-                                </a>
-                            </li>
-                            <!-- <li @click.stop="deleteQuestion(text)"><span>刪除</span></li> -->
-                            <li
-                                v-if="text.janusMsg.sender === 1 && text.janusMsg.msgType !== 6"
-                                @click.stop="confirmRecallPopup(text)"
-                            >
-                                <span>收回</span>
-                            </li>
-                            <li
-                                v-if="text.janusMsg.msgType === 1 || text.janusMsg.msgType === 6"
-                                @click.stop="replyMsgEvent(text)"
-                            >
-                                <span>回覆</span>
-                            </li>
-                        </ul>
+                <!-- 日期樣板 -->
+                <div
+                    v-if="
+                        (index > 0 && text.currentDate !== messages[index - 1].currentDate) ||
+                        (index === 0 && text.currentDate)
+                    "
+                    class="date"
+                >
+                    <div>
+                        {{ text.currentDate === currentDate() ? "今天" : text.currentDate }}
                     </div>
-                    <!-- 收回訊息滿版 popup 出現 -->
-                    <teleport to="body">
-                        <div class="mask" v-if="text.recallPopUp">
-                            <div class="popUp">
-                                <div class="recallMsgConfirm">您確定要收回訊息嗎 ?</div>
-                                <div class="buttonContainer">
-                                    <div
-                                        type="button"
-                                        class="cancel"
-                                        @click.stop="text.recallPopUp = !text.recallPopUp"
-                                    >
-                                        取消
-                                    </div>
-                                    <div
-                                        type="button"
-                                        class="confirm"
-                                        @click.stop="recallMsg(text.id)"
-                                    >
-                                        確定
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </teleport>
-                    <!-- hover出現的訊息狀態 -->
-                    <div
-                        class="msg_more"
-                        :class="{ show: text.msgFunctionStatus }"
-                        @click.stop="closeBubble(text)"
-                    >
-                        <img src="../../assets/Images/chatroom/more.svg" alt="#" />
-                        <!-- 訊息功能框 -->
-                        <div class="msgFunction" v-show="text.msgFunctionStatus">
+                </div>
+
+                <n-checkbox-group
+                    v-model:value="deleteGroup"
+                    v-if="deleteBoolean && !text.recallStatus"
+                >
+                    <div class="deleteCheckBox">
+                        <n-config-provider :theme-overrides="themeOverrides">
+                            <n-checkbox :value="text.id" label="" />
+                        </n-config-provider>
+                    </div>
+                </n-checkbox-group>
+
+                <!-- 收回訊息樣板 -->
+                <div class="recall" v-if="text.recallStatus">
+                    <div>
+                        <p>
+                            您已收回訊息&emsp;
+                            <span @click="reEdit(text.id)" v-if="text.janusMsg.message">
+                                <u>重新編輯</u>
+                            </span>
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 聊天對話框樣板-->
+                <div class="dialog" v-else>
+                    <div class="dialog-inner">
+                        <div class="msgFunction mobile" v-if="text.msgFunctionStatus">
                             <ul class="ulList">
                                 <li v-if="text.janusMsg.message" @click.stop="copyMsg(text)">
                                     <span>複製</span>
@@ -159,212 +97,299 @@
                                 </li>
                             </ul>
                         </div>
-                    </div>
-                    <!-- 對方頭像 -->
-                    <div
-                        class="avatar"
-                        @click="showCompanyInfo({ ...eventInfo, chatToken: route.query.chatToken })"
-                        v-if="text.janusMsg.sender === 0 && !deleteBoolean"
-                    >
-                        <n-avatar
-                            round
-                            :size="42"
-                            :src="`${config.serverUrl}/image/${eventInfo.icon}`"
-                        />
-                    </div>
-                    <!-- 訊息 -->
-                    <div
-                        class="content"
-                        :class="{
-                            reply: text.replyObj,
-                        }"
-                        v-if="text.janusMsg.message"
-                        @touchstart="gtouchstart(text)"
-                        @touchmove="gtouchmove()"
-                        @touchend="gtouchend()"
-                    >
-                        <!-- 回覆 -->
-                        <div
-                            class="replyMsg"
-                            :class="{
-                                noMsgClick: text.replyObj.recallStatus,
-                            }"
-                            v-if="text.replyObj"
-                            @click.prevent="
-                                text.replyObj.recallStatus ? null : scrollPageTo(text.replyObj.id)
-                            "
-                        >
-                            <div class="info noMsg" v-if="text.replyObj.recallStatus">
-                                無法讀取原始訊息。
+                        <!-- 收回訊息滿版 popup 出現 -->
+                        <teleport to="body">
+                            <div class="mask" v-if="text.recallPopUp">
+                                <div class="popUp">
+                                    <div class="recallMsgConfirm">您確定要收回訊息嗎 ?</div>
+                                    <div class="buttonContainer">
+                                        <div
+                                            type="button"
+                                            class="cancel"
+                                            @click.stop="text.recallPopUp = !text.recallPopUp"
+                                        >
+                                            取消
+                                        </div>
+                                        <div
+                                            type="button"
+                                            class="confirm"
+                                            @click.stop="recallMsg(text.id)"
+                                        >
+                                            確定
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
+                        </teleport>
+                        <!-- hover出現的訊息狀態 -->
+                        <div
+                            class="msg_more"
+                            :class="{ show: text.msgFunctionStatus }"
+                            @click.stop="closeBubble(text)"
+                        >
+                            <img src="../../assets/Images/chatroom/more.svg" alt="#" />
+                            <!-- 訊息功能框 -->
+                            <div class="msgFunction" v-show="text.msgFunctionStatus">
+                                <ul class="ulList">
+                                    <li v-if="text.janusMsg.message" @click.stop="copyMsg(text)">
+                                        <span>複製</span>
+                                    </li>
+                                    <li
+                                        v-if="
+                                            text.janusMsg.msgType === 7 ||
+                                            text.janusMsg.msgType === 6
+                                        "
+                                        @click.stop="downloadImage(text)"
+                                    >
+                                        <a
+                                            :href="`${config.serverUrl}/file/${route.query.chatToken}/${text.janusMsg.format.Fileid}`"
+                                        >
+                                            下載
+                                        </a>
+                                    </li>
+                                    <!-- <li @click.stop="deleteQuestion(text)"><span>刪除</span></li> -->
+                                    <li
+                                        v-if="
+                                            text.janusMsg.sender === 1 &&
+                                            text.janusMsg.msgType !== 6
+                                        "
+                                        @click.stop="confirmRecallPopup(text)"
+                                    >
+                                        <span>收回</span>
+                                    </li>
+                                    <li
+                                        v-if="
+                                            text.janusMsg.msgType === 1 ||
+                                            text.janusMsg.msgType === 6
+                                        "
+                                        @click.stop="replyMsgEvent(text)"
+                                    >
+                                        <span>回覆</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <!-- 對方頭像 -->
+                        <div
+                            class="avatar"
+                            @click="
+                                showCompanyInfo({ ...eventInfo, chatToken: route.query.chatToken })
+                            "
+                            v-if="text.janusMsg.sender === 0 && !deleteBoolean"
+                        >
+                            <n-avatar
+                                round
+                                :size="42"
+                                :src="`${config.serverUrl}/image/${eventInfo.icon}`"
+                            />
+                        </div>
+                        <!-- 訊息 -->
+                        <div
+                            class="content"
+                            :class="{
+                                reply: text.replyObj,
+                            }"
+                            v-if="text.janusMsg.message"
+                            @touchstart="gtouchstart(text)"
+                            @touchmove="gtouchmove()"
+                            @touchend="gtouchend()"
+                        >
+                            <!-- 回覆 -->
                             <div
-                                class="info"
+                                class="replyMsg"
                                 :class="{
-                                    isImg: text.replyObj.msgType === 6,
+                                    noMsgClick: text.replyObj.recallStatus,
                                 }"
-                                v-else
+                                v-if="text.replyObj"
+                                @click.prevent="
+                                    text.replyObj.recallStatus
+                                        ? null
+                                        : scrollPageTo(text.replyObj.id)
+                                "
                             >
-                                <div class="userName">{{ eventInfo.name }}</div>
-                                <div v-if="text.replyObj.msgType === 6">[照片]</div>
+                                <div class="info noMsg" v-if="text.replyObj.recallStatus">
+                                    無法讀取原始訊息。
+                                </div>
+                                <div
+                                    class="info"
+                                    :class="{
+                                        isImg: text.replyObj.msgType === 6,
+                                    }"
+                                    v-else
+                                >
+                                    <div class="userName" v-if="text.replyObj.sender === 0">
+                                        {{ eventInfo.name }}
+                                    </div>
+                                    <div v-if="text.replyObj.msgType === 6">[照片]</div>
+                                    <n-ellipsis
+                                        v-if="text.replyObj.msgType === 1"
+                                        style="width: 100%"
+                                        :line-clamp="2"
+                                        :tooltip="false"
+                                    >
+                                        {{ text.replyObj.message }}
+                                    </n-ellipsis>
+                                </div>
+                                <div class="replyImg" v-if="text.replyObj.msgType === 6">
+                                    <img
+                                        :src="`${config.serverUrl}/image/${text.replyObj.format.Fileid}${text.replyObj.ext}`"
+                                    />
+                                </div>
+                            </div>
+                            <!-- 文字訊息 -->
+                            <div class="originalMsg">
+                                <p>{{ text.janusMsg.message }}</p>
+                            </div>
+                        </div>
+                        <!-- google maps -->
+                        <div
+                            class="googleMapsMsg content"
+                            v-if="text.janusMsg.msgType === 8"
+                            @touchstart="gtouchstart(text)"
+                            @touchmove="gtouchmove()"
+                            @touchend="gtouchend()"
+                        >
+                            <a
+                                :href="`https://maps.google.com/maps?q=${text.janusMsg.format.Latitude},${text.janusMsg.format.Longitude}`"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >
+                                <span class="img"
+                                    ><img
+                                        src="../../assets/Images/chatroom/map.jpg"
+                                        alt="google maps"
+                                /></span>
+                                查看地圖
+                            </a>
+                        </div>
+                        <!-- audio -->
+                        <div
+                            class="audio content"
+                            :class="{ play: text.janusMsg.format.isPlay }"
+                            v-if="text.janusMsg.msgType === 5"
+                        >
+                            <audio :id="`audio-player-${text.id}`">
+                                <source
+                                    :src="`${config.serverUrl}/image/${text.janusMsg.format.Fileid}${text.ext}`"
+                                    type="audio/wav"
+                                />
+                                Your browser does not support the audio tag.
+                            </audio>
+                            <n-icon @click="toggleAudio(text)" size="24">
+                                <pause-circle-sharp v-if="text.janusMsg.format.isPlay" />
+                                <play-circle-sharp v-else />
+                            </n-icon>
+                            <span v-if="text.janusMsg.format.isPlay">{{ newTime }}</span>
+                            <span v-if="!text.janusMsg.format.isPlay" class="totalTime">
+                                {{ text.audioInfo.SoundTime }}
+                            </span>
+                            <img
+                                class="audioWave"
+                                v-if="!text.janusMsg.format.isPlay"
+                                src="../../assets/Images/chatroom/audio.svg"
+                            />
+                        </div>
+                        <!-- 圖片訊息 -->
+                        <div
+                            class="picture"
+                            v-if="text.janusMsg.msgType === 6"
+                            @click="previewURL(text.janusMsg.format.Fileid)"
+                            @touchstart="gtouchstart(text)"
+                            @touchmove="gtouchmove()"
+                            @touchend="gtouchend()"
+                        >
+                            <img
+                                :src="`${config.serverUrl}/image/${text.janusMsg.format.Fileid}${text.ext}`"
+                            />
+                        </div>
+                        <!-- 文件訊息 -->
+                        <div
+                            class="content icon"
+                            v-if="text.janusMsg.msgType === 7"
+                            @touchstart="gtouchstart(text)"
+                            @touchmove="gtouchmove()"
+                            @touchend="gtouchend()"
+                        >
+                            <img src="../../assets/Images/chatroom/file-fill.svg" />
+                            <div class="fileDescription">
                                 <n-ellipsis
-                                    v-if="text.replyObj.msgType === 1"
-                                    style="width: 100%"
-                                    :line-clamp="2"
+                                    class="ellipsisName"
+                                    style="max-width: 120px"
                                     :tooltip="false"
                                 >
-                                    {{ text.replyObj.message }}
+                                    {{ text.janusMsg.format.ShowName }}
                                 </n-ellipsis>
-                            </div>
-                            <div class="replyImg" v-if="text.replyObj.msgType === 6">
-                                <img
-                                    :src="`${config.serverUrl}/image/${text.replyObj.format.Fileid}${text.replyObj.ext}`"
-                                />
+                                <p>
+                                    檔案大小&thinsp;:&thinsp;{{ text.janusMsg.format.FileSize }}KB
+                                </p>
+                                <p>下載期限&thinsp;:&thinsp;{{ text.expirationDate }}</p>
                             </div>
                         </div>
-                        <!-- 文字訊息 -->
-                        <div class="originalMsg">
-                            <p>{{ text.janusMsg.message }}</p>
-                        </div>
-                    </div>
-                    <!-- google maps -->
-                    <div
-                        class="googleMapsMsg content"
-                        v-if="text.janusMsg.msgType === 8"
-                        @touchstart="gtouchstart(text)"
-                        @touchmove="gtouchmove()"
-                        @touchend="gtouchend()"
-                    >
-                        <a
-                            :href="`https://maps.google.com/maps?q=${text.janusMsg.format.Latitude},${text.janusMsg.format.Longitude}`"
-                            target="_blank"
-                            rel="noopener noreferrer"
+                        <!-- 電話訊息 -->
+                        <div
+                            class="phoneMsg content"
+                            v-else-if="text.janusMsg.msgType === 9"
+                            @touchend="doCall(DO_CALL_NAME)"
                         >
-                            <span class="img"
-                                ><img src="../../assets/Images/chatroom/map.jpg" alt="google maps"
-                            /></span>
-                            查看地圖
-                        </a>
-                    </div>
-                    <!-- audio -->
-                    <div
-                        class="audio content"
-                        :class="{ play: text.janusMsg.format.isPlay }"
-                        v-if="text.janusMsg.msgType === 5"
-                    >
-                        <audio :id="`audio-player-${text.id}`">
-                            <source
-                                :src="`${config.serverUrl}/image/${text.janusMsg.format.Fileid}${text.ext}`"
-                                type="audio/wav"
-                            />
-                            Your browser does not support the audio tag.
-                        </audio>
-                        <n-icon @click="toggleAudio(text)" size="24">
-                            <pause-circle-sharp v-if="text.janusMsg.format.isPlay" />
-                            <play-circle-sharp v-else />
-                        </n-icon>
-                        <span v-if="text.janusMsg.format.isPlay">{{ newTime }}</span>
-                        <span v-if="!text.janusMsg.format.isPlay" class="totalTime">
-                            {{ text.audioInfo.SoundTime }}
-                        </span>
-                        <img
-                            class="audioWave"
-                            v-if="!text.janusMsg.format.isPlay"
-                            src="../../assets/Images/chatroom/audio.svg"
-                        />
-                    </div>
-                    <!-- 圖片訊息 -->
-                    <div
-                        class="picture"
-                        v-if="text.janusMsg.msgType === 6"
-                        @click="previewURL(text.janusMsg.format.Fileid)"
-                        @touchstart="gtouchstart(text)"
-                        @touchmove="gtouchmove()"
-                        @touchend="gtouchend()"
-                    >
-                        <img
-                            :src="`${config.serverUrl}/image/${text.janusMsg.format.Fileid}${text.ext}`"
-                        />
-                    </div>
-                    <!-- 文件訊息 -->
-                    <div
-                        class="content icon"
-                        v-if="text.janusMsg.msgType === 7"
-                        @touchstart="gtouchstart(text)"
-                        @touchmove="gtouchmove()"
-                        @touchend="gtouchend()"
-                    >
-                        <img src="../../assets/Images/chatroom/file-fill.svg" />
-                        <div class="fileDescription">
-                            <n-ellipsis
-                                class="ellipsisName"
-                                style="max-width: 120px"
-                                :tooltip="false"
+                            <router-link
+                                class="phone"
+                                :to="`/phone?chatToken=${route.query.chatToken}`"
                             >
-                                {{ text.janusMsg.format.ShowName }}
-                            </n-ellipsis>
-                            <p>檔案大小&thinsp;:&thinsp;{{ text.janusMsg.format.FileSize }}KB</p>
-                            <p>下載期限&thinsp;:&thinsp;{{ text.expirationDate }}</p>
+                                <div class="phonePic">
+                                    <img
+                                        src="../../assets/Images/chatroom/phone-fill-round-y.svg"
+                                        alt=""
+                                    />
+                                </div>
+                                <div class="phoneStatus">
+                                    <h4 v-if="text.janusMsg.format.phoneType === 1">無回應</h4>
+                                    <h4 v-if="text.janusMsg.format.phoneType === 2">取消通話</h4>
+                                    <h4 v-if="text.janusMsg.format.phoneType === 3">語音來電</h4>
+                                    <p v-if="text.janusMsg.format.phoneType === 3">
+                                        {{ text.janusMsg.format.phoneTime }}
+                                    </p>
+                                    <h4 v-if="text.janusMsg.format.phoneType === 4">未接來電</h4>
+                                </div>
+                            </router-link>
+                            <a class="phone-web" @click="onPhoneCallModal">
+                                <div class="phonePic">
+                                    <img
+                                        src="../../assets/Images/chatroom/phone-fill-round-y.svg"
+                                        alt=""
+                                    />
+                                </div>
+                                <div class="phoneStatus">
+                                    <h4 v-if="text.janusMsg.format.phoneType === 1">無回應</h4>
+                                    <h4 v-if="text.janusMsg.format.phoneType === 2">取消通話</h4>
+                                    <h4 v-if="text.janusMsg.format.phoneType === 3">語音來電</h4>
+                                    <p v-if="text.janusMsg.format.phoneType === 3">
+                                        {{ text.janusMsg.format.phoneTime }}
+                                    </p>
+                                    <h4 v-if="text.janusMsg.format.phoneType === 4">未接來電</h4>
+                                </div>
+                            </a>
                         </div>
                     </div>
-                    <!-- 電話訊息 -->
-                    <div
-                        class="phoneMsg content"
-                        v-else-if="text.janusMsg.msgType === 9"
-                        @touchend="doCall(DO_CALL_NAME)"
-                    >
-                        <router-link
-                            class="phone"
-                            :to="`/phone?chatToken=${route.query.chatToken}`"
-                        >
-                            <div class="phonePic">
-                                <img
-                                    src="../../assets/Images/chatroom/phone-fill-round-y.svg"
-                                    alt=""
-                                />
-                            </div>
-                            <div class="phoneStatus">
-                                <h4 v-if="text.janusMsg.format.phoneType === 1">無回應</h4>
-                                <h4 v-if="text.janusMsg.format.phoneType === 2">取消通話</h4>
-                                <h4 v-if="text.janusMsg.format.phoneType === 3">語音來電</h4>
-                                <p v-if="text.janusMsg.format.phoneType === 3">
-                                    {{ text.janusMsg.format.phoneTime }}
-                                </p>
-                                <h4 v-if="text.janusMsg.format.phoneType === 4">未接來電</h4>
-                            </div>
-                        </router-link>
-                        <a class="phone-web" @click="onPhoneCallModal">
-                            <div class="phonePic">
-                                <img
-                                    src="../../assets/Images/chatroom/phone-fill-round-y.svg"
-                                    alt=""
-                                />
-                            </div>
-                            <div class="phoneStatus">
-                                <h4 v-if="text.janusMsg.format.phoneType === 1">無回應</h4>
-                                <h4 v-if="text.janusMsg.format.phoneType === 2">取消通話</h4>
-                                <h4 v-if="text.janusMsg.format.phoneType === 3">語音來電</h4>
-                                <p v-if="text.janusMsg.format.phoneType === 3">
-                                    {{ text.janusMsg.format.phoneTime }}
-                                </p>
-                                <h4 v-if="text.janusMsg.format.phoneType === 4">未接來電</h4>
-                            </div>
-                        </a>
+                    <!-- 時間戳記 -->
+                    <div class="timestamp" :class="{ yourTimeStamp: text.janusMsg.sender === 0 }">
+                        <span>已讀</span>
+                        <span>{{ text.time }}</span>
                     </div>
                 </div>
-                <!-- 時間戳記 -->
-                <div class="timestamp" :class="{ yourTimeStamp: text.janusMsg.sender === 0 }">
-                    <span>已讀</span>
-                    <span>{{ text.time }}</span>
-                </div>
+                <n-icon
+                    size="30"
+                    class="scrollToBottom"
+                    v-show="
+                        chatroomScrolltopAndWindowHeight < chatroomScrollHeight &&
+                        !text.replyObj &&
+                        !isReplyBox &&
+                        !inputFunctionBoolean
+                    "
+                    @click="scrollToBottom"
+                >
+                    <arrow-down-circle />
+                </n-icon>
             </div>
-            <n-icon
-                size="30"
-                class="scrollToBottom"
-                v-show="chatroomScrolltopAndWindowHeight < chatroomScrollHeight && !text.replyObj"
-                @click="scrollToBottom"
-            >
-                <arrow-down-circle />
-            </n-icon>
         </div>
     </div>
     <UserInfoModel />
@@ -467,8 +492,18 @@ const themeOverrides = {
 //chat store
 const chatStore = useChatStore();
 const { replyMsgEvent, confirmDelete, deleteQuestion } = chatStore;
-let { messages, msg, deleteBoolean, deleteGroup, deletePopUp, replyMsg, pictures, textPlugin } =
-    storeToRefs(chatStore);
+let {
+    messages,
+    msg,
+    deleteBoolean,
+    deleteGroup,
+    deletePopUp,
+    replyMsg,
+    pictures,
+    textPlugin,
+    isReplyBox,
+    inputFunctionBoolean,
+} = storeToRefs(chatStore);
 
 const onPhoneCallModal = () => {
     phoneCallModal.value = true;
@@ -501,7 +536,7 @@ const gtouchstart = (msg: txt) => {
 const gtouchend = () => {
     clearInterval(timeOutEvent.value);
     if (timeOutEvent.value != 0) {
-        goChat();
+        console.log("點擊");
     }
     return false;
 };
@@ -517,9 +552,6 @@ const longPress = (msg: any) => {
     closeBubble(msg);
 };
 
-const goChat = () => {
-    console.log("點擊");
-};
 //上傳檔案
 const dropFiles = ref();
 const image = ref();
@@ -1096,13 +1128,16 @@ watchEffect(() => {
 }
 .chatroom-inner {
     width: 100%;
-    height: calc(100vh - 53px);
-    overflow-x: hidden;
-    overflow-y: auto;
-    flex: 12;
-    position: relative;
-    padding-top: 125px;
+    position: absolute;
+    top: 160px;
+    bottom: 67px;
+    overflow-y: scroll;
+    height: auto;
     background-color: $gray-8;
+    box-sizing: border-box;
+    .background {
+        padding-top: 0;
+    }
     .dialog-box {
         display: flex;
         justify-content: flex-end;
@@ -1327,7 +1362,7 @@ watchEffect(() => {
                             li {
                                 width: 58px;
                                 height: 40px;
-                                padding: 10px 14px 10px 15px;
+                                padding: 10px 9px 10px 10px;
                                 text-align: center;
                                 display: block;
                                 color: $gray-1;
@@ -1604,11 +1639,25 @@ watchEffect(() => {
         right: 20px;
         bottom: 70px;
         border-radius: 50%;
-        z-index: 0;
+        z-index: 1;
         cursor: pointer;
     }
 }
 
+@media screen and (max-width: 768px) {
+    .chatroom-inner {
+        position: absolute;
+        top: 140px;
+        bottom: 67px;
+        overflow-y: scroll;
+        height: auto;
+        padding: 0;
+        .background {
+            padding-top: 0;
+            padding-bottom: 0px;
+        }
+    }
+}
 .dropActive {
     background-color: rgba(0, 0, 0, 0.1);
 }

@@ -128,6 +128,7 @@ export const usePhoneCallStore = defineStore({
                           format: replyMsg.value.janusMsg.format,
                           recallStatus: replyMsg.value.recallStatus,
                           recallPopUp: replyMsg.value.recallPopUp,
+                          sender: replyMsg.value.janusMsg.sender,
                       }
                     : "",
             };

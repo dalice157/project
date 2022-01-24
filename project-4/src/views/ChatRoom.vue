@@ -600,17 +600,11 @@ const attachVideocallPlugin = () => {
 @import "~@/assets/scss/var";
 .chatroom {
     position: relative;
+    box-sizing: border-box;
+    height: 100%;
     width: 100%;
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    z-index: 99;
-}
-@media (max-width: 768px) {
-    .chatroom {
-        width: 100%;
-        height: 100vh;
-    }
+    grid-area: body;
+    background-color: $gray-8;
 }
 .description {
     width: 100%;

@@ -1,4 +1,6 @@
 import { defineStore } from "pinia";
+import { usePhoneCallStore } from "@/store/phoneCall"
+import{ DO_CALL_NAME } from "@/util/commonUtil"
 
 export const useModelStore = defineStore({
     id: "model",
@@ -25,6 +27,11 @@ export const useModelStore = defineStore({
         },
         gotoPhone(token: string | null) {
             location.href = `/phone?chatToken=${token}`;
+            
+            // const phoneCallStore = usePhoneCallStore()
+            // const { doCall } = phoneCallStore
+            // this.phoneCallModal = true
+            // doCall(DO_CALL_NAME);
         },
     },
 });

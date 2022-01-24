@@ -39,7 +39,7 @@
                     type="file"
                     multiple
                     :accept="fileAccept"
-                    @change="onUploadFile"
+                    @click="onUploadFile"
                 />
                 <span class="upload_icon">文件</span>
             </label>
@@ -58,7 +58,16 @@
             </div>
         </div>
         <div class="input-inner" v-else>
-            <span class="attach" @click="inputFunctionSwitch"></span>
+            <span
+                class="attachOpen"
+                @click="inputFunctionSwitch"
+                v-show="!inputFunctionBoolean"
+            ></span>
+            <span
+                class="attachClose"
+                @click="inputFunctionSwitch"
+                v-show="inputFunctionBoolean"
+            ></span>
             <span class="camera">
                 <input
                     type="file"
@@ -72,13 +81,12 @@
                 <input type="file" name="image" accept="image/*" @change="uploadImage" />
             </span>
             <span class="file-folder">
-                <input type="file" multiple @change="onUploadFile" />
+                <input type="file" multiple @click="onUploadFile" />
             </span>
             <div class="textArea">
                 <n-config-provider :theme-overrides="themeOverrides">
                     <n-input
                         class="n-input-modify"
-                        autofocus
                         placeholder="Aa"
                         type="textarea"
                         size="small"
@@ -87,8 +95,8 @@
                             maxRows: 5,
                         }"
                         v-model:value.trim="msg"
-                        ref="inputInstRef"
                         @keydown.enter.exact.prevent="addMsg"
+                        ref="inputInstRef"
                     >
                         <template #suffix>
                             <img src="../../assets/Images/chatroom/emoji.svg" alt="#" />
@@ -108,14 +116,14 @@
                 src="../../assets/Images/chatroom/voice.svg"
                 alt="#"
                 v-show="!msg && !showRecorderModal"
-                @click="handlerRecorder()"
+                @click="openRecorder()"
             />
             <img
                 class="recorder"
                 src="../../assets/Images/chatroom/voice-enabled.svg"
                 alt="#"
                 v-show="!msg && showRecorderModal"
-                @click="handlerRecorder()"
+                @click="closeRecorder()"
             />
         </div>
 
@@ -222,6 +230,8 @@ const {
 //router
 const route = useRoute();
 onMounted(() => {
+    console.log("**************", inputInstRef);
+    inputInstRef.value.blur();
     inputVal.value = inputInstRef.value;
 });
 
@@ -313,6 +323,7 @@ const shareMap = () => {
                   format: replyMsg.value.janusMsg.format,
                   recallStatus: replyMsg.value.recallStatus,
                   recallPopUp: replyMsg.value.recallPopUp,
+                  sender: replyMsg.value.janusMsg.sender,
               }
             : "",
     };
@@ -340,14 +351,28 @@ const isClock = ref(false);
 const posStart = ref(0) as any;
 
 // 開啟錄音視窗
-const handlerRecorder = () => {
-    showRecorderModal.value = !showRecorderModal.value;
+const openRecorder = () => {
+    showRecorderModal.value = true;
+    //取得麥克風權限
+    navigator.mediaDevices
+        .getUserMedia({ audio: true })
+        .then(function (stream) {
+            console.log("You let me use your mic!");
+        })
+        .catch(function (err) {
+            console.log("No mic for you!");
+        });
+};
+//關閉錄音室窗
+const closeRecorder = () => {
+    showRecorderModal.value = false;
 };
 
 onMounted(() => {
     const all = document.querySelector(".all") as any;
     const recordArea = document.querySelector("#audio") as any;
     const microphone = document.querySelector(".microphone");
+
     recordArea.addEventListener("touchstart", (e: any) => {
         e.preventDefault(); //
         isClock.value = true;
@@ -431,9 +456,6 @@ const startRecorder = (e: any) => {
         });
 };
 
-const stopMoveRecorder = (e: any) => {
-    e.preventDefault();
-};
 const stopClRecorder = (e: any) => {
     recorder.value.stop();
     recorder.value.destroy().then(function () {
@@ -503,6 +525,7 @@ const stopRecorder = (e: any) => {
                           format: replyMsg.value.janusMsg.format,
                           recallStatus: replyMsg.value.recallStatus,
                           recallPopUp: replyMsg.value.recallPopUp,
+                          sender: replyMsg.value.janusMsg.sender,
                       }
                     : "",
             };
@@ -558,6 +581,7 @@ const addMsg = (): void => {
                   format: replyMsg.value.janusMsg.format,
                   recallStatus: replyMsg.value.recallStatus,
                   recallPopUp: replyMsg.value.recallPopUp,
+                  sender: replyMsg.value.janusMsg.sender,
               }
             : "",
     };
@@ -642,6 +666,7 @@ const uploadImage = (e: any) => {
                                       format: replyMsg.value.janusMsg.format,
                                       recallStatus: replyMsg.value.recallStatus,
                                       recallPopUp: replyMsg.value.recallPopUp,
+                                      sender: replyMsg.value.janusMsg.sender,
                                   }
                                 : "",
                         };
@@ -674,6 +699,7 @@ const uploadImage = (e: any) => {
 //上傳
 const files = ref();
 const onUploadFile = (e: any) => {
+    inputFunctionBoolean.value = false;
     const fileArr = e.target.files[0];
     const fileArrType = e.target.files[0].type;
     const fileName = fileArr.name;
@@ -739,6 +765,7 @@ const onUploadFile = (e: any) => {
                                           format: replyMsg.value.janusMsg.format,
                                           recallStatus: replyMsg.value.recallStatus,
                                           recallPopUp: replyMsg.value.recallPopUp,
+                                          sender: replyMsg.value.janusMsg.sender,
                                       }
                                     : "",
                             };
@@ -820,6 +847,7 @@ const onUploadFile = (e: any) => {
                                   format: replyMsg.value.janusMsg.format,
                                   recallStatus: replyMsg.value.recallStatus,
                                   recallPopUp: replyMsg.value.recallPopUp,
+                                  sender: replyMsg.value.janusMsg.sender,
                               }
                             : "",
                     };
@@ -842,7 +870,6 @@ const onUploadFile = (e: any) => {
                 console.error(err);
             });
     }
-    inputFunctionBoolean.value = false;
 };
 
 //功能欄開關
@@ -919,10 +946,12 @@ const confirmDeletePopup = () => {
 }
 
 .reply {
+    width: 100%;
     background-color: $gray-7;
     display: flex;
-    position: relative;
     cursor: pointer;
+    position: fixed;
+    bottom: 60px;
     .avatar {
         width: 40px;
         height: 40px;
@@ -962,6 +991,9 @@ const confirmDeletePopup = () => {
     }
 }
 .inputFunctionBar {
+    position: fixed;
+    bottom: 60px;
+    width: calc(100% - 300px);
     height: 84px;
     background-color: $white;
     display: flex;
@@ -977,7 +1009,7 @@ const confirmDeletePopup = () => {
         }
     }
     .file {
-        width: 28px;
+        width: 30px;
         padding-top: 15px;
         .upload_cover {
             position: relative;
@@ -993,7 +1025,7 @@ const confirmDeletePopup = () => {
                 display: none;
             }
             .upload_icon {
-                width: 28px;
+                width: 30px;
                 position: absolute;
                 @extend %h4;
                 cursor: pointer;
@@ -1003,6 +1035,7 @@ const confirmDeletePopup = () => {
         }
     }
     .position {
+        width: 30px;
         padding-top: 15px;
         cursor: pointer;
         img {
@@ -1015,10 +1048,17 @@ const confirmDeletePopup = () => {
         }
     }
 }
+@media (max-width: 768px) {
+    .inputFunctionBar {
+        width: 100%;
+    }
+}
 .input {
+    position: fixed;
+    bottom: 0;
+    width: calc(100% - 300px);
     padding: 0 15px;
     background-color: $white;
-    flex: 1;
     box-shadow: -1px -1px 4px $gray-6;
     .deleteOption {
         height: 60px;
@@ -1059,7 +1099,7 @@ const confirmDeletePopup = () => {
         align-items: center;
         padding: 10px 0px;
 
-        .attach {
+        .attachOpen {
             display: none;
             min-width: 24px;
             height: 24px;
@@ -1068,15 +1108,22 @@ const confirmDeletePopup = () => {
             background-size: 24px;
             cursor: pointer;
         }
+        .attachClose {
+            display: none;
+            min-width: 24px;
+            height: 24px;
+            margin: 3px 6px 3px 0;
+            background-image: url("~@/assets/Images/chatroom/close-round.svg");
+            background-size: 24px;
+            cursor: pointer;
+        }
+
         @media (max-width: 768px) {
-            .attach {
+            .attachOpen {
                 display: block;
-                min-width: 24px;
-                height: 24px;
-                margin: 3px 6px 3px 0;
-                background-image: url("~@/assets/Images/chatroom/add-round.svg");
-                background-size: 24px;
-                cursor: pointer;
+            }
+            .attachClose {
+                display: block;
             }
         }
         .camera {
@@ -1298,6 +1345,11 @@ const confirmDeletePopup = () => {
                 transform: translate(-50%, -50%);
             }
         }
+    }
+}
+@media (max-width: 768px) {
+    .input {
+        width: 100%;
     }
 }
 </style>

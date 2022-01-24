@@ -217,12 +217,15 @@ const imgDisplay = (fileid: string) => {
 @import "~@/assets/scss/var";
 @import "~@/assets/scss/extend";
 .gallery {
+    grid-area: body;
     width: 100%;
-    height: calc(100vh - 125px);
+    height: 100%;
     background-color: $white;
+    overflow-y: auto;
 
     .galleryHeader {
-        width: calc(100% - $siderWidth);
+        width: calc(100% - 300px);
+        // width: 100%;
         height: 125px;
         background: url("~@/assets/Images/common/header-bg-pc.svg") no-repeat center top;
         background-size: cover;
@@ -388,7 +391,7 @@ const imgDisplay = (fileid: string) => {
 }
 @media (max-width: 768px) {
     .gallery {
-        height: 100vh;
+        height: 100%;
         .date {
             font-size: $font-size-14;
         }

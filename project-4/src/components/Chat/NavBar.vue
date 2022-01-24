@@ -14,9 +14,7 @@
                     />
                 </div>
                 <!-- NavBar 標題 -->
-                <h1 class="title" v-show="route.meta.show">
-                    {{ eventInfo.name }}
-                </h1>
+                <h1 class="title" v-show="route.meta.show">{{ eventInfo.name }}</h1>
             </div>
             <!-- 功能欄 -->
             <div class="chatpane">
@@ -93,12 +91,13 @@ const onPhoneCallModal = () => {
 @import "~@/assets/scss/var";
 
 .navbar {
-    width: calc(100% - $siderWidth);
-    min-height: 166px;
+    width: calc(100% - 300px);
+    height: 160px;
     background: transparent url("~@/assets/Images/chatroom/header-bg-pc.png") no-repeat center top;
     background-size: cover;
     position: fixed;
     z-index: 100;
+    top: 0;
     .back {
         display: none;
     }
@@ -207,6 +206,7 @@ const onPhoneCallModal = () => {
 @media (max-width: 768px) {
     .navbar {
         width: 100%;
+        height: 140px;
         background: transparent url("~@/assets/Images/chatroom/header-bg.png") no-repeat center top;
         background-size: cover;
         .back {

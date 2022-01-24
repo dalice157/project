@@ -39,6 +39,9 @@ const route = useRoute();
     height: 44px;
     border: 1px solid $border-line;
     box-shadow: 2px 0px 4px $gray-6;
+    position: sticky;
+    top: 60px;
+    z-index: 100;
     .search {
         display: flex;
         align-self: center;
@@ -66,8 +69,6 @@ const route = useRoute();
 
 @media (max-width: 768px) {
     .searchBar {
-        position: relative;
-        z-index: 101;
         width: 93%;
         margin: -60px auto 0;
         display: flex;
@@ -76,14 +77,14 @@ const route = useRoute();
 .result {
     position: fixed;
     top: 188px;
-    width: calc(100% - $siderWidth);
-    height: calc(100vh - 165px);
+    width: 100%;
+    height: calc(100% - 165px);
     background-color: $white;
     z-index: 100;
     .empty {
-        height: calc(100vh - 165px);
+        height: calc(100% - 165px);
         text-align: center;
-        line-height: calc(100vh - 220px);
+        line-height: calc(100% - 220px);
         color: $gray-3;
         font-size: $font-size-26;
         font-weight: 500;

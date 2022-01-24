@@ -1,9 +1,11 @@
 <template>
     <div class="moreChatRoom" :class="{ menuToggle: hamburgerBoolean }">
         <HamburgerBar @menuToggle="menuToggle" />
-        <h1 v-if="!isResult || keyWord === ''" class="logo">溝通雲</h1>
-        <SeachBar />
-        <ChatRoomList />
+        <div class="main">
+            <h1 v-if="!isResult || keyWord === ''" class="logo">溝通雲</h1>
+            <SeachBar />
+            <ChatRoomList />
+        </div>
     </div>
 </template>
 
@@ -39,15 +41,19 @@ const menuToggle = (menuBoolean: boolean) => {
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
 .moreChatRoom {
+    height: 100%;
+    grid-area: body;
     display: none;
 }
 @media (max-width: 768px) {
     .moreChatRoom {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        height: 100vh;
         width: 100%;
+        height: 100%;
+        display: grid;
+        grid:
+            "header" 120px
+            "main" 1fr;
+        gap: 0;
         background-color: $gray-8;
         transform: translateX(0px);
         -webkit-transition: all 0.7s ease-in-out;
@@ -59,12 +65,16 @@ const menuToggle = (menuBoolean: boolean) => {
             -o-transition: all 0.7s ease-in-out;
             transition: all 0.7s ease-in-out;
         }
+    }
+    .main {
+        grid-area: main;
         .logo {
             margin-top: 20px;
             margin-bottom: 20px;
             font-size: $font-size-18;
             font-weight: 600;
             color: $primary-1;
+            text-align: center;
         }
     }
 }

@@ -170,14 +170,14 @@ const themeOverrides = {
     position: fixed;
     top: 166px;
     width: calc(100% - $siderWidth);
-    height: calc(100vh - 127px);
+    height: calc(100% - 127px);
     background-color: $white;
     z-index: 100;
 
     .empty {
-        height: calc(100vh - 165px);
+        height: calc(100% - 165px);
         text-align: center;
-        line-height: calc(100vh - 220px);
+        line-height: calc(100% - 220px);
         color: $gray-3;
         font-size: $font-size-26;
         font-weight: 500;
@@ -238,7 +238,7 @@ const themeOverrides = {
     .result {
         width: 100% !important;
         top: 127px !important;
-        height: calc(100vh - 127px) !important;
+        height: calc(100% - 127px) !important;
         z-index: 100;
         .numOfsearchMessage {
             margin-left: 15px;

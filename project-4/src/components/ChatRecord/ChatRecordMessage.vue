@@ -291,10 +291,12 @@ const unpin = (item: any, index: any): void => {
         }
         it.isfunctionPopUp = false;
     });
-    const toTopLists = lists.filters((isTop) => {
+    console.log("lists:", lists);
+
+    const toTopLists = lists.filter((isTop) => {
         return isTop.toTop;
     });
-    const doNotTopLists = lists.filters((isTop) => {
+    const doNotTopLists = lists.filter((isTop) => {
         return !isTop.toTop;
     });
     changeList.value = [...toTopLists, ...doNotTopLists];
@@ -338,6 +340,8 @@ const unpin = (item: any, index: any): void => {
     text-align: center;
 }
 .searchRecordMessage {
+    height: 100%;
+    overflow-y: auto;
     .chatRoomBox {
         cursor: pointer;
         width: 100%;
@@ -408,7 +412,7 @@ const unpin = (item: any, index: any): void => {
             flex-direction: column;
             .time {
                 text-align: right;
-                width: 68px;
+                width: 75px;
                 color: $gray-3;
                 font-size: $font-size-14;
                 font-weight: 500;
@@ -438,6 +442,10 @@ const unpin = (item: any, index: any): void => {
     }
 }
 .chatRecordMessage {
+    height: calc(100% - 160px);
+    overflow-y: auto;
+    padding-top: 20px;
+    box-sizing: border-box;
     .chatRoomBox {
         cursor: pointer;
         width: 100%;
@@ -507,7 +515,7 @@ const unpin = (item: any, index: any): void => {
             display: flex;
             .time {
                 text-align: right;
-                width: 68px;
+                width: 75px;
                 color: $gray-3;
                 font-size: $font-size-14;
                 font-weight: 500;
@@ -558,12 +566,6 @@ const unpin = (item: any, index: any): void => {
                 }
             }
         }
-    }
-}
-
-@media (max-width: 768px) {
-    .chatRecordMessage {
-        margin-top: 20px;
     }
 }
 </style>

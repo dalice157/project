@@ -101,8 +101,16 @@ section {
     display: block;
 }
 * {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
 }
+
+html,
+body {
+    height: 100%;
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, Arial, "微軟正黑體", "Microsoft JhengHei",
         Roboto, "Segoe UI", "蘋方體", "PingFangTC", sans-serif;

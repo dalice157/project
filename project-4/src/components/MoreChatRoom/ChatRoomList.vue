@@ -108,7 +108,7 @@ watchEffect(() => {
     .chatRoomAll {
         border-radius: 4px;
         width: 90%;
-        margin-top: 15px;
+        margin: 15px auto;
         display: flex;
         flex-direction: column;
         align-items: center;

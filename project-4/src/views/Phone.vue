@@ -92,8 +92,9 @@ getBackendApi(chatToken.value);
 @import "~@/assets/scss/var";
 
 .phone {
+    grid-area: body;
     width: 100%;
-    height: 100vh;
+    height: 100%;
     background: url("~@/assets/Images/phone/phone-bg.svg") no-repeat center top;
     position: relative;
 
@@ -167,7 +168,7 @@ getBackendApi(chatToken.value);
 @media (max-width: 768px) {
     .phone {
         width: 100%;
-        height: 100vh;
+        height: 100%;
         background: url("~@/assets/Images/phone/phone-bg-428.svg") no-repeat center top;
     }
 }

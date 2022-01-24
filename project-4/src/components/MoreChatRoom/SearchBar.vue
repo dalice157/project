@@ -81,14 +81,14 @@ getEventListApi(route.query.chatToken);
 .result {
     position: fixed;
     top: 188px;
-    width: calc(100% - $siderWidth);
-    height: calc(100vh - 165px);
+    width: 100%;
+    height: calc(100% - 165px);
     background-color: $white;
     z-index: 100;
     .empty {
-        height: calc(100vh - 165px);
+        height: calc(100% - 165px);
         text-align: center;
-        line-height: calc(100vh - 220px);
+        line-height: calc(100% - 220px);
         color: $gray-3;
         font-size: $font-size-26;
         font-weight: 600;

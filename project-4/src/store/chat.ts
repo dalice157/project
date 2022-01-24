@@ -26,7 +26,6 @@ export const useChatStore = defineStore({
             const findId = this.messages.find((text: any) => {
                 return text.id === msg.id;
             });
-
             this.replyMsg = findId;
             this.isReplyBox = true;
             msg.msgFunctionStatus = false;
@@ -37,6 +36,7 @@ export const useChatStore = defineStore({
         replyHide() {
             this.isReplyBox = false;
             this.replyMsg = "";
+            this.inputVal.focus();
         },
         //刪除訊息提示
         deleteQuestion(msg: any) {
