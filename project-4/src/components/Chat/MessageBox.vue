@@ -4,6 +4,7 @@
         :class="{ dropActive: dropActive }"
         class="chatroom-inner"
         ref="findScrollHeight"
+        @click="closeAll"
         @scroll="chatroomToBottom($event)"
     >
         <div class="background">
@@ -372,7 +373,7 @@
                     </div>
                     <!-- 時間戳記 -->
                     <div class="timestamp" :class="{ yourTimeStamp: text.janusMsg.sender === 0 }">
-                        <span>已讀</span>
+                        <span v-if="text.isRead && text.janusMsg.sender === 1">已讀</span>
                         <span>{{ text.time }}</span>
                     </div>
                 </div>
@@ -442,6 +443,7 @@ import { useApiStore } from "@/store/api";
 import { useChatStore } from "@/store/chat";
 import { useModelStore } from "@/store/model";
 import { usePhoneCallStore } from "@/store/phoneCall";
+import { useSearchStore } from "@/store/search";
 import { txt } from "@/util/interfaceUtil";
 import { sendPrivateMsg } from "@/util/chatUtil";
 import phoneIcon from "@/assets/Images/common/phone-round.svg";
@@ -464,7 +466,7 @@ const timeOutEvent = ref(0);
 
 // 彈窗 store
 const modelStore = useModelStore();
-const { showCompanyInfo, gotoPhone } = modelStore;
+const { showCompanyInfo, gotoPhone, closeAll } = modelStore;
 const { info, phoneCallModal } = storeToRefs(modelStore);
 
 //phone store
@@ -491,7 +493,7 @@ const themeOverrides = {
 };
 //chat store
 const chatStore = useChatStore();
-const { replyMsgEvent, confirmDelete, deleteQuestion } = chatStore;
+const { replyMsgEvent, confirmDelete, deleteQuestion, closeRecorder } = chatStore;
 let {
     messages,
     msg,
@@ -509,6 +511,10 @@ const onPhoneCallModal = () => {
     phoneCallModal.value = true;
     doCall(DO_CALL_NAME);
 };
+
+//search store
+const searchStore = useSearchStore();
+const { closeSearchBar } = searchStore;
 
 //聊天室功能
 const preDate: any = ref([]);
@@ -612,6 +618,7 @@ const onUploadFile = (file: any) => {
                                 currentMonth: currentMonth(),
                                 expirationDate: dayjs.unix(res.data.data.exp).format("YYYY-MM-DD"),
                                 isExpire: false,
+                                isRead: false,
                                 replyObj: replyMsg.value
                                     ? {
                                           id: replyMsg.value.id,
@@ -693,6 +700,7 @@ const onUploadFile = (file: any) => {
                         currentMonth: currentMonth(),
                         expirationDate: dayjs.unix(res.data.data.exp).format("YYYY-MM-DD"),
                         isExpire: false,
+                        isRead: false,
                         replyObj: replyMsg.value
                             ? {
                                   id: replyMsg.value.id,
@@ -895,19 +903,19 @@ const previewURL = (fileid: string): void => {
         if (
             !viewImgs.value.includes(
                 `${config.serverUrl}/image/${img.janusMsg.format.Fileid}${img.ext}`
-            )
+            ) &&
+            img.janusMsg.msgType === 6
         ) {
             viewImgs.value.push(
                 `${config.serverUrl}/image/${img.janusMsg.format.Fileid}${img.ext}`
             );
         }
     });
-    console.log(
-        "picture:",
-        pictures.value.map((img: any) => img.janusMsg.format.Fileid)
-    );
+    console.log("picture:", viewImgs.value);
 
-    const viewIndex = pictures.value.map((img: any) => img.janusMsg.format.Fileid).indexOf(fileid);
+    const viewIndex = viewImgs.value
+        .map((img: any) => Math.floor(img.split("/")[4].split(".")[0]))
+        .indexOf(fileid);
     viewerApi({
         options: {
             initialViewIndex: viewIndex,
@@ -1017,14 +1025,14 @@ watchEffect(() => {
         transform: translate3d(5px, 0, 0);
     }
 }
-// * {
-//     -webkit-touch-callout: none;
-//     -webkit-user-select: none;
-//     -khtml-user-select: none;
-//     -moz-user-select: none;
-//     -ms-user-select: none;
-//     user-select: none;
-// }
+* {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
 
 //收回訊息確認的彈窗
 .mask {
@@ -1398,6 +1406,11 @@ watchEffect(() => {
                     flex-direction: column;
                     line-height: 1.5;
                     margin-left: 10px;
+                    -webkit-touch-callout: none;
+                    -webkit-user-select: none;
+                    -khtml-user-select: none;
+                    -moz-user-select: none;
+                    -ms-user-select: none;
                     user-select: none;
                     &.reply {
                         min-width: 70px;
@@ -1437,6 +1450,12 @@ watchEffect(() => {
                         > img {
                             margin-top: 4px;
                             width: 18px;
+                            -webkit-touch-callout: none;
+                            -webkit-user-select: none;
+                            -khtml-user-select: none;
+                            -moz-user-select: none;
+                            -ms-user-select: none;
+                            user-select: none;
                         }
                         .fileDescription {
                             margin-left: 8px;
@@ -1577,6 +1596,13 @@ watchEffect(() => {
                     align-items: center;
                     min-width: 100px;
                     height: 150px;
+
+                    -webkit-touch-callout: none;
+                    -webkit-user-select: none;
+                    -khtml-user-select: none;
+                    -moz-user-select: none;
+                    -ms-user-select: none;
+                    user-select: none;
                     /* Firefox, Chrome */
                     line-height: 148px;
                     white-space: nowrap;
@@ -1584,7 +1610,6 @@ watchEffect(() => {
 
                     /* IE */
                     *font-size: 135px; /* 200px * 0.9 = 180px */
-                    overflow: hidden;
                     overflow: hidden;
                     background-color: $white;
                     &:hover {
@@ -1599,6 +1624,12 @@ watchEffect(() => {
                         vertical-align: middle;
                         max-width: 150px;
                         max-height: 150px;
+                        -webkit-touch-callout: none;
+                        -webkit-user-select: none;
+                        -khtml-user-select: none;
+                        -moz-user-select: none;
+                        -ms-user-select: none;
+                        user-select: none;
                     }
                 }
                 .googleMapsMsg {

@@ -1,5 +1,5 @@
 <template>
-    <div class="siderWrap">
+    <div class="siderWrap" @click="closeSearchBar">
         <ul class="tabsNav">
             <li class="log" :class="{ active: type === 'log' }" @click="onLog">交談紀錄</li>
             <li class="moreChat" :class="{ active: type === 'moreChat' }" @click="onMoreChat">
@@ -71,6 +71,9 @@ const { eventInfo } = storeToRefs(apiStore);
 //router
 const route = useRoute();
 const chatToken = computed(() => route.query.chatToken);
+//search store
+const searchStore = useSearchStore();
+const { closeSearchBar } = searchStore;
 
 const type = ref("default");
 const onLog = () => {

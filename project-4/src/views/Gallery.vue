@@ -31,7 +31,7 @@
                                 !picture.isExpire &&
                                 date === dayjs(picture.currentDate).format('YYYY/MM')
                             "
-                            @click="imgDisplay(picture.janusMsg.format.Fileid)"
+                            @click="previewURL(picture.janusMsg.format.Fileid)"
                         >
                             <img
                                 :src="`${config.serverUrl}/image/${picture.janusMsg.format.Fileid}${picture.ext}`"
@@ -64,6 +64,7 @@
                                     style="width: 90%; max-height: 80px"
                                     :line-clamp="4"
                                     :tooltip="false"
+                                    class="showName"
                                 >
                                     <p>{{ picture.janusMsg.format.ShowName }}</p>
                                 </n-ellipsis>
@@ -167,29 +168,27 @@ onMounted(() => {
     // console.log("dateArr.value:", dateArr.value);
 });
 //圖片展示
-const viewPicture: any = ref([]);
-const imgDisplay = (fileid: string) => {
-    pictures.value.filter((img: any) => {
+const viewImgs: any = ref([]);
+const previewURL = (fileid: string): void => {
+    pictures.value.forEach((img: any) => {
         if (
-            !viewPicture.value.includes(
+            !viewImgs.value.includes(
                 `${config.serverUrl}/image/${img.janusMsg.format.Fileid}${img.ext}`
             ) &&
-            img.janusMsg.msgType === 6 &&
-            img.isExpire === false
+            img.janusMsg.msgType === 6
         ) {
-            viewPicture.value.push(
+            viewImgs.value.push(
                 `${config.serverUrl}/image/${img.janusMsg.format.Fileid}${img.ext}`
             );
         }
     });
+    console.log("picture:", fileid);
 
-    let viewPictureArr = viewPicture.value.map((img: any) => img.split("/")[4]);
-    const viewIndex = viewPictureArr.map((img: any) => img.split(".")[0]).indexOf(fileid);
-    // console.log(
-    //     "arr:",
-    //     viewPictureArr.map((img: any) => img.split(".")[0])
-    // );
-    // console.log("viewIndex", viewIndex);
+    const viewIndex = viewImgs.value
+        .map((img: any) => Math.floor(img.split("/")[4].split(".")[0]))
+        .indexOf(fileid);
+    console.log("viewIndex:", viewIndex);
+
     viewerApi({
         options: {
             initialViewIndex: viewIndex,
@@ -202,14 +201,14 @@ const imgDisplay = (fileid: string) => {
                 const wrap = document.getElementsByClassName("v-wrap");
                 const div = document.createElement("div");
                 const a = document.createElement("a");
-                a.href = `${config.serverUrl}/file/${route.query.chatToken}/${fileId}`;
+                a.href = `${config.serverUrl}/file/1GdSC2wd/${fileId}`;
                 a.download = fileName;
                 a.className = "download";
                 a.innerHTML = `<span class="downloadImg"></span>`;
                 wrap[0].appendChild(div).appendChild(a);
             },
         },
-        images: viewPicture.value,
+        images: viewImgs.value,
     });
 };
 </script>
@@ -344,6 +343,7 @@ const imgDisplay = (fileid: string) => {
                             line-height: 1.6;
                             margin-left: 4px;
                             height: 100%;
+                            word-break: break-all;
                         }
                     }
                 }
@@ -376,6 +376,7 @@ const imgDisplay = (fileid: string) => {
 
                         margin-left: 4px;
                         height: 100%;
+                        word-break: break-all;
                     }
                 }
             }

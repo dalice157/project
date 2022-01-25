@@ -1,7 +1,7 @@
 const env = process.env.NODE_ENV || "development";
 console.log(`"env" is ${env}`);
 const SERVER_SITE = {
-    develop: "https://test.gayu.biz:443",
+    develop: "https://192.168.1.178",
     production: "https://test.gayu.biz:443",
 };
 const JANUS_SITE = {

@@ -39,7 +39,7 @@
                     type="file"
                     multiple
                     :accept="fileAccept"
-                    @click="onUploadFile"
+                    @change="onUploadFileMP"
                 />
                 <span class="upload_icon">文件</span>
             </label>
@@ -60,12 +60,12 @@
         <div class="input-inner" v-else>
             <span
                 class="attachOpen"
-                @click="inputFunctionSwitch"
+                @click.stop="inputFunctionOpen"
                 v-show="!inputFunctionBoolean"
             ></span>
             <span
                 class="attachClose"
-                @click="inputFunctionSwitch"
+                @click.stop="inputFunctionClose"
                 v-show="inputFunctionBoolean"
             ></span>
             <span class="camera">
@@ -81,7 +81,7 @@
                 <input type="file" name="image" accept="image/*" @change="uploadImage" />
             </span>
             <span class="file-folder">
-                <input type="file" multiple @click="onUploadFile" />
+                <input type="file" @change="onUploadFilePC" />
             </span>
             <div class="textArea">
                 <n-config-provider :theme-overrides="themeOverrides">
@@ -95,6 +95,7 @@
                             maxRows: 5,
                         }"
                         v-model:value.trim="msg"
+                        @focus="closeAll()"
                         @keydown.enter.exact.prevent="addMsg"
                         ref="inputInstRef"
                     >
@@ -202,10 +203,15 @@ import { scrollPageTo, localStorageMsg, isObjToBeZero, chatroomID } from "@/util
 import { currentTime, currentDate, currentMonth } from "@/util/dateUtil";
 import { useApiStore } from "@/store/api";
 import { useChatStore } from "@/store/chat";
+import { useModelStore } from "@/store/model";
 import mapIcon from "@/assets/Images/m_fa_mappin.png";
 import sendIcon from "@/assets/Images/btn_send.png";
 import { convertTime } from "@/util/commonUtil";
 import config from "@/config/config";
+
+// model sotre
+const modelStore = useModelStore();
+const { closeAll } = modelStore;
 
 // api store
 const apiStore = useApiStore();
@@ -213,7 +219,7 @@ const { eventInfo } = storeToRefs(apiStore);
 //store
 const chatStore = useChatStore();
 const inputInstRef: any = ref(null);
-const { replyHide, confirmDelete } = chatStore;
+const { replyHide, confirmDelete, openRecorder, closeRecorder } = chatStore;
 const {
     messages,
     pictures,
@@ -226,6 +232,7 @@ const {
     deletePopUp,
     inputFunctionBoolean,
     textPlugin,
+    showRecorderModal,
 } = storeToRefs(chatStore);
 //router
 const route = useRoute();
@@ -339,8 +346,6 @@ const shareMap = () => {
 
 // 錄音
 const recorder: any = ref(null);
-//錄音視窗開關
-const showRecorderModal = ref(false);
 //是否錄音
 const isRecording = ref(false);
 //音檔長度
@@ -349,24 +354,6 @@ const recorderTime = ref("00:00");
 //座標
 const isClock = ref(false);
 const posStart = ref(0) as any;
-
-// 開啟錄音視窗
-const openRecorder = () => {
-    showRecorderModal.value = true;
-    //取得麥克風權限
-    navigator.mediaDevices
-        .getUserMedia({ audio: true })
-        .then(function (stream) {
-            console.log("You let me use your mic!");
-        })
-        .catch(function (err) {
-            console.log("No mic for you!");
-        });
-};
-//關閉錄音室窗
-const closeRecorder = () => {
-    showRecorderModal.value = false;
-};
 
 onMounted(() => {
     const all = document.querySelector(".all") as any;
@@ -455,7 +442,7 @@ const startRecorder = (e: any) => {
             console.log(`異常了,${error.name}:${error.message}`);
         });
 };
-
+//失敗銷毀錄音並重置
 const stopClRecorder = (e: any) => {
     recorder.value.stop();
     recorder.value.destroy().then(function () {
@@ -464,7 +451,7 @@ const stopClRecorder = (e: any) => {
     isRecording.value = false;
     recorderTime.value = "0:00";
 };
-// 結束錄音
+//完成錄音並送出
 const stopRecorder = (e: any) => {
     isRecording.value = false;
     console.log("結束錄音");
@@ -657,6 +644,7 @@ const uploadImage = (e: any) => {
                             currentMonth: currentMonth(),
                             expirationDate: dayjs.unix(res.data.data.exp).format("YYYY-MM-DD"),
                             isExpire: false,
+                            isRead: false,
                             replyObj: replyMsg.value
                                 ? {
                                       id: replyMsg.value.id,
@@ -698,7 +686,7 @@ const uploadImage = (e: any) => {
 };
 //上傳
 const files = ref();
-const onUploadFile = (e: any) => {
+const onUploadFilePC = (e: any) => {
     inputFunctionBoolean.value = false;
     const fileArr = e.target.files[0];
     const fileArrType = e.target.files[0].type;
@@ -756,6 +744,7 @@ const onUploadFile = (e: any) => {
                                 currentMonth: currentMonth(),
                                 expirationDate: dayjs.unix(res.data.data.exp).format("YYYY-MM-DD"),
                                 isExpire: false,
+                                isRead: false,
                                 replyObj: replyMsg.value
                                     ? {
                                           id: replyMsg.value.id,
@@ -838,6 +827,7 @@ const onUploadFile = (e: any) => {
                         currentMonth: currentMonth(),
                         expirationDate: dayjs.unix(res.data.data.exp).format("YYYY-MM-DD"),
                         isExpire: false,
+                        isRead: false,
                         replyObj: replyMsg.value
                             ? {
                                   id: replyMsg.value.id,
@@ -872,9 +862,99 @@ const onUploadFile = (e: any) => {
     }
 };
 
+const onUploadFileMP = (e: any) => {
+    inputFunctionBoolean.value = false;
+    const fileArr = e.target.files[0];
+    if (!fileArr) {
+        return;
+    }
+
+    const fd = new FormData();
+    fd.append("file", new File([fileArr], fileArr.name, { type: fileArr.type }));
+
+    axios({
+        method: "post",
+        url: `${config.serverUrl}/file/${route.query.chatToken}`,
+        data: fd,
+    })
+        .then((res) => {
+            console.log("上傳 res:", res);
+            const reader = new FileReader();
+            reader.readAsDataURL(fileArr);
+            reader.onload = (e: any) => {
+                files.value = e.target.result;
+
+                let fileObj: any = {};
+                fileObj = {
+                    janusMsg: {
+                        chatroomID: chatroomID(route.query.chatToken),
+                        sender: 1, // 1 為自己傳送的訊息
+                        type: 2,
+                        msgType: 7,
+                        message: "",
+                        format: {
+                            Fileid: res.data.data.fileid,
+                            ShowName: fileArr.name,
+                            ExtensionName: res.data.data.ext,
+                            FileSize: fileArr.size,
+                        },
+                    },
+                    id: nanoid(),
+                    phoneType: "",
+                    audioInfo: "",
+                    ext: res.data.data.ext,
+                    msgMoreStatus: false,
+                    msgFunctionStatus: false,
+                    recallStatus: false,
+                    recallPopUp: false,
+                    time: currentTime(),
+                    currentDate: currentDate(),
+                    currentMonth: currentMonth(),
+                    expirationDate: dayjs.unix(res.data.data.exp).format("YYYY-MM-DD"),
+                    isExpire: false,
+                    isRead: false,
+                    replyObj: replyMsg.value
+                        ? {
+                              id: replyMsg.value.id,
+                              ext: replyMsg.value.ext,
+                              msgType: replyMsg.value.janusMsg.msgType,
+                              message: replyMsg.value.janusMsg.message,
+                              format: replyMsg.value.janusMsg.format,
+                              recallStatus: replyMsg.value.recallStatus,
+                              recallPopUp: replyMsg.value.recallPopUp,
+                              sender: replyMsg.value.janusMsg.sender,
+                          }
+                        : "",
+                };
+                messages.value.push(fileObj);
+                const sendMsgObj = {
+                    msg: fileObj,
+                    textPlugin: textPlugin.value,
+                    chatToken: route.query.chatToken,
+                };
+                sendPrivateMsg(sendMsgObj);
+                localStorageMsg(messages.value, route.query.chatToken);
+                pictures.value.push(fileObj);
+                localStorage.setItem(
+                    `${route.query.chatToken}-pictures`,
+                    JSON.stringify(pictures.value)
+                );
+            };
+        })
+        .catch((err) => {
+            console.error(err);
+        });
+};
+
 //功能欄開關
-const inputFunctionSwitch = () => {
-    inputFunctionBoolean.value = !inputFunctionBoolean.value;
+const inputFunctionOpen = () => {
+    closeAll();
+    inputFunctionBoolean.value = true;
+    isReplyBox.value = false;
+};
+const inputFunctionClose = () => {
+    closeAll();
+    inputFunctionBoolean.value = false;
     isReplyBox.value = false;
 };
 //更改naive-ui 套件主題

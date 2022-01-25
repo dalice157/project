@@ -412,7 +412,7 @@ const unpin = (item: any, index: any): void => {
             flex-direction: column;
             .time {
                 text-align: right;
-                width: 75px;
+                min-width: 68px;
                 color: $gray-3;
                 font-size: $font-size-14;
                 font-weight: 500;
@@ -515,7 +515,7 @@ const unpin = (item: any, index: any): void => {
             display: flex;
             .time {
                 text-align: right;
-                width: 75px;
+                min-width: 68px;
                 color: $gray-3;
                 font-size: $font-size-14;
                 font-weight: 500;

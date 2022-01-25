@@ -5,7 +5,7 @@ import { nanoid } from "nanoid";
 import { useChatStore } from "@/store/chat";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { IProcessData } from "@/util/interfaceUtil";
-import { MY_ROOM, YOU_USER_NAME } from "@/util/commonUtil";
+import { MY_ROOM, YOU_USER_NAME, ME_USER_NAME } from "@/util/commonUtil";
 
 //發送私人訊息
 export const sendPrivateMsg = ({ msg = <any>"", textPlugin = <any>"", chatToken = <any>"" }) => {
@@ -59,8 +59,9 @@ export const processDataEvent = (data: any, chatToken: any) => {
         message: () => {
             if (whisper === true) {
                 console.log("Private message->", data);
-                notifyMe(data);
                 getCompanyMsg(data, chatToken);
+                notifyMe(data);
+
                 return;
             }
             console.log("Public message->", data);
@@ -71,6 +72,13 @@ export const processDataEvent = (data: any, chatToken: any) => {
         },
         join: () => {
             console.log("有人加入房間->", data);
+            if (data.display !== ME_USER_NAME) {
+                messages.value = JSON.parse(localStorage.getItem(`${chatToken}`) || "[]");
+                messages.value.forEach((element) => {
+                    element.isRead = true;
+                });
+                localStorage.setItem(`${chatToken}`, JSON.stringify(messages.value));
+            }
         },
         leave: () => {
             console.log("有人離開房間->", data);

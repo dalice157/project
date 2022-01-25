@@ -24,26 +24,29 @@ import NavBar from "@/components/Chat/NavBar.vue";
 import HamburgerBar from "@/components/HamburgerBar.vue";
 import UserInfoSider from "@/components/UserInfoSider.vue";
 import { useChatStore } from "@/store/chat";
+import { useSearchStore } from "@/store/search";
 import { txt } from "@/util/interfaceUtil";
 
+//chat store
 const chatStore = useChatStore();
-const { messages } = storeToRefs(chatStore);
+const { messages, inputFunctionBoolean } = storeToRefs(chatStore);
 
 //取消訊息功能泡泡
 const closeChatBubble = (): void => {
     messages.value.forEach((text: txt) => {
         text.msgFunctionStatus = false;
     });
+    inputFunctionBoolean.value = false;
 };
 
 const shieldBoolean = ref(false);
 
 //隱藏 url bar
-window.addEventListener("load", () => {
-    setTimeout(() => {
-        window.scrollTo(0, 1);
-    }, 0);
-});
+// window.addEventListener("load", () => {
+//     setTimeout(() => {
+//         window.scrollTo(0, 1);
+//     }, 0);
+// });
 //判斷設備使用者設備瀏覽方向
 onMounted(() => {
     if (

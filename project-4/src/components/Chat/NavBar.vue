@@ -1,5 +1,5 @@
 <template>
-    <div class="navbar">
+    <div class="navbar" @click="closeSearchBar">
         <div class="navbarFuncitonbar">
             <div class="navbartitle">
                 <router-link class="back" :to="`/chatRecord?chatToken=${chatToken}`">
@@ -36,7 +36,11 @@
                 <router-link class="gallery" :to="`/gallery?chatToken=${chatToken}`">
                     <img src="../../assets/Images/chatroom/list.svg" alt="#" />
                 </router-link>
-                <router-link class="search" :to="`/?chatToken=${chatToken}`" @click="searchSwitch">
+                <router-link
+                    class="search"
+                    :to="`/?chatToken=${chatToken}`"
+                    @click.stop="searchSwitch"
+                >
                     <img src="../../assets/Images/chatroom/search.svg" alt="#" />
                 </router-link>
             </div>

@@ -3,7 +3,7 @@ import { randomString } from "@/util/chatUtil";
 // 預設值
 export const ME_USER_NAME = randomString(3); // 自己
 export const DO_CALL_NAME = "123";
-export const YOU_USER_NAME = ["tony1", "da", randomString(3)]; // 對方
+export const YOU_USER_NAME = ["tony1", "123", randomString(3)]; // 對方
 export const OPAQUEID = "SMS_Plugin-123456789123";
 export const MY_ROOM = 1234; //Demo room
 export const JANUS_URL: any = `${config.janusUrl}/janus`;
@@ -58,6 +58,7 @@ export const localStorageMsg = (messageList: any, chatToken: any = "") => {
             currentMonth: msg.currentMonth,
             expirationDate: msg.expirationDate,
             isExpire: msg.isExpire,
+            isRead: msg.isRead,
             replyObj: msg.replyObj || "",
         };
     });

@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 
-import { localStorageMsg } from "@/util/commonUtil";
+import { localStorageMsg, ME_USER_NAME } from "@/util/commonUtil";
 
 export const useChatStore = defineStore({
     id: "chat",
@@ -18,6 +18,7 @@ export const useChatStore = defineStore({
         inputFunctionBoolean: <boolean>false,
         isUnableRead: <boolean>false,
         textPlugin: <any>"",
+        showRecorderModal: <any>false,
     }),
     getters: {},
     actions: {
@@ -57,11 +58,37 @@ export const useChatStore = defineStore({
 
         //獲取janus訊息
         getCompanyMsg(msgObj: any, chatToken: any) {
-            console.log("對方傳的msgObj:", msgObj);
+            console.log("msgObj:", msgObj);
+
             const messagesParse = JSON.parse(msgObj.msg);
             messagesParse.janusMsg.sender = 0;
             this.messages.push(messagesParse);
-            // localStorageMsg(this.messages,route.query.chatToken);
+            if (msgObj.display !== ME_USER_NAME) {
+                this.messages = JSON.parse(localStorage.getItem(`${chatToken}`) || "[]");
+                this.messages.forEach((element) => {
+                    element.isRead = true;
+                });
+                localStorageMsg(this.messages, chatToken);
+            }
+        },
+        // 開啟錄音視窗
+        openRecorder() {
+            this.showRecorderModal = true;
+            this.inputFunctionBoolean = false;
+            //取得麥克風權限
+            navigator.mediaDevices
+                .getUserMedia({ audio: true })
+                .then(function (stream) {
+                    console.log("You let me use your mic!");
+                })
+                .catch(function (err) {
+                    console.log("No mic for you!");
+                    this.closeRecorder();
+                });
+        },
+        //關閉錄音室窗
+        closeRecorder() {
+            this.showRecorderModal = false;
         },
     },
 });

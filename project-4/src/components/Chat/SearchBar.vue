@@ -171,13 +171,13 @@ const themeOverrides = {
     top: 166px;
     width: calc(100% - $siderWidth);
     height: calc(100% - 127px);
-    background-color: $white;
+    background-color: $gray-8;
     z-index: 100;
 
     .empty {
         height: calc(100% - 165px);
         text-align: center;
-        line-height: calc(100% - 220px);
+        margin-top: 10rem;
         color: $gray-3;
         font-size: $font-size-26;
         font-weight: 500;

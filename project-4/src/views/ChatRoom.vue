@@ -127,6 +127,7 @@ onMounted(() => {
                 msgFunctionStatus: false,
                 recallStatus: false,
                 recallPopUp: false,
+                isRead: false,
                 time: currentTime(),
                 currentDate: currentDate(),
                 replyObj: "",

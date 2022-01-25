@@ -26,23 +26,22 @@ export const useApiStore = defineStore({
     actions: {
         // 1GdSC2wd
         //發api拿取聊天資料
-        getBackendApi(token: any) {
-            axios
+        async getBackendApi(token: any) {
+            await axios
                 .get(`${config.serverUrl}/Event/${token}`)
                 .then((res: any) => {
-                    this.eventInfo = res.data.data.eventInfo;
-                    console.log(this.eventInfo);
+                    this.eventInfo = res.data.eventInfo;
                 })
                 .catch((err: any) => {
                     console.error(err);
                 });
         },
         //發api拿取交談紀錄聊天資料
-        getEventListApi(token: any) {
-            axios
+        async getEventListApi(token: any) {
+            await axios
                 .get(`${config.serverUrl}/events/${token}`)
                 .then((res: any) => {
-                    this.eventList = res.data.data.EventList;
+                    this.eventList = res.data.eventList;
                 })
                 .catch((err: any) => {
                     console.error(err);
