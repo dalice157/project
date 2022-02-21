@@ -77,6 +77,7 @@
                                 >
                                     <a
                                         :href="`${config.serverUrl}/file/${route.query.chatToken}/${text.janusMsg.format.Fileid}`"
+                                        target="_blank"
                                     >
                                         下載
                                     </a>
@@ -90,7 +91,9 @@
                                 </li>
                                 <li
                                     v-if="
-                                        text.janusMsg.msgType === 1 || text.janusMsg.msgType === 6
+                                        text.janusMsg.msgType === 1 ||
+                                        text.janusMsg.msgType === 3 ||
+                                        text.janusMsg.msgType === 6
                                     "
                                     @click.stop="replyMsgEvent(text)"
                                 >
@@ -161,6 +164,7 @@
                                     <li
                                         v-if="
                                             text.janusMsg.msgType === 1 ||
+                                            text.janusMsg.msgType === 3 ||
                                             text.janusMsg.msgType === 6
                                         "
                                         @click.stop="replyMsgEvent(text)"
@@ -181,7 +185,7 @@
                             <n-avatar
                                 round
                                 :size="42"
-                                :src="`${config.serverUrl}/image/${eventInfo.icon}`"
+                                :src="`${config.fileUrl}/fls/${eventInfo.icon}`"
                             />
                         </div>
                         <!-- 訊息 -->
@@ -221,6 +225,7 @@
                                     <div class="userName" v-if="text.replyObj.sender === 0">
                                         {{ eventInfo.name }}
                                     </div>
+                                    <div v-if="text.replyObj.msgType === 3">[貼圖]</div>
                                     <div v-if="text.replyObj.msgType === 6">[照片]</div>
                                     <n-ellipsis
                                         v-if="text.replyObj.msgType === 1"
@@ -231,9 +236,14 @@
                                         {{ text.replyObj.message }}
                                     </n-ellipsis>
                                 </div>
+                                <div class="replyImg" v-if="text.replyObj.msgType === 3">
+                                    <img
+                                        :src="`${text.replyObj.format.stickerUrl}${text.replyObj.format.stickerPackID}/${text.replyObj.format.stickerFileID}.${text.replyObj.format.ext}`"
+                                    />
+                                </div>
                                 <div class="replyImg" v-if="text.replyObj.msgType === 6">
                                     <img
-                                        :src="`${config.serverUrl}/image/${text.replyObj.format.Fileid}${text.replyObj.ext}`"
+                                        :src="`${config.fileUrl}/fls/${text.replyObj.format.Fileid}${text.replyObj.ext}`"
                                     />
                                 </div>
                             </div>
@@ -271,7 +281,7 @@
                         >
                             <audio :id="`audio-player-${text.id}`">
                                 <source
-                                    :src="`${config.serverUrl}/image/${text.janusMsg.format.Fileid}${text.ext}`"
+                                    :src="`${config.fileUrl}/fls/${text.janusMsg.format.Fileid}${text.ext}`"
                                     type="audio/wav"
                                 />
                                 Your browser does not support the audio tag.
@@ -300,7 +310,7 @@
                             @touchend="gtouchend()"
                         >
                             <img
-                                :src="`${config.serverUrl}/image/${text.janusMsg.format.Fileid}${text.ext}`"
+                                :src="`${config.fileUrl}/fls/${text.janusMsg.format.Fileid}${text.ext}`"
                             />
                         </div>
                         <!-- 文件訊息 -->
@@ -369,6 +379,18 @@
                                     <h4 v-if="text.janusMsg.format.phoneType === 4">未接來電</h4>
                                 </div>
                             </a>
+                        </div>
+                        <!-- 貼圖訊息 -->
+                        <div
+                            class="sticker"
+                            v-if="text.janusMsg.msgType === 3"
+                            @touchstart="gtouchstart(text)"
+                            @touchmove="gtouchmove()"
+                            @touchend="gtouchend()"
+                        >
+                            <img
+                                :src="`${text.janusMsg.format.stickerUrl}${text.janusMsg.format.stickerPackID}/${text.janusMsg.format.stickerFileID}.${text.janusMsg.format.ext}`"
+                            />
                         </div>
                     </div>
                     <!-- 時間戳記 -->
@@ -598,7 +620,7 @@ const onUploadFile = (file: any) => {
                                     msgType: 6,
                                     message: "",
                                     format: {
-                                        Fileid: res.data.data.fileid,
+                                        Fileid: res.data.fileid,
                                         ShowName: fileName,
                                         FileSize: fileArr.size,
                                     },
@@ -606,7 +628,7 @@ const onUploadFile = (file: any) => {
                                 id: nanoid(),
                                 phoneType: "",
                                 audioInfo: "",
-                                ext: res.data.data.ext,
+                                ext: res.data.ext,
                                 msgMoreStatus: false,
                                 msgFunctionStatus: false,
                                 recallStatus: false,
@@ -616,7 +638,7 @@ const onUploadFile = (file: any) => {
                                 currentDate: currentDate(),
                                 // currentMonth: "2022-1",
                                 currentMonth: currentMonth(),
-                                expirationDate: dayjs.unix(res.data.data.exp).format("YYYY-MM-DD"),
+                                expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                                 isExpire: false,
                                 isRead: false,
                                 replyObj: replyMsg.value
@@ -681,16 +703,16 @@ const onUploadFile = (file: any) => {
                             msgType: 7,
                             message: "",
                             format: {
-                                Fileid: res.data.data.fileid,
+                                Fileid: res.data.fileid,
                                 ShowName: fileArr.name,
-                                ExtensionName: res.data.data.ext,
+                                ExtensionName: res.data.ext,
                                 FileSize: fileArr.size,
                             },
                         },
                         id: nanoid(),
                         phoneType: "",
                         audioInfo: "",
-                        ext: res.data.data.ext,
+                        ext: res.data.ext,
                         msgMoreStatus: false,
                         msgFunctionStatus: false,
                         recallStatus: false,
@@ -698,7 +720,7 @@ const onUploadFile = (file: any) => {
                         time: currentTime(),
                         currentDate: currentDate(),
                         currentMonth: currentMonth(),
-                        expirationDate: dayjs.unix(res.data.data.exp).format("YYYY-MM-DD"),
+                        expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                         isExpire: false,
                         isRead: false,
                         replyObj: replyMsg.value
@@ -902,13 +924,11 @@ const previewURL = (fileid: string): void => {
     pictures.value.forEach((img: any) => {
         if (
             !viewImgs.value.includes(
-                `${config.serverUrl}/image/${img.janusMsg.format.Fileid}${img.ext}`
+                `${config.fileUrl}/fls/${img.janusMsg.format.Fileid}${img.ext}`
             ) &&
             img.janusMsg.msgType === 6
         ) {
-            viewImgs.value.push(
-                `${config.serverUrl}/image/${img.janusMsg.format.Fileid}${img.ext}`
-            );
+            viewImgs.value.push(`${config.fileUrl}/fls/${img.janusMsg.format.Fileid}${img.ext}`);
         }
     });
     console.log("picture:", viewImgs.value);
@@ -928,8 +948,9 @@ const previewURL = (fileid: string): void => {
                 const wrap = document.getElementsByClassName("v-wrap");
                 const div = document.createElement("div");
                 const a = document.createElement("a");
-                a.href = `${config.serverUrl}/file/1GdSC2wd/${fileId}`;
+                a.href = `${config.serverUrl}/file/${route.query.chatToken}/${fileId}`;
                 a.download = fileName;
+                a.target = "_blank";
                 a.className = "download";
                 a.innerHTML = `<span class="downloadImg"></span>`;
                 wrap[0].appendChild(div).appendChild(a);
@@ -1053,7 +1074,7 @@ watchEffect(() => {
         left: 50%;
         transform: translate(-50%, -50%);
         .recallMsgConfirm {
-            font-size: $font-size-16;
+            font-size: $font-size-18;
             color: $gray-1;
             letter-spacing: -0.1px;
             min-width: 342px;
@@ -1069,7 +1090,7 @@ watchEffect(() => {
                 border-radius: 100px;
                 padding: 6px 16px;
                 cursor: pointer;
-                font-size: $font-size-16;
+                font-size: $font-size-18;
                 transition: background-color 0.2s linear;
                 line-height: 20px;
                 background-color: $white;
@@ -1085,7 +1106,7 @@ watchEffect(() => {
                 border-radius: 100px;
                 padding: 6px 16px;
                 cursor: pointer;
-                font-size: $font-size-16;
+                font-size: $font-size-18;
                 transition: background-color 0.2s linear;
                 line-height: 20px;
                 background-color: $primary-2;
@@ -1137,7 +1158,7 @@ watchEffect(() => {
 .chatroom-inner {
     width: 100%;
     position: absolute;
-    top: 160px;
+    top: 120px;
     bottom: 67px;
     overflow-y: scroll;
     height: auto;
@@ -1265,16 +1286,18 @@ watchEffect(() => {
         .recall {
             padding: 10px 14px;
             div {
-                width: 180px;
+                width: 210px;
                 margin: 0 auto;
                 display: flex;
                 justify-content: center;
                 padding: 3px 10px;
                 background-color: rgba(65, 73, 78, 0.2);
                 color: $gray-3;
-                font-size: $font-size-14;
-                line-height: 16px;
                 border-radius: 100px;
+                p {
+                    font-size: $font-size-14;
+                    line-height: 16px;
+                }
                 span {
                     cursor: pointer;
                 }
@@ -1304,7 +1327,7 @@ watchEffect(() => {
                     .ulList {
                         background-color: $primary-3;
                         li {
-                            width: 58px;
+                            width: 63px;
                             height: 40px;
                             padding: 10px 15px 9px 15px;
                             text-align: center;
@@ -1312,11 +1335,11 @@ watchEffect(() => {
                             color: $gray-1;
                             border-bottom: 1px solid $white;
                             span {
-                                font-size: $font-size-14;
+                                font-size: $font-size-16;
                                 font-weight: 500;
                             }
                             a {
-                                font-size: $font-size-14;
+                                font-size: $font-size-16;
                                 font-weight: 500;
                                 color: $gray-1;
                                 text-decoration: none;
@@ -1377,11 +1400,11 @@ watchEffect(() => {
                                 border-right: 1px solid $white;
                                 border-bottom: 0;
                                 span {
-                                    font-size: $font-size-14;
+                                    font-size: $font-size-16;
                                     font-weight: 500;
                                 }
                                 a {
-                                    font-size: $font-size-14;
+                                    font-size: $font-size-16;
                                     font-weight: 500;
                                     color: $gray-1;
                                     text-decoration: none;
@@ -1431,7 +1454,7 @@ watchEffect(() => {
                             margin-right: 10px;
                         }
                         .totalTime {
-                            font-size: $font-size-14;
+                            font-size: $font-size-16;
                             font-weight: 500;
                             margin-right: 10px;
                         }
@@ -1534,7 +1557,7 @@ watchEffect(() => {
                     }
                 }
                 .originalMsg {
-                    font-size: $font-size-14;
+                    font-size: $font-size-16;
                     font-weight: 500;
                     color: $gray-1;
                     display: flex;
@@ -1542,7 +1565,7 @@ watchEffect(() => {
                 }
 
                 .replyMsg {
-                    font-size: $font-size-14;
+                    font-size: $font-size-16;
                     color: #a37f29;
                     margin-left: -10px;
                     margin-right: -10px;
@@ -1575,7 +1598,7 @@ watchEffect(() => {
                     }
                     .userName {
                         font-weight: 900;
-                        font-size: $font-size-14;
+                        font-size: $font-size-16;
                     }
                     .replyImg {
                         width: 50%;
@@ -1586,6 +1609,26 @@ watchEffect(() => {
                     img {
                         width: 100%;
                         object-fit: cover;
+                    }
+                }
+                .sticker {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    width: 150px;
+                    height: 150px;
+                    margin-left: 10px;
+                    -webkit-touch-callout: none;
+                    -webkit-user-select: none;
+                    -khtml-user-select: none;
+                    -moz-user-select: none;
+                    -ms-user-select: none;
+                    user-select: none;
+                    line-height: 148px;
+                    white-space: nowrap;
+                    text-align: center;
+                    img {
+                        width: 100%;
                     }
                 }
                 .picture {
@@ -1636,7 +1679,7 @@ watchEffect(() => {
                     border-radius: 8px;
                     a {
                         color: $gray-1;
-                        font-size: $font-size-14;
+                        font-size: $font-size-16;
                         text-decoration: none;
                     }
                     .img {
@@ -1678,7 +1721,7 @@ watchEffect(() => {
 @media screen and (max-width: 768px) {
     .chatroom-inner {
         position: absolute;
-        top: 140px;
+        top: 100px;
         bottom: 67px;
         overflow-y: scroll;
         height: auto;

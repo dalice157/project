@@ -5,7 +5,7 @@
             :size="75"
             object-fit="cover"
             fallback-src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-            :src="`${config.serverUrl}/image/${userInfo.icon}`"
+            :src="`${config.fileUrl}/fls/${userInfo.icon}`"
         />
     </div>
     <h3 class="userName">

@@ -7,7 +7,7 @@
                 :size="120"
                 object-fit="cover"
                 fallback-src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-                :src="`${config.serverUrl}/image/${eventInfo.icon}`"
+                :src="`${config.fileUrl}/fls/${eventInfo.icon}`"
             />
             <div class="clientName">
                 <h1>{{ eventInfo.name }}</h1>
@@ -136,8 +136,6 @@ getBackendApi(chatToken.value);
         align-items: center;
         .phoneMicrophone {
             text-align: center;
-            img {
-            }
             p {
                 margin-top: 10px;
                 font-size: $font-size-10;
@@ -148,11 +146,7 @@ getBackendApi(chatToken.value);
                 margin-top: 2px;
             }
         }
-        .phoneClose {
-        }
         .phoneSpeaker {
-            img {
-            }
             p {
                 margin-top: 10px;
                 font-size: $font-size-10;

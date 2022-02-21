@@ -1,6 +1,7 @@
-import { defineStore } from "pinia";
+import { defineStore, storeToRefs } from "pinia";
 
 import { localStorageMsg, ME_USER_NAME } from "@/util/commonUtil";
+import { useApiStore } from "@/store/api";
 
 export const useChatStore = defineStore({
     id: "chat",
@@ -19,6 +20,10 @@ export const useChatStore = defineStore({
         isUnableRead: <boolean>false,
         textPlugin: <any>"",
         showRecorderModal: <any>false,
+        showStickerModal: <boolean>false,
+        stickerGroupID: <number>1,
+        stickerGroup: <any>[],
+        stickerItems: <any>[],
     }),
     getters: {},
     actions: {
@@ -75,20 +80,46 @@ export const useChatStore = defineStore({
         openRecorder() {
             this.showRecorderModal = true;
             this.inputFunctionBoolean = false;
+            this.showStickerModal = false;
             //取得麥克風權限
             navigator.mediaDevices
                 .getUserMedia({ audio: true })
                 .then(function (stream) {
                     console.log("You let me use your mic!");
+                    stream.getTracks().forEach((track) => track.stop());
                 })
                 .catch(function (err) {
-                    console.log("No mic for you!");
-                    this.closeRecorder();
+                    console.log("No mic for you !");
                 });
         },
         //關閉錄音室窗
         closeRecorder() {
             this.showRecorderModal = false;
+            this.inputFunctionBoolean = false;
+            //取得麥克風權限
+            navigator.mediaDevices
+                .getUserMedia({ audio: true })
+                .then(function (stream) {
+                    console.log("You let me use your mic!");
+                    stream.getTracks().forEach((track) => track.stop());
+                })
+                .catch(function (err) {
+                    console.log("No mic for you !");
+                });
+        },
+        // 貼圖
+        handleStickckerGroup(id: any) {
+            console.log("id:", id);
+
+            // api store
+            const apiStore = useApiStore();
+            const { stickerList } = storeToRefs(apiStore);
+            this.stickerGroupID = id;
+            const getlist = stickerList.value.find((item) => {
+                return item.stickerPackID === this.stickerGroupID;
+            });
+            this.stickerGroup = id == 0 ? this.stickerItems : getlist;
+            console.log('this.stickerGroup"', this.stickerGroup);
         },
     },
 });

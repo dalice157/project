@@ -3,25 +3,24 @@
         <div class="navbarFuncitonbar">
             <div class="navbartitle">
                 <router-link class="back" :to="`/chatRecord?chatToken=${chatToken}`">
-                    <img src="../../assets/Images/chatroom/arrow-left.svg" alt="#" />
+                    <img src="../../assets/Images/chatroom/arrow-left.svg" alt="回交談紀錄" />
                 </router-link>
                 <!-- NavBar 大頭貼 -->
                 <div class="navbarAvatar">
-                    <n-avatar
-                        round
-                        :size="42"
-                        :src="`${config.serverUrl}/image/${eventInfo.icon}`"
-                    />
+                    <n-avatar round :size="42" :src="`${config.fileUrl}/fls/${eventInfo.icon}`" />
                 </div>
                 <!-- NavBar 標題 -->
                 <h1 class="title" v-show="route.meta.show">{{ eventInfo.name }}</h1>
             </div>
             <!-- 功能欄 -->
             <div class="chatpane">
+                <router-link class="back" :to="`/chatRecord?chatToken=${chatToken}`">
+                    <img src="../../assets/Images/chatroom/comment.svg" alt="回交談紀錄" />
+                </router-link>
                 <a class="phone-web">
                     <img
                         src="../../assets/Images/chatroom/phone.svg"
-                        alt="#"
+                        alt="撥打電話"
                         @click="onPhoneCallModal"
                     />
                 </a>
@@ -29,19 +28,19 @@
                 <router-link class="phone" :to="`/phone?chatToken=${chatToken}`">
                     <img
                         src="../../assets/Images/chatroom/phone.svg"
-                        alt="#"
+                        alt="撥打電話"
                         @touchend="doCall(DO_CALL_NAME)"
                     />
                 </router-link>
                 <router-link class="gallery" :to="`/gallery?chatToken=${chatToken}`">
-                    <img src="../../assets/Images/chatroom/list.svg" alt="#" />
+                    <img src="../../assets/Images/chatroom/list.svg" alt="進入相本" />
                 </router-link>
                 <router-link
                     class="search"
                     :to="`/?chatToken=${chatToken}`"
                     @click.stop="searchSwitch"
                 >
-                    <img src="../../assets/Images/chatroom/search.svg" alt="#" />
+                    <img src="../../assets/Images/chatroom/search.svg" alt="搜尋" />
                 </router-link>
             </div>
         </div>
@@ -97,8 +96,8 @@ const onPhoneCallModal = () => {
 .navbar {
     width: calc(100% - 300px);
     height: 160px;
-    background: transparent url("~@/assets/Images/chatroom/header-bg-pc.png") no-repeat center top;
-    background-size: cover;
+    background: transparent url("~@/assets/Images/chatroom/header-bg-pc.svg") no-repeat center top;
+    background-size: 100%;
     position: fixed;
     z-index: 100;
     top: 0;
@@ -111,7 +110,7 @@ const onPhoneCallModal = () => {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding-top: 20px;
+        padding-top: 0px;
         .navbartitle {
             margin-left: 15px;
             display: flex;
@@ -178,11 +177,11 @@ const onPhoneCallModal = () => {
             //navbar 標題
             .title {
                 color: $gray-1;
-                @extend %h2;
+                @extend %h4;
             }
         }
         .chatpane {
-            margin-right: 0.5em;
+            margin-right: 10px;
             display: flex;
             .phone-web {
                 display: block;
@@ -201,7 +200,7 @@ const onPhoneCallModal = () => {
             }
             a {
                 background-color: transparent;
-                margin: 0 10px;
+                margin: 0 5px;
             }
         }
     }
@@ -210,9 +209,9 @@ const onPhoneCallModal = () => {
 @media (max-width: 768px) {
     .navbar {
         width: 100%;
-        height: 140px;
+        height: 120px;
         background: transparent url("~@/assets/Images/chatroom/header-bg.png") no-repeat center top;
-        background-size: cover;
+        background-size: 120% 150px;
         .back {
             display: block;
         }
@@ -222,7 +221,7 @@ const onPhoneCallModal = () => {
     .navbar {
         background: transparent url("~@/assets/Images/chatroom/header-bg-s.svg") no-repeat center
             top;
-        background-size: cover;
+        background-size: 100%;
     }
 }
 </style>

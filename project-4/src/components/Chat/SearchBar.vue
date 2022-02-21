@@ -37,7 +37,7 @@
                     class="avatar"
                     v-if="msg.janusMsg.sender === 0"
                     :size="48"
-                    :src="`${config.serverUrl}/image/${eventInfo.icon}`"
+                    :src="`${config.fileUrl}/fls/${eventInfo.icon}`"
                 />
                 <img
                     class="avatar"
@@ -63,7 +63,7 @@
                     >
                         <img
                             v-if="msg.janusMsg.msgType === 6"
-                            :src="`${config.serverUrl}/image/${msg.janusMsg.format.Fileid}${msg.ext}`"
+                            :src="`${config.fileUrl}/fls/${msg.janusMsg.format.Fileid}${msg.ext}`"
                         />
                         <span v-if="msg.janusMsg.msgType === 7">
                             {{ msg.janusMsg.format.ShowName }}
@@ -101,7 +101,7 @@ const route = useRoute();
 const themeOverrides = {
     common: {},
     Input: {
-        fontSize: "14px",
+        fontSize: "16px",
         caretColor: "black",
         borderHover: "transparent",
         borderFocus: "transparent",
@@ -223,7 +223,7 @@ const themeOverrides = {
                 }
             }
             .time {
-                font-size: $font-size-14;
+                font-size: $font-size-16;
                 color: $gray-3;
             }
         }
@@ -243,7 +243,7 @@ const themeOverrides = {
         .numOfsearchMessage {
             margin-left: 15px;
             color: $gray-1;
-            font-size: $font-size-14;
+            font-size: $font-size-16;
             font-weight: 600;
             font-family: $font-family;
         }
@@ -258,26 +258,26 @@ const themeOverrides = {
             .info {
                 .name {
                     color: $gray-2;
-                    font-size: $font-size-16;
+                    font-size: $font-size-18;
                     font-weight: 500;
                     font-family: $font-family;
                 }
                 .msg {
                     color: $gray-3;
-                    font-size: $font-size-14;
+                    font-size: $font-size-16;
                     font-weight: 500;
                     font-family: $font-family;
                     line-height: 1.5;
                 }
             }
             .time {
-                font-size: $font-size-14;
+                font-size: $font-size-16;
                 font-weight: 500;
                 color: $gray-3;
                 font-family: $font-family;
             }
             .time {
-                font-size: $font-size-14;
+                font-size: $font-size-16;
                 font-weight: 500;
                 color: $gray-3;
             }

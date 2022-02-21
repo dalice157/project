@@ -41,12 +41,6 @@ const closeChatBubble = (): void => {
 
 const shieldBoolean = ref(false);
 
-//隱藏 url bar
-// window.addEventListener("load", () => {
-//     setTimeout(() => {
-//         window.scrollTo(0, 1);
-//     }, 0);
-// });
 //判斷設備使用者設備瀏覽方向
 onMounted(() => {
     if (
@@ -135,7 +129,7 @@ const vConsole = new VConsole();
 }
 
 .v-wrap {
-    left: 330px !important;
+    left: 300px !important;
 }
 
 @media (max-width: 768px) {

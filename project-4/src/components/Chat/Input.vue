@@ -2,12 +2,8 @@
     <!-- 回覆視窗 -->
     <div class="reply" v-if="isReplyBox" @click.prevent="scrollPageTo(replyMsg.id)">
         <div class="usertext">
-            <div
-                class="replyText"
-                v-if="replyMsg && replyMsg.janusMsg.format && replyMsg.janusMsg.format.ShowName"
-            >
-                [照片]
-            </div>
+            <div class="replyText" v-if="replyMsg && replyMsg.janusMsg.msgType === 6">[照片]</div>
+            <div class="replyText" v-if="replyMsg && replyMsg.janusMsg.msgType === 3">[貼圖]</div>
             <n-ellipsis
                 v-if="replyMsg && replyMsg.janusMsg.message"
                 style="width: 80%"
@@ -18,7 +14,12 @@
             </n-ellipsis>
             <div class="img" v-if="replyMsg && replyMsg.janusMsg.msgType === 6">
                 <img
-                    :src="`${config.serverUrl}/image/${replyMsg.janusMsg.format.Fileid}${replyMsg.ext}`"
+                    :src="`${config.fileUrl}/fls/${replyMsg.janusMsg.format.Fileid}${replyMsg.ext}`"
+                />
+            </div>
+            <div class="img" v-if="replyMsg && replyMsg.janusMsg.msgType === 3">
+                <img
+                    :src="`${replyMsg.janusMsg.format.stickerUrl}${replyMsg.janusMsg.format.stickerPackID}/${replyMsg.janusMsg.format.stickerFileID}.${replyMsg.janusMsg.format.ext}`"
                 />
             </div>
             <div @click.stop="replyHide" class="closeBtn">
@@ -84,50 +85,128 @@
                 <input type="file" @change="onUploadFilePC" />
             </span>
             <div class="textArea">
-                <n-config-provider :theme-overrides="themeOverrides">
-                    <n-input
-                        class="n-input-modify"
-                        placeholder="Aa"
-                        type="textarea"
-                        size="small"
-                        :autosize="{
-                            minRows: 1,
-                            maxRows: 5,
-                        }"
-                        v-model:value.trim="msg"
-                        @focus="closeAll()"
-                        @keydown.enter.exact.prevent="addMsg"
-                        ref="inputInstRef"
-                    >
-                        <template #suffix>
-                            <img src="../../assets/Images/chatroom/emoji.svg" alt="#" />
-                        </template>
-                    </n-input>
-                </n-config-provider>
+                <n-input
+                    class="n-input-modify"
+                    placeholder="Aa"
+                    type="textarea"
+                    size="small"
+                    :autosize="{
+                        minRows: 1,
+                        maxRows: 5,
+                    }"
+                    v-model:value.trim="msg"
+                    @focus="closeAll()"
+                    @keydown.enter.exact.prevent="addMsg"
+                    ref="inputInstRef"
+                >
+                </n-input>
+                <img
+                    @click.stop="closeStickerBox"
+                    v-if="showStickerModal"
+                    src="../../assets/Images/chatroom/emoji-enabled.svg"
+                    alt="表情貼圖"
+                />
+                <img
+                    @click.stop="openStickerBox"
+                    v-if="!showStickerModal"
+                    src="../../assets/Images/chatroom/emoji.svg"
+                    alt="表情貼圖"
+                />
             </div>
             <img
                 class="send"
                 src="../../assets/Images/chatroom/send.svg"
-                alt="#"
+                alt="傳送訊息"
                 @click.prevent="addMsg"
                 v-show="msg"
             />
             <img
                 class="recorder"
                 src="../../assets/Images/chatroom/voice.svg"
-                alt="#"
+                alt="開啟錄音"
                 v-show="!msg && !showRecorderModal"
                 @click="openRecorder()"
             />
             <img
                 class="recorder"
                 src="../../assets/Images/chatroom/voice-enabled.svg"
-                alt="#"
+                alt="關閉錄音"
                 v-show="!msg && showRecorderModal"
                 @click="closeRecorder()"
             />
         </div>
-
+        <!-- 貼圖視窗 -->
+        <div class="stickerArea" v-show="showStickerModal">
+            <div class="stickerTabsArea">
+                <ul class="stickerTabs">
+                    <li
+                        v-if="stickerItems.length > 0"
+                        class="reload-time"
+                        @click="stickerGroupID == 0 ? '' : handleStickckerGroup(0)"
+                        :class="{
+                            active: stickerGroupID == 0,
+                        }"
+                    >
+                        <img
+                            v-if="stickerGroupID == 0"
+                            src="../../assets/Images/chatroom/reload-time-enabled.svg"
+                            alt="小圖"
+                        />
+                        <img v-else src="../../assets/Images/chatroom/reload-time.svg" alt="小圖" />
+                    </li>
+                    <li
+                        v-for="tab in stickerList"
+                        :key="tab.stickerPackID"
+                        @click="
+                            stickerGroupID == tab.stickerPackID
+                                ? ''
+                                : handleStickckerGroup(tab.stickerPackID)
+                        "
+                        :class="{
+                            active: stickerList.length > 0 && stickerGroupID == tab.stickerPackID,
+                        }"
+                    >
+                        <img :src="`${stickerUrl}${tab.stickerPackID}/tab.${tab.ext}`" alt="小圖" />
+                    </li>
+                </ul>
+            </div>
+            <div class="stickerGroupID" v-show="stickerItems.length > 0 && stickerGroupID == 0">
+                <n-grid :x-gap="10" :y-gap="10" :cols="4">
+                    <n-grid-item
+                        v-for="(item, index) in stickerItems"
+                        :key="index"
+                        @click="addSticker(item, item.stickerFileID)"
+                    >
+                        <div class="stickerIcon">
+                            <img
+                                :src="`${item.stickerUrl}${item.stickerPackID}/${item.stickerFileID}.${item.ext}`"
+                                :alt="`${item.title}`"
+                            />
+                        </div>
+                    </n-grid-item>
+                </n-grid>
+            </div>
+            <div
+                class="stickerGroupID"
+                v-show="stickerGroupID == stickerGroup.stickerPackID && stickerGroupID != 0"
+            >
+                <n-grid :x-gap="10" :y-gap="10" :cols="4">
+                    <n-grid-item
+                        v-for="tab in stickerGroup.stickerList"
+                        :key="tab"
+                        @click="addSticker(stickerGroup, tab)"
+                        :class="{ hide: tab == 'tab' || tab == 'main' }"
+                    >
+                        <div class="stickerIcon">
+                            <img
+                                :src="`${stickerUrl}${stickerGroup.stickerPackID}/${tab}.${stickerGroup.ext}`"
+                                :alt="`${stickerGroup.stickerPackID}-${tab}`"
+                            />
+                        </div>
+                    </n-grid-item>
+                </n-grid>
+            </div>
+        </div>
         <!-- 錄音視窗 -->
         <div class="audioRecorderArea" v-show="showRecorderModal" @touchend="clearRecorder">
             <!--未錄音狀態  -->
@@ -187,7 +266,7 @@ import {
     NCard,
     NButton,
     NGrid,
-    NGi,
+    NGridItem,
 } from "naive-ui";
 import { MicOutline, ArrowRedo } from "@vicons/ionicons5";
 import { storeToRefs } from "pinia";
@@ -215,11 +294,12 @@ const { closeAll } = modelStore;
 
 // api store
 const apiStore = useApiStore();
-const { eventInfo } = storeToRefs(apiStore);
+const { getSticker } = apiStore;
+const { eventInfo, stickerList, stickerUrl } = storeToRefs(apiStore);
 //store
 const chatStore = useChatStore();
 const inputInstRef: any = ref(null);
-const { replyHide, confirmDelete, openRecorder, closeRecorder } = chatStore;
+const { replyHide, confirmDelete, openRecorder, closeRecorder, handleStickckerGroup } = chatStore;
 const {
     messages,
     pictures,
@@ -233,6 +313,10 @@ const {
     inputFunctionBoolean,
     textPlugin,
     showRecorderModal,
+    showStickerModal,
+    stickerGroupID,
+    stickerGroup,
+    stickerItems,
 } = storeToRefs(chatStore);
 //router
 const route = useRoute();
@@ -479,7 +563,7 @@ const stopRecorder = (e: any) => {
                     msgType: 5,
                     message: "",
                     format: {
-                        Fileid: res.data.data.fileid,
+                        Fileid: res.data.fileid,
                         ShowName: `record_${audioFile.size}`,
                         Description: "",
                         FileSize: audioFile.size,
@@ -493,7 +577,7 @@ const stopRecorder = (e: any) => {
                     type: audioFile.type,
                     isPlay: false,
                 },
-                ext: res.data.data.ext,
+                ext: res.data.ext,
                 msgMoreStatus: false,
                 msgFunctionStatus: false,
                 recallStatus: false,
@@ -624,7 +708,7 @@ const uploadImage = (e: any) => {
                                 msgType: 6,
                                 message: "",
                                 format: {
-                                    Fileid: res.data.data.fileid,
+                                    Fileid: res.data.fileid,
                                     ShowName: fileName,
                                     FileSize: file.size,
                                 },
@@ -632,7 +716,7 @@ const uploadImage = (e: any) => {
                             id: nanoid(),
                             phoneType: "",
                             audioInfo: "",
-                            ext: res.data.data.ext,
+                            ext: res.data.ext,
                             msgMoreStatus: false,
                             msgFunctionStatus: false,
                             recallStatus: false,
@@ -642,7 +726,7 @@ const uploadImage = (e: any) => {
                             currentDate: currentDate(),
                             // currentMonth: "2022-2",
                             currentMonth: currentMonth(),
-                            expirationDate: dayjs.unix(res.data.data.exp).format("YYYY-MM-DD"),
+                            expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                             isExpire: false,
                             isRead: false,
                             replyObj: replyMsg.value
@@ -724,7 +808,7 @@ const onUploadFilePC = (e: any) => {
                                     msgType: 6,
                                     message: "",
                                     format: {
-                                        Fileid: res.data.data.fileid,
+                                        Fileid: res.data.fileid,
                                         ShowName: fileName,
                                         FileSize: fileArr.size,
                                     },
@@ -732,7 +816,7 @@ const onUploadFilePC = (e: any) => {
                                 id: nanoid(),
                                 phoneType: "",
                                 audioInfo: "",
-                                ext: res.data.data.ext,
+                                ext: res.data.ext,
                                 msgMoreStatus: false,
                                 msgFunctionStatus: false,
                                 recallStatus: false,
@@ -742,7 +826,7 @@ const onUploadFilePC = (e: any) => {
                                 currentDate: currentDate(),
                                 // currentMonth: "2022-1",
                                 currentMonth: currentMonth(),
-                                expirationDate: dayjs.unix(res.data.data.exp).format("YYYY-MM-DD"),
+                                expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                                 isExpire: false,
                                 isRead: false,
                                 replyObj: replyMsg.value
@@ -808,16 +892,16 @@ const onUploadFilePC = (e: any) => {
                             msgType: 7,
                             message: "",
                             format: {
-                                Fileid: res.data.data.fileid,
+                                Fileid: res.data.fileid,
                                 ShowName: fileArr.name,
-                                ExtensionName: res.data.data.ext,
+                                ExtensionName: res.data.ext,
                                 FileSize: fileArr.size,
                             },
                         },
                         id: nanoid(),
                         phoneType: "",
                         audioInfo: "",
-                        ext: res.data.data.ext,
+                        ext: res.data.ext,
                         msgMoreStatus: false,
                         msgFunctionStatus: false,
                         recallStatus: false,
@@ -825,7 +909,7 @@ const onUploadFilePC = (e: any) => {
                         time: currentTime(),
                         currentDate: currentDate(),
                         currentMonth: currentMonth(),
-                        expirationDate: dayjs.unix(res.data.data.exp).format("YYYY-MM-DD"),
+                        expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                         isExpire: false,
                         isRead: false,
                         replyObj: replyMsg.value
@@ -893,16 +977,16 @@ const onUploadFileMP = (e: any) => {
                         msgType: 7,
                         message: "",
                         format: {
-                            Fileid: res.data.data.fileid,
+                            Fileid: res.data.fileid,
                             ShowName: fileArr.name,
-                            ExtensionName: res.data.data.ext,
+                            ExtensionName: res.data.ext,
                             FileSize: fileArr.size,
                         },
                     },
                     id: nanoid(),
                     phoneType: "",
                     audioInfo: "",
-                    ext: res.data.data.ext,
+                    ext: res.data.ext,
                     msgMoreStatus: false,
                     msgFunctionStatus: false,
                     recallStatus: false,
@@ -910,7 +994,7 @@ const onUploadFileMP = (e: any) => {
                     time: currentTime(),
                     currentDate: currentDate(),
                     currentMonth: currentMonth(),
-                    expirationDate: dayjs.unix(res.data.data.exp).format("YYYY-MM-DD"),
+                    expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                     isExpire: false,
                     isRead: false,
                     replyObj: replyMsg.value
@@ -945,6 +1029,86 @@ const onUploadFileMP = (e: any) => {
             console.error(err);
         });
 };
+// 貼圖功能
+onMounted(() => {
+    getSticker();
+});
+const openStickerBox = () => {
+    showRecorderModal.value = false;
+    showStickerModal.value = true;
+};
+
+const closeStickerBox = () => {
+    showStickerModal.value = false;
+};
+
+const addSticker = (sticker, id) => {
+    let stickerObj: any = {
+        janusMsg: {
+            chatroomID: chatroomID(route.query.chatToken),
+            sender: 1, // 1 為自己傳送的訊息
+            type: 2,
+            msgType: 3,
+            message: "",
+            format: {
+                stickerPackID: sticker.stickerPackID,
+                stickerUrl: stickerUrl.value,
+                ext: sticker.ext,
+                stickerFileID: id,
+                title: `貼圖${sticker.stickerPackID}-${id}`,
+            },
+        },
+        id: nanoid(),
+        ext: "",
+        phoneType: "",
+        audioInfo: "",
+        msgMoreStatus: false,
+        msgFunctionStatus: false,
+        recallStatus: false,
+        recallPopUp: false,
+        time: currentTime(),
+        currentDate: currentDate(),
+        currentMonth: currentMonth(),
+        expirationDate: "",
+        isExpire: false,
+        replyObj: replyMsg.value
+            ? {
+                  id: replyMsg.value.id,
+                  ext: replyMsg.value.ext,
+                  msgType: replyMsg.value.janusMsg.msgType,
+                  message: replyMsg.value.janusMsg.message,
+                  format: replyMsg.value.janusMsg.format,
+                  recallStatus: replyMsg.value.recallStatus,
+                  recallPopUp: replyMsg.value.recallPopUp,
+                  sender: replyMsg.value.janusMsg.sender,
+              }
+            : "",
+    };
+    const stickers = {
+        stickerPackID: sticker.stickerPackID,
+        stickerUrl: stickerUrl.value,
+        ext: sticker.ext,
+        stickerFileID: id,
+        title: `貼圖${sticker.stickerPackID}-${id}`,
+    };
+    messages.value.push(stickerObj);
+    const sendMsgObj = {
+        msg: stickerObj,
+        textPlugin: textPlugin.value,
+        chatToken: route.query.chatToken,
+    };
+    const isStickerPush = stickerItems.value.some((item) => {
+        return item.title === stickers.title;
+    });
+    if (!isStickerPush) {
+        stickerItems.value.push(stickers);
+    }
+
+    window.localStorage.setItem("sticker", JSON.stringify(stickerItems.value));
+    sendPrivateMsg(sendMsgObj);
+    localStorageMsg(messages.value, route.query.chatToken);
+    showStickerModal.value = false;
+};
 
 //功能欄開關
 const inputFunctionOpen = () => {
@@ -973,6 +1137,32 @@ const confirmDeletePopup = () => {
     deletePopUp.value = !deletePopUp.value;
 };
 </script>
+<style lang="scss">
+@import "~@/assets/scss/extend";
+@import "~@/assets/scss/var";
+.n-input-modify {
+    width: 100%;
+    background-color: $gray-7;
+    &.n-input .n-input__border,
+    &.n-input .n-input__state-border {
+        border: none;
+    }
+    &.n-input:not(.n-input--disabled):hover .n-input__state-border {
+        border: none;
+    }
+    &.n-input:not(.n-input--disabled).n-input--focus {
+        background-color: $gray-7;
+    }
+    &.n-input:not(.n-input--disabled).n-input--focus .n-input__state-border {
+        border: none;
+        box-shadow: none;
+    }
+    &.n-input .n-input__input-el,
+    &.n-input .n-input__textarea-el {
+        caret-color: $primary-1;
+    }
+}
+</style>
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
@@ -1026,7 +1216,7 @@ const confirmDeletePopup = () => {
 }
 
 .reply {
-    width: 100%;
+    width: calc(100% - 300px);
     background-color: $gray-7;
     display: flex;
     cursor: pointer;
@@ -1070,6 +1260,11 @@ const confirmDeletePopup = () => {
         }
     }
 }
+@media (max-width: 768px) {
+    .reply {
+        width: 100%;
+    }
+}
 .inputFunctionBar {
     position: fixed;
     bottom: 60px;
@@ -1089,7 +1284,7 @@ const confirmDeletePopup = () => {
         }
     }
     .file {
-        width: 30px;
+        width: 40px;
         padding-top: 15px;
         .upload_cover {
             position: relative;
@@ -1105,7 +1300,7 @@ const confirmDeletePopup = () => {
                 display: none;
             }
             .upload_icon {
-                width: 30px;
+                width: 40px;
                 position: absolute;
                 @extend %h4;
                 cursor: pointer;
@@ -1115,11 +1310,13 @@ const confirmDeletePopup = () => {
         }
     }
     .position {
-        width: 30px;
+        width: 40px;
         padding-top: 15px;
         cursor: pointer;
         img {
             width: 24px;
+            display: block;
+            margin: 0 auto;
         }
         p {
             @extend %h4;
@@ -1344,12 +1541,11 @@ const confirmDeletePopup = () => {
             margin-left: 7px;
             background-color: $gray-7;
             overflow-x: hidden;
-            .n-input-modify {
-                background-color: $gray-7;
-                --padding-right: 0px !important;
-                img {
-                    margin-right: 5px;
-                }
+            display: flex;
+            justify-content: space-between;
+            img {
+                margin-right: 5px;
+                cursor: pointer;
             }
         }
         .send {
@@ -1379,6 +1575,77 @@ const confirmDeletePopup = () => {
                 width: 24px;
                 height: 24px;
                 margin-left: 9px;
+            }
+        }
+    }
+    .stickerArea {
+        padding-top: 0;
+        padding-bottom: 10px;
+        .stickerTabsArea {
+            width: 100%;
+            height: 55px;
+            display: block;
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+        .stickerTabs {
+            padding-top: 10px;
+            padding-bottom: 10px;
+            li {
+                width: 35px;
+                height: 35px;
+                overflow: hidden;
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                cursor: pointer;
+                &.reload-time {
+                    img {
+                        width: 25px;
+                    }
+                }
+                img {
+                    width: 95%;
+                }
+                + li {
+                    margin-left: 8px;
+                }
+                &.active {
+                    border-radius: 8px;
+                    background-color: $primary-3;
+                }
+            }
+        }
+        .stickerGroupID {
+            width: 100%;
+            min-height: 150px;
+            max-height: 140px;
+            display: block;
+            overflow-y: auto;
+            .hide {
+                display: none;
+            }
+        }
+        .stickerIcon {
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 120px;
+            height: 110px;
+            cursor: pointer;
+            &:active {
+                border-radius: 8px;
+                background-color: $primary-3;
+            }
+            img {
+                width: 85%;
+            }
+        }
+        @media (max-width: 768px) {
+            .stickerIcon {
+                width: auto;
+                height: auto;
             }
         }
     }

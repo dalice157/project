@@ -14,7 +14,7 @@
                         :size="120"
                         object-fit="cover"
                         fallback-src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-                        :src="`${config.serverUrl}/image/${eventInfo.icon}`"
+                        :src="`${config.fileUrl}/fls/${eventInfo.icon}`"
                     />
                 </div>
             </div>
@@ -47,7 +47,7 @@
     </n-modal>
 </template>
 <script setup lang="ts">
-import { defineComponent, computed } from "vue";
+import { computed } from "vue";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
 import { NModal, NCard, NAvatar } from "naive-ui";

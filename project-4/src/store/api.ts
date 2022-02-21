@@ -1,7 +1,8 @@
 import axios from "axios";
-import { defineStore } from "pinia";
+import { defineStore, storeToRefs } from "pinia";
 
 import config from "@/config/config";
+import { useChatStore } from "@/store/chat";
 
 export const useApiStore = defineStore({
     id: "api",
@@ -21,6 +22,8 @@ export const useApiStore = defineStore({
             ],
         },
         eventList: <any>[],
+        stickerList: <any>[],
+        stickerUrl: <string>"",
     }),
     getters: {},
     actions: {
@@ -42,6 +45,27 @@ export const useApiStore = defineStore({
                 .get(`${config.serverUrl}/events/${token}`)
                 .then((res: any) => {
                     this.eventList = res.data.eventList;
+                })
+                .catch((err: any) => {
+                    console.error(err);
+                });
+        },
+        async getSticker() {
+            // api store
+            const chatStore = useChatStore();
+            const { handleStickckerGroup } = chatStore;
+            const { stickerItems } = storeToRefs(chatStore);
+
+            if (window.localStorage.getItem("sticker") !== null) {
+                stickerItems.value = JSON.parse(window.localStorage.getItem("sticker"));
+            }
+            const isReloadTime = stickerItems.value.length > 0 ? 0 : 1;
+            await axios
+                .get(`${config.serverUrl}/sticker`)
+                .then((res: any) => {
+                    this.stickerList = res.data.stickerList;
+                    this.stickerUrl = res.data.prefix;
+                    handleStickckerGroup(isReloadTime);
                 })
                 .catch((err: any) => {
                     console.error(err);

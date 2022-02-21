@@ -26,7 +26,7 @@
                         :size="100"
                         object-fit="cover"
                         fallback-src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-                        :src="`${config.serverUrl}/image/${eventInfo.icon}`"
+                        :src="`${config.fileUrl}/fls/${eventInfo.icon}`"
                     />
                 </a>
             </div>
@@ -141,7 +141,7 @@ const handleSelect = (key: any) => {
     li {
         color: $gray-1;
         padding: 20px;
-        font-size: $font-size-16;
+        font-size: $font-size-18;
         font-weight: 600;
         color: $gray-1;
         cursor: pointer;
@@ -212,7 +212,7 @@ const handleSelect = (key: any) => {
         text-align: center;
         margin: 20px auto;
         color: $gray-4;
-        font-size: $font-size-14;
+        font-size: $font-size-16;
         line-height: 1.6;
     }
     .logo {

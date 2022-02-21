@@ -136,7 +136,7 @@ getEventListApi(route.query.chatToken);
         }
     }
     .time {
-        font-size: $font-size-14;
+        font-size: $font-size-16;
         color: $gray-3;
     }
 }

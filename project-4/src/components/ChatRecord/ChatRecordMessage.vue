@@ -11,7 +11,7 @@
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
                 <div class="avatar" @click.prevent="showCompanyInfo(num)">
-                    <n-avatar round :size="48" :src="`${config.serverUrl}/image/${num.icon}`" />
+                    <n-avatar round :size="48" :src="`${config.fileUrl}/fls/${num.icon}`" />
                 </div>
                 <div class="chatRoomInfo">
                     <h2 class="info_title">{{ num.name }}</h2>
@@ -41,6 +41,7 @@
     <div
         v-if="changeList?.length > 0 && searcRecordMessages?.length === 0 && recordKeyWord === ''"
         class="chatRecordMessage"
+        @touchstart="getChangeList"
     >
         <!-- @touchend.prevent="gotoChat(num.chatToken)" -->
         <!-- :href="`/?chatToken=${num.chatToken}`" -->
@@ -53,7 +54,7 @@
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
                 <div class="avatar" @click.prevent="showCompanyInfo(num)">
-                    <n-avatar round :size="48" :src="`${config.serverUrl}/image/${num.icon}`" />
+                    <n-avatar round :size="48" :src="`${config.fileUrl}/fls/${num.icon}`" />
                     <img
                         class="img"
                         src="../../assets/Images/chatRecord/pushpin-round.svg"
@@ -90,7 +91,7 @@
                     <img
                         src="@/assets/Images/chatRecord/more.svg"
                         alt="#"
-                        @touchstart.prevent="openFunctionPopUp(num)"
+                        @touchstart.prevent.stop="openFunctionPopUp(num)"
                     />
                     <div class="functionPopUp" v-show="num.isfunctionPopUp">
                         <ul class="ulList">
@@ -114,7 +115,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watchEffect, watch, onUpdated } from "vue";
+import { ref, watchEffect, onMounted, defineEmits } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { NAvatar, NEllipsis, NModal, NCard } from "naive-ui";
 import { nanoid } from "nanoid";
@@ -153,6 +154,13 @@ const { isInfoPop, info } = storeToRefs(modelStore);
 
 let changeList = ref();
 let list = ref([]);
+
+const emit = defineEmits(["getChangeList"]);
+
+const getChangeList = () => {
+    const getList = changeList.value;
+    emit("getChangeList", getList);
+};
 
 interface IObj {
     [propName: string]: any;
@@ -239,12 +247,12 @@ watchEffect(() => {
         };
         recordMessages.value.push(lastObj);
     }
-    recordMessages.value.forEach((item, idx) => {
+    recordMessages.value.forEach((item: any, idx: any) => {
         item.key = idx;
     });
 
     changeList.value = JSON.parse(JSON.stringify(recordMessages.value));
-    console.log("recordMessages:", recordMessages.value);
+    // console.log("recordMessages:", recordMessages.value);
 });
 //開啟功能列表
 const openFunctionPopUp = (num: any) => {
@@ -291,7 +299,6 @@ const unpin = (item: any, index: any): void => {
         }
         it.isfunctionPopUp = false;
     });
-    console.log("lists:", lists);
 
     const toTopLists = lists.filter((isTop) => {
         return isTop.toTop;
@@ -414,7 +421,7 @@ const unpin = (item: any, index: any): void => {
                 text-align: right;
                 min-width: 68px;
                 color: $gray-3;
-                font-size: $font-size-14;
+                font-size: $font-size-16;
                 font-weight: 500;
             }
             .badge {
@@ -449,7 +456,7 @@ const unpin = (item: any, index: any): void => {
     .chatRoomBox {
         cursor: pointer;
         width: 100%;
-        height: 80px;
+        height: 90px;
         display: flex;
         justify-content: space-between;
         text-decoration: none;
@@ -517,7 +524,7 @@ const unpin = (item: any, index: any): void => {
                 text-align: right;
                 min-width: 68px;
                 color: $gray-3;
-                font-size: $font-size-14;
+                font-size: $font-size-16;
                 font-weight: 500;
             }
             .badge {
@@ -549,7 +556,7 @@ const unpin = (item: any, index: any): void => {
                     .ulList {
                         background-color: $primary-3;
                         li {
-                            width: 76px;
+                            width: 90px;
                             height: 50px;
                             padding: 10px 10px;
                             text-align: center;
@@ -566,6 +573,12 @@ const unpin = (item: any, index: any): void => {
                 }
             }
         }
+    }
+}
+@media (max-width: 768px) {
+    .chatRecordMessage {
+        height: 100%;
+        padding-top: 20px;
     }
 }
 </style>

@@ -4,7 +4,7 @@
         <div class="main">
             <!-- 聊天室交談紀錄列表 -->
             <ChatRecordSearch />
-            <ChatRecordMessage />
+            <ChatRecordMessage @getChangeList="getChangeList" />
         </div>
     </div>
 </template>
@@ -29,6 +29,13 @@ const hamburgerBoolean = ref();
 const menuToggle = (menuBoolean: any) => {
     hamburgerBoolean.value = menuBoolean;
 };
+
+const getChangeList = (lists:any) => {
+    // console.log("=======",lists);
+    lists.forEach((list:any)=>{
+        list.isfunctionPopUp = false
+    })
+}
 </script>
 <style lang="scss" scoped>
 .chatRecord {

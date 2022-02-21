@@ -9,7 +9,7 @@
                         :size="42"
                         object-fit="cover"
                         fallback-src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-                        :src="`${config.serverUrl}/image/${eventInfo.icon}`"
+                        :src="`${config.fileUrl}/fls/${eventInfo.icon}`"
                     />
                     {{ eventInfo.name }}
                 </h1>
@@ -34,7 +34,7 @@
                             @click="previewURL(picture.janusMsg.format.Fileid)"
                         >
                             <img
-                                :src="`${config.serverUrl}/image/${picture.janusMsg.format.Fileid}${picture.ext}`"
+                                :src="`${config.fileUrl}/fls/${picture.janusMsg.format.Fileid}${picture.ext}`"
                             />
                         </div>
                         <div
@@ -173,13 +173,11 @@ const previewURL = (fileid: string): void => {
     pictures.value.forEach((img: any) => {
         if (
             !viewImgs.value.includes(
-                `${config.serverUrl}/image/${img.janusMsg.format.Fileid}${img.ext}`
+                `${config.fileUrl}/fls/${img.janusMsg.format.Fileid}${img.ext}`
             ) &&
             img.janusMsg.msgType === 6
         ) {
-            viewImgs.value.push(
-                `${config.serverUrl}/image/${img.janusMsg.format.Fileid}${img.ext}`
-            );
+            viewImgs.value.push(`${config.fileUrl}/fls/${img.janusMsg.format.Fileid}${img.ext}`);
         }
     });
     console.log("picture:", fileid);
@@ -201,7 +199,8 @@ const previewURL = (fileid: string): void => {
                 const wrap = document.getElementsByClassName("v-wrap");
                 const div = document.createElement("div");
                 const a = document.createElement("a");
-                a.href = `${config.serverUrl}/file/1GdSC2wd/${fileId}`;
+                a.href = `${config.serverUrl}/file/${chatToken.value}/${fileId}`;
+                a.target = "_blank";
                 a.download = fileName;
                 a.className = "download";
                 a.innerHTML = `<span class="downloadImg"></span>`;
@@ -258,7 +257,7 @@ const previewURL = (fileid: string): void => {
         }
     }
     .date {
-        font-size: $font-size-16;
+        font-size: $font-size-18;
         font-weight: 500;
         margin-top: 20px;
         margin-bottom: 8px;
@@ -394,7 +393,7 @@ const previewURL = (fileid: string): void => {
     .gallery {
         height: 100%;
         .date {
-            font-size: $font-size-14;
+            font-size: $font-size-16;
         }
         .galleryHeader {
             width: 100%;
@@ -418,7 +417,7 @@ const previewURL = (fileid: string): void => {
                 .name {
                     display: block;
                     margin: 0 auto;
-                    font-size: $font-size-16;
+                    font-size: $font-size-18;
                     font-weight: 600;
                 }
                 .avatar {

@@ -130,7 +130,7 @@ const onPhoneCallModal = () => {
         text-align: center;
         margin: 1em auto;
         color: $gray-1;
-        font-size: $font-size-14;
+        font-size: $font-size-16;
         font-weight: 500;
         line-height: 1.6;
     }

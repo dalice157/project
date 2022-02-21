@@ -39,10 +39,14 @@ export const useModelStore = defineStore({
         closeAll() {
             const chatStore = useChatStore();
             const { closeRecorder } = chatStore;
+            const { showRecorderModal, inputFunctionBoolean, showStickerModal } =
+                storeToRefs(chatStore);
             const searchStore = useSearchStore();
             const { closeSearchBar } = searchStore;
-
-            closeRecorder();
+            showRecorderModal.value = false;
+            inputFunctionBoolean.value = false;
+            showStickerModal.value = false;
+            // closeRecorder();
             closeSearchBar();
         },
     },

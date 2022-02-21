@@ -8,7 +8,7 @@
         >
             <div class="chatRoomList">
                 <div class="avatar">
-                    <n-avatar round :size="50" :src="`${config.serverUrl}/image/${item.icon}`" />
+                    <n-avatar round :size="50" :src="`${config.fileUrl}/fls/${item.icon}`" />
                 </div>
                 <div class="chatRoomInfo">
                     <h3 class="name">{{ item.name }}</h3>
@@ -30,7 +30,7 @@
         >
             <div class="chatRoomList">
                 <div class="avatar">
-                    <n-avatar round :size="48" :src="`${config.serverUrl}/image/${item.icon}`" />
+                    <n-avatar round :size="48" :src="`${config.fileUrl}/fls/${item.icon}`" />
                 </div>
                 <div class="chatRoomInfo">
                     <h3 class="name" v-html="item.tagName"></h3>
@@ -96,7 +96,7 @@ watchEffect(() => {
                     margin-bottom: 6px;
                 }
                 p {
-                    font-size: $font-size-14;
+                    font-size: $font-size-16;
                     line-height: 1.5;
                     color: $gray-3;
                 }
