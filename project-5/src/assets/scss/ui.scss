@@ -1,0 +1,34 @@
+//checkbox 統一樣式
+.n-checkbox.n-checkbox--checked .n-checkbox-box,
+.n-checkbox.n-checkbox--indeterminate .n-checkbox-box {
+    background-color: #ffb400;
+}
+.n-checkbox.n-checkbox--checked .n-checkbox-box .n-checkbox-box__border,
+.n-checkbox.n-checkbox--indeterminate .n-checkbox-box .n-checkbox-box__border {
+    border: 1px solid #ffb400;
+}
+.n-checkbox:hover .n-checkbox-box .n-checkbox-box__border {
+    border-color: #ffb400;
+}
+
+.n-checkbox.n-checkbox--checked:focus:not(:active) .n-checkbox-box .n-checkbox-box__border,
+.n-checkbox.n-checkbox--indeterminate:focus:not(:active) .n-checkbox-box .n-checkbox-box__border {
+    border-color: #ffb400;
+    box-shadow: 0 0 0 2px rgba(255, 180, 0, 0.3);
+}
+
+.n-checkbox:focus:not(:active) .n-checkbox-box .n-checkbox-box__border {
+    border-color: #ffb400;
+    box-shadow: 0 0 0 2px rgba(255, 180, 0, 0.3);
+}
+
+.n-pagination .n-pagination-item:not(.n-pagination-item--disabled).n-pagination-item--active {
+    color: #ffb400;
+    border-color: #ffb400;
+}
+
+.n-pagination .n-pagination-item:not(.n-pagination-item--disabled):hover {
+    color: #ffb400;
+}
+//datapicker 統一樣式
+

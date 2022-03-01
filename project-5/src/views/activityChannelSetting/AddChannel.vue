@@ -1,0 +1,840 @@
+<template>
+    <div class="addChannel">
+        <div class="addChannelWrap">
+            <div class="addChannelSetting">
+                <div class="channelIntroduce">
+                    <div class="setting">
+                        <div class="iconSetting">
+                            <div class="iconTitle">
+                                <h1>頭像設定</h1>
+                                <p>(請上傳商標或形象圖以供辨識)</p>
+                            </div>
+                            <n-upload @change="uploadAvatar($event)" accept="image/*" type="file">
+                                <div class="addChannelUploadImg">
+                                    <img
+                                        class="avatarDefault"
+                                        src="../../assets/Images/manage/Photo.svg"
+                                        alt="#"
+                                        v-if="avatarStatus === 0"
+                                    />
+                                    <img
+                                        class="avatarUpload"
+                                        :src="`${config.fileUrl}/fls/${avatar.fileid}${avatar.ext}`"
+                                        alt="#"
+                                        v-else
+                                    />
+                                </div>
+                            </n-upload>
+                        </div>
+                        <div class="functionSetting">
+                            <h1>功能設定</h1>
+                            <div class="freecall">
+                                <n-checkbox
+                                    v-model:checked="callable"
+                                    checked-value="1"
+                                    unchecked-value="0"
+                                ></n-checkbox>
+                                <p>免費通話</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="activityTitle">
+                        <h1>活動名稱</h1>
+                        <n-config-provider :themeOverrides="themeOverrides">
+                            <n-input
+                                placeholder="請輸入活動名稱"
+                                maxlength="25"
+                                show-count
+                                v-model:value="name"
+                            ></n-input>
+                        </n-config-provider>
+                    </div>
+                    <div class="homeURL">
+                        <h1>活動網址</h1>
+                        <n-config-provider :themeOverrides="themeOverrides">
+                            <n-input placeholder="請輸入活動網址" v-model:value="url"></n-input>
+                        </n-config-provider>
+                    </div>
+                    <div class="introduction">
+                        <h1>簡介</h1>
+                        <n-config-provider :themeOverrides="themeOverrides">
+                            <n-input
+                                type="textarea"
+                                placeholder="當使用者點及頭像即可看到聊天室簡介"
+                                maxlength="100"
+                                show-count
+                                :autosize="{
+                                    minRows: 3,
+                                    maxRows: 3,
+                                }"
+                                v-model:value="description"
+                            ></n-input>
+                        </n-config-provider>
+                    </div>
+                    <div class="customerService">
+                        <div class="customerServiceTitle">
+                            <h1>客服人員</h1>
+                            <h2 @click="popUp = !popUp">+新增客服人員</h2>
+                        </div>
+                        <div class="customServiceTagArea">
+                            <p v-show="addList.length === 0">請選擇客服人員</p>
+                            <div
+                                class="staffTag"
+                                v-for="(item, index) in addList"
+                                :key="item.acountID"
+                            >
+                                <p>{{ item.name }}</p>
+                                <img
+                                    src="@/assets/Images/manage/round-fill_close.svg"
+                                    alt=""
+                                    @click="deleteStaff(index)"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="welcomeStatus">
+                    <div class="welcomeTitle">
+                        <h1>歡迎訊息</h1>
+                        <p>(最多三則)</p>
+                    </div>
+                    <div
+                        class="welcomeInput"
+                        v-for="(item, index) in welcomeMsgCount"
+                        :key="item.id"
+                    >
+                        <n-config-provider
+                            :themeOverrides="themeOverrides"
+                            v-if="item.MsgType === 1"
+                        >
+                            <n-input
+                                type="textarea"
+                                placeholder="請輸入歡迎訊息"
+                                :autosize="{
+                                    minRows: 3,
+                                }"
+                                v-model:value="item.MsgContent"
+                            ></n-input>
+                        </n-config-provider>
+                        <div class="welcomeImg" v-else-if="item.MsgType === 6">
+                            <img
+                                :src="`${config.fileUrl}/fls/${item.Format.fileid}${item.Format.ext}`"
+                                alt="#"
+                            />
+                        </div>
+                        <div class="welcomeFile" v-else-if="item.MsgType === 7">
+                            <div>
+                                <div>
+                                    <img src="@/assets/Images/common/file.svg" />
+                                    <p>{{ item.Format.fileName }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="welcomeFunctionBar">
+                            <img
+                                src="../../assets/Images/manage/delete.svg"
+                                alt=""
+                                @click="deleteWelcomeMsg(item.id)"
+                            />
+                            <div class="welcomeFunctionBarUpload">
+                                <span
+                                    src="../../assets/Images/common/file.svg"
+                                    alt=""
+                                    v-show="item.MsgContent === ''"
+                                >
+                                    <input
+                                        type="file"
+                                        @change="welcomeFile($event, index)"
+                                        :accept="fileAccept"
+                                    />
+                                </span>
+                                <span
+                                    src="../../assets/Images/chatroom/pic.svg"
+                                    alt=""
+                                    v-show="item.MsgContent === ''"
+                                >
+                                    <input
+                                        type="file"
+                                        @change="welcomePicture($event, index)"
+                                        accept="image/*"
+                                    />
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <h2 @click="addWelcomeMsg" v-show="welcomeMsgCount.length < 3">
+                        +新增歡迎訊息
+                    </h2>
+                </div>
+            </div>
+            <div class="channelButtonGroup">
+                <router-link
+                    class="channelCancel"
+                    :to="`/manage/${route.params.id}/activitySetting`"
+                    >取消</router-link
+                >
+                <div class="channelPreview">預覽</div>
+                <div class="channelStore" @click="goActivityStore">確認儲存</div>
+            </div>
+        </div>
+    </div>
+    <teleport to="body">
+        <div class="mask" v-show="popUp === true">
+            <div class="customService">
+                <div class="customServiceTitle">
+                    <h2>客服人員列表</h2>
+                </div>
+                <div class="staffList">
+                    <ul>
+                        <li v-for="(staff, index) in staffList" :key="index">
+                            <n-checkbox-group v-model:value="addList">
+                                <div class="staffData">
+                                    <p>{{ staff.name }}</p>
+                                    <n-checkbox :value="staff"></n-checkbox>
+                                </div>
+                            </n-checkbox-group>
+                        </li>
+                    </ul>
+                </div>
+                <div class="staffConfirm" @click="popUp = !popUp">確認</div>
+            </div>
+        </div>
+    </teleport>
+</template>
+
+<script lang="ts" setup>
+import { ref, reactive, onMounted, onUpdated } from "vue";
+import { NInput, NConfigProvider, NCheckbox, NCheckboxGroup, NUpload } from "naive-ui";
+import { nanoid } from "nanoid";
+import config from "@/config/config";
+import { useRoute, useRouter } from "vue-router";
+import axios from "axios";
+import { chatroomID } from "@/util/commonUtil";
+import Compressor from "compressorjs";
+import { useApiStore } from "@/store/api";
+import { storeToRefs } from "pinia";
+
+//router 資訊
+const router = useRouter();
+const route = useRoute();
+const params = route.params;
+
+//store 使用
+const apiStore = useApiStore();
+const { getCustomServiceStaffList } = apiStore;
+const { staffList } = storeToRefs(apiStore);
+getCustomServiceStaffList();
+
+//v-model
+const callable = ref("0");
+const name = ref("");
+const description = ref("");
+const url = ref("");
+
+//頭像上傳功能
+const avatarStatus = ref(0);
+let avatar = ref({ exp: "", ext: "", fileid: "" });
+const uploadAvatar = (e: any) => {
+    const file = e.file.file;
+    // console.log(e.file.file);
+    // const fileName = file.name;
+    if (!file) {
+        return;
+    }
+    //壓縮圖片套件 compressor js
+    new Compressor(file, {
+        quality: 0.6,
+        success(result) {
+            //呼叫api
+            const fd = new FormData();
+            // console.log("file.name:", file);
+            fd.append("file", new File([result], file.name, { type: "image/*" }));
+            const getToken = localStorage.getItem("access_token");
+            axios({
+                method: "post",
+                url: `${config.serverUrl}/v1/file`,
+                data: fd,
+                headers: { Authorization: `Bearer ${getToken}` },
+            })
+                .then((res) => {
+                    // console.log("avatar res:", res);
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = (e: any) => {
+                        avatar.value = {
+                            exp: res.data.exp,
+                            ext: res.data.ext,
+                            fileid: res.data.fileid,
+                        };
+                        avatarStatus.value = 1;
+                        console.log(avatar.value);
+                    };
+                })
+                .catch((err) => {
+                    console.error(err);
+                });
+        },
+        error(err) {
+            console.error(err);
+        },
+    });
+};
+
+const popUp = ref(false);
+const addList = ref([]);
+//給submit api 的cslist
+const csList = ref([]);
+onUpdated(() => {
+    csList.value = addList.value.map((item) => {
+        return {
+            accountID: item.accountID,
+        };
+    });
+});
+// 刪除人員tag
+const deleteStaff = (i: any) => {
+    addList.value.forEach((_, index) => {
+        if (index === i) {
+            addList.value.splice(index, 1);
+        }
+    });
+};
+
+//歡迎訊息數量
+const welcomeMsgCount = ref([]);
+let welcomeMsg = reactive({});
+const addWelcomeMsg = () => {
+    welcomeMsg = {
+        id: nanoid(),
+        MsgContent: "",
+        Format: {},
+        MsgType: 1, //文字類型
+    };
+    if (welcomeMsgCount.value.length < 3) {
+        welcomeMsgCount.value.push(welcomeMsg);
+    }
+};
+
+//刪除歡迎訊息
+const deleteWelcomeMsg = (id: any) => {
+    welcomeMsgCount.value.forEach((item, index) => {
+        if (item.id === id) {
+            welcomeMsgCount.value.splice(index, 1);
+        }
+    });
+};
+
+//上傳圖片
+const image = ref();
+const welcomePicture = (e: any, index: any) => {
+    console.log(e);
+    const file = e.target.files[0];
+    const fileName = file.name;
+    if (!file) {
+        return;
+    }
+    //壓縮圖片套件 compressor js
+    new Compressor(file, {
+        quality: 0.6,
+        success(result) {
+            //呼叫api
+            const fd = new FormData();
+            // console.log("file.name:", file);
+            fd.append("file", new File([result], file.name, { type: "image/*" }));
+            const getToken = localStorage.getItem("access_token");
+            axios({
+                method: "post",
+                url: `${config.serverUrl}/v1/file`,
+                data: fd,
+                headers: { Authorization: `Bearer ${getToken}` },
+            })
+                .then((res) => {
+                    // console.log("img res:", res);
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = (e: any) => {
+                        image.value = e.target.result;
+                        welcomeMsg = {
+                            ...welcomeMsg,
+                            MsgType: 6, //圖片類型
+                            Format: {
+                                exp: res.data.exp,
+                                ext: res.data.ext,
+                                fileid: res.data.fileid,
+                            },
+                        };
+                        welcomeMsgCount.value.splice(index, 1, welcomeMsg);
+                    };
+                })
+                .catch((err) => {
+                    console.error(err);
+                });
+        },
+        error(err) {
+            console.error(err);
+        },
+    });
+};
+
+// 可上傳檔案類型
+const fileAccept =
+    "text/*, video/*, audio/*, application/*, application/rtf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.wordprocessingml.templat, application/vnd.ms-word.document.macroEnabled.12, application/vnd.ms-word.template.macroEnabled.12";
+//上傳檔案
+const welcomeFile = (e: any, index: any) => {
+    console.log(e.target.files[0]);
+    welcomeMsg = {
+        ...welcomeMsg,
+        MsgType: 7, //檔案類型
+        Format: {
+            fileName: e.target.files[0].name,
+            fileSize: e.target.files[0].size,
+        },
+    };
+    welcomeMsgCount.value.splice(index, 1, welcomeMsg);
+};
+
+//確認儲存
+const goActivityStore = () => {
+    const accountID = localStorage.getItem("accountID") || "[]";
+    const channelDataObj = {
+        accountID: parseFloat(accountID), // 4
+        icon: `${avatar.value.fileid}${avatar.value.ext}`,
+        callable: parseInt(callable.value),
+        name: name.value,
+        homeurl: url.value,
+        description: description.value,
+        cslist: JSON.stringify(csList.value),
+        messagelist: JSON.stringify(welcomeMsgCount.value),
+    };
+    // console.log("塞api資料", channelDataObj);
+    const fd = new FormData();
+    fd.append("accountID", JSON.stringify(channelDataObj.accountID));
+    fd.append("icon", channelDataObj.icon);
+    fd.append("callable", JSON.stringify(channelDataObj.callable));
+    fd.append("name", channelDataObj.name);
+    fd.append("homeurl", channelDataObj.homeurl);
+    fd.append("description", channelDataObj.description);
+    fd.append("cslist", channelDataObj.cslist);
+    fd.append("messagelist", channelDataObj.messagelist);
+    const getToken = localStorage.getItem("access_token");
+    axios({
+        method: "post",
+        url: `${config.serverUrl}/v1/Event`,
+        data: fd,
+        headers: { Authorization: `Bearer ${getToken}` },
+    })
+        .then((res) => {
+            console.log("confirm res", res);
+        })
+        .catch((err) => {
+            console.error(err);
+        });
+    router.push(`/manage/${params.id}/activitySetting`);
+};
+//取消
+const goActivityCancel = () => {
+    router.push(`/manage/${params.id}/activitySetting`);
+};
+
+const themeOverrides = {
+    common: { primaryColor: "#FFb400" },
+    Input: {
+        caretColor: "black",
+        borderHover: "transparent",
+        borderFocus: "transparent",
+        boxShadowFocus: "none",
+        borderRadius: "4px",
+    },
+};
+</script>
+
+<style lang="scss" scoped>
+@import "~@/assets/scss/extend";
+@import "~@/assets/scss/var";
+.mask {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .customService {
+        width: 590px;
+        height: 665px;
+        background-color: $white;
+        padding: 25px 0px;
+        .customServiceTitle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 0 20px;
+            h2 {
+                font-family: $font-family;
+                font-size: 16px;
+                font-weight: 500;
+                color: $gray-1;
+            }
+            img {
+                width: 27px;
+                height: 27px;
+                cursor: pointer;
+            }
+        }
+        .staffList {
+            overflow-y: auto;
+            height: 500px;
+            ul {
+                li {
+                    height: 60px;
+                    line-height: 60px;
+                    padding: 0 20px;
+                    position: relative;
+                    .staffData {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
+
+                    &::after {
+                        position: absolute;
+                        content: "";
+                        width: 93%;
+                        height: 1px;
+                        bottom: 0;
+                        background-color: #eeeeee;
+                    }
+                }
+            }
+        }
+        .staffConfirm {
+            width: 100px;
+            height: 36px;
+            line-height: 36px;
+            border: 1px solid $gray-1;
+            border-radius: 18px;
+            text-align: center;
+            color: $white;
+            background-color: $gray-1;
+            cursor: pointer;
+            margin: 30px auto;
+        }
+    }
+}
+
+.addChannel {
+    background-color: $bg;
+    padding-top: 15px;
+    .addChannelWrap {
+        width: 1200px;
+        height: 665px;
+        background-color: $white;
+        margin: 0 auto;
+        padding: 30px 50px;
+
+        .addChannelSetting {
+            display: flex;
+            margin-bottom: 60px;
+            .channelIntroduce {
+                width: 640px;
+
+                .setting {
+                    display: flex;
+                    margin-bottom: 30px;
+                    .iconSetting {
+                        margin-right: 100px;
+                        .iconTitle {
+                            display: flex;
+                            align-items: center;
+                            margin-bottom: 15px;
+                            h1 {
+                                font-family: $font-family;
+                                font-size: 16px;
+                                font-weight: 400;
+                                color: $gray-1;
+                                margin-right: 10px;
+                            }
+                            p {
+                                font-family: $font-family;
+                                font-size: 14px;
+                                font-weight: 400;
+                                color: $gray-3;
+                            }
+                        }
+                        .n-upload {
+                            width: 80px;
+                            & .n-upload-trigger {
+                                width: 80px;
+                                border-radius: 50%;
+                                .addChannelUploadImg {
+                                    width: 80px;
+                                    height: 80px;
+                                    border: 1px dashed $gray-3;
+                                    background-color: $gray-8;
+                                    border-radius: 50%;
+                                    display: flex;
+                                    justify-content: center;
+                                    align-items: center;
+                                    cursor: pointer;
+                                    .avatarUpload {
+                                        width: 80px;
+                                        height: 80px;
+                                        border-radius: 50%;
+                                    }
+                                }
+                            }
+                            & .n-upload-file-list {
+                                display: none !important;
+                            }
+                        }
+                    }
+                    .functionSetting {
+                        h1 {
+                            font-family: $font-family;
+                            font-size: 16px;
+                            font-weight: 400;
+                            color: $gray-1;
+                            margin-right: 10px;
+                            margin-bottom: 17px;
+                        }
+                        .freecall {
+                            display: flex;
+                            align-items: center;
+                            p {
+                                margin-left: 15px;
+                                font-family: $font-family;
+                                font-size: 14px;
+                                font-weight: 400;
+                                color: $gray-3;
+                            }
+                        }
+                    }
+                }
+                .activityTitle {
+                    margin-bottom: 30px;
+                    h1 {
+                        margin-bottom: 15px;
+                    }
+                    .n-input {
+                        border: 1px solid $gray-1;
+                    }
+                }
+                .homeURL {
+                    margin-bottom: 30px;
+                    h1 {
+                        margin-bottom: 15px;
+                    }
+                    .n-input {
+                        border: 1px solid $gray-1;
+                    }
+                }
+                .introduction {
+                    margin-bottom: 30px;
+                    h1 {
+                        margin-bottom: 15px;
+                    }
+                    .n-input {
+                        border: 1px solid $gray-1;
+                    }
+                }
+                .customerService {
+                    .customerServiceTitle {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        h1 {
+                            margin-bottom: 15px;
+                        }
+                        h2 {
+                            color: $primary-1;
+                            cursor: pointer;
+                        }
+                    }
+                    .customServiceTagArea {
+                        display: flex;
+                        flex-wrap: wrap;
+                        align-items: center;
+                        border: 1px solid $gray-1;
+                        min-height: 34px;
+                        border-radius: 4px;
+                        padding: 0 5px;
+                        // overflow-y: auto;
+                        > p {
+                            margin-left: 5px;
+                            color: $gray-4;
+                        }
+                        .staffTag {
+                            background-color: $primary-4;
+                            height: 25px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: space-between;
+                            border-radius: 20px;
+                            padding: 5px 10px;
+                            margin: 5px 5px;
+                            p {
+                                color: $gray-1;
+                            }
+                            img {
+                                margin-left: 5px;
+                                cursor: pointer;
+                            }
+                        }
+                    }
+                }
+            }
+            .welcomeStatus {
+                margin-left: 100px;
+                width: 360px;
+                .welcomeTitle {
+                    display: flex;
+                    h1 {
+                        font-family: $font-family;
+                        font-size: 16px;
+                        font-weight: 400;
+                        color: $gray-1;
+                        margin-right: 10px;
+                        margin-bottom: 17px;
+                    }
+                    p {
+                        margin-left: 15px;
+                        font-family: $font-family;
+                        font-size: 14px;
+                        font-weight: 400;
+                        color: $gray-3;
+                    }
+                }
+                .welcomeInput {
+                    width: 100%;
+                    min-height: 100px;
+                    border: 1px solid $gray-3;
+                    margin-bottom: 15px;
+                    background-color: $gray-8;
+                    &:focus {
+                        outline: none;
+                    }
+                    &:empty:before {
+                        content: attr(data-placeholder);
+                        color: $gray-3;
+                    }
+                    .n-input {
+                        background-color: $gray-8;
+                        --border: transparent !important;
+                    }
+                    .welcomeImg {
+                        padding: 5px 5px;
+                        img {
+                            max-height: 80px;
+                        }
+                    }
+                    .welcomeFile {
+                        padding: 5px 5px;
+                        > div {
+                            height: 80px;
+                            > div {
+                                display: flex;
+                                align-items: center;
+                                img {
+                                    width: 24px;
+                                    height: 24px;
+                                }
+                            }
+                        }
+                    }
+                    .welcomeFunctionBar {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        img {
+                            cursor: pointer;
+                        }
+                        .welcomeFunctionBarUpload {
+                            display: flex;
+                            span {
+                                display: block;
+                                width: 24px;
+                                height: 24px;
+                                background-image: url("../../assets/Images/common/file.svg");
+                                background-size: 24px;
+
+                                input {
+                                    opacity: 0;
+                                    border: 12px solid #00a;
+                                    width: 24px;
+                                    height: 24px;
+                                    cursor: pointer;
+                                }
+                            }
+                            span + span {
+                                display: block;
+                                width: 24px;
+                                height: 24px;
+                                background-image: url("../../assets/Images/chatroom/pic.svg");
+                                background-size: 24px;
+                                margin: 0 5px;
+
+                                input {
+                                    opacity: 0;
+                                    border: 12px solid #00a;
+                                    width: 24px;
+                                    height: 24px;
+                                    cursor: pointer;
+                                }
+                            }
+                        }
+                    }
+                }
+                h2 {
+                    text-align: right;
+                    cursor: pointer;
+                    color: $primary-1;
+                }
+            }
+        }
+        .channelButtonGroup {
+            display: flex;
+            justify-content: center;
+            .channelCancel {
+                width: 100px;
+                height: 36px;
+                line-height: 36px;
+                border: 1px solid $gray-1;
+                border-radius: 18px;
+                text-align: center;
+                margin: 0 15px;
+                cursor: pointer;
+                text-decoration: none;
+                color: $gray-1;
+            }
+            .channelPreview {
+                width: 100px;
+                height: 36px;
+                line-height: 36px;
+                border: 1px solid $gray-1;
+                border-radius: 18px;
+                text-align: center;
+                color: $white;
+                background-color: $gray-1;
+                margin: 0 15px;
+                cursor: pointer;
+            }
+            .channelStore {
+                width: 200px;
+                height: 36px;
+                line-height: 36px;
+                border: 1px solid $gray-1;
+                border-radius: 18px;
+                text-align: center;
+                color: $white;
+                background-color: $gray-1;
+                margin: 0 15px;
+                cursor: pointer;
+            }
+        }
+    }
+}
+</style>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="375px" height="127px" viewBox="0 0 375 127" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>樣式-交談室</title>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="375" height="127"></rect>
+        <polygon id="path-3" points="0 0 585 0 585 235 0 235"></polygon>
+    </defs>
+    <g id="Style" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="小網/交談室" transform="translate(0.000000, -94.000000)">
+            <g id="樣式-交談室" transform="translate(0.000000, 94.000000)">
+                <mask id="mask-2" fill="white">
+                    <use xlink:href="#path-1"></use>
+                </mask>
+                <g id="Mask"></g>
+                <g mask="url(#mask-2)">
+                    <g transform="translate(-105.000000, 0.000000)">
+                        <mask id="mask-4" fill="white">
+                            <use xlink:href="#path-3"></use>
+                        </mask>
+                        <g id="Clip-2" stroke="none" fill="none"></g>
+                        <path d="M-242,30.4183966 C-242.44457,76.4312777 -201.982944,120.105341 -146.148116,141.337186 C-90.3132874,162.569961 -21.7973504,162.548546 36.9524264,146.047407 C76.2653921,135.005061 111.248596,117.260028 147.934415,102.137786 C184.61896,87.0146127 224.830988,74.1781176 266.943018,74.5151605 C301.689358,74.7935468 334.943203,83.9914678 368.363872,90.9474013 C401.784541,97.9042659 438.073041,102.610764 470.806042,94.0841353 C507.807679,84.4448929 533.922511,59.019564 546,31.6930148 L-242,30.4183966 Z" id="Fill-1" stroke="none" fill="#FFF1CF" fill-rule="evenodd" mask="url(#mask-4)"></path>
+                        <path d="M586.000619,-14 L104.999381,-14 C76.2803943,-14 53,9.33031931 53,38.110894 L53,146.777882 C84.0714796,113.778555 165.634887,53.4193804 340.42202,64.7945008 C499.791038,75.1645657 565.054145,148.015589 638,221 L638,38.110894 C638,9.33031931 614.719606,-14 586.000619,-14" id="Fill-1" stroke="none" fill="#FFB400" fill-rule="evenodd" mask="url(#mask-4)"></path>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

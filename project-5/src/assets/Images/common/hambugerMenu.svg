@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="250px" height="309px" viewBox="0 0 250 309" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>樣式-Menu</title>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="250" height="309"></rect>
+    </defs>
+    <g id="Style" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="小網/交談紀錄/Menu" transform="translate(0.000000, -420.000000)">
+            <rect fill="#FFFFFF" x="0" y="0" width="375" height="812"></rect>
+            <rect id="Mask" fill="#FFFFFF" x="0" y="74" width="250" height="668"></rect>
+            <g id="樣式-Menu" transform="translate(0.000000, 420.000000)">
+                <mask id="mask-2" fill="white">
+                    <use xlink:href="#path-1"></use>
+                </mask>
+                <g id="Mask"></g>
+                <g mask="url(#mask-2)" id="Group-3">
+                    <g transform="translate(-190.204952, -33.564294)">
+                        <g transform="translate(377.764838, 178.893500) scale(-1, 1) rotate(-180.000000) translate(-377.764838, -178.893500) translate(0.000000, 0.000000)">
+                            <path d="M42,29 L42,357.787 C42,357.787 109.709,170.099 402.252,208.701 L402.252,208.701 C694.796,247.304 630.545,29 630.545,29 L630.545,29 L42,29 Z" id="Fill-1-Copy" fill-opacity="0.15" fill="#FFB400"></path>
+                            <path d="M161,29 L161,357.787 C161,357.787 228.709,170.099 521.252,208.701 L521.252,208.701 C813.796,247.304 749.545,29 749.545,29 L749.545,29 L161,29 Z" id="Fill-1-Copy-2" fill-opacity="0.15" fill="#FFB400"></path>
+                            <path d="M0,0 L0,328.787 C0,328.787 67.709,141.099 360.252,179.701 L360.252,179.701 C652.796,218.304 588.545,0 588.545,0 L588.545,0 L0,0 Z" id="Fill-1" fill="#FFB400"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
