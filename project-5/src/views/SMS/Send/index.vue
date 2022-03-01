@@ -150,31 +150,24 @@ onMounted(() => {
 
 // textarea 預設文字
 const focusType = (e: any) => {
-    if (smsContent.value === demoContent || smsContent.value.includes("~ ` ^ { } [ ] | < >")) {
-        smsContent.value = "";
-    } else {
-        smsContent.value = e.target.value;
-    }
+    const isDefaultSmsContent = smsContent.value === demoContent || smsContent.value.includes("~ ` ^ { } [ ] | < >");
+     smsContent.value =  isDefaultSmsContent ? "" : e.target.value;
 };
 const blurJudge = (e: any) => {
-    if (smsContent.value === "") {
-        smsContent.value = demoContent;
-    } else {
-        smsContent.value = e.target.value;
-    }
+    smsContent.value = smsContent.value === "" ? demoContent : e.target.value
 };
 // == 檢查是否有中文 ....
 const editsend_hasChinese = (str: string) => {
-    if (str.length > 0) {
-        for (var i = 0; i < str.length; i++) {
-            console.log("str:", str.charCodeAt(i) > 127);
+    if(str.length <= 0) {
+        return false;
+    }
+    for (var i = 0; i < str.length; i++) {
+        console.log("str:", str.charCodeAt(i) > 127);
 
-            if (str.charCodeAt(i) > 127) {
-                return true;
-            }
+        if (str.charCodeAt(i) > 127) {
+            return true;
         }
     }
-    return false;
 };
 
 /*檢查發送內容是否有無法輸入字元*/
@@ -244,7 +237,6 @@ const wordCount = () => {
         }
     } else if (isPureEnglishCheck(smsContent.value)) {
         errorMsg.value = "純英文發送內容時不可有`^";
-        // console.log("純英文發送內容時不可有`^");
         //純英數判斷點數
         if (smsWord.value > 765) {
             tempCharge = Math.floor(smsWord.value / 765);
@@ -262,19 +254,6 @@ const wordCount = () => {
         } else {
             smsPoint.value = 0;
         }
-        // if (editsend_messageLength > 765) {
-        //     var tempCharge = Math.floor(editsend_messageLength / 765);
-        //     var remainder = editsend_messageLength - (tempCharge * 765);
-        //     if (remainder <= 160) {
-        //         editsend_messageCost = tempCharge * 5 + 1;
-        //     } else {
-        //         editsend_messageCost = tempCharge * 5 + Math.ceil(remainder / 153);
-        //     }
-        // } else if (editsend_messageLength <= 160) {
-        //     editsend_messageCost = 1;
-        // } else {
-        //     editsend_messageCost = Math.ceil(editsend_messageLength / 153);
-        // }
         //純英數計算長簡訊的發送則數
         if (smsWord.value > 765) {
             if (smsWord.value <= 1520) {
@@ -288,16 +267,6 @@ const wordCount = () => {
         } else {
             smsCount.value = 0;
         }
-        // if (editsend_messageLength > 765) {
-        //     if (editsend_messageLength <= 1520) {
-        //         editsend_messageNum = 2;
-        //     } else {
-        //         var length = editsend_messageLength - 1520;
-        //         editsend_messageNum = 2 + Math.ceil(length / 760);
-        //     }
-        // } else {
-        //     editsend_messageNum = 1;
-        // }
     }
 };
 
