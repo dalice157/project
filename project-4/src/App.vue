@@ -1,5 +1,5 @@
 <template>
-    <div class="all" @click="closeChatBubble">
+    <div class="all" :class="{ hide: shieldBoolean }" @click="closeChatBubble">
         <!-- 使用者資訊 -->
         <UserInfoSider />
         <router-view></router-view>
@@ -40,41 +40,37 @@ const closeChatBubble = (): void => {
 };
 
 const shieldBoolean = ref(false);
-
+let phoneDirection = window.matchMedia("(orientation: portrait)");
 //判斷設備使用者設備瀏覽方向
 onMounted(() => {
     if (
         navigator.userAgent.match(
-            /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennc|wOSBrowser|BrowserNG|WebOS|Symbian|Windos Phone)/i
+            /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|SAMSUNG|SGH-[I|N|T]|GT-[I|P|N]|SM-[N|P|T|Z|G]|SHV-E|SCH-[I|J|R|S]|SPH-L|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennc|wOSBrowser|BrowserNG|WebOS|Symbian|Windos Phone)/i
         ) &&
-        window.innerWidth > window.innerHeight
+        !phoneDirection.matches
+        // document.body.clientWidth > document.body.clientHeight
     ) {
+        console.log("橫屏");
         shieldBoolean.value = true;
-        const all = document.querySelector(".all") as any;
-        all.style.display = "none";
     } else {
+        console.log("豎屏");
         shieldBoolean.value = false;
-        const all = document.querySelector(".all") as any;
-        all.style.display = "grid";
     }
 });
 
 window.addEventListener("resize", () => {
     if (
         navigator.userAgent.match(
-            /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennc|wOSBrowser|BrowserNG|WebOS|Symbian|Windos Phone)/i
+            /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|SAMSUNG|SGH-[I|N|T]|GT-[I|P|N]|SM-[N|P|T|Z|G]|SHV-E|SCH-[I|J|R|S]|SPH-L|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennc|wOSBrowser|BrowserNG|WebOS|Symbian|Windos Phone)/i
         ) &&
-        document.body.clientWidth > document.body.clientHeight
+        !phoneDirection.matches
+        // document.body.clientWidth > document.body.clientHeight + 20
     ) {
         console.log("橫屏");
         shieldBoolean.value = true;
-        const all = document.querySelector(".all") as any;
-        all.style.display = "none";
     } else {
         console.log("豎屏");
         shieldBoolean.value = false;
-        const all = document.querySelector(".all") as any;
-        all.style.display = "grid";
     }
 });
 
@@ -175,6 +171,9 @@ const vConsole = new VConsole();
     grid: "sidebar body" 1fr / 300px 1fr;
     gap: 0;
     user-select: none;
+    &.hide {
+        display: none;
+    }
 }
 
 @media (max-width: 768px) {

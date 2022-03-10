@@ -1,9 +1,10 @@
 import config from "@/config/config";
 import { randomString } from "@/util/chatUtil";
 // 預設值
-export const ME_USER_NAME = randomString(3); // 自己
-export const DO_CALL_NAME = "123";
-export const YOU_USER_NAME = ["tony1", "123", randomString(3)]; // 對方
+// export const ME_USER_NAME = randomString(3); // 自己
+export const ME_USER_NAME = "DA_Front"; // 自己
+export const DO_CALL_NAME = "eee";
+export const YOU_USER_NAME = ["DA"]; // 對方
 export const OPAQUEID = "SMS_Plugin-123456789123";
 export const MY_ROOM = 1234; //Demo room
 export const JANUS_URL: any = `${config.janusUrl}/janus`;
@@ -17,9 +18,12 @@ export const JANUS_URL: any = `${config.janusUrl}/janus`;
 
 // chatroomID
 export const chatroomID = (chatToken: any) => chatToken?.slice(-7);
+export const eventID = (chatToken: any) => chatToken?.slice(0, -7);
 
 // 回覆點擊功能
 export const scrollPageTo = (replyId: string | null) => {
+    console.log("replyId", replyId);
+
     if (!replyId) return;
     const element: any = document.getElementById(`${replyId}`);
 
@@ -35,35 +39,7 @@ export const scrollPageTo = (replyId: string | null) => {
 
 // 存取 localStorage
 export const localStorageMsg = (messageList: any, chatToken: any = "") => {
-    const messageStorage = messageList.map((msg: any) => {
-        return {
-            janusMsg: {
-                chatroomID: chatroomID(chatToken),
-                sender: msg.janusMsg.sender,
-                type: msg.janusMsg.type,
-                msgType: msg.janusMsg.msgType,
-                message: msg.janusMsg.message,
-                format: msg.janusMsg.format || "",
-            },
-            id: msg.id,
-            phoneType: msg.phoneType,
-            audioInfo: msg.audioInfo,
-            ext: msg.ext,
-            msgMoreStatus: msg.msgMoreStatus,
-            msgFunctionStatus: msg.msgFunctionStatus,
-            recallStatus: msg.recallStatus,
-            recallPopUp: msg.recallPopUp,
-            time: msg.time,
-            currentDate: msg.currentDate,
-            currentMonth: msg.currentMonth,
-            expirationDate: msg.expirationDate,
-            isExpire: msg.isExpire,
-            isRead: msg.isRead,
-            replyObj: msg.replyObj || "",
-        };
-    });
-
-    localStorage.setItem(`${chatToken}`, JSON.stringify(messageStorage));
+    localStorage.setItem(`${chatToken}`, JSON.stringify(messageList));
 };
 const MIMEMap: any = {
     "image/jpeg": "IMAGE",

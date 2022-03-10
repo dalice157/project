@@ -8,22 +8,22 @@
         <!-- 使用者輸入框 -->
         <Input />
     </div>
-    <n-modal class="chatRecordCard" v-model:show="isIncomingCall" preset="card">
+    <n-modal
+        class="chatRecordCard"
+        v-model:show="isIncomingCall"
+        :mask-closable="false"
+        preset="card"
+    >
         <n-card :bordered="false" size="huge" class="container">
             <UserInfo :info="eventInfo" />
             <div class="description">語音來電</div>
             <ul class="call_container">
-                <li @touchend="doHangup(3)">
+                <li @click="doHangup(2, eventID(route.query.chatToken))">
                     <span class="icon"><img :src="hangUpIcon" alt="掛斷" /></span>
                     <h4 class="text">掛斷</h4>
                 </li>
                 <li>
-                    <router-link :to="`/phone?chatToken=${chatToken}`">
-                        <button
-                            class="icon"
-                            @touchend="onIncomingCall(yourUsername, jsepMsg)"
-                        ></button>
-                    </router-link>
+                    <button class="icon" @click="onIncomingCall(yourUsername, jsepMsg)"></button>
                     <h4 class="text">接聽</h4>
                 </li>
             </ul>
@@ -50,15 +50,15 @@ import {
     onHangup,
     onError,
     randomString,
-    sendPrivateMsg,
 } from "@/util/chatUtil";
 import { useApiStore } from "@/store/api";
 import { useChatStore } from "@/store/chat";
 import { usePhoneCallStore } from "@/store/phoneCall";
+import { useModelStore } from "@/store/model";
 import { currentTime, currentDate } from "@/util/dateUtil";
 import {
     localStorageMsg,
-    ME_USER_NAME,
+    eventID,
     OPAQUEID,
     MY_ROOM,
     JANUS_URL,
@@ -88,6 +88,11 @@ let welcomeStatus: any = ref(false);
 const router = useRouter();
 const route = useRoute();
 const chatToken = computed(() => route.query.chatToken);
+
+// 彈窗 store
+const modelStore = useModelStore();
+const { phoneCallModal } = storeToRefs(modelStore);
+
 // api store
 const apiStore = useApiStore();
 const { getEventListApi, getBackendApi } = apiStore;
@@ -95,7 +100,8 @@ const { eventInfo } = storeToRefs(apiStore);
 
 //Chat store
 const chatStore = useChatStore();
-const { chatRoomMsg, messages, pictures, textPlugin } = storeToRefs(chatStore);
+const { msgParticipantList, messages, pictures, textPlugin, participantList } =
+    storeToRefs(chatStore);
 
 //phoneCall store
 const phoneCallStore = usePhoneCallStore();
@@ -106,39 +112,6 @@ const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime
 getEventListApi(route.query.chatToken);
 getBackendApi(route.query.chatToken);
 
-onMounted(() => {
-    let otherMsg: any = {};
-    if (!welcomeStatus.value) {
-        eventInfo.value.messagelist.forEach((item: IMessageList) => {
-            otherMsg = {
-                janusMsg: {
-                    chatroomID: chatroomID(route.query.chatToken),
-                    sender: 0, // 0 為對方傳送的訊息
-                    type: 2,
-                    msgType: 1,
-                    message: item.MsgContent,
-                    format: {},
-                },
-                id: nanoid(),
-                phoneType: "",
-                audioInfo: "",
-                ext: "",
-                msgMoreStatus: false,
-                msgFunctionStatus: false,
-                recallStatus: false,
-                recallPopUp: false,
-                isRead: false,
-                time: currentTime(),
-                currentDate: currentDate(),
-                replyObj: "",
-            };
-
-            messages.value.push(otherMsg);
-        });
-        localStorage.setItem(`${route.query.chatToken}-welcomeStatus`, JSON.stringify(true));
-    }
-    localStorageMsg(messages.value, route.query.chatToken);
-});
 //janus 初始值
 onMounted(() => {
     Janus.init({
@@ -157,6 +130,64 @@ onMounted(() => {
 });
 watchEffect(() => {
     messages.value = JSON.parse(localStorage.getItem(`${route.query.chatToken}`) || "[]");
+    welcomeStatus.value = JSON.parse(
+        localStorage.getItem(`${route.query.chatToken}-welcomeStatus`) || "false"
+    );
+    pictures.value = JSON.parse(localStorage.getItem(`${route.query.chatToken}-pictures`) || "[]");
+});
+
+watchEffect(() => {
+    let otherMsg: any = null;
+    if (!welcomeStatus.value) {
+        eventInfo.value.messagelist.forEach((item: any) => {
+            console.log("item:", item);
+
+            otherMsg = {
+                janusMsg: {
+                    ...item,
+                    msgType: item.MsgType,
+                    chatroomID: chatroomID(route.query.chatToken),
+                    sender: 0,
+                    type: 2,
+                    message: item.MsgContent,
+                    format: {
+                        ...item.Format,
+                        id: item.id,
+                        isMMS: false,
+                        isReplay: false,
+                        replyObj: "",
+                    },
+                },
+                currentDate: currentDate(),
+                time: currentTime(),
+                msgMoreStatus: false,
+                msgFunctionStatus: false,
+                recallStatus: false,
+                recallPopUp: false,
+                isExpire: false,
+                isRead: false,
+                isPlay: false,
+            };
+
+            localStorage.setItem(`${route.query.chatToken}-welcomeStatus`, JSON.stringify(true));
+            delete otherMsg.janusMsg.Format;
+            delete otherMsg.janusMsg.MsgContent;
+            delete otherMsg.janusMsg.MsgType;
+            messages.value.push(otherMsg);
+            messages.value.reduce((unique, o) => {
+                const hasRepeatId = unique.some((obj) => {
+                    return obj.janusMsg.format.id === o.janusMsg.format.id;
+                });
+                if (!hasRepeatId) {
+                    unique.push(o);
+                }
+                return unique;
+            }, []);
+            localStorageMsg(messages.value, route.query.chatToken);
+        });
+    }
+    localStorageMsg(messages.value, route.query.chatToken);
+    messages.value = JSON.parse(localStorage.getItem(`${route.query.chatToken}`) || ([] as any));
     welcomeStatus.value = JSON.parse(
         localStorage.getItem(`${route.query.chatToken}-welcomeStatus`) || "false"
     );
@@ -188,14 +219,14 @@ const registerUsername = (username: undefined | string) => {
         return;
     }
     // myid = randomString(12);
-    myid = ME_USER_NAME;
+    myid = username;
     let transaction = randomString(12);
     let register = {
         textroom: "join",
         transaction: transaction,
-        room: MY_ROOM,
+        room: Number(eventID(route.query.chatToken)),
         username: myid,
-        display: username,
+        display: "user",
     };
 
     myusername = username;
@@ -204,7 +235,7 @@ const registerUsername = (username: undefined | string) => {
             // Something went wrong
             if (response["error_code"] === 417) {
                 // This is a "no such room" error: give a more meaningful description
-                bootbox.alert("No such room : <code>" + MY_ROOM + "</code>");
+                bootbox.alert("No such room : <code>" + eventID(route.query.chatToken) + "</code>");
             } else {
                 bootbox.alert(response["error"]);
             }
@@ -223,6 +254,23 @@ const registerUsername = (username: undefined | string) => {
             }
             //TODO do something
         }
+        participantList.value = participants;
+        participantList.value = Object.keys(participants).map((key) => {
+            return {
+                [key]: participants[key],
+            };
+        });
+        participantList.value = participantList.value.filter((item, index) => {
+            const keyName: any = Object.keys(participantList.value[index])[0];
+            return item[keyName] === "admin";
+        });
+        msgParticipantList.value = participantList.value;
+        participantList.value = participantList.value.map((display) => {
+            return Object.keys(display)[0];
+        });
+
+        console.log("register participantList:", participantList.value);
+        console.log("register msgParticipantList:", msgParticipantList.value);
     };
     textPlugin.value.data({
         text: JSON.stringify(register),
@@ -298,17 +346,19 @@ const attachTextroomPlugin = () => {
         },
         ondataopen: function (data: any) {
             // @ts-ignore
-            Janus.log("text-> The DataChannel is available!", data);
             console.log("text-> The DataChannel is available!", data);
             // registerUsername(自己的username);
-            registerUsername(ME_USER_NAME);
+            const chatroomId = chatroomID(route.query.chatToken);
+            registerUsername(chatroomId);
         },
         ondata: function (item: any) {
             // @ts-ignore
             Janus.debug("text-> We got data from the DataChannel!", item);
 
             let json = JSON.parse(item);
+
             let transaction = json["transaction"];
+
             if (transactions[transaction]) {
                 // Someone was waiting for this
                 transactions[transaction](json);
@@ -347,11 +397,17 @@ const attachTextroomPlugin = () => {
 
                 data.username = username;
                 data.display = display;
+
+                console.log("participantsparticipants:", participants);
+                const participant = Object.keys(participants).filter((participant) => {
+                    return participant !== myid;
+                });
+
+                participantList.value = participant;
             } else if (what === "leave") {
                 // Somebody left
                 let username = json["username"];
                 delete participants[username];
-
                 data.username = username;
             } else if (what === "kicked") {
                 // Somebody was kicked
@@ -436,6 +492,8 @@ const attachVideocallPlugin = () => {
             // @ts-ignore
             Janus.debug("call-> ::: Got a message :::", msg);
             let result = msg["result"];
+            console.log("result:", result);
+
             if (result) {
                 if (result["list"]) {
                     let list = result["list"];
@@ -447,7 +505,6 @@ const attachVideocallPlugin = () => {
                     }
                 } else if (result["event"]) {
                     let event = result["event"];
-                    console.log("event:", event);
 
                     if (event === "registered") {
                         myusername = result["username"];
@@ -460,7 +517,7 @@ const attachVideocallPlugin = () => {
                         // TODO Any ringtone?
                         calling.value = setTimeout(() => {
                             // 撥打超過30秒， 自動掛掉
-                            doHangup(1);
+                            doHangup(1, eventID(route.query.chatToken));
                         }, 15000);
                         // @ts-ignore
                         Janus.log("call-> Waiting for the peer to answer...");
@@ -487,6 +544,7 @@ const attachVideocallPlugin = () => {
                             phoneTime.value = convertTime(i++);
                         }, 1000);
                         let peer = result["username"];
+
                         if (!peer) {
                             // @ts-ignore
                             Janus.log("Call started!");
@@ -536,6 +594,8 @@ const attachVideocallPlugin = () => {
                         clearInterval(connecting.value);
                         // Reset status
                         callPlugin.value.hangup();
+                        isIncomingCall.value = false;
+                        phoneCallModal.value = false;
                         location.href = `/?chatToken=${chatToken.value}`;
                     } else if (event === "simulcast") {
                         // Is simulcast in place?
@@ -564,9 +624,11 @@ const attachVideocallPlugin = () => {
                 if (error.indexOf("already taken") > 0) {
                     // FIXME Use status codes...
                 }
+                isIncomingCall.value = false;
+                phoneCallModal.value = false;
                 // TODO Reset status
                 callPlugin.value.hangup();
-                onHangup();
+                location.href = `/?chatToken=${chatToken.value}`;
             }
         },
         onlocalstream: function (stream: any) {
@@ -590,6 +652,8 @@ const attachVideocallPlugin = () => {
             Janus.log("call-> ::: Got a cleanup notification :::");
             yourusername = null;
             simulcastStarted = false;
+            isIncomingCall.value = false;
+            phoneCallModal.value = false;
             location.href = `/?chatToken=${chatToken.value}`;
         },
     });

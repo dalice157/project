@@ -8,18 +8,12 @@ export const useApiStore = defineStore({
     id: "api",
     state: () => ({
         eventInfo: <any>{
-            name: "test",
+            name: "",
             callable: true,
-            description: "hi",
-            homeurl: "http://e8d.tw/",
+            description: "",
+            homeurl: "",
             icon: "logo.png",
-            messagelist: [
-                {
-                    format: {},
-                    MsgContent: "歡迎進入我們的聊天室！需要任何協助都可以告訴我們喔:>",
-                    MsgType: 0,
-                },
-            ],
+            messagelist: [],
         },
         eventList: <any>[],
         stickerList: <any>[],

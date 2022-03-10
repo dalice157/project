@@ -15,7 +15,6 @@
                         </template>
                     </n-input>
                 </div>
-                <n-button class="sms_exportButton">匯出</n-button>
             </div>
             <n-divider class="sms_divider" />
             <n-form class="inquireCondition" :model="model" :rules="rules" ref="formRef">
@@ -25,30 +24,26 @@
                             <div class="timeInquire">
                                 <n-checkbox value="box_time">依發送時間查詢</n-checkbox>
                                 <n-form-item path="searchSend_date">
-                                    <n-config-provider :theme-overrides="themeOverrides">
-                                        <n-date-picker
-                                            class="datePicker"
-                                            v-model:value="model.searchSend_date"
-                                            type="daterange"
-                                            clearable
-                                            size="small"
-                                        />
-                                    </n-config-provider>
+                                    <n-date-picker
+                                        class="datePicker"
+                                        v-model:value="model.searchSend_date"
+                                        type="daterange"
+                                        clearable
+                                        size="small"
+                                    />
                                 </n-form-item>
                                 <p>(可查詢三個月內的發送紀錄)</p>
                             </div>
                             <div class="phoneNumberInquire">
                                 <n-checkbox value="box_phone">依接收門號查詢</n-checkbox>
                                 <n-form-item path="searchSend_phone">
-                                    <n-config-provider :theme-overrides="themeOverrides">
-                                        <n-input
-                                            class="input"
-                                            v-model:value="model.searchSend_phone"
-                                            placeholder=""
-                                            size="small"
-                                        >
-                                        </n-input>
-                                    </n-config-provider>
+                                    <n-input
+                                        class="input"
+                                        v-model:value="model.searchSend_phone"
+                                        placeholder=""
+                                        size="small"
+                                    >
+                                    </n-input>
                                 </n-form-item>
                             </div>
                             <n-button @click="onSmsSubmit" class="inquireButton">查詢</n-button>
@@ -57,22 +52,22 @@
                             <div class="statusInquire">
                                 <n-checkbox value="box_status">依接收狀態查詢</n-checkbox>
                                 <n-form-item path="searchSend_send_status">
-                                    <n-checkbox-group
+                                    <ul
+                                        class="status_list"
                                         v-if="
                                             model.searchSend_box &&
                                             model.searchSend_box.includes('box_status')
                                         "
-                                        v-model:value="model.searchSend_send_status"
                                     >
-                                        <n-checkbox value="0">傳送中</n-checkbox>
-                                        <n-checkbox value="99|100|900">成功</n-checkbox>
-                                        <n-checkbox value="103">空號</n-checkbox>
-                                        <n-checkbox value="-3">電話號碼格式錯誤</n-checkbox>
-                                        <n-checkbox
-                                            value="101|102|104|105|106|107|-1|-2|-4|-5|-6|-8|-9|-32|-100|-101|-201|-202|-203"
-                                            >逾時</n-checkbox
+                                        <li
+                                            v-for="status in statusList"
+                                            :class="{ active: status.isSelect }"
+                                            :key="status.id"
+                                            @click="addStatus(status.id)"
                                         >
-                                    </n-checkbox-group>
+                                            {{ status.text }}
+                                        </li>
+                                    </ul>
                                 </n-form-item>
                             </div>
                         </div>
@@ -111,6 +106,7 @@ import {
 // const { getSmsMessageTable } = apiStore;
 // getSmsMessageTable()
 
+import { filterOptions } from "naive-ui/lib/select/src/utils";
 //v-model
 const search = ref("");
 const formRef = ref(null);
@@ -120,6 +116,51 @@ const model = reactive({
     searchSend_date: [Date.now(), Date.now()],
     searchSend_send_status: null,
 }) as any;
+
+const statusList = ref([
+    {
+        id: 0,
+        text: "傳送中",
+        val: "0",
+        isSelect: false,
+    },
+    {
+        id: 1,
+        text: "成功",
+        val: "99|100|900",
+        isSelect: false,
+    },
+    {
+        id: 2,
+        text: "空號",
+        val: "103",
+        isSelect: false,
+    },
+    {
+        id: 3,
+        text: "電話號碼格式錯誤",
+        val: "-3",
+        isSelect: false,
+    },
+    {
+        id: 4,
+        text: "電話號碼格式錯誤",
+        val: "101|102|104|105|106|107|-1|-2|-4|-5|-6|-8|-9|-32|-100|-101|-201|-202|-203",
+        isSelect: false,
+    },
+]);
+const addStatus = (id) => {
+    statusList.value.forEach((status) => {
+        if (status.id === id) {
+            status.isSelect = !status.isSelect;
+        }
+    });
+    model.searchSend_send_status = statusList.value
+        .filter((filterItem) => {
+            return filterItem.isSelect;
+        })
+        .map((item) => item.val);
+};
 
 //驗證規則
 const rules = {
@@ -150,7 +191,7 @@ const rules = {
         validator(rule: any, value: any) {
             console.log("value:", value);
 
-            if (model.searchSend_box.includes("box_status") && !value) {
+            if (model.searchSend_box.includes("box_status") && (!value || value.length === 0)) {
                 return new Error("請輸入接收狀態");
             }
         },
@@ -407,24 +448,6 @@ const data = [
 const pagination = {
     pageSize: 6,
 };
-const themeOverrides = {
-    common: { primaryColor: "#FFb400" },
-    Input: {
-        fontSize: "14px",
-        caretColor: "black",
-        borderHover: "transparent",
-        borderFocus: "transparent",
-        boxShadowFocus: "none",
-    },
-    Button: {
-        textColorHover: "#FFb400",
-        textColorPressed: "#FFb400",
-        textColorFocus: "#FFb400",
-        borderFocus: "#FFb400",
-        borderPressed: "#FFb400",
-        borderHover: "#FFb400",
-    },
-};
 </script>
 
 <style lang="scss">
@@ -542,7 +565,7 @@ const themeOverrides = {
     .link {
         color: $gray-1;
         &:hover {
-            color: $gray-4;
+            color: $primary-1;
         }
         &:visited {
             color: $primary-1;
@@ -666,6 +689,29 @@ const themeOverrides = {
             margin-bottom: 45px;
             .statusInquire {
                 display: flex;
+                .status_list {
+                    display: flex;
+                    align-items: center;
+                    li {
+                        display: flex;
+                        align-items: center;
+                        border-radius: 20px;
+                        background-color: $white;
+                        border: 1px solid $gray-3;
+                        color: $gray-3;
+                        font-size: $font-size-12;
+                        padding: 2px 8px;
+                        cursor: pointer;
+                        + li {
+                            margin-left: 15px;
+                        }
+                        &.active {
+                            color: $white;
+                            background-color: $primary-1;
+                            border-color: $primary-1;
+                        }
+                    }
+                }
             }
         }
     }

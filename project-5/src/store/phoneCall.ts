@@ -5,9 +5,9 @@ import { nanoid } from "nanoid";
 import { storeToRefs } from "pinia";
 
 import { currentTime, currentDate, currentMonth } from "@/util/dateUtil";
-import { chatroomID } from "@/util/commonUtil";
 import { useChatStore } from "@/store/chat";
 import { sendPrivateMsg } from "@/util/chatUtil";
+import { useModelStore } from "@/store/model";
 
 /**
  * phoneType 狀態
@@ -64,6 +64,11 @@ export const usePhoneCallStore = defineStore({
             console.log("有電話進來");
             console.log("name:", name);
             console.log("jsep:", jsep);
+            //modal store
+            const modelStore = useModelStore();
+            const { phoneCallModal } = storeToRefs(modelStore);
+            phoneCallModal.value = true;
+            this.isIncomingCall = false;
             // eslint-disable-next-line @typescript-eslint/no-this-alias
             const that = this;
             this.callPlugin.createAnswer({
@@ -83,16 +88,12 @@ export const usePhoneCallStore = defineStore({
             });
         },
         //掛電話
-        doHangup(type: any, chatRoomID) {
-            console.log("掛掉電話", type);
-            this.isIncomingCall = false;
-            // Hangup a call
-            const hangup = { request: "hangup" };
-            this.callPlugin.send({ message: hangup });
-            this.callPlugin.hangup();
-            this.yourUsername = null;
+        doHangup(type: any, chatRoomID, eventID) {
             const chatstore = useChatStore();
-            const { messages, replyMsg, textPlugin } = storeToRefs(chatstore);
+            const { textPlugin } = storeToRefs(chatstore);
+
+            console.log("掛掉電話種類", type);
+            this.yourUsername = null;
             const phoneObj = {
                 janusMsg: {
                     chatroomID: chatRoomID,
@@ -104,27 +105,33 @@ export const usePhoneCallStore = defineStore({
                         id: nanoid(),
                         isReplay: false,
                         replyObj: "",
+                        isMMS: false,
                         phoneType: type,
+                        phoneTypeOther: type === 2 ? 4 : null,
                         phoneTime: this.phoneTime,
                     },
                 },
-                audioInfo: "",
-                ext: "",
+                currentDate: currentDate(),
+                time: currentTime(),
                 msgMoreStatus: false,
                 msgFunctionStatus: false,
                 recallStatus: false,
                 recallPopUp: false,
                 isExpire: false,
                 isRead: false,
+                isPlay: false,
             };
-            console.log("phoneObj", phoneObj);
-            messages.value.push(phoneObj);
             const sendMsgObj = {
                 msg: phoneObj,
                 textPlugin: textPlugin.value,
-                chatToken: this.route.params.id,
+                chatRoomID: chatRoomID,
+                eventID: eventID,
             };
             sendPrivateMsg(sendMsgObj);
+            // Hangup a call
+            const hangup = { request: "hangup" };
+            this.callPlugin.send({ message: hangup });
+            this.callPlugin.hangup();
             console.log("電話傳電話訊息掛掉");
         },
     },

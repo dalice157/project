@@ -38,6 +38,7 @@ import phoneIcon from "@/assets/Images/common/phone-round.svg";
 import messageIcon from "@/assets/Images/common/message-round.svg";
 import { useModelStore } from "@/store/model";
 import { usePhoneCallStore } from "@/store/phoneCall";
+import { useChatStore } from "@/store/chat";
 import { DO_CALL_NAME } from "@/util/commonUtil";
 import UserInfo from "@/components/UserInfo.vue";
 
@@ -50,9 +51,14 @@ const { showModal, info, phoneCallModal } = storeToRefs(modelStore);
 const phoneCallStore = usePhoneCallStore();
 const { doCall } = phoneCallStore;
 
+// chat store
+const chatStore = useChatStore();
+const { participantList } = storeToRefs(chatStore);
+
 const onPhoneCallModal = () => {
     phoneCallModal.value = true;
-    doCall(DO_CALL_NAME);
+    const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
+    doCall(getCutomer);
 };
 </script>
 <style lang="scss">

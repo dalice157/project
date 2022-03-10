@@ -10,17 +10,17 @@
                 <img src="../assets/Images/common/close-round.svg" alt="關閉" />
             </div>
             <UserInfo :info="info" />
+            {{ info }}
             <div class="description">{{ info.description }}</div>
             <ul class="call_container">
-                <li class="call-mobile" @touchend.prevent="gotoPhone(info.eventID)">
+                <li class="call-web" @click.prevent="onPhoneCallModal(info.chatroomID)">
                     <span class="icon"><img :src="phoneIcon" alt="語音通話" /></span>
                     <p class="text">語音通話</p>
                 </li>
-                <li class="call-web" @click.prevent="onPhoneCallModal">
-                    <span class="icon"><img :src="phoneIcon" alt="語音通話" /></span>
-                    <p class="text">語音通話</p>
-                </li>
-                <li v-if="route.path !== '/'" @touchend.prevent="gotoChat(info.eventID)">
+                <li
+                    v-if="route.path !== '/'"
+                    @touchend.prevent="gotoChat(info.eventID, info.chatroomID, info.mobile)"
+                >
                     <span class="icon"><img :src="messageIcon" alt="傳送訊息" /></span>
                     <p class="text">傳送訊息</p>
                 </li>
@@ -50,9 +50,9 @@ const { showModal, info, phoneCallModal } = storeToRefs(modelStore);
 const phoneCallStore = usePhoneCallStore();
 const { doCall } = phoneCallStore;
 
-const onPhoneCallModal = () => {
+const onPhoneCallModal = (chatroomID) => {
     phoneCallModal.value = true;
-    doCall(DO_CALL_NAME);
+    doCall(chatroomID);
 };
 </script>
 <style lang="scss">

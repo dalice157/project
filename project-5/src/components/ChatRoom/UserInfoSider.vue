@@ -6,13 +6,13 @@
             class="save-button"
             text-color="#3e3e3e"
             @click="onSaveEdited"
-            v-if="isEdited && !isUserIcon"
+            v-show="isEdited && !isUserIcon"
         >
             儲存
         </n-button>
         <img
             @click="handleEdited"
-            v-if="!isEdited"
+            v-show="!isEdited"
             class="editIcon"
             src="../../assets/Images/chatroom/edit-round.svg"
             alt="編輯"
@@ -27,8 +27,8 @@
                 :src="img"
             />
         </div>
-        <p v-if="isEdited" class="change-title" @click="onChangeAvatar">更換大頭照</p>
-        <div v-if="isEdited && !isUserIcon">
+        <p v-show="isEdited" class="change-title" @click="onChangeAvatar">更換大頭照</p>
+        <div v-show="isEdited && !isUserIcon">
             <n-input class="input" v-model:value="userInfo.name" type="text" />
             <n-input class="input" v-model:value="userInfo.mobile" type="text" />
             <div class="tags-group" v-if="userInfo.tag.length > 0">
@@ -62,7 +62,7 @@
                 <n-input v-model:value="userInfo.description" type="textarea" />
             </div>
         </div>
-        <div v-if="!isEdited">
+        <div v-show="!isEdited">
             <div class="userName">{{ userInfo.name }}</div>
             <p class="phone-number">
                 ({{ String(userInfo.mobile).slice(0, 3) }}) {{ String(userInfo.mobile).slice(-9) }}
@@ -76,7 +76,7 @@
             </p>
         </div>
 
-        <div v-if="isUserIcon">
+        <div v-show="isUserIcon">
             <n-grid class="img-group" :x-gap="16" :y-gap="8" :cols="3">
                 <n-grid-item v-for="icon in imgList" :key="icon">
                     <n-avatar
@@ -173,11 +173,7 @@ const showPopover = ref(false);
 const tag = ref("");
 const isUserIcon = ref(false);
 
-const chatroomID = computed(() =>
-    chatroomList.value.length > 0 && !(route.query && route.query.chatroomID)
-        ? chatroomList.value[0].chatroomID
-        : route.query.chatroomID
-);
+const chatroomID = computed(() => route.query.chatroomID);
 
 // 開啟修改
 const handleEdited = () => {

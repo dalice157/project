@@ -45,47 +45,39 @@
                         </div>
                         <div class="status">
                             <h3>活動頻道開關</h3>
-                            <n-config-provider :themeOverrides="themeOverrides">
-                                <n-switch
-                                    v-model:value="status"
-                                    checked-value="0"
-                                    unchecked-value="1"
-                                />
-                            </n-config-provider>
+                            <n-switch
+                                v-model:value="status"
+                                checked-value="1"
+                                unchecked-value="0"
+                            />
                         </div>
                     </div>
                     <div class="activityTitle">
                         <h3>活動名稱</h3>
-                        <n-config-provider :themeOverrides="themeOverrides">
-                            <n-input
-                                placeholder="請輸入活動名稱"
-                                maxlength="25"
-                                show-count
-                                v-model:value="name"
-                            ></n-input>
-                        </n-config-provider>
+                        <n-input
+                            placeholder="請輸入活動名稱"
+                            maxlength="25"
+                            show-count
+                            v-model:value="name"
+                        ></n-input>
                     </div>
                     <div class="homeURL">
                         <h3>活動網址</h3>
-                        <n-config-provider :themeOverrides="themeOverrides">
-                            <n-input placeholder="請輸入活動網址" v-model:value="url"></n-input>
-                        </n-config-provider>
+                        <n-input placeholder="請輸入活動網址" v-model:value="url"></n-input>
                     </div>
                     <div class="introduction">
                         <h3>簡介</h3>
-                        <n-config-provider :themeOverrides="themeOverrides">
-                            <n-input
-                                type="textarea"
-                                placeholder="當使用者點及頭像即可看到聊天室簡介"
-                                maxlength="100"
-                                show-count
-                                :autosize="{
-                                    minRows: 3,
-                                    maxRows: 3,
-                                }"
-                                v-model:value="description"
-                            ></n-input>
-                        </n-config-provider>
+                        <n-input
+                            type="textarea"
+                            placeholder="當使用者點及頭像即可看到聊天室簡介"
+                            maxlength="100"
+                            show-count
+                            :autosize="{
+                                minRows: 3,
+                                maxRows: 3,
+                            }"
+                            v-model:value="description"
+                        ></n-input>
                     </div>
                     <div class="customerService">
                         <div class="customerServiceTitle">
@@ -115,10 +107,7 @@
                         v-for="(item, index) in welcomeMsgCount"
                         :key="item.id"
                     >
-                        <n-config-provider
-                            :themeOverrides="themeOverrides"
-                            v-if="item.MsgType === 1"
-                        >
+                        <div v-if="item.MsgType === 1">
                             <n-input
                                 type="textarea"
                                 placeholder="請輸入歡迎訊息"
@@ -127,10 +116,10 @@
                                 }"
                                 v-model:value="item.MsgContent"
                             ></n-input>
-                        </n-config-provider>
+                        </div>
                         <div class="welcomeImg" v-else-if="item.MsgType === 6">
                             <img
-                                :src="`${config.fileUrl}/fls/${item.Format.fileid}${item.Format.ext}`"
+                                :src="`${config.fileUrl}/fls/${item.Format.Fileid}${item.Format.ext}`"
                                 alt="#"
                             />
                         </div>
@@ -258,6 +247,7 @@ import { useApiStore } from "@/store/api";
 const router = useRouter();
 const route = useRoute();
 
+//store
 const apiStore = useApiStore();
 const {
     getCustomServiceStaffList,
@@ -273,11 +263,21 @@ getCustomServiceStaffList();
 getActivetyCsList(route.query.eventID);
 
 const callable: any = computed({
+    // 0:關閉 1:開啟通話
     get() {
         return String(channelEvent.value.callable);
     },
     set(val) {
         channelEvent.value.callable = String(val);
+    },
+});
+const status: any = computed({
+    // 0:關閉 1:開啟活動 2:刪除活動
+    get() {
+        return String(channelEvent.value.status);
+    },
+    set(val) {
+        channelEvent.value.status = String(val);
     },
 });
 const name: any = computed({
@@ -312,18 +312,10 @@ const welcomeMsgCount: any = computed({
         channelEvent.value.messageList = val;
     },
 });
-const status: any = computed({
-    get() {
-        return String(channelEvent.value.status);
-    },
-    set(val) {
-        channelEvent.value.status = String(val);
-    },
-});
+
 const loading = ref(false);
 
 const popUp = ref(false);
-const isChangeCheckbox = ref(false);
 const addList: any = computed({
     get() {
         return checkedCsList.value;
@@ -343,7 +335,6 @@ const tagList: any = computed({
 
 // 新增更新客服人員
 const onUpdate = (val) => {
-    isChangeCheckbox.value = true;
     addList.value = val;
 };
 
@@ -351,11 +342,11 @@ const onUpdate = (val) => {
 const deleteStaff = (id: any) => {
     let getAddList = [];
     const list = tagList.value.filter((tag) => {
-        return tag.accountID != id;
+        return tag.accountID !== id;
     });
     staffList.value.forEach((staff) => {
         Object.values(list).forEach((item: any) => {
-            if (item.accountID == staff.accountID) {
+            if (item.accountID === staff.accountID) {
                 getAddList.push(staff.accountID);
             }
         });
@@ -424,18 +415,17 @@ const addWelcomeMsg = () => {
         Format: {},
         MsgType: 1, //文字類型
     };
+
     if (welcomeMsgCount.value.length < 3) {
         welcomeMsgCount.value.push(welcomeMsg);
     }
 };
 
 const onShowPop = () => {
-    isChangeCheckbox.value = true;
     popUp.value = true;
 };
 
 const onPopUp = () => {
-    isChangeCheckbox.value = true;
     popUp.value = false;
     let list = staffList.value
         .filter((item) => {
@@ -473,7 +463,7 @@ const welcomePicture = (e: any, index: any) => {
         success(result) {
             //呼叫api
             const fd = new FormData();
-            // console.log("file.name:", file);
+            console.log("result:", result);
             fd.append("file", new File([result], file.name, { type: "image/*" }));
             const getToken = localStorage.getItem("access_token");
             axios({
@@ -494,7 +484,9 @@ const welcomePicture = (e: any, index: any) => {
                             Format: {
                                 exp: res.data.exp,
                                 ext: res.data.ext,
-                                fileid: res.data.fileid,
+                                Fileid: res.data.fileid,
+                                ShowName: fileName,
+                                FileSize: file.size,
                             },
                         };
                         welcomeMsgCount.value.splice(index, 1, welcomeMsg);
@@ -531,11 +523,14 @@ const welcomeFile = (e: any, index: any) => {
 const cslist = ref([]);
 const goActivity = () => {
     Object.entries(tagList.value).forEach(([key, value]) => {
-        const hasAccountID = cslist.value.some((item) => item.accountID === value.accountID);
+        const hasAccountID = cslist.value.some(
+            (item) => item.accountID === (value as any).accountID
+        );
         if (!hasAccountID) {
-            cslist.value.push({ accountID: value.accountID });
+            cslist.value.push({ accountID: (value as any).accountID });
         }
     });
+    console.log("welcomeMsgCount.value:", welcomeMsgCount.value);
 
     const bodyData = {
         icon:
@@ -557,19 +552,12 @@ const goActivity = () => {
 const deleteChannel = () => {
     deleteChannelEventInfo(route, router);
 };
-
-const themeOverrides = {
-    common: { primaryColor: "#FFb400" },
-    Input: {
-        caretColor: "black",
-        borderHover: "transparent",
-        borderFocus: "transparent",
-        boxShadowFocus: "none",
-        borderRadius: "4px",
-    },
-};
 </script>
-
+<style lang="scss">
+.n-upload-file-list {
+    display: none;
+}
+</style>
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
@@ -815,26 +803,17 @@ const themeOverrides = {
                     h3 {
                         margin-bottom: 15px;
                     }
-                    .n-input {
-                        border: 1px solid $gray-1;
-                    }
                 }
                 .homeURL {
                     margin-bottom: 30px;
                     h3 {
                         margin-bottom: 15px;
                     }
-                    .n-input {
-                        border: 1px solid $gray-1;
-                    }
                 }
                 .introduction {
                     margin-bottom: 30px;
                     h3 {
                         margin-bottom: 15px;
-                    }
-                    .n-input {
-                        border: 1px solid $gray-1;
                     }
                 }
                 .customerService {
@@ -855,7 +834,7 @@ const themeOverrides = {
                         display: flex;
                         flex-wrap: wrap;
                         align-items: center;
-                        border: 1px solid $gray-1;
+                        border: 1px solid $gray-3;
                         min-height: 34px;
                         border-radius: 4px;
                         padding: 0 5px;

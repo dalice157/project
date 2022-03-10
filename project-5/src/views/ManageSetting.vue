@@ -129,7 +129,6 @@ const deletePopUp = (admin) => {
         };
     });
     adminArray.value = arr.value;
-    // console.log(adminArray.value);
 };
 const cancelRemove = () => {
     adminArray.value.pop();
@@ -141,12 +140,8 @@ const removeAdmin = () => {
     showDelModal.value = false;
 };
 const themeOverrides = {
-    common: { primaryColor: "#FFb400" },
     Input: {
-        caretColor: "black",
-        borderHover: "transparent",
-        borderFocus: "transparent",
-        boxShadowFocus: "none",
+        border: "1px solid #ececec",
         borderRadius: "20px",
     },
 };

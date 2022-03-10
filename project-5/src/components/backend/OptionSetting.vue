@@ -28,7 +28,7 @@
                                     </a>
                                     <h2 v-else>已上傳成功</h2>
                                     <h3 v-if="uploadRef === null">範例檔編輯完成直接上傳</h3>
-                                    <p v-else>{{ uploadRef.name }}</p>
+                                    <p v-else>{{ fileName }}</p>
                                 </div>
                             </div>
                         </div>
@@ -65,10 +65,23 @@
                         </div>
                         <div class="nameList" v-else>
                             <div>
-                                <p>有效名單&ensp;:&ensp;<span>1928</span>&ensp;筆</p>
-                                <p>無效名單&ensp;:&ensp;<span>15</span>&ensp;筆</p>
+                                <p>
+                                    有效名單&ensp;:&ensp;<span>{{
+                                        uploadRef.valid ? uploadRef.valid.length : 0
+                                    }}</span
+                                    >&ensp;筆
+                                </p>
+                                <p>
+                                    無效名單&ensp;:&ensp;<span>{{
+                                        uploadRef.invalid ? uploadRef.invalid.length : 0
+                                    }}</span
+                                    >&ensp;筆
+                                </p>
                             </div>
-                            <img src="../../assets/Images/manage/edit-round.svg" alt="" />
+                            <img
+                                src="../../assets/Images/manage/edit-round.svg"
+                                @click="invalidPopUp = !invalidPopUp"
+                            />
                         </div>
                         <div class="nextPage" @click="nextPageList" v-show="uploadRef !== null">
                             <p>下一步</p>
@@ -150,14 +163,55 @@
             </div>
         </div>
     </teleport>
+    <!-- 無效名單 -->
+    <teleport to="body">
+        <div class="mask" v-show="invalidPopUp">
+            <div class="invalidList">
+                <div class="popUpTitle">
+                    <h2>無效名單</h2>
+                    <img
+                        src="../../assets/Images/chatroom/close-round.svg"
+                        alt="#"
+                        @click="invalidPopUp = !invalidPopUp"
+                    />
+                </div>
+                <div class="invalidFunctionBar">
+                    <n-input
+                        class="invalidSearch"
+                        v-model:value="search"
+                        type="text"
+                        placeholder="搜尋"
+                    >
+                        <template #prefix>
+                            <img src="@/assets/Images/manage/search.svg" />
+                        </template>
+                    </n-input>
+                    <!-- <div class="invalidCancel">匯出</div> -->
+                    <div class="invalidConfirm">確定</div>
+                </div>
+                <div class="invalidTable">
+                    <n-data-table
+                        class="sms_table"
+                        :bordered="false"
+                        :scroll-x="840"
+                        :columns="createColumns"
+                        :data="data"
+                        :pagination="pagination"
+                        :bottom-bordered="false"
+                    />
+                </div>
+            </div>
+        </div>
+    </teleport>
 </template>
 <script lang="ts" setup>
-import { ref, watch } from "vue";
+import { ref, watch, computed, watchEffect } from "vue";
 import { NConfigProvider } from "naive-ui";
-import { NTabs, NTabPane, NInput, NButton, NIcon, NDivider, NUpload } from "naive-ui";
+import { NTabs, NTabPane, NInput, NButton, NIcon, NDivider, NUpload, NDataTable } from "naive-ui";
 import { useRouter } from "vue-router";
 import { useSmsStore } from "@/store/smsStore";
 import { useMmsStore } from "@/store/mmsStore";
+import { useApiStore } from "@/store/api";
 import { storeToRefs } from "pinia";
 import config from "@/config/config";
 
@@ -171,6 +225,7 @@ const {
     smsPhoneArray,
     smsPhoneString,
     smsTabsType,
+    smsExcelFile,
 } = storeToRefs(smsStore);
 
 //mmsStore
@@ -186,8 +241,12 @@ const {
     mmsPhoneString,
     mmsTabsType,
     mmsKB,
+    mmsExcelFile,
 } = storeToRefs(mmsStore);
 
+const apiStore = useApiStore();
+const { excelVerification } = apiStore;
+const { uploadRef, invalidList } = storeToRefs(apiStore);
 //props
 const props = defineProps({
     nextPageRouter: String,
@@ -208,28 +267,27 @@ const router = useRouter();
 const nextPageList = () => {
     if (props.optionType === "sms") {
         if (
-            (smsChannel.value !== null &&
-                smsContent.value !== "" &&
-                smsContent.value !== props.demoContent &&
-                smsSendOption.value === 0) ||
-            (smsSendOption.value === 1 && smsSendTimeStamp.value !== null)
+            smsChannel.value === null ||
+            smsContent.value === "" ||
+            smsContent.value === props.demoContent ||
+            (smsSendOption.value !== 0 && smsSendTimeStamp.value === null)
         ) {
-            router.push(props.nextPageRouter);
-        } else {
             alert("仍有必填欄位尚未填寫!!");
+        } else {
+            router.push(props.nextPageRouter);
         }
     } else {
         if (
-            (mmsChannel.value !== null &&
-                mmsSubject !== "" &&
-                mmsContent.value !== "" &&
-                mmsContent.value !== props.demoContent &&
-                mmsSendOption.value === 0) ||
-            (mmsSendOption.value === 1 && mmsSendTimeStamp.value !== null)
+            mmsChannel.value === null ||
+            mmsSubject.value === "" ||
+            mmsUploadImgRef.value === null ||
+            mmsContent.value === "" ||
+            mmsContent.value === props.demoContent ||
+            (mmsSendOption.value !== 0 && mmsSendTimeStamp.value === null)
         ) {
-            router.push(props.nextPageRouter);
-        } else {
             alert("仍有必填欄位尚未填寫!!");
+        } else {
+            router.push(props.nextPageRouter);
         }
     }
 };
@@ -293,15 +351,72 @@ watch(phoneNumberList, () => {
 });
 
 //excel 上傳功能
-const uploadRef = ref(null);
-const emit = defineEmits(["excelFile"]);
-const handleChange = ({ fileList }) => {
-    uploadRef.value = fileList[fileList.length - 1];
-    emit("excelFile", uploadRef.value);
+const fileName: any = ref("");
+const handleChange = (e) => {
+    fileName.value = e.file.file.name;
+    excelVerification(e.file.file);
 };
 
 //簡訊服務條款popup
 const termsPopUp = ref(false);
+//無效名單popup
+const invalidPopUp = ref(false);
+//無效名單搜尋v-model
+const search = ref("");
+//dataTable
+const createColumns = [
+    {
+        title: "資料編號",
+        key: "sn",
+        align: "center",
+    },
+    {
+        title: "姓名",
+        key: "name",
+        align: "center",
+    },
+    {
+        title: "收訊門號",
+        key: "mobile",
+        align: "center",
+    },
+    {
+        title: "狀態",
+        key: "msg",
+        align: "center",
+    },
+] as any;
+
+//無效資料
+const data: any = computed(() => {
+    if (search.value.match(/^\+?\d+$/)) {
+        return invalidList.value
+            .map((item) => {
+                return {
+                    ...item,
+                    sn: item.sn + 1,
+                };
+            })
+            .filter((item) =>
+                item.mobile.toLocaleLowerCase().includes(search.value.toLocaleLowerCase())
+            );
+    } else {
+        return invalidList.value
+            .map((item) => {
+                return {
+                    ...item,
+                    sn: item.sn + 1,
+                };
+            })
+            .filter((item) =>
+                item.name.toLocaleLowerCase().includes(search.value.toLocaleLowerCase())
+            );
+    }
+});
+
+const pagination = {
+    pageSize: 9,
+};
 //更改naive-ui主題
 const themeOverrides = {
     common: {},
@@ -347,19 +462,19 @@ const themeOverrides = {
         transform: translate(-50%, -50%);
         .popUpTitle {
             position: relative;
+            h2 {
+                text-align: center;
+                margin-bottom: 60px;
+                font-size: 16px;
+                font-weight: 500;
+                color: $gray-1;
+            }
             img {
                 position: absolute;
                 right: 0;
                 top: 0;
                 cursor: pointer;
             }
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 60px;
-            font-size: 16px;
-            font-weight: 500;
-            color: $gray-1;
         }
         p {
             line-height: 1.4;
@@ -379,6 +494,86 @@ const themeOverrides = {
             border-radius: 18px;
             text-align: center;
             cursor: pointer;
+        }
+    }
+}
+.mask {
+    .invalidList {
+        width: 900px;
+        height: 700px;
+        padding: 30px;
+        background-color: $white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+    .popUpTitle {
+        position: relative;
+        h2 {
+            text-align: center;
+            margin-bottom: 60px;
+            font-size: 16px;
+            font-weight: 500;
+            color: $gray-1;
+        }
+        img {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 32px;
+            height: 32px;
+            cursor: pointer;
+        }
+    }
+    .invalidFunctionBar {
+        display: flex;
+        margin-bottom: 15px;
+        .invalidSearch {
+            width: 700px;
+            border-radius: 20px;
+            box-shadow: 1px 2px 4px 0 $gray-6;
+            &.n-input .n-input__border,
+            &.n-input .n-input__state-border {
+                border: 1px solid $border-line;
+            }
+            &.n-input:not(.n-input--disabled):hover .n-input__state-border {
+                border: none;
+            }
+            &.n-input:not(.n-input--disabled).n-input--focus {
+                background-color: none;
+            }
+            &.n-input:not(.n-input--disabled).n-input--focus .n-input__state-border {
+                border: none;
+                box-shadow: none;
+            }
+            &.n-input .n-input__input-el,
+            &.n-input .n-input__textarea-el {
+                caret-color: $gray-2;
+            }
+        }
+        .invalidCancel {
+            width: 100px;
+            height: 36px;
+            background-color: $white;
+            line-height: 36px;
+            color: $gray-1;
+            border: 1px solid $gray-1;
+            border-radius: 18px;
+            text-align: center;
+            cursor: pointer;
+            margin-left: 30px;
+        }
+        .invalidConfirm {
+            width: 100px;
+            height: 36px;
+            background-color: $gray-1;
+            line-height: 36px;
+            color: $white;
+            border-radius: 18px;
+            text-align: center;
+            cursor: pointer;
+            margin-left: 30px;
         }
     }
 }
@@ -493,12 +688,16 @@ const themeOverrides = {
                             .downloadText {
                                 a {
                                     text-decoration: none;
+
                                     h2 {
                                         font-size: 16px;
                                         font-weight: 400;
                                         font-family: $font-family;
                                         color: $danger;
                                         margin-bottom: 5px;
+                                        &:hover {
+                                            text-decoration: underline;
+                                        }
                                     }
                                 }
                                 h2 {
@@ -561,16 +760,16 @@ const themeOverrides = {
 
                             > p {
                                 span {
-                                    text-decoration: underline;
-                                    cursor: pointer;
+                                    // text-decoration: underline;
+                                    // cursor: pointer;
                                 }
                             }
                             p + p {
                                 margin-left: 30px;
                                 span {
-                                    text-decoration: underline;
+                                    // text-decoration: underline;
                                     color: $danger;
-                                    cursor: pointer;
+                                    // cursor: pointer;
                                 }
                             }
                         }

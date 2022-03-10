@@ -36,7 +36,7 @@
                 </div>
                 <div class="deliveryList">
                     <h3>發送名單</h3>
-                    <p>{{ mmsPhoneArray.length }}筆</p>
+                    <p>{{ getPhones.length }}筆</p>
                 </div>
             </div>
             <div class="mmsPage2Button">
@@ -49,15 +49,21 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
-import { useRoute, useRouter } from "vue-router";
-import { useMmsStore } from "@/store/mmsStore";
 import { storeToRefs } from "pinia";
 import axios from "axios";
+
+import { useRoute, useRouter } from "vue-router";
+import { useMmsStore } from "@/store/mmsStore";
+import { useApiStore } from "@/store/api";
 import config from "@/config/config";
 
 const route = useRoute();
 const router = useRouter();
 const params = route.params;
+
+const apiStore = useApiStore();
+const { uploadRef } = storeToRefs(apiStore);
+
 //smsStore
 const mmsStore = useMmsStore();
 const {
@@ -75,16 +81,24 @@ const {
     mmsUploadImgRef,
     mmsSendTimeStamp,
 } = storeToRefs(mmsStore);
+const getPhones: any = ref(null);
+if (mmsTabsType.value === "automatic") {
+    getPhones.value = uploadRef.value.valid.map((file) => `0${file.mobile}`);
+} else {
+    getPhones.value = mmsPhoneArray.value;
+}
 //確認傳送
 const onSend = () => {
     const newsletterDepartmentToken = localStorage.getItem("newsletterDepartmentToken");
-    const getPhones = mmsTabsType.value === "automatic" ? mmsExcelFile.value : mmsPhoneString.value;
+
+    const getToken = localStorage.getItem("access_token");
+
     const sendObj = {
         token: newsletterDepartmentToken,
         text: mmsContent.value,
         type: "1",
         subject: mmsSubject.value,
-        list: getPhones,
+        list: getPhones.value.toString(),
         sendTime: mmsSendTime.value,
         image: mmsUploadImgRef.value.file,
         eventId: mmsChannel.value,
@@ -98,7 +112,6 @@ const onSend = () => {
     fd.append("list", sendObj.list);
     fd.append("sendTime", sendObj.sendTime);
     fd.append("image", sendObj.image);
-    const getToken = localStorage.getItem("access_token");
     axios({
         method: "post",
         url: `${config.serverUrl}/v1/msgs/${sendObj.eventId}`,
@@ -107,18 +120,6 @@ const onSend = () => {
     })
         .then((res) => {
             console.log("MMS 確認傳送 res", res);
-            mmsChannel.value = null;
-            mmsSubject.value = "";
-            mmsUploadImgRef.value = null;
-            mmsContent.value = "";
-            mmsPoint.value = 0;
-            mmsSendOption.value = 0;
-            mmsSendTimeStamp.value = 0;
-            mmsSendTime.value = null;
-            mmsExcelFile.value = null;
-            mmsPhoneArray.value = [];
-            mmsPhoneString.value = "";
-            mmsTabsType.value = "automatic";
             location.href = `/manage/${params.id}/MMSSend`;
         })
         .catch((err) => {

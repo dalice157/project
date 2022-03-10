@@ -34,7 +34,9 @@
                             @click="previewURL(picture.janusMsg.format.Fileid)"
                         >
                             <img
-                                :src="`${config.fileUrl}/fls/${picture.janusMsg.format.Fileid}${picture.ext}`"
+                                :src="`${config.fileUrl}/fls/${
+                                    picture.janusMsg.format.Fileid
+                                }${String(picture.janusMsg.format.ShowName).slice(-4)}`"
                             />
                         </div>
                         <div
@@ -100,7 +102,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, onMounted, computed, ref } from "vue";
+import { defineComponent, onMounted, computed, ref, watchEffect } from "vue";
 import { storeToRefs } from "pinia";
 import { NEllipsis, NAvatar } from "naive-ui";
 import { useRoute } from "vue-router";
@@ -132,11 +134,11 @@ const dateArr: any = ref([]);
 getBackendApi(route.query.chatToken);
 
 //獲取當天日期 判斷圖片及檔案是否失效
-onMounted(() => {
+watchEffect(() => {
     pictures.value = JSON.parse(localStorage.getItem(`${chatToken.value}-pictures`) || "[]");
 
     pictures.value.forEach((pic: any, index: any) => {
-        if (dayjs().isAfter(dayjs(pic.expirationDate))) {
+        if (dayjs().isAfter(dayjs(pic.janusMsg.format.expirationDate))) {
             pic.isExpire = true;
             localStorage.setItem(
                 `${route.query.chatToken}-pictures`,
@@ -173,20 +175,23 @@ const previewURL = (fileid: string): void => {
     pictures.value.forEach((img: any) => {
         if (
             !viewImgs.value.includes(
-                `${config.fileUrl}/fls/${img.janusMsg.format.Fileid}${img.ext}`
+                `${config.fileUrl}/fls/${
+                    img.janusMsg.format.Fileid
+                }.${img.janusMsg.format.ShowName.split(".").pop()}`
             ) &&
-            img.janusMsg.msgType === 6
+            img.janusMsg.msgType === 6 &&
+            !img.isExpire
         ) {
-            viewImgs.value.push(`${config.fileUrl}/fls/${img.janusMsg.format.Fileid}${img.ext}`);
+            viewImgs.value.push(
+                `${config.fileUrl}/fls/${
+                    img.janusMsg.format.Fileid
+                }.${img.janusMsg.format.ShowName.split(".").pop()}`
+            );
         }
     });
-    console.log("picture:", fileid);
-
     const viewIndex = viewImgs.value
         .map((img: any) => Math.floor(img.split("/")[4].split(".")[0]))
         .indexOf(fileid);
-    console.log("viewIndex:", viewIndex);
-
     viewerApi({
         options: {
             initialViewIndex: viewIndex,
@@ -199,7 +204,7 @@ const previewURL = (fileid: string): void => {
                 const wrap = document.getElementsByClassName("v-wrap");
                 const div = document.createElement("div");
                 const a = document.createElement("a");
-                a.href = `${config.serverUrl}/file/${chatToken.value}/${fileId}`;
+                a.href = `${config.serverUrl}/file/${fileId}`;
                 a.target = "_blank";
                 a.download = fileName;
                 a.className = "download";

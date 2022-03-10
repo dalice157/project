@@ -30,7 +30,7 @@
             <div class="phoneClose">
                 <router-link :to="`/?chatToken=${chatToken}`">
                     <img
-                        @click="doHangup(!isAccepted ? 2 : 3)"
+                        @click="doHangup(!isAccepted ? 2 : 3, eventID(route.query.chatToken))"
                         src="../assets/Images/chatroom/close-round-red.svg"
                         alt="掛斷"
                     />
@@ -67,6 +67,7 @@ import ScaleLoader from "vue-spinner/src/ScaleLoader.vue";
 import { useApiStore } from "@/store/api";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import config from "@/config/config";
+import { eventID } from "@/util/commonUtil";
 
 // api store
 const apiStore = useApiStore();

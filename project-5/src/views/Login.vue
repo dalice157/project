@@ -6,46 +6,42 @@
                 <h1>溝通雲</h1>
             </div>
             <n-form class="loginForm" :model="modelRef" ref="formRef" :rules="rules">
-                <n-config-provider :theme-overrides="themeOverrides">
-                    <n-form-item label="帳號" path="account">
-                        <n-input
-                            v-model:value="modelRef.account"
-                            type="text"
-                            placeholder="請輸入帳號"
-                        />
-                    </n-form-item>
-                    <span class="error" v-show="varificationError">帳號或密碼輸入錯誤</span>
-                    <n-form-item label="密碼" path="password">
-                        <n-input
-                            v-model:value="modelRef.password"
-                            type="password"
-                            placeholder="請輸入密碼"
-                        />
-                    </n-form-item>
-                    <n-form-item label="驗證碼" path="varificationCode">
-                        <n-input
-                            class="varificationCode"
-                            v-model:value="modelRef.varificationCode"
-                            type="text"
-                            placeholder="請輸入驗證碼"
-                            @keyup.enter.prevent="login"
-                        >
-                            <template #suffix>
-                                <identify :identifyCode="identifyCode"></identify>
-                                <n-icon>
-                                    <refresh-outline @click="changeCode" />
-                                </n-icon>
-                            </template>
-                        </n-input>
-                    </n-form-item>
-                    <span class="error" v-show="varificationCodeError">驗證碼輸入錯誤</span>
-                </n-config-provider>
+                <n-form-item label="帳號" path="account">
+                    <n-input
+                        v-model:value="modelRef.account"
+                        type="text"
+                        placeholder="請輸入帳號"
+                    />
+                </n-form-item>
+                <span class="error" v-show="varificationError">帳號或密碼輸入錯誤</span>
+                <n-form-item label="密碼" path="password">
+                    <n-input
+                        v-model:value="modelRef.password"
+                        type="password"
+                        placeholder="請輸入密碼"
+                    />
+                </n-form-item>
+                <n-form-item label="驗證碼" path="varificationCode">
+                    <n-input
+                        class="varificationCode"
+                        v-model:value="modelRef.varificationCode"
+                        type="text"
+                        placeholder="請輸入驗證碼"
+                        @keyup.enter.prevent="login"
+                    >
+                        <template #suffix>
+                            <identify :identifyCode="identifyCode"></identify>
+                            <n-icon>
+                                <refresh-outline @click="changeCode" />
+                            </n-icon>
+                        </template>
+                    </n-input>
+                </n-form-item>
+                <span class="error" v-show="varificationCodeError">驗證碼輸入錯誤</span>
 
                 <div class="loginService">
                     <div class="rememberAccount">
-                        <n-config-provider :theme-overrides="themeOverrides">
-                            <n-checkbox v-model:checked="rememberAccountPassword" />
-                        </n-config-provider>
+                        <n-checkbox v-model:checked="rememberAccountPassword" />
                         <span>記住帳號</span>
                     </div>
                     <a href="#">忘記密碼</a>
@@ -160,6 +156,7 @@ onMounted(() => {
     localStorage.removeItem("adminStatus");
     localStorage.removeItem("access_token");
     localStorage.removeItem("accountID");
+    localStorage.removeItem("newsletterDepartmentToken");
 });
 
 const login = () => {
@@ -212,25 +209,6 @@ const login = () => {
         varificationCodeError.value = true;
         changeCode();
     }
-};
-
-//更改naive ui input框主題
-const themeOverrides = {
-    common: {},
-    Input: {
-        caretColor: "black",
-        borderHover: "transparent",
-        borderFocus: "transparent",
-        boxShadowFocus: "none",
-        border: "1px solid #8b8b8b",
-        paddingVertical: "15px",
-    },
-    Checkbox: {
-        colorChecked: "orange",
-        borderChecked: "1px solid rgb(224, 224, 230)",
-        borderFocus: "1px solid rgb(224, 224, 230)",
-        boxShadowFocus: "transparent",
-    },
 };
 </script>
 <style lang="scss">

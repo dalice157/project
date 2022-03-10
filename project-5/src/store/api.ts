@@ -4,7 +4,9 @@ import { nanoid } from "nanoid";
 
 import config from "@/config/config";
 import { useChatStore } from "@/store/chat";
-import { chDateFormat } from "@/util/dateUtil";
+import { useSmsStore } from "@/store/smsStore";
+import { useMmsStore } from "@/store/mmsStore";
+import { currentTime, currentDate } from "@/util/dateUtil";
 
 export const useApiStore = defineStore({
     id: "api",
@@ -35,12 +37,10 @@ export const useApiStore = defineStore({
         point: <any>0,
         adminList: <any>[],
         chatroomMsg: <any>{
-            mobile: "無",
-            chatroomID: "0",
+            totalCount: 0,
             messageList: [],
         },
         msgStart: <any>0,
-        isInput: <boolean>false,
         staffEvents: {
             accountName: "",
             events: [],
@@ -52,9 +52,37 @@ export const useApiStore = defineStore({
             name: "訪客",
             tag: [],
         },
+        uploadRef: <any>null,
+        invalidList: <any>[],
+        commonMsgList: <any>[],
+        isInput: <boolean>false,
+        isUserMsg: <boolean>false,
     }),
     getters: {},
     actions: {
+        // 聊天室簡訊發送
+        async sendMMSMsg(data) {
+            console.log("sendMMSMsg:", data);
+
+            const getToken = localStorage.getItem("access_token");
+            const newsletterDepartmentToken = localStorage.getItem("newsletterDepartmentToken");
+            const bodyFormData = new FormData();
+            bodyFormData.append("token", newsletterDepartmentToken);
+            bodyFormData.append("text", data.text);
+
+            await axios({
+                method: "post",
+                url: `${config.serverUrl}/v1/msg/${data.chatRoomID}`,
+                data: bodyFormData,
+                headers: { Authorization: `Bearer ${getToken}` },
+            })
+                .then((res: any) => {
+                    console.log("sendMMSMsg res:", res.data);
+                })
+                .catch((err: any) => {
+                    console.error(err);
+                });
+        },
         //取得使用者資訊
         async getChatroomUserInfoApi(chatroomID) {
             const getToken = localStorage.getItem("access_token");
@@ -124,29 +152,41 @@ export const useApiStore = defineStore({
                                           id: item.format.id || nanoid(),
                                           isReplay: item.format.isReplay || false,
                                           replyObj: item.format.replyObj || "",
+                                          isMMS: item.format.isMMS || false,
                                           ...item.format,
                                       },
-                                      phoneType: "",
-                                      audioInfo: "",
+                                      currentDate: currentDate(),
                                       msgMoreStatus: false,
                                       msgFunctionStatus: false,
                                       recallStatus: false,
                                       recallPopUp: false,
-                                      expirationDate: "",
-                                      isPlay: false,
                                       isExpire: false,
-                                      tagMsg: "",
+                                      isRead: this.isUserMsg ? true : false,
+                                      isPlay: false,
                                   };
                               })
                               .reverse()
                         : [];
-                    const getList = this.isInput ? list : list.concat(this.chatroomMsg.messageList);
+                    let getList = this.isInput ? list : list.concat(this.chatroomMsg.messageList);
+                    getList = getList.reduce((unique, o) => {
+                        const hasRepeatId = unique.some((obj) => {
+                            return obj.format.id === o.format.id;
+                        });
+                        if (!hasRepeatId) {
+                            unique.push(o);
+                        }
+                        unique.sort((a, b) => {
+                            return a.time > b.time ? 1 : -1;
+                        });
+                        return unique;
+                    }, []);
+                    console.log("getList:", getList);
                     this.chatroomMsg = {
                         ...res.data,
                         messageList: getList,
                     };
                     this.isInput = false;
-                    console.log("chatroomMsg", this.chatroomMsg);
+                    this.isUserMsg = false;
                 })
                 .catch((err: any) => {
                     console.error(err);
@@ -491,6 +531,107 @@ export const useApiStore = defineStore({
                 .then((res: any) => {
                     console.log("res:", res);
                     router.push(`/manage/${accountId}/activitySetting`);
+                })
+                .catch((err: any) => {
+                    console.error(err);
+                });
+        },
+        //excel電話號碼驗證
+        async excelVerification(file) {
+            console.log("file:", file);
+
+            const getToken = localStorage.getItem("access_token");
+            const fileType = file.type;
+            const fileName = file.name;
+            const fd = new FormData();
+            fd.append("file", new File([file], fileName, { type: fileType }));
+            await axios({
+                method: "post",
+                url: `${config.serverUrl}/v1/verify`,
+                data: fd,
+                headers: { Authorization: `Bearer ${getToken}` },
+            })
+                .then((res: any) => {
+                    console.log("excel res", res);
+                    this.uploadRef = res.data;
+                    this.invalidList = res.data.invalid;
+                })
+                .catch((err: any) => {
+                    if (err.response) {
+                        console.log("excel err:", err.response);
+                    }
+                });
+        },
+        //取得常用簡訊列表
+        async getCommonMsgList(accountID: any) {
+            const getToken = localStorage.getItem("access_token");
+            await axios({
+                method: "get",
+                url: `${config.serverUrl}/v1/oftens/${accountID}`,
+                headers: { Authorization: `Bearer ${getToken}` },
+            })
+                .then((res: any) => {
+                    this.commonMsgList = res.data.oftens.reverse();
+                })
+                .catch((err: any) => {
+                    console.error(err);
+                });
+        },
+        //新增常用簡訊
+        async addCommonMsgObj(accountID: any, msg: any) {
+            const getToken = localStorage.getItem("access_token");
+            const fd = new FormData();
+            fd.append("accountID", accountID);
+            fd.append("subject", msg.subject);
+            fd.append("content", msg.content);
+            await axios({
+                method: "post",
+                url: `${config.serverUrl}/v1/oftens`,
+                data: fd,
+                headers: { Authorization: `Bearer ${getToken}` },
+            })
+                .then((res: any) => {
+                    this.getCommonMsgList(accountID);
+                })
+                .catch((err: any) => {
+                    console.error(err);
+                });
+        },
+        //刪除常用簡訊
+        async removeCommonMsgObj(id: any) {
+            const getToken = localStorage.getItem("access_token");
+            const accountID = localStorage.getItem("accountID");
+            const fd = new FormData();
+            fd.append("smsID", id);
+            await axios({
+                method: "delete",
+                url: `${config.serverUrl}/v1/oftens`,
+                data: fd,
+                headers: { Authorization: `Bearer ${getToken}` },
+            })
+                .then((res: any) => {
+                    this.getCommonMsgList(accountID);
+                })
+                .catch((err: any) => {
+                    console.error(err);
+                });
+        },
+        //編輯常用簡訊
+        async editCommonMsgObj(id: any, subject: any, content: any) {
+            const getToken = localStorage.getItem("access_token");
+            const accountID = localStorage.getItem("accountID");
+            const fd = new FormData();
+            fd.append("smsID", id);
+            fd.append("subject", subject);
+            fd.append("content", content);
+            await axios({
+                method: "patch",
+                url: `${config.serverUrl}/v1/oftens`,
+                data: fd,
+                headers: { Authorization: `Bearer ${getToken}` },
+            })
+                .then((res: any) => {
+                    this.getCommonMsgList(accountID);
                 })
                 .catch((err: any) => {
                     console.error(err);

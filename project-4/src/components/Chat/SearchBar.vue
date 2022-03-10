@@ -29,9 +29,9 @@
         <ul class="list" v-if="searcMessages.length > 0">
             <li
                 class="item"
-                :key="msg.id"
+                :key="msg.janusMsg.format.id"
                 v-for="msg in searcMessages"
-                @click.prevent="onClickGoto(msg.id, route.query.chatToken)"
+                @click.prevent="onClickGoto(msg.janusMsg.format.id, route.query.chatToken)"
             >
                 <n-avatar
                     class="avatar"

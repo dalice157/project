@@ -104,10 +104,7 @@ const themeOverrides = {
     common: {},
     Input: {
         fontSize: "14px",
-        caretColor: "black",
-        borderHover: "transparent",
-        borderFocus: "transparent",
-        boxShadowFocus: "none",
+        border: "1px solid #ececec",
     },
 };
 </script>

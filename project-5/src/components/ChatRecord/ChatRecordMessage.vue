@@ -1,11 +1,11 @@
 <template>
     <!--搜尋交談結果-->
     <div v-if="searcRecordMessages?.length > 0 && recordKeyWord !== ''" class="searchRecordMessage">
-        <a
+        <div
             class="chatRoomBox"
             v-for="num in searcRecordMessages"
             :key="num.chatroomID"
-            :href="`/chat/${route.params.id}?chatroomID=${num.chatroomID}&mobile=${num.mobile}`"
+            @click.stop="gotoChat(route.params.id, num.chatroomID, num.mobile)"
         >
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
@@ -33,7 +33,13 @@
             </div>
             <div class="functionBox">
                 <div class="time">
-                    {{ num.time }}
+                    {{
+                        isToday
+                            ? dayjs.unix(num.time).format("A hh:mm")
+                            : isYesterday
+                            ? "昨天"
+                            : dayjs.unix(num.time).format("MM/DD")
+                    }}
                 </div>
                 <div class="badge" v-if="num.unread === 1">
                     <div class="badgeBg">
@@ -42,7 +48,7 @@
                     </div>
                 </div>
             </div>
-        </a>
+        </div>
     </div>
 
     <!-- 交談歷史紀錄 -->
@@ -51,11 +57,11 @@
         v-if="changeList?.length > 0 && searcRecordMessages?.length === 0 && recordKeyWord === ''"
         class="chatRecordMessage"
     >
-        <a
+        <div
             class="chatRoomBox"
             v-for="(num, index) in changeList"
             :key="num.chatroomID"
-            :href="`/chat/${route.params.id}?chatroomID=${num.chatroomID}&mobile=${num.mobile}`"
+            @click.stop="gotoChat(route.params.id, num.chatroomID, num.mobile)"
         >
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
@@ -91,7 +97,13 @@
             <div class="functionBox">
                 <div>
                     <div class="time">
-                        {{ num.time }}
+                        {{
+                            isToday
+                                ? dayjs.unix(num.time).format("A hh:mm")
+                                : isYesterday
+                                ? "昨天"
+                                : dayjs.unix(num.time).format("MM/DD")
+                        }}
                     </div>
 
                     <div class="functionBoxMore">
@@ -116,7 +128,7 @@
                     </div>
                 </div>
             </div>
-        </a>
+        </div>
     </div>
 
     <div
@@ -129,7 +141,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, watchEffect, watch, onUpdated } from "vue";
+import { ref, computed, watchEffect, watch, onUpdated } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { NAvatar, NEllipsis, NModal, NCard } from "naive-ui";
 import { nanoid } from "nanoid";
@@ -166,7 +178,6 @@ const modelStore = useModelStore();
 const { showCompanyInfo, gotoChat, gotoPhone } = modelStore;
 const { isInfoPop, info } = storeToRefs(modelStore);
 
-let changeList = ref();
 let list = ref([]);
 
 interface IObj {
@@ -191,43 +202,45 @@ const sendMsgTypeObj: ISendMsgTypeObj = {
     9: "語音通話",
 };
 
+let changeList: any = computed({
+    get() {
+        return recordMessages.value;
+    },
+    set(val) {
+        recordMessages.value = val;
+    },
+});
+
+let i = ref(0);
 watchEffect(() => {
     if (chatroomList.value.length > 0) {
-        recordMessages.value = chatroomList.value.map((item, idx) => {
-            const isInfoYesterday = dayjs.unix(item.time).isYesterday();
-            const isInfoToday = dayjs.unix(item.time).isToday();
-
+        recordMessages.value = chatroomList.value.map((item) => {
             return {
                 ...item,
-                time: isInfoToday
-                    ? dayjs.unix(item.time).format("A hh:mm")
-                    : isInfoYesterday
-                    ? "昨天"
-                    : dayjs.unix(item.time).format("MM/DD"),
-                key: idx,
+                key: i.value++,
             };
         });
-        changeList.value = JSON.parse(JSON.stringify(recordMessages.value));
     }
 });
 //開啟功能列表
 const openFunctionPopUp = (num: any) => {
     // console.log("popup:", num);
-
-    changeList.value.forEach((item: any) => {
-        if (item.eventID === num.eventID) {
+    let arr = changeList.value.map((item: any) => {
+        if (item.chatroomID === num.chatroomID) {
             item.isfunctionPopUp = !item.isfunctionPopUp;
         } else {
             item.isfunctionPopUp = false;
         }
+        return item;
     });
+    changeList.value = arr;
 };
 
 //刪除功能
 const deletechatRoomBox = (item: any): void => {
     changeList.value = changeList.value.filter((num: any) => {
         num.isfunctionPopUp = false;
-        return num.eventID !== item.eventID;
+        return num.chatroomID !== item.chatroomID;
     });
 };
 
@@ -236,7 +249,7 @@ const pin = (item: any, idx: any): void => {
     const lists = changeList.value;
     lists.unshift(lists.splice(idx, 1)[0]);
     lists.forEach((it: any, index: any) => {
-        if (it.eventID === item.eventID) {
+        if (it.chatroomID === item.chatroomID) {
             it.toTop = true;
         }
         it.isfunctionPopUp = false;
@@ -251,7 +264,7 @@ const unpin = (item: any, index: any): void => {
     const getItem = lists.splice(index, 1)[0];
     lists.splice(item.key, 0, getItem);
     lists.forEach((it) => {
-        if (it.eventID === item.eventID) {
+        if (it.chatroomID === item.chatroomID) {
             it.toTop = false;
         }
         it.isfunctionPopUp = false;

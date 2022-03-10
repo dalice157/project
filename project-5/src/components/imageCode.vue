@@ -14,11 +14,11 @@ const props = defineProps({
     },
     fontSizeMin: {
         type: Number,
-        default: 20,
+        default: 25,
     },
     fontSizeMax: {
         type: Number,
-        default: 35,
+        default: 30,
     },
     backgroundColorMin: {
         type: Number,
@@ -50,7 +50,7 @@ const props = defineProps({
     },
     dotColorMax: {
         type: Number,
-        default: 255,
+        default: 250,
     },
     contentWidth: {
         type: Number,
@@ -96,15 +96,15 @@ const drawText = (ctx: any, txt: any, i: any) => {
     var deg = randomNum(-45, 45);
     // 修改座標原點和旋轉角度
     ctx.translate(x, y);
-    ctx.rotate((deg * Math.PI) / 180);
+    ctx.rotate((deg * Math.PI) / 300);
     ctx.fillText(txt, 0, 0);
     // 恢復座標原點和旋轉角度
-    ctx.rotate((-deg * Math.PI) / 180);
+    ctx.rotate((-deg * Math.PI) / 300);
     ctx.translate(-x, -y);
 };
 //繪製干擾線
 const drawLine = (ctx: any) => {
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 2; i++) {
         ctx.strokeStyle = randomColor(props.lineColorMin, props.lineColorMax);
         ctx.beginPath();
         ctx.moveTo(randomNum(0, props.contentWidth), randomNum(0, props.contentHeight));
@@ -114,8 +114,8 @@ const drawLine = (ctx: any) => {
 };
 //繪製干擾點
 const drawDot = (ctx: any) => {
-    for (let i = 0; i < 30; i++) {
-        ctx.fillStyle = randomColor(0, 255);
+    for (let i = 0; i < 15; i++) {
+        ctx.fillStyle = randomColor(0, 200);
         ctx.beginPath();
         ctx.arc(
             randomNum(0, props.contentWidth),

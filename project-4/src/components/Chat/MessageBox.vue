@@ -23,7 +23,7 @@
                 }"
                 v-for="(text, index) in messages"
                 :key="index"
-                :id="text.id"
+                :id="text.janusMsg.format.id"
             >
                 <!-- 日期樣板 -->
                 <div
@@ -44,7 +44,7 @@
                 >
                     <div class="deleteCheckBox">
                         <n-config-provider :theme-overrides="themeOverrides">
-                            <n-checkbox :value="text.id" label="" />
+                            <n-checkbox :value="text.janusMsg.format.id" label="" />
                         </n-config-provider>
                     </div>
                 </n-checkbox-group>
@@ -54,7 +54,10 @@
                     <div>
                         <p>
                             您已收回訊息&emsp;
-                            <span @click="reEdit(text.id)" v-if="text.janusMsg.message">
+                            <span
+                                @click="reEdit(text.janusMsg.format.id)"
+                                v-if="text.janusMsg.message"
+                            >
                                 <u>重新編輯</u>
                             </span>
                         </p>
@@ -117,7 +120,7 @@
                                         <div
                                             type="button"
                                             class="confirm"
-                                            @click.stop="recallMsg(text.id)"
+                                            @click.stop="recallMsg(text.janusMsg.format.id)"
                                         >
                                             確定
                                         </div>
@@ -192,9 +195,9 @@
                         <div
                             class="content"
                             :class="{
-                                reply: text.replyObj,
+                                reply: text.janusMsg.format.isReplay,
                             }"
-                            v-if="text.janusMsg.message"
+                            v-if="text.janusMsg.msgType === 1"
                             @touchstart="gtouchstart(text)"
                             @touchmove="gtouchmove()"
                             @touchend="gtouchend()"
@@ -203,47 +206,148 @@
                             <div
                                 class="replyMsg"
                                 :class="{
-                                    noMsgClick: text.replyObj.recallStatus,
+                                    noMsgClick: !text.janusMsg.format.isReplay,
                                 }"
-                                v-if="text.replyObj"
+                                v-if="text.janusMsg.format.isReplay"
                                 @click.prevent="
-                                    text.replyObj.recallStatus
-                                        ? null
-                                        : scrollPageTo(text.replyObj.id)
+                                    text.janusMsg.format.isReplay
+                                        ? scrollPageTo(text.janusMsg.format.replyObj.format.id)
+                                        : null
                                 "
                             >
-                                <div class="info noMsg" v-if="text.replyObj.recallStatus">
+                                <div
+                                    class="info noMsg"
+                                    v-if="text.janusMsg.format.replyObj.recallStatus"
+                                >
                                     無法讀取原始訊息。
                                 </div>
                                 <div
                                     class="info"
                                     :class="{
-                                        isImg: text.replyObj.msgType === 6,
+                                        isImg: text.janusMsg.format.replyObj.msgType === 6,
                                     }"
                                     v-else
                                 >
-                                    <div class="userName" v-if="text.replyObj.sender === 0">
+                                    <!--客服回覆訊息顯示名字 -->
+                                    <div
+                                        class="userName"
+                                        v-if="
+                                            !text.janusMsg.format.replyObj.janusMsg &&
+                                            text.janusMsg.format.replyObj.sender === 0
+                                        "
+                                    >
                                         {{ eventInfo.name }}
                                     </div>
-                                    <div v-if="text.replyObj.msgType === 3">[貼圖]</div>
-                                    <div v-if="text.replyObj.msgType === 6">[照片]</div>
+                                    <!--自己回覆訊息顯示名字 -->
+                                    <div
+                                        class="userName"
+                                        v-else-if="
+                                            text.janusMsg.format.replyObj.janusMsg &&
+                                            text.janusMsg.format.replyObj.janusMsg.sender === 0
+                                        "
+                                    >
+                                        {{ eventInfo.name }}
+                                    </div>
+
+                                    <!-- 客服回覆照片顯示 -->
+                                    <div
+                                        v-if="
+                                            !text.janusMsg.format.replyObj.janusMsg &&
+                                            text.janusMsg.format.replyObj.msgType === 6
+                                        "
+                                    >
+                                        [照片]
+                                    </div>
+                                    <!-- 自己回覆照片顯示 -->
+                                    <div
+                                        v-else-if="
+                                            text.janusMsg.format.replyObj.janusMsg &&
+                                            text.janusMsg.format.replyObj.janusMsg.msgType === 6
+                                        "
+                                    >
+                                        [照片]
+                                    </div>
+
+                                    <!-- 客服回覆訊息格式 訊息過長顯示...-->
                                     <n-ellipsis
-                                        v-if="text.replyObj.msgType === 1"
+                                        v-if="
+                                            !text.janusMsg.format.replyObj.janusMsg &&
+                                            text.janusMsg.format.replyObj.msgType === 1
+                                        "
                                         style="width: 100%"
                                         :line-clamp="2"
                                         :tooltip="false"
                                     >
-                                        {{ text.replyObj.message }}
+                                        {{ text.janusMsg.format.replyObj.msgContent }}
+                                    </n-ellipsis>
+                                    <!-- 自己回覆訊息格式 訊息過長顯示...-->
+                                    <n-ellipsis
+                                        v-if="
+                                            text.janusMsg.format.replyObj.janusMsg &&
+                                            text.janusMsg.format.replyObj.janusMsg.msgType === 1
+                                        "
+                                        style="width: 100%"
+                                        :line-clamp="2"
+                                        :tooltip="false"
+                                    >
+                                        {{ text.janusMsg.format.replyObj.janusMsg.message }}
                                     </n-ellipsis>
                                 </div>
-                                <div class="replyImg" v-if="text.replyObj.msgType === 3">
+                                <!-- 客服回覆貼圖 -->
+                                <div
+                                    class="replyImg"
+                                    v-if="
+                                        !text.janusMsg.format.replyObj.janusMsg &&
+                                        text.janusMsg.format.replyObj.msgType === 3
+                                    "
+                                >
                                     <img
-                                        :src="`${text.replyObj.format.stickerUrl}${text.replyObj.format.stickerPackID}/${text.replyObj.format.stickerFileID}.${text.replyObj.format.ext}`"
+                                        :src="`${text.janusMsg.format.replyObj.format.stickerUrl}${text.janusMsg.format.replyObj.format.stickerPackID}/${text.janusMsg.format.replyObj.format.stickerFileID}.${text.janusMsg.format.replyObj.format.ext}`"
                                     />
                                 </div>
-                                <div class="replyImg" v-if="text.replyObj.msgType === 6">
+                                <!-- 自己回覆貼圖 -->
+                                <div
+                                    class="replyImg"
+                                    v-if="
+                                        text.janusMsg.format.replyObj.janusMsg &&
+                                        text.janusMsg.format.replyObj.janusMsg.msgType === 3
+                                    "
+                                >
                                     <img
-                                        :src="`${config.fileUrl}/fls/${text.replyObj.format.Fileid}${text.replyObj.ext}`"
+                                        :src="`${text.janusMsg.format.replyObj.janusMsg.format.stickerUrl}${text.janusMsg.format.replyObj.janusMsg.format.stickerPackID}/${text.janusMsg.format.replyObj.janusMsg.format.stickerFileID}.${text.janusMsg.format.replyObj.janusMsg.format.ext}`"
+                                    />
+                                </div>
+
+                                <!-- 客服回覆圖片格式 -->
+                                <div
+                                    class="replyImg"
+                                    v-if="
+                                        !text.janusMsg.format.replyObj.janusMsg &&
+                                        text.janusMsg.format.replyObj.msgType === 6
+                                    "
+                                >
+                                    <img
+                                        :src="`${config.fileUrl}/fls/${
+                                            text.janusMsg.format.replyObj.format.Fileid
+                                        }.${text.janusMsg.format.replyObj.format.ShowName.split(
+                                            '.'
+                                        ).pop()}`"
+                                    />
+                                </div>
+                                <!-- 自己回覆圖片格式 -->
+                                <div
+                                    class="replyImg"
+                                    v-else-if="
+                                        text.janusMsg.format.replyObj.janusMsg &&
+                                        text.janusMsg.format.replyObj.janusMsg.msgType === 6
+                                    "
+                                >
+                                    <img
+                                        :src="`${config.fileUrl}/fls/${
+                                            text.janusMsg.format.replyObj.janusMsg.format.Fileid
+                                        }.${text.janusMsg.format.replyObj.janusMsg.format.ShowName.split(
+                                            '.'
+                                        ).pop()}`"
                                     />
                                 </div>
                             </div>
@@ -255,7 +359,7 @@
                         <!-- google maps -->
                         <div
                             class="googleMapsMsg content"
-                            v-if="text.janusMsg.msgType === 8"
+                            v-if="text.msgType === 8"
                             @touchstart="gtouchstart(text)"
                             @touchmove="gtouchmove()"
                             @touchend="gtouchend()"
@@ -276,27 +380,27 @@
                         <!-- audio -->
                         <div
                             class="audio content"
-                            :class="{ play: text.janusMsg.format.isPlay }"
+                            :class="{ play: text.isPlay }"
                             v-if="text.janusMsg.msgType === 5"
                         >
-                            <audio :id="`audio-player-${text.id}`">
+                            <audio :id="`audio-player-${text.janusMsg.format.id}`">
                                 <source
-                                    :src="`${config.fileUrl}/fls/${text.janusMsg.format.Fileid}${text.ext}`"
+                                    :src="`${config.fileUrl}/fls/${text.janusMsg.format.Fileid}.wav`"
                                     type="audio/wav"
                                 />
                                 Your browser does not support the audio tag.
                             </audio>
                             <n-icon @click="toggleAudio(text)" size="24">
-                                <pause-circle-sharp v-if="text.janusMsg.format.isPlay" />
-                                <play-circle-sharp v-else />
+                                <pause-circle-sharp v-show="text.isPlay" />
+                                <play-circle-sharp v-show="!text.isPlay" />
                             </n-icon>
-                            <span v-if="text.janusMsg.format.isPlay">{{ newTime }}</span>
-                            <span v-if="!text.janusMsg.format.isPlay" class="totalTime">
-                                {{ text.audioInfo.SoundTime }}
+                            <span v-show="text.isPlay">{{ newTime }}</span>
+                            <span v-show="!text.isPlay" class="totalTime">
+                                {{ convertTime(text.janusMsg.format.SoundLength) }}
                             </span>
                             <img
                                 class="audioWave"
-                                v-if="!text.janusMsg.format.isPlay"
+                                v-show="!text.isPlay"
                                 src="../../assets/Images/chatroom/audio.svg"
                             />
                         </div>
@@ -310,7 +414,9 @@
                             @touchend="gtouchend()"
                         >
                             <img
-                                :src="`${config.fileUrl}/fls/${text.janusMsg.format.Fileid}${text.ext}`"
+                                :src="`${config.fileUrl}/fls/${
+                                    text.janusMsg.format.Fileid
+                                }.${text.janusMsg.format.ShowName.split('.').pop()}`"
                             />
                         </div>
                         <!-- 文件訊息 -->
@@ -333,7 +439,11 @@
                                 <p>
                                     檔案大小&thinsp;:&thinsp;{{ text.janusMsg.format.FileSize }}KB
                                 </p>
-                                <p>下載期限&thinsp;:&thinsp;{{ text.expirationDate }}</p>
+                                <p>
+                                    下載期限&thinsp;:&thinsp;{{
+                                        text.janusMsg.format.expirationDate
+                                    }}
+                                </p>
                             </div>
                         </div>
                         <!-- 電話訊息 -->
@@ -369,14 +479,21 @@
                                         alt=""
                                     />
                                 </div>
-                                <div class="phoneStatus">
+                                <div
+                                    class="phoneStatus"
+                                    v-if="!text.janusMsg.format.phoneTypeOther"
+                                >
                                     <h4 v-if="text.janusMsg.format.phoneType === 1">無回應</h4>
                                     <h4 v-if="text.janusMsg.format.phoneType === 2">取消通話</h4>
                                     <h4 v-if="text.janusMsg.format.phoneType === 3">語音來電</h4>
                                     <p v-if="text.janusMsg.format.phoneType === 3">
                                         {{ text.janusMsg.format.phoneTime }}
                                     </p>
-                                    <h4 v-if="text.janusMsg.format.phoneType === 4">未接來電</h4>
+                                </div>
+                                <div class="phoneStatus" v-else>
+                                    <h4 v-if="text.janusMsg.format.phoneTypeOther === 4">
+                                        未接來電
+                                    </h4>
                                 </div>
                             </a>
                         </div>
@@ -404,9 +521,10 @@
                     class="scrollToBottom"
                     v-show="
                         chatroomScrolltopAndWindowHeight < chatroomScrollHeight &&
-                        !text.replyObj &&
+                        !text.janusMsg.format.isReplay &&
                         !isReplyBox &&
-                        !inputFunctionBoolean
+                        !inputFunctionBoolean &&
+                        !showStickerModal
                     "
                     @click="scrollToBottom"
                 >
@@ -476,6 +594,7 @@ import {
     chatroomID,
     convertTime,
     DO_CALL_NAME,
+    eventID,
 } from "@/util/commonUtil";
 import { currentTime, currentDate, currentMonth } from "@/util/dateUtil";
 import UserInfoModel from "@/components/UserInfoModel.vue";
@@ -498,21 +617,6 @@ const { doCall, phoneTime } = phoneCallStore;
 //router
 const route = useRoute();
 
-//拿取後端api
-getBackendApi(route.query.chatToken);
-//更改naive-ui 套件主題
-const themeOverrides = {
-    common: {},
-    Checkbox: {
-        size: "25px",
-        colorChecked: "#01bad4",
-        borderRadius: "50%",
-        border: "2px solid #01bad4",
-        borderChecked: "2px solid #01bad4",
-        borderFocus: "2px solid #01bad4",
-        boxShadowFocus: "0 0 0 1px #01bad4",
-    },
-};
 //chat store
 const chatStore = useChatStore();
 const { replyMsgEvent, confirmDelete, deleteQuestion, closeRecorder } = chatStore;
@@ -527,11 +631,14 @@ let {
     textPlugin,
     isReplyBox,
     inputFunctionBoolean,
+    participantList,
+    showStickerModal,
 } = storeToRefs(chatStore);
 
 const onPhoneCallModal = () => {
     phoneCallModal.value = true;
-    doCall(DO_CALL_NAME);
+    const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
+    doCall(getCutomer);
 };
 
 //search store
@@ -620,38 +727,26 @@ const onUploadFile = (file: any) => {
                                     msgType: 6,
                                     message: "",
                                     format: {
+                                        id: nanoid(),
+                                        isReplay: replyMsg.value ? true : false,
+                                        replyObj: replyMsg.value ? { ...replyMsg.value } : "",
                                         Fileid: res.data.fileid,
                                         ShowName: fileName,
                                         FileSize: fileArr.size,
+                                        expirationDate: dayjs
+                                            .unix(res.data.exp)
+                                            .format("YYYY-MM-DD"),
                                     },
                                 },
-                                id: nanoid(),
-                                phoneType: "",
-                                audioInfo: "",
-                                ext: res.data.ext,
+                                currentDate: currentDate(),
+                                time: currentTime(),
                                 msgMoreStatus: false,
                                 msgFunctionStatus: false,
                                 recallStatus: false,
                                 recallPopUp: false,
-                                time: currentTime(),
-                                // currentDate: "2021-04-30",
-                                currentDate: currentDate(),
-                                // currentMonth: "2022-1",
-                                currentMonth: currentMonth(),
-                                expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                                 isExpire: false,
                                 isRead: false,
-                                replyObj: replyMsg.value
-                                    ? {
-                                          id: replyMsg.value.id,
-                                          ext: replyMsg.value.ext,
-                                          msgType: replyMsg.value.janusMsg.msgType,
-                                          message: replyMsg.value.janusMsg.message,
-                                          format: replyMsg.value.janusMsg.format,
-                                          recallStatus: replyMsg.value.recallStatus,
-                                          recallPopUp: replyMsg.value.recallPopUp,
-                                      }
-                                    : "",
+                                isPlay: false,
                             };
 
                             messages.value.push(imageObj);
@@ -659,6 +754,8 @@ const onUploadFile = (file: any) => {
                                 msg: imageObj,
                                 textPlugin: textPlugin.value,
                                 chatToken: route.query.chatToken,
+                                msgParticipantList: participantList.value,
+                                eventID: eventID(route.query.chatToken),
                             };
                             sendPrivateMsg(sendMsgObj);
                             localStorageMsg(messages.value, route.query.chatToken);
@@ -703,43 +800,33 @@ const onUploadFile = (file: any) => {
                             msgType: 7,
                             message: "",
                             format: {
+                                id: nanoid(),
+                                isReplay: false,
+                                replyObj: "",
                                 Fileid: res.data.fileid,
                                 ShowName: fileArr.name,
                                 ExtensionName: res.data.ext,
                                 FileSize: fileArr.size,
+                                expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                             },
                         },
-                        id: nanoid(),
-                        phoneType: "",
-                        audioInfo: "",
-                        ext: res.data.ext,
+                        currentDate: currentDate(),
+                        time: currentTime(),
                         msgMoreStatus: false,
                         msgFunctionStatus: false,
                         recallStatus: false,
                         recallPopUp: false,
-                        time: currentTime(),
-                        currentDate: currentDate(),
-                        currentMonth: currentMonth(),
-                        expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                         isExpire: false,
                         isRead: false,
-                        replyObj: replyMsg.value
-                            ? {
-                                  id: replyMsg.value.id,
-                                  ext: replyMsg.value.ext,
-                                  msgType: replyMsg.value.janusMsg.msgType,
-                                  message: replyMsg.value.janusMsg.message,
-                                  format: replyMsg.value.janusMsg.format,
-                                  recallStatus: replyMsg.value.recallStatus,
-                                  recallPopUp: replyMsg.value.recallPopUp,
-                              }
-                            : "",
+                        isPlay: false,
                     };
                     messages.value.push(fileObj);
                     const sendMsgObj = {
                         msg: fileObj,
                         textPlugin: textPlugin.value,
                         chatToken: route.query.chatToken,
+                        msgParticipantList: participantList.value,
+                        eventID: eventID(route.query.chatToken),
                     };
                     sendPrivateMsg(sendMsgObj);
                     localStorageMsg(messages.value, route.query.chatToken);
@@ -780,7 +867,7 @@ const toggleAudio = (msg: any) => {
                 track.value.pause();
                 track.value.currentTime = 0;
                 newTime.value = "0:00";
-                msg.janusMsg.format.isPlay = false;
+                msg.isPlay = false;
             },
             false
         );
@@ -789,7 +876,7 @@ const toggleAudio = (msg: any) => {
         track.value.currentTime = 0;
         newTime.value = "0:00";
         console.log("pause.paused:", track.value.paused);
-        msg.janusMsg.format.isPlay = false;
+        msg.isPlay = false;
     }
 };
 onMounted(() => {
@@ -860,7 +947,7 @@ const scrollToBottom = (): void => {
 //重新編輯
 const reEdit = (id: string): void => {
     messages.value.forEach((text: txt) => {
-        if (text.id === id) {
+        if (text.janusMsg.format.id === id) {
             msg.value = text.janusMsg.message;
         }
     });
@@ -896,11 +983,11 @@ const downloadImage = (text: txt): void => {
 //收回訊息
 const recallMsg = (id: string): void => {
     messages.value.forEach((text: txt) => {
-        if (text.id === id) {
+        if (text.janusMsg.format.id === id) {
             text.recallStatus = true;
         }
-        if (text.replyObj && text.replyObj.id === id) {
-            text.replyObj.recallStatus = true;
+        if (text.janusMsg.format.isReplay && text.janusMsg.format.replyObj.format.id === id) {
+            text.janusMsg.format.replyObj.recallStatus = true;
         }
     });
     localStorageMsg(messages.value, route.query.chatToken);
@@ -909,12 +996,15 @@ const recallMsg = (id: string): void => {
 //收回彈窗
 const confirmRecallPopup = (text: txt): void => {
     messages.value.forEach((item: txt) => {
-        if (item.id === text.id) {
+        if (item.janusMsg.format.id === text.janusMsg.format.id) {
             text.msgFunctionStatus = false;
             item.recallPopUp = !item.recallPopUp;
         }
-        if (item.replyObj && item.replyObj.id === text.id) {
-            item.replyObj.recallPopUp = !item.replyObj.recallPopUp;
+        if (
+            item.janusMsg.format.isReplay &&
+            item.janusMsg.format.replyObj.format.id === text.janusMsg.format.id
+        ) {
+            item.janusMsg.format.replyObj.recallPopUp = !item.janusMsg.format.replyObj.recallPopUp;
         }
     });
 };
@@ -924,15 +1014,19 @@ const previewURL = (fileid: string): void => {
     pictures.value.forEach((img: any) => {
         if (
             !viewImgs.value.includes(
-                `${config.fileUrl}/fls/${img.janusMsg.format.Fileid}${img.ext}`
+                `${config.fileUrl}/fls/${
+                    img.janusMsg.format.Fileid
+                }.${img.janusMsg.format.ShowName.split(".").pop()}`
             ) &&
             img.janusMsg.msgType === 6
         ) {
-            viewImgs.value.push(`${config.fileUrl}/fls/${img.janusMsg.format.Fileid}${img.ext}`);
+            viewImgs.value.push(
+                `${config.fileUrl}/fls/${
+                    img.janusMsg.format.Fileid
+                }.${img.janusMsg.format.ShowName.split(".").pop()}`
+            );
         }
     });
-    console.log("picture:", viewImgs.value);
-
     const viewIndex = viewImgs.value
         .map((img: any) => Math.floor(img.split("/")[4].split(".")[0]))
         .indexOf(fileid);
@@ -948,9 +1042,9 @@ const previewURL = (fileid: string): void => {
                 const wrap = document.getElementsByClassName("v-wrap");
                 const div = document.createElement("div");
                 const a = document.createElement("a");
-                a.href = `${config.serverUrl}/file/${route.query.chatToken}/${fileId}`;
-                a.download = fileName;
+                a.href = `${config.serverUrl}/file/${fileId}`;
                 a.target = "_blank";
+                a.download = fileName;
                 a.className = "download";
                 a.innerHTML = `<span class="downloadImg"></span>`;
                 wrap[0].appendChild(div).appendChild(a);
@@ -959,9 +1053,20 @@ const previewURL = (fileid: string): void => {
         images: viewImgs.value,
     });
 };
-watchEffect(() => {
-    pictures.value = JSON.parse(localStorage.getItem(`${route.query.chatToken}-pictures`) || "[]");
-});
+
+//更改naive-ui 套件主題
+const themeOverrides = {
+    common: {},
+    Checkbox: {
+        size: "25px",
+        colorChecked: "#01bad4",
+        borderRadius: "50%",
+        border: "2px solid #01bad4",
+        borderChecked: "2px solid #01bad4",
+        borderFocus: "2px solid #01bad4",
+        boxShadowFocus: "0 0 0 1px #01bad4",
+    },
+};
 </script>
 <style lang="scss">
 @import "~@/assets/scss/var";

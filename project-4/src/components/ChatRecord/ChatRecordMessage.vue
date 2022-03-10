@@ -1,16 +1,15 @@
 <template>
     <!--搜尋交談結果-->
     <div v-if="searcRecordMessages?.length > 0 && recordKeyWord !== ''" class="searchRecordMessage">
-        <a
+        <div
             class="chatRoomBox"
-            @touchend.prevent="gotoChat(num.chatToken)"
+            @click.stop="gotoChat(num.chatToken)"
             v-for="num in searcRecordMessages"
             :key="num.chatToken"
-            :href="`/?chatToken=${num.chatToken}`"
         >
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
-                <div class="avatar" @click.prevent="showCompanyInfo(num)">
+                <div class="avatar" @click.stop="showCompanyInfo(num)">
                     <n-avatar round :size="48" :src="`${config.fileUrl}/fls/${num.icon}`" />
                 </div>
                 <div class="chatRoomInfo">
@@ -34,14 +33,13 @@
                     </div>
                 </div>
             </div>
-        </a>
+        </div>
     </div>
 
     <!-- 交談歷史紀錄 -->
     <div
         v-if="changeList?.length > 0 && searcRecordMessages?.length === 0 && recordKeyWord === ''"
         class="chatRecordMessage"
-        @touchstart="getChangeList"
     >
         <!-- @touchend.prevent="gotoChat(num.chatToken)" -->
         <!-- :href="`/?chatToken=${num.chatToken}`" -->
@@ -49,11 +47,11 @@
             class="chatRoomBox"
             v-for="(num, index) in changeList"
             :key="num.chatToken"
-            :href="`/?chatToken=${num.chatToken}`"
+            @click.stop="gotoChat(num.chatToken)"
         >
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
-                <div class="avatar" @click.prevent="showCompanyInfo(num)">
+                <div class="avatar" @click.stop="showCompanyInfo(num)">
                     <n-avatar round :size="48" :src="`${config.fileUrl}/fls/${num.icon}`" />
                     <img
                         class="img"
@@ -91,13 +89,13 @@
                     <img
                         src="@/assets/Images/chatRecord/more.svg"
                         alt="#"
-                        @touchstart.prevent.stop="openFunctionPopUp(num)"
+                        @click.stop="openFunctionPopUp(num)"
                     />
                     <div class="functionPopUp" v-show="num.isfunctionPopUp">
                         <ul class="ulList">
-                            <li @click.prevent="pin(num, index)" v-if="!num.toTop">開啟置頂</li>
-                            <li @click.prevent="unpin(num, index)" v-if="num.toTop">取消置頂</li>
-                            <li @click.prevent="deletechatRoomBox(num)">刪除</li>
+                            <li @click.stop="pin(num, index)" v-if="!num.toTop">開啟置頂</li>
+                            <li @click.stop="unpin(num, index)" v-if="num.toTop">取消置頂</li>
+                            <li @click.stop="deletechatRoomBox(num)">刪除</li>
                         </ul>
                     </div>
                 </div>
@@ -183,7 +181,7 @@ const sendMsgTypeObj: ISendMsgTypeObj = {
     8: "地圖",
     9: "語音通話",
 };
-
+let i = ref(0);
 watchEffect(() => {
     let messages = JSON.parse(localStorage.getItem(route.query.chatToken as any) || "[]");
 
@@ -222,7 +220,7 @@ watchEffect(() => {
     }
     if (
         messages.length > 0 &&
-        eventInfo.value.name !== "test" &&
+        eventInfo.value.name &&
         !recordMessages.value.some((msg: any) => msg.chatToken === route.query.chatToken)
     ) {
         let getObj = {
@@ -247,12 +245,11 @@ watchEffect(() => {
         };
         recordMessages.value.push(lastObj);
     }
-    recordMessages.value.forEach((item: any, idx: any) => {
-        item.key = idx;
+    recordMessages.value.forEach((item: any) => {
+        item.key = i.value++;
     });
 
-    changeList.value = JSON.parse(JSON.stringify(recordMessages.value));
-    // console.log("recordMessages:", recordMessages.value);
+    changeList.value = recordMessages.value;
 });
 //開啟功能列表
 const openFunctionPopUp = (num: any) => {
@@ -276,6 +273,8 @@ const deletechatRoomBox = (item: any): void => {
 
 //置頂功能
 const pin = (item: any, idx: any): void => {
+    console.log("item:", item);
+
     const lists = changeList.value;
     lists.unshift(lists.splice(idx, 1)[0]);
     lists.forEach((it: any, index: any) => {

@@ -6,17 +6,33 @@ import { useChatStore } from "@/store/chat";
 import { useApiStore } from "@/store/api";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { IProcessData } from "@/util/interfaceUtil";
-import { MY_ROOM, YOU_USER_NAME, ME_USER_NAME } from "@/util/commonUtil";
+import { MY_ROOM, YOU_USER_NAME } from "@/util/commonUtil";
 
 //發送私人訊息
-export const sendPrivateMsg = ({ msg = <any>"", textPlugin = <any>"", chatRoomID = <any>"0" }) => {
-    console.log("sendPrivateMsg:", msg);
-
+export const sendPrivateMsg = ({
+    msg = <any>"",
+    textPlugin = <any>"",
+    chatRoomID = <any>"0",
+    eventID = <any>"0",
+}) => {
+    //Chat store
+    const chatStore = useChatStore();
+    const { participantList } = storeToRefs(chatStore);
+    //api store
     const apiStore = useApiStore();
     const { isInput } = storeToRefs(apiStore);
-    // const getText = msg.message || msg.format?.ShowName;
-    // const display = eventInfo.name;
-    const display = YOU_USER_NAME;
+
+    let filterDisplays: any = participantList.value.filter((item, index) => {
+        const keyName: any = Object.keys(participantList.value[index])[0];
+        return item[keyName] === "admin";
+    });
+    filterDisplays = filterDisplays.map((display) => {
+        return Object.keys(display)[0];
+    });
+
+    const display = [chatRoomID, ...filterDisplays];
+    console.log("sendPrivateMsg display", display);
+
     if (!display) return;
 
     if (msg === "") {
@@ -26,7 +42,7 @@ export const sendPrivateMsg = ({ msg = <any>"", textPlugin = <any>"", chatRoomID
     const message: any = {
         textroom: "message",
         transaction: randomString(12),
-        room: MY_ROOM,
+        room: Number(eventID),
         // tos: [全部在線客服1,全部在線客服2],
         tos: display,
         text: JSON.stringify(msg),
@@ -56,6 +72,11 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
     const { getCompanyMsg } = chatStore;
     const { chatRoomMsg, messages, replyMsg } = storeToRefs(chatStore);
 
+    // api store
+    const apiStore = useApiStore();
+    const { getHistoryApi, getChatroomlistApi } = apiStore;
+    const { isInput, isUserMsg } = storeToRefs(apiStore);
+
     interface whatType {
         [key: string]: any;
     }
@@ -64,10 +85,22 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
         message: () => {
             if (whisper === true) {
                 console.log("Private message->", data);
-                notifyMe(data);
+                const getFrom = JSON.parse(data.msg).janusMsg.chatroomID;
+                console.log("getFrom:", getFrom);
+                console.log("chatroomID:", chatroomID);
+                if (chatroomID == getFrom) {
+                    isUserMsg.value = true;
+                    isInput.value = true;
 
+                    setTimeout(() => {
+                        getHistoryApi(chatroomID);
+                        getChatroomlistApi(eventID);
+                    }, 1000);
+                }
                 return;
             }
+            notifyMe(data);
+
             console.log("Public message->", data);
             return;
         },
@@ -75,6 +108,11 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
             console.log("房間公告消息->", data);
         },
         join: () => {
+            if (chatroomID == data.username) {
+                isUserMsg.value = true;
+                isInput.value = true;
+                console.log(`${data.username} 加入房間`);
+            }
             console.log("有人加入房間->", data);
         },
         leave: () => {
@@ -93,12 +131,6 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
             console.log("error->", data);
         },
         success: () => {
-            const apiStore = useApiStore();
-            const { getHistoryApi, getChatroomlistApi } = apiStore;
-            // 當訊息送出成功就打history及chatroomList的 api
-
-            getHistoryApi(chatroomID);
-            getChatroomlistApi(eventID);
             console.log("success->", data);
         },
     };

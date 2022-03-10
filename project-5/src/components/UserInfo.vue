@@ -5,11 +5,11 @@
             :size="75"
             object-fit="cover"
             fallback-src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-            :src="`${config.serverUrl}/image/${userInfo.icon}`"
+            :src="`${config.serverUrl}/image/${props.info.icon}`"
         />
     </div>
     <h3 class="userName">
-        {{ userInfo.name }}
+        {{ props.info.name }}
     </h3>
 </template>
 <script setup lang="ts">
@@ -22,13 +22,6 @@ const props = defineProps({
     info: {
         type: Object,
     },
-});
-
-let userInfo: any = computed({
-    get() {
-        return props.info;
-    },
-    set(val) {},
 });
 </script>
 <style lang="scss" scoped>

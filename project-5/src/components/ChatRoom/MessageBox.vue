@@ -3,7 +3,6 @@
         class="chatroom-inner notMsg"
         ref="findScrollHeight"
         @click="closeAll"
-        @scroll="chatroomToBottom($event)"
         v-if="messageList.length === 0"
     >
         尚無聊天訊息!!
@@ -109,7 +108,7 @@
                         <div
                             class="msg_more"
                             :class="{ show: text.msgFunctionStatus }"
-                            @click.stop="closeBubble(text)"
+                            @click.stop="onBubble(text)"
                         >
                             <img src="../../assets/Images/chatroom/more.svg" alt="#" />
                             <!-- 訊息功能框 -->
@@ -131,16 +130,17 @@
                                     </li>
                                     <!-- <li @click.stop="deleteQuestion(text)"><span>刪除</span></li> -->
                                     <li
-                                        v-if="text.sender === 0 && text.msgType !== 6"
+                                        v-if="text.sender === 0"
                                         @click.stop="confirmRecallPopup(text)"
                                     >
                                         <span>收回</span>
                                     </li>
                                     <li
                                         v-if="
-                                            text.msgType === 1 ||
-                                            text.msgType === 3 ||
-                                            text.msgType === 6
+                                            (text.msgType === 1 ||
+                                                text.msgType === 3 ||
+                                                text.msgType === 6) &&
+                                            !text.format.isMMS
                                         "
                                         @click.stop="replyMsgEvent(text)"
                                     >
@@ -193,7 +193,19 @@
                                         ({{ String(mobile).slice(0, 3) }})
                                         {{ String(mobile).slice(-9) }}
                                     </div>
+                                    <!-- 自己回覆照片顯示照片 -->
                                     <div v-if="text.format.replyObj.msgType === 6">[照片]</div>
+                                    <!-- 對方回覆照片顯示照片 -->
+                                    <div
+                                        v-if="
+                                            text.format.replyObj.janusMsg &&
+                                            text.format.replyObj.janusMsg.msgType === 6
+                                        "
+                                    >
+                                        [照片]
+                                    </div>
+
+                                    <!-- 接收自己回覆訊息 -->
                                     <n-ellipsis
                                         v-if="text.format.replyObj.msgType === 1"
                                         style="width: 100%"
@@ -202,17 +214,59 @@
                                     >
                                         {{ text.format.replyObj.msgContent }}
                                     </n-ellipsis>
+                                    <!-- 接收對方回覆訊息 -->
+                                    <n-ellipsis
+                                        v-if="
+                                            text.format.replyObj.janusMsg &&
+                                            text.format.replyObj.janusMsg.msgType === 1
+                                        "
+                                        style="width: 100%"
+                                        :line-clamp="2"
+                                        :tooltip="false"
+                                    >
+                                        {{ text.format.replyObj.janusMsg.message }}
+                                    </n-ellipsis>
                                 </div>
+                                <!-- 自己回覆貼圖格式 -->
                                 <div class="replyImg" v-if="text.format.replyObj.msgType === 3">
                                     <img
                                         :src="`${text.format.replyObj.format.stickerUrl}${text.format.replyObj.format.stickerPackID}/${text.format.replyObj.format.stickerFileID}.${text.format.replyObj.format.ext}`"
                                     />
                                 </div>
+                                <!-- 對方回覆貼圖格式 -->
+                                <div
+                                    class="replyImg"
+                                    v-if="
+                                        text.format.replyObj.janusMsg &&
+                                        text.format.replyObj.janusMsg.msgType === 3
+                                    "
+                                >
+                                    <img
+                                        :src="`${text.format.replyObj.janusMsg.format.stickerUrl}${text.format.replyObj.janusMsg.format.stickerPackID}/${text.format.replyObj.janusMsg.format.stickerFileID}.${text.format.replyObj.janusMsg.format.ext}`"
+                                    />
+                                </div>
+                                <!-- 對方回覆圖片格式 -->
+                                <div
+                                    class="replyImg"
+                                    v-if="
+                                        text.format.replyObj.janusMsg &&
+                                        text.format.replyObj.janusMsg.msgType === 6
+                                    "
+                                >
+                                    <img
+                                        :src="`${config.fileUrl}/fls/${
+                                            text.format.replyObj.janusMsg.format.Fileid
+                                        }.${text.format.replyObj.janusMsg.format.ShowName.split(
+                                            '.'
+                                        ).pop()}`"
+                                    />
+                                </div>
+                                <!-- 自己回覆圖片格式 -->
                                 <div class="replyImg" v-if="text.format.replyObj.msgType === 6">
                                     <img
                                         :src="`${config.fileUrl}/fls/${
                                             text.format.replyObj.format.Fileid
-                                        }${String(text.format.replyObj.format.ShowName).slice(-4)}`"
+                                        }.${text.format.replyObj.format.ShowName.split('.').pop()}`"
                                     />
                                 </div>
                             </div>
@@ -256,16 +310,16 @@
                                 Your browser does not support the audio tag.
                             </audio>
                             <n-icon @click="toggleAudio(text)" size="24">
-                                <pause-circle-sharp v-if="text.isPlay" />
-                                <play-circle-sharp v-else />
+                                <pause-circle-sharp v-show="text.isPlay" />
+                                <play-circle-sharp v-show="!text.isPlay" />
                             </n-icon>
-                            <span v-if="text.isPlay">{{ newTime }}</span>
-                            <span v-if="!text.isPlay" class="totalTime">
+                            <span v-show="text.isPlay">{{ newTime }}</span>
+                            <span v-show="!text.isPlay" class="totalTime">
                                 {{ convertTime(text.format.SoundLength) }}
                             </span>
                             <img
                                 class="audioWave"
-                                v-if="!text.isPlay"
+                                v-show="!text.isPlay"
                                 src="../../assets/Images/chatroom/audio.svg"
                             />
                         </div>
@@ -279,9 +333,9 @@
                             @touchend="gtouchend()"
                         >
                             <img
-                                :src="`${config.fileUrl}/fls/${text.format.Fileid}${String(
-                                    text.format.ShowName
-                                ).slice(-4)}`"
+                                :src="`${config.fileUrl}/fls/${
+                                    text.format.Fileid
+                                }.${text.format.ShowName.split('.').pop()}`"
                             />
                         </div>
                         <!-- 文件訊息 -->
@@ -309,7 +363,7 @@
                         <div
                             class="phoneMsg content"
                             v-else-if="text.msgType === 9"
-                            @touchend="doCall(DO_CALL_NAME)"
+                            @touchend="doCall(chatRoomID)"
                         >
                             <router-link class="phone" :to="`/phone?eventID=${route.params.id}`">
                                 <div class="phonePic">
@@ -328,21 +382,23 @@
                                     <h4 v-if="text.format.phoneType === 4">未接來電</h4>
                                 </div>
                             </router-link>
-                            <a class="phone-web" @click="onPhoneCallModal">
+                            <a class="phone-web" @click="onPhoneCallModal(chatRoomID)">
                                 <div class="phonePic">
                                     <img
                                         src="../../assets/Images/chatroom/phone-fill-round-y.svg"
                                         alt=""
                                     />
                                 </div>
-                                <div class="phoneStatus">
+                                <div class="phoneStatus" v-if="!text.format.phoneTypeOther">
                                     <h4 v-if="text.format.phoneType === 1">無回應</h4>
                                     <h4 v-if="text.format.phoneType === 2">取消通話</h4>
                                     <h4 v-if="text.format.phoneType === 3">語音來電</h4>
                                     <p v-if="text.format.phoneType === 3">
                                         {{ text.format.phoneTime }}
                                     </p>
-                                    <h4 v-if="text.format.phoneType === 4">未接來電</h4>
+                                </div>
+                                <div class="phoneStatus" v-else>
+                                    <h4 v-if="text.format.phoneTypeOther === 4">未接來電</h4>
                                 </div>
                             </a>
                         </div>
@@ -361,7 +417,8 @@
                     </div>
                     <!-- 時間戳記 -->
                     <div class="timestamp" :class="{ yourTimeStamp: text.sender === 0 }">
-                        <span v-if="text.isRead && text.sender === 1">已讀</span>
+                        <div class="mms" v-if="text.format.isMMS">以MMS簡訊發送</div>
+                        <span v-if="text.isRead && text.sender === 0">已讀</span>
                         <span>{{ dayjs.unix(text.time).format("A hh:mm") }}</span>
                     </div>
                 </div>
@@ -369,10 +426,11 @@
                     size="30"
                     class="scrollToBottom"
                     v-show="
-                        chatroomScrolltopAndWindowHeight < chatroomScrollHeight &&
+                        chatroomScrolltopAndWindowHeight < chatroomScrollHeight - 1 &&
                         !text.replyObj &&
                         !isReplyBox &&
-                        !inputFunctionBoolean
+                        !inputFunctionBoolean &&
+                        !showStickerModal
                     "
                     @click="scrollToBottom"
                 >
@@ -405,17 +463,7 @@
 </template>
 
 <script setup lang="ts">
-import ScaleLoader from "vue-spinner/src/ScaleLoader.vue";
-import {
-    ref,
-    computed,
-    onMounted,
-    onUpdated,
-    watch,
-    watchEffect,
-    nextTick,
-    onBeforeUpdate,
-} from "vue";
+import { ref, computed, onMounted, onUpdated, watch, nextTick, onBeforeUpdate } from "vue";
 import useClipboard from "vue-clipboard3";
 import { api as viewerApi } from "v-viewer";
 import { storeToRefs } from "pinia";
@@ -435,14 +483,15 @@ import { useSearchStore } from "@/store/search";
 import { txt } from "@/util/interfaceUtil";
 import { sendPrivateMsg } from "@/util/chatUtil";
 import user_pic_defaul from "@/assets/Images/chatroom/User-round.svg";
-import { scrollPageTo, convertTime, DO_CALL_NAME } from "@/util/commonUtil";
+import { scrollPageTo, convertTime, DO_CALL_NAME, removeDuplicates } from "@/util/commonUtil";
 import { currentTime, currentDate, currentMonth, chDateFormat } from "@/util/dateUtil";
 import UserInfoModel from "@/components/UserInfoModel.vue";
 import config from "@/config/config";
 
+import { formatLength } from "naive-ui/lib/_utils";
 const apiStore = useApiStore();
-const { getHistoryApi } = apiStore;
-const { chatroomMsg, msgStart, chatroomList } = storeToRefs(apiStore);
+const { getHistoryApi, getChatroomlistApi } = apiStore;
+const { chatroomMsg, msgStart, isInput } = storeToRefs(apiStore);
 const timeOutEvent = ref(0);
 
 // 彈窗 store
@@ -483,27 +532,47 @@ let {
     textPlugin,
     isReplyBox,
     inputFunctionBoolean,
+    isMmsSend,
+    showStickerModal,
 } = storeToRefs(chatStore);
 
-const onPhoneCallModal = () => {
+const onPhoneCallModal = (chatRoomID) => {
     phoneCallModal.value = true;
-    doCall(DO_CALL_NAME);
+    doCall(chatRoomID);
 };
 
 //search store
 const searchStore = useSearchStore();
 const { closeSearchBar } = searchStore;
-const chatRoomID: any = computed(() =>
-    chatroomList.value.length > 0 && !(route.query && route.query.chatroomID)
-        ? chatroomList.value[0].chatroomID
-        : route.query.chatroomID
-);
-const mobile: any = computed(() =>
-    chatroomList.value.length > 0 && !(route.query && route.query.mobile)
-        ? chatroomList.value[0].mobile
-        : route.query.mobile
-);
-const messageList = computed(() => chatroomMsg.value.messageList);
+const chatRoomID: any = computed(() => route.query.chatroomID);
+const mobile: any = computed(() => route.query.mobile);
+chatroomMsg.value.messageList = chatroomMsg.value.messageList.map((item) => {
+    return {
+        ...item,
+        format: {
+            ...item.format,
+            replyObj:
+                item.sender === 0
+                    ? item.format.replyObj
+                    : item.format.replyObj && {
+                          ...item.format.replyObj.janusMsg,
+                          chatroomID: item.format.replyObj.janusMsg.chatroomID,
+                          format: item.format.replyObj.janusMsg.format,
+                          msgContent: item.format.replyObj.janusMsg.message,
+                      },
+        },
+    };
+});
+
+const messageList: any = computed({
+    get() {
+        return chatroomMsg.value.messageList;
+    },
+    set(val) {
+        chatroomMsg.value.messageList = val;
+    },
+});
+
 const pictures: any = computed(() => {
     return messageList.value.filter((item) => {
         return item.msgType == 6;
@@ -549,7 +618,7 @@ const gtouchmove = () => {
 //真正長按後應該執行的内容
 const longPress = (msg: any) => {
     timeOutEvent.value = 0;
-    closeBubble(msg);
+    onBubble(msg);
 };
 
 //上傳檔案
@@ -596,6 +665,7 @@ const onUploadFile = (file: any) => {
                                         id: nanoid(),
                                         isReplay: replyMsg.value ? true : false,
                                         replyObj: replyMsg.value ? { ...replyMsg.value } : "",
+                                        isMMS: isMmsSend.value,
                                         Fileid: res.data.fileid,
                                         ShowName: fileName,
                                         FileSize: fileArr.size,
@@ -604,15 +674,14 @@ const onUploadFile = (file: any) => {
                                             .format("YYYY-MM-DD"),
                                     },
                                 },
-                                phoneType: "",
-                                audioInfo: "",
-                                ext: res.data.ext,
+                                currentDate: currentDate(),
                                 msgMoreStatus: false,
                                 msgFunctionStatus: false,
                                 recallStatus: false,
                                 recallPopUp: false,
                                 isExpire: false,
                                 isRead: false,
+                                isPlay: false,
                             };
 
                             messageList.value.push(imageObj);
@@ -620,6 +689,7 @@ const onUploadFile = (file: any) => {
                                 msg: imageObj,
                                 textPlugin: textPlugin.value,
                                 chatRoomID: chatRoomID.value,
+                                eventID: route.params.id,
                             };
                             sendPrivateMsg(sendMsgObj);
                             pictures.value.push(imageObj);
@@ -659,8 +729,9 @@ const onUploadFile = (file: any) => {
                             message: "",
                             format: {
                                 id: nanoid(),
-                                isReplay: replyMsg.value ? true : false,
-                                replyObj: replyMsg.value ? { ...replyMsg.value } : "",
+                                isReplay: false,
+                                replyObj: "",
+                                isMMS: isMmsSend.value,
                                 Fileid: res.data.fileid,
                                 ShowName: fileArr.name,
                                 ExtensionName: res.data.ext,
@@ -668,21 +739,21 @@ const onUploadFile = (file: any) => {
                                 expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                             },
                         },
-                        phoneType: "",
-                        audioInfo: "",
-                        ext: res.data.ext,
+                        currentDate: currentDate(),
                         msgMoreStatus: false,
                         msgFunctionStatus: false,
                         recallStatus: false,
                         recallPopUp: false,
                         isExpire: false,
                         isRead: false,
+                        isPlay: false,
                     };
                     messageList.value.push(fileObj);
                     const sendMsgObj = {
                         msg: fileObj,
                         textPlugin: textPlugin.value,
                         chatRoomID: chatRoomID.value,
+                        eventID: route.params.id,
                     };
                     sendPrivateMsg(sendMsgObj);
                     pictures.value.push(fileObj);
@@ -769,24 +840,31 @@ const chatroomToBottom = (e: any) => {
     chatroomWindowHeight.value = e.target.clientHeight;
     chatroomScrollHeight.value = e.target.scrollHeight;
     chatroomScrolltopAndWindowHeight.value = chatroomScrolltop.value + chatroomWindowHeight.value;
+    // console.log("視窗滾動高", chatroomScrollHeight.value);
+    // console.log("視窗離頂部距離+視窗高", chatroomScrolltopAndWindowHeight.value);
 };
 
 //聊天室置底功能
 const findScrollHeight: any = ref(null);
 const scrollHeight: any = ref(0);
+
 nextTick(() => {
     scrollHeight.value = findScrollHeight.value.scrollHeight;
     scrollToBottom();
 });
 
-onUpdated(() => {
-    scrollHeight.value = findScrollHeight.value.scrollHeight;
-});
 watch(scrollHeight, (newValue, oldValue) => {
     if (newValue > oldValue) {
         scrollToBottom();
     }
 });
+
+//聊天室滾動條置底
+const scrollToBottom = (): void => {
+    findScrollHeight.value.scrollTop = scrollHeight.value;
+    console.log("findScorllHeight:", findScrollHeight.value.scrollTop);
+};
+
 const handleScroll = (e) => {
     if (e.target.scrollTop == 0) {
         loadMore();
@@ -801,11 +879,6 @@ const loadMore = () => {
 };
 
 window.addEventListener("scroll", handleScroll, true);
-
-//聊天室滾動條置底
-const scrollToBottom = (): void => {
-    findScrollHeight.value.scrollTop = scrollHeight.value;
-};
 
 //重新編輯
 const reEdit = (id: string): void => {
@@ -827,15 +900,17 @@ const copyMsg = async (text: any) => {
     text.msgFunctionStatus = false;
 };
 
-//取消訊息功能泡泡
-const closeBubble = (text: txt): void => {
-    messageList.value.forEach((item: txt) => {
-        if (item.time === text.time) {
-            text.msgFunctionStatus = !text.msgFunctionStatus;
+//訊息功能泡泡
+const onBubble = (text: txt): void => {
+    let arr = chatroomMsg.value.messageList.map((item: txt) => {
+        if (item.format.id === text.format.id) {
+            text.msgFunctionStatus = true;
         } else {
             item.msgFunctionStatus = false;
         }
+        return item;
     });
+    messageList.value = arr;
 };
 
 //下載圖片
@@ -873,12 +948,12 @@ const previewURL = (fileid: string): void => {
     pictures.value.forEach((img: any) => {
         if (
             !viewImgs.value.includes(
-                `${config.fileUrl}/fls/${img.format.Fileid}${String(img.format.ShowName).slice(-4)}`
+                `${config.fileUrl}/fls/${img.format.Fileid}.${img.format.ShowName.split(".").pop()}`
             ) &&
             img.msgType === 6
         ) {
             viewImgs.value.push(
-                `${config.fileUrl}/fls/${img.format.Fileid}${String(img.format.ShowName).slice(-4)}`
+                `${config.fileUrl}/fls/${img.format.Fileid}.${img.format.ShowName.split(".").pop()}`
             );
         }
     });
@@ -1256,6 +1331,7 @@ const previewURL = (fileid: string): void => {
 
             .dialog-inner {
                 display: inline-flex;
+                align-items: center;
                 justify-content: flex-end;
                 position: relative;
                 .msgFunction {
@@ -1644,6 +1720,11 @@ const previewURL = (fileid: string): void => {
             .timestamp {
                 display: flex;
                 flex-direction: column;
+                .mms {
+                    font-size: $font-size-12;
+                    margin-bottom: 4px;
+                    color: $danger;
+                }
                 span {
                     display: block;
                     color: $gray-3;

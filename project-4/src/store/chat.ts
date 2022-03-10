@@ -24,13 +24,15 @@ export const useChatStore = defineStore({
         stickerGroupID: <number>1,
         stickerGroup: <any>[],
         stickerItems: <any>[],
+        participantList: <any>[],
+        msgParticipantList: <any>[],
     }),
     getters: {},
     actions: {
         // 回覆訊息
         replyMsgEvent(msg: any) {
             const findId = this.messages.find((text: any) => {
-                return text.id === msg.id;
+                return text.janusMsg.format.id === msg.janusMsg.format.id;
             });
             this.replyMsg = findId;
             this.isReplyBox = true;
@@ -53,7 +55,7 @@ export const useChatStore = defineStore({
         //刪除訊息
         confirmDelete(chatToken: any) {
             this.messages = this.messages.filter((item: any) => {
-                return !this.deleteGroup.includes(item.id);
+                return !this.deleteGroup.includes(item.janusMsg.format.id);
             });
             localStorageMsg(this.messages, chatToken);
             this.deleteGroup = [];
@@ -63,18 +65,19 @@ export const useChatStore = defineStore({
 
         //獲取janus訊息
         getCompanyMsg(msgObj: any, chatToken: any) {
-            console.log("msgObj:", msgObj);
-
-            const messagesParse = JSON.parse(msgObj.msg);
+            this.messages = JSON.parse(localStorage.getItem(`${chatToken}`) || "[]");
+            const messagesParse: any = JSON.parse(msgObj.msg);
             messagesParse.janusMsg.sender = 0;
             this.messages.push(messagesParse);
-            if (msgObj.display !== ME_USER_NAME) {
-                this.messages = JSON.parse(localStorage.getItem(`${chatToken}`) || "[]");
-                this.messages.forEach((element) => {
-                    element.isRead = true;
-                });
-                localStorageMsg(this.messages, chatToken);
+            this.messages.forEach((element) => {
+                element.isRead = true;
+            });
+            localStorageMsg(this.messages, chatToken);
+            if (messagesParse.janusMsg.msgType === 6 || messagesParse.janusMsg.msgType === 7) {
+                this.pictures.push(messagesParse);
+                localStorage.setItem(`${chatToken}-pictures`, JSON.stringify(this.pictures));
             }
+            console.log("this.messages:", this.messages);
         },
         // 開啟錄音視窗
         openRecorder() {

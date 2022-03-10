@@ -8,11 +8,16 @@ import { IProcessData } from "@/util/interfaceUtil";
 import { MY_ROOM, YOU_USER_NAME, ME_USER_NAME } from "@/util/commonUtil";
 
 //發送私人訊息
-export const sendPrivateMsg = ({ msg = <any>"", textPlugin = <any>"", chatToken = <any>"" }) => {
-    console.log("sendPrivateMsg:", msg);
-    // const getText = msg.message || msg.format?.ShowName;
-    // const display = eventInfo.name;
-    const display = YOU_USER_NAME;
+export const sendPrivateMsg = ({
+    msg = <any>"",
+    textPlugin = <any>"",
+    chatToken = <any>"",
+    msgParticipantList = <any>[],
+    eventID = <any>"",
+}) => {
+    console.log("msgParticipantList:", msgParticipantList);
+
+    const display = msgParticipantList;
     if (!display) return;
 
     if (msg === "") {
@@ -22,7 +27,7 @@ export const sendPrivateMsg = ({ msg = <any>"", textPlugin = <any>"", chatToken 
     const message: any = {
         textroom: "message",
         transaction: randomString(12),
-        room: MY_ROOM,
+        room: Number(eventID),
         // tos: [全部在線客服1,全部在線客服2],
         tos: display,
         text: JSON.stringify(msg),
@@ -72,7 +77,7 @@ export const processDataEvent = (data: any, chatToken: any) => {
         },
         join: () => {
             console.log("有人加入房間->", data);
-            if (data.display !== ME_USER_NAME) {
+            if ("tony" == data.username) {
                 messages.value = JSON.parse(localStorage.getItem(`${chatToken}`) || "[]");
                 messages.value.forEach((element) => {
                     element.isRead = true;

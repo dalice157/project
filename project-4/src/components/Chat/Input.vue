@@ -1,6 +1,6 @@
 <template>
     <!-- 回覆視窗 -->
-    <div class="reply" v-if="isReplyBox" @click.prevent="scrollPageTo(replyMsg.id)">
+    <div class="reply" v-if="isReplyBox" @click.prevent="scrollPageTo(replyMsg.janusMsg.format.id)">
         <div class="usertext">
             <div class="replyText" v-if="replyMsg && replyMsg.janusMsg.msgType === 6">[照片]</div>
             <div class="replyText" v-if="replyMsg && replyMsg.janusMsg.msgType === 3">[貼圖]</div>
@@ -14,7 +14,9 @@
             </n-ellipsis>
             <div class="img" v-if="replyMsg && replyMsg.janusMsg.msgType === 6">
                 <img
-                    :src="`${config.fileUrl}/fls/${replyMsg.janusMsg.format.Fileid}${replyMsg.ext}`"
+                    :src="`${config.fileUrl}/fls/${replyMsg.janusMsg.format.Fileid}${String(
+                        replyMsg.janusMsg.format.ShowName
+                    ).slice(-4)}`"
                 />
             </div>
             <div class="img" v-if="replyMsg && replyMsg.janusMsg.msgType === 3">
@@ -278,14 +280,13 @@ import dayjs from "dayjs";
 
 import { txt } from "@/util/interfaceUtil";
 import { sendPrivateMsg } from "@/util/chatUtil";
-import { scrollPageTo, localStorageMsg, isObjToBeZero, chatroomID } from "@/util/commonUtil";
+import { scrollPageTo, localStorageMsg, eventID, chatroomID, convertTime } from "@/util/commonUtil";
 import { currentTime, currentDate, currentMonth } from "@/util/dateUtil";
 import { useApiStore } from "@/store/api";
 import { useChatStore } from "@/store/chat";
 import { useModelStore } from "@/store/model";
 import mapIcon from "@/assets/Images/m_fa_mappin.png";
 import sendIcon from "@/assets/Images/btn_send.png";
-import { convertTime } from "@/util/commonUtil";
 import config from "@/config/config";
 
 // model sotre
@@ -317,11 +318,12 @@ const {
     stickerGroupID,
     stickerGroup,
     stickerItems,
+    participantList,
 } = storeToRefs(chatStore);
 //router
 const route = useRoute();
 onMounted(() => {
-    console.log("**************", inputInstRef);
+    // console.log("**************", inputInstRef);
     inputInstRef.value.blur();
     inputVal.value = inputInstRef.value;
 });
@@ -386,43 +388,32 @@ const shareMap = () => {
             msgType: 8,
             message: "",
             format: {
+                id: nanoid(),
+                isReplay: false,
+                replyObj: "",
                 Longitude: longitude.value,
                 Latitude: latitude.value,
                 LocateTime: new Date(),
                 LocateSource: 0,
             },
         },
-        id: nanoid(),
-        ext: "",
-        phoneType: "",
-        audioInfo: "",
+        currentDate: currentDate(),
+        time: currentTime(),
         msgMoreStatus: false,
         msgFunctionStatus: false,
         recallStatus: false,
         recallPopUp: false,
-        time: currentTime(),
-        currentDate: currentDate(),
-        currentMonth: currentMonth(),
-        expirationDate: "",
         isExpire: false,
-        replyObj: replyMsg.value
-            ? {
-                  id: replyMsg.value.id,
-                  ext: replyMsg.value.ext,
-                  msgType: replyMsg.value.janusMsg.msgType,
-                  message: replyMsg.value.janusMsg.message,
-                  format: replyMsg.value.janusMsg.format,
-                  recallStatus: replyMsg.value.recallStatus,
-                  recallPopUp: replyMsg.value.recallPopUp,
-                  sender: replyMsg.value.janusMsg.sender,
-              }
-            : "",
+        isRead: false,
+        isPlay: false,
     };
     messages.value.push(mapObj);
     const sendMsgObj = {
         msg: mapObj,
         textPlugin: textPlugin.value,
         chatToken: route.query.chatToken,
+        msgParticipantList: participantList.value,
+        eventID: eventID(route.query.chatToken),
     };
     sendPrivateMsg(sendMsgObj);
     localStorageMsg(messages.value, route.query.chatToken);
@@ -558,53 +549,39 @@ const stopRecorder = (e: any) => {
             audioObj = {
                 janusMsg: {
                     chatroomID: chatroomID(route.query.chatToken),
-                    sender: 1, // 1 為自己傳送的訊息
+                    sender: 1,
                     type: 2,
                     msgType: 5,
                     message: "",
                     format: {
+                        id: nanoid(),
+                        isReplay: false,
+                        replyObj: "",
                         Fileid: res.data.fileid,
                         ShowName: `record_${audioFile.size}`,
                         Description: "",
                         FileSize: audioFile.size,
                         SoundLength: duration.value,
+                        expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                     },
                 },
-                id: nanoid(),
-                phoneType: "",
-                audioInfo: {
-                    SoundTime: convertTime(duration.value),
-                    type: audioFile.type,
-                    isPlay: false,
-                },
-                ext: res.data.ext,
+                currentDate: currentDate(),
+                time: currentTime(),
                 msgMoreStatus: false,
                 msgFunctionStatus: false,
                 recallStatus: false,
                 recallPopUp: false,
-                time: currentTime(),
-                currentDate: currentDate(),
-                currentMonth: currentMonth(),
-                expirationDate: "",
                 isExpire: false,
-                replyObj: replyMsg.value
-                    ? {
-                          id: replyMsg.value.id,
-                          ext: replyMsg.value.ext,
-                          msgType: replyMsg.value.janusMsg.msgType,
-                          message: replyMsg.value.janusMsg.message,
-                          format: replyMsg.value.janusMsg.format,
-                          recallStatus: replyMsg.value.recallStatus,
-                          recallPopUp: replyMsg.value.recallPopUp,
-                          sender: replyMsg.value.janusMsg.sender,
-                      }
-                    : "",
+                isRead: false,
+                isPlay: false,
             };
             messages.value.push(audioObj);
             const sendMsgObj = {
                 msg: audioObj,
                 textPlugin: textPlugin.value,
                 chatToken: route.query.chatToken,
+                msgParticipantList: participantList.value,
+                eventID: eventID(route.query.chatToken),
             };
             sendPrivateMsg(sendMsgObj);
             localStorageMsg(messages.value, route.query.chatToken);
@@ -629,32 +606,21 @@ const addMsg = (): void => {
             type: 2,
             msgType: 1,
             message: str,
-            format: {},
+            format: {
+                id: nanoid(),
+                isReplay: replyMsg.value ? true : false,
+                replyObj: replyMsg.value ? { ...replyMsg.value } : "",
+            },
         },
-        id: nanoid(),
-        phoneType: "",
-        audioInfo: "",
+        currentDate: currentDate(),
+        time: currentTime(),
         msgMoreStatus: false,
         msgFunctionStatus: false,
         recallStatus: false,
         recallPopUp: false,
-        time: currentTime(),
-        currentDate: currentDate(),
-        currentMonth: currentMonth(),
-        expirationDate: "",
         isExpire: false,
-        replyObj: replyMsg.value
-            ? {
-                  id: replyMsg.value.id,
-                  ext: replyMsg.value.ext,
-                  msgType: replyMsg.value.janusMsg.msgType,
-                  message: replyMsg.value.janusMsg.message,
-                  format: replyMsg.value.janusMsg.format,
-                  recallStatus: replyMsg.value.recallStatus,
-                  recallPopUp: replyMsg.value.recallPopUp,
-                  sender: replyMsg.value.janusMsg.sender,
-              }
-            : "",
+        isRead: false,
+        isPlay: false,
     };
 
     if (str !== "") {
@@ -663,6 +629,8 @@ const addMsg = (): void => {
             msg: textObj,
             textPlugin: textPlugin.value,
             chatToken: route.query.chatToken,
+            msgParticipantList: participantList.value,
+            eventID: eventID(route.query.chatToken),
         };
         sendPrivateMsg(sendMsgObj);
     }
@@ -708,39 +676,24 @@ const uploadImage = (e: any) => {
                                 msgType: 6,
                                 message: "",
                                 format: {
+                                    id: nanoid(),
+                                    isReplay: replyMsg.value ? true : false,
+                                    replyObj: replyMsg.value ? { ...replyMsg.value } : "",
                                     Fileid: res.data.fileid,
                                     ShowName: fileName,
                                     FileSize: file.size,
+                                    expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                                 },
                             },
-                            id: nanoid(),
-                            phoneType: "",
-                            audioInfo: "",
-                            ext: res.data.ext,
+                            currentDate: currentDate(),
+                            time: currentTime(),
                             msgMoreStatus: false,
                             msgFunctionStatus: false,
                             recallStatus: false,
                             recallPopUp: false,
-                            time: currentTime(),
-                            // currentDate: "2022-06-07",
-                            currentDate: currentDate(),
-                            // currentMonth: "2022-2",
-                            currentMonth: currentMonth(),
-                            expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                             isExpire: false,
                             isRead: false,
-                            replyObj: replyMsg.value
-                                ? {
-                                      id: replyMsg.value.id,
-                                      ext: replyMsg.value.ext,
-                                      msgType: replyMsg.value.janusMsg.msgType,
-                                      message: replyMsg.value.janusMsg.message,
-                                      format: replyMsg.value.janusMsg.format,
-                                      recallStatus: replyMsg.value.recallStatus,
-                                      recallPopUp: replyMsg.value.recallPopUp,
-                                      sender: replyMsg.value.janusMsg.sender,
-                                  }
-                                : "",
+                            isPlay: false,
                         };
 
                         messages.value.push(imageObj);
@@ -748,6 +701,8 @@ const uploadImage = (e: any) => {
                             msg: imageObj,
                             textPlugin: textPlugin.value,
                             chatToken: route.query.chatToken,
+                            msgParticipantList: participantList.value,
+                            eventID: eventID(route.query.chatToken),
                         };
                         sendPrivateMsg(sendMsgObj);
                         localStorageMsg(messages.value, route.query.chatToken);
@@ -808,39 +763,26 @@ const onUploadFilePC = (e: any) => {
                                     msgType: 6,
                                     message: "",
                                     format: {
+                                        id: nanoid(),
+                                        isReplay: replyMsg.value ? true : false,
+                                        replyObj: replyMsg.value ? { ...replyMsg.value } : "",
                                         Fileid: res.data.fileid,
                                         ShowName: fileName,
                                         FileSize: fileArr.size,
+                                        expirationDate: dayjs
+                                            .unix(res.data.exp)
+                                            .format("YYYY-MM-DD"),
                                     },
                                 },
-                                id: nanoid(),
-                                phoneType: "",
-                                audioInfo: "",
-                                ext: res.data.ext,
+                                currentDate: currentDate(),
+                                time: currentTime(),
                                 msgMoreStatus: false,
                                 msgFunctionStatus: false,
                                 recallStatus: false,
                                 recallPopUp: false,
-                                time: currentTime(),
-                                // currentDate: "2022-03-27",
-                                currentDate: currentDate(),
-                                // currentMonth: "2022-1",
-                                currentMonth: currentMonth(),
-                                expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                                 isExpire: false,
                                 isRead: false,
-                                replyObj: replyMsg.value
-                                    ? {
-                                          id: replyMsg.value.id,
-                                          ext: replyMsg.value.ext,
-                                          msgType: replyMsg.value.janusMsg.msgType,
-                                          message: replyMsg.value.janusMsg.message,
-                                          format: replyMsg.value.janusMsg.format,
-                                          recallStatus: replyMsg.value.recallStatus,
-                                          recallPopUp: replyMsg.value.recallPopUp,
-                                          sender: replyMsg.value.janusMsg.sender,
-                                      }
-                                    : "",
+                                isPlay: false,
                             };
 
                             messages.value.push(imageObj);
@@ -848,6 +790,8 @@ const onUploadFilePC = (e: any) => {
                                 msg: imageObj,
                                 textPlugin: textPlugin.value,
                                 chatToken: route.query.chatToken,
+                                msgParticipantList: participantList.value,
+                                eventID: eventID(route.query.chatToken),
                             };
                             sendPrivateMsg(sendMsgObj);
                             localStorageMsg(messages.value, route.query.chatToken);
@@ -892,44 +836,33 @@ const onUploadFilePC = (e: any) => {
                             msgType: 7,
                             message: "",
                             format: {
+                                id: nanoid(),
+                                isReplay: false,
+                                replyObj: "",
                                 Fileid: res.data.fileid,
                                 ShowName: fileArr.name,
                                 ExtensionName: res.data.ext,
                                 FileSize: fileArr.size,
+                                expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                             },
                         },
-                        id: nanoid(),
-                        phoneType: "",
-                        audioInfo: "",
-                        ext: res.data.ext,
+                        currentDate: currentDate(),
+                        time: currentTime(),
                         msgMoreStatus: false,
                         msgFunctionStatus: false,
                         recallStatus: false,
                         recallPopUp: false,
-                        time: currentTime(),
-                        currentDate: currentDate(),
-                        currentMonth: currentMonth(),
-                        expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                         isExpire: false,
                         isRead: false,
-                        replyObj: replyMsg.value
-                            ? {
-                                  id: replyMsg.value.id,
-                                  ext: replyMsg.value.ext,
-                                  msgType: replyMsg.value.janusMsg.msgType,
-                                  message: replyMsg.value.janusMsg.message,
-                                  format: replyMsg.value.janusMsg.format,
-                                  recallStatus: replyMsg.value.recallStatus,
-                                  recallPopUp: replyMsg.value.recallPopUp,
-                                  sender: replyMsg.value.janusMsg.sender,
-                              }
-                            : "",
+                        isPlay: false,
                     };
                     messages.value.push(fileObj);
                     const sendMsgObj = {
                         msg: fileObj,
                         textPlugin: textPlugin.value,
                         chatToken: route.query.chatToken,
+                        msgParticipantList: participantList.value,
+                        eventID: eventID(route.query.chatToken),
                     };
                     sendPrivateMsg(sendMsgObj);
                     localStorageMsg(messages.value, route.query.chatToken);
@@ -977,44 +910,33 @@ const onUploadFileMP = (e: any) => {
                         msgType: 7,
                         message: "",
                         format: {
+                            id: nanoid(),
+                            isReplay: false,
+                            replyObj: "",
                             Fileid: res.data.fileid,
                             ShowName: fileArr.name,
                             ExtensionName: res.data.ext,
                             FileSize: fileArr.size,
+                            expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                         },
                     },
-                    id: nanoid(),
-                    phoneType: "",
-                    audioInfo: "",
-                    ext: res.data.ext,
+                    currentDate: currentDate(),
+                    time: currentTime(),
                     msgMoreStatus: false,
                     msgFunctionStatus: false,
                     recallStatus: false,
                     recallPopUp: false,
-                    time: currentTime(),
-                    currentDate: currentDate(),
-                    currentMonth: currentMonth(),
-                    expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                     isExpire: false,
                     isRead: false,
-                    replyObj: replyMsg.value
-                        ? {
-                              id: replyMsg.value.id,
-                              ext: replyMsg.value.ext,
-                              msgType: replyMsg.value.janusMsg.msgType,
-                              message: replyMsg.value.janusMsg.message,
-                              format: replyMsg.value.janusMsg.format,
-                              recallStatus: replyMsg.value.recallStatus,
-                              recallPopUp: replyMsg.value.recallPopUp,
-                              sender: replyMsg.value.janusMsg.sender,
-                          }
-                        : "",
+                    isPlay: false,
                 };
                 messages.value.push(fileObj);
                 const sendMsgObj = {
                     msg: fileObj,
                     textPlugin: textPlugin.value,
                     chatToken: route.query.chatToken,
+                    msgParticipantList: participantList.value,
+                    eventID: eventID(route.query.chatToken),
                 };
                 sendPrivateMsg(sendMsgObj);
                 localStorageMsg(messages.value, route.query.chatToken);
@@ -1051,6 +973,9 @@ const addSticker = (sticker, id) => {
             msgType: 3,
             message: "",
             format: {
+                id: nanoid(),
+                isReplay: replyMsg.value ? true : false,
+                replyObj: replyMsg.value ? { ...replyMsg.value } : "",
                 stickerPackID: sticker.stickerPackID,
                 stickerUrl: stickerUrl.value,
                 ext: sticker.ext,
@@ -1058,31 +983,15 @@ const addSticker = (sticker, id) => {
                 title: `貼圖${sticker.stickerPackID}-${id}`,
             },
         },
-        id: nanoid(),
-        ext: "",
-        phoneType: "",
-        audioInfo: "",
+        currentDate: currentDate(),
+        time: currentTime(),
         msgMoreStatus: false,
         msgFunctionStatus: false,
         recallStatus: false,
         recallPopUp: false,
-        time: currentTime(),
-        currentDate: currentDate(),
-        currentMonth: currentMonth(),
-        expirationDate: "",
         isExpire: false,
-        replyObj: replyMsg.value
-            ? {
-                  id: replyMsg.value.id,
-                  ext: replyMsg.value.ext,
-                  msgType: replyMsg.value.janusMsg.msgType,
-                  message: replyMsg.value.janusMsg.message,
-                  format: replyMsg.value.janusMsg.format,
-                  recallStatus: replyMsg.value.recallStatus,
-                  recallPopUp: replyMsg.value.recallPopUp,
-                  sender: replyMsg.value.janusMsg.sender,
-              }
-            : "",
+        isRead: false,
+        isPlay: false,
     };
     const stickers = {
         stickerPackID: sticker.stickerPackID,
@@ -1096,6 +1005,8 @@ const addSticker = (sticker, id) => {
         msg: stickerObj,
         textPlugin: textPlugin.value,
         chatToken: route.query.chatToken,
+        msgParticipantList: participantList.value,
+        eventID: eventID(route.query.chatToken),
     };
     const isStickerPush = stickerItems.value.some((item) => {
         return item.title === stickers.title;
@@ -1136,6 +1047,9 @@ const themeOverrides = {
 const confirmDeletePopup = () => {
     deletePopUp.value = !deletePopUp.value;
 };
+watchEffect(() => {
+    messages.value;
+});
 </script>
 <style lang="scss">
 @import "~@/assets/scss/extend";

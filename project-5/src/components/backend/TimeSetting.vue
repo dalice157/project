@@ -1,40 +1,32 @@
 <template>
-    <!-- <div class="timeSetting"> -->
     <div class="timeSetting">
         <h2>發送時間設定</h2>
         <n-divider></n-divider>
         <div class="settingRadio">
             <n-radio-group v-model:value="radio" name="radioGroup" class="radioGroup">
                 <div class="immediate">
-                    <n-config-provider :theme-overrides="themeOverrides">
-                        <n-radio :value="0">
-                            <h3>立即發送</h3>
-                        </n-radio>
-                    </n-config-provider>
+                    <n-radio :value="0">
+                        <h3>立即發送</h3>
+                    </n-radio>
                 </div>
                 <div class="reserve">
-                    <n-config-provider :theme-overrides="themeOverrides">
-                        <n-radio :value="1">
-                            <h3>預約發送</h3>
-                        </n-radio>
-                    </n-config-provider>
-                    <n-config-provider :theme-overrides="themeOverrides">
-                        <n-date-picker
-                            v-model:value="date"
-                            type="datetime"
-                            clearable
-                            :disabled="disabled"
-                            size="small"
-                        />
-                    </n-config-provider>
+                    <n-radio :value="1">
+                        <h3>預約發送</h3>
+                    </n-radio>
+                    <n-date-picker
+                        v-model:value="date"
+                        type="datetime"
+                        clearable
+                        :disabled="disabled"
+                        size="small"
+                    />
                 </div>
             </n-radio-group>
         </div>
     </div>
-    <!-- </div> -->
 </template>
 <script lang="ts" setup>
-import { ref, watchEffect, watch} from "vue";
+import { ref, watchEffect, watch } from "vue";
 import { NRadioGroup, NRadio, NDatePicker, NDivider, NConfigProvider } from "naive-ui";
 import { useSmsStore } from "@/store/smsStore";
 import { useMmsStore } from "@/store/mmsStore";
@@ -105,18 +97,6 @@ watchEffect(() => {
 
 //更改naive-ui 套件主題
 const themeOverrides = {
-    common: { primaryColor: "#FFb400" },
-    Radio: {
-        dotColorActive: "#ffb400",
-        boxShadowHover: "inset 0 0 0 1px #ffb400",
-        boxShadowFocus: "inset 0 0 0 1px #ffb400",
-        boxShadowActive: "inset 0 0 0 1px #ffb400",
-    },
-    Input: {
-        borderHover: "trasparent",
-        borderFocus: "trasparent",
-        boxShadowFocus: "trasparent",
-    },
     Card: {
         titleTextColor: "#fff",
         closeColor: "#fff",

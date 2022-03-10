@@ -7,12 +7,17 @@
         </h2>
         <!-- 功能欄 -->
         <div class="chatpane">
-            <button class="change-mms">切換發送簡訊</button>
+            <button v-show="!isMmsSend" @click="onChangMMSSend" class="change-mms">
+                切換發送MMS
+            </button>
+            <button v-show="isMmsSend" @click="onChangSMSSend" class="change-mms">
+                切換發送SMS
+            </button>
             <a class="phone-web">
                 <img
                     src="../../assets/Images/chatroom/phone.svg"
                     alt="#"
-                    @click="onPhoneCallModal"
+                    @click="onPhoneCallModal(chatroomID)"
                 />
             </a>
             <phoneCallModel />
@@ -48,6 +53,7 @@ import { useRouter, useRoute } from "vue-router";
 import { useApiStore } from "@/store/api";
 import { useSearchStore } from "@/store/search";
 import { usePhoneCallStore } from "@/store/phoneCall";
+import { useChatStore } from "@/store/chat";
 import { useModelStore } from "@/store/model";
 import { DO_CALL_NAME } from "@/util/commonUtil";
 import config from "@/config/config";
@@ -63,23 +69,15 @@ const apiStore = useApiStore();
 const { chatroomList: getChatroomList } = storeToRefs(apiStore);
 
 const chatroomList: any = computed(() => getChatroomList.value);
-const mobile: any = computed(() => {
-    return !(route.query && route.query.mobile)
-        ? chatroomList.value.length > 0
-            ? String(chatroomList.value[0].mobile)
-            : "8860123456789"
-        : route.query.mobile;
-});
-const chatroomID = computed(() =>
-    chatroomList.value.length > 0 && !(route.query && route.query.chatroomID)
-        ? chatroomList.value[0].chatroomID
-        : route.query.chatroomID
-);
+const mobile: any = computed(() => route.query.mobile);
+const chatroomID = computed(() => route.query.chatroomID);
+//chat store
+const chatStore = useChatStore();
+const { isMmsSend } = storeToRefs(chatStore);
 
 //search store
 const searchStore = useSearchStore();
 const { searchSwitch, closeSearchBar } = searchStore;
-const { searchBoolean } = storeToRefs(searchStore);
 
 //phone store
 const phoneCallStore = usePhoneCallStore();
@@ -89,9 +87,16 @@ const { doCall } = phoneCallStore;
 const modelStore = useModelStore();
 const { phoneCallModal } = storeToRefs(modelStore);
 
-const onPhoneCallModal = () => {
+const onPhoneCallModal = (chatroomID) => {
     phoneCallModal.value = true;
-    doCall(DO_CALL_NAME);
+    doCall(chatroomID);
+};
+
+const onChangMMSSend = () => {
+    isMmsSend.value = true;
+};
+const onChangSMSSend = () => {
+    isMmsSend.value = false;
 };
 </script>
 

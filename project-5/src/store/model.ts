@@ -24,12 +24,11 @@ export const useModelStore = defineStore({
         closeModal() {
             this.showModal = false;
         },
-        gotoChat(token: string | null) {
-            console.log("token:", token);
-            location.href = `/chat/${token}`;
+        gotoChat(eventID: any, chatroomID: any, mobile: any) {
+            location.href = `/chat/${eventID}?chatroomID=${chatroomID}&mobile=${mobile}`;
         },
-        gotoPhone(token: string | null) {
-            location.href = `/phone/${token}`;
+        gotoPhone(eventID: any, chatroomID: any, mobile: any) {
+            location.href = `/phone/${eventID}?chatroomID=${chatroomID}&mobile=${mobile}`;
 
             // const phoneCallStore = usePhoneCallStore()
             // const { doCall } = phoneCallStore

@@ -1,9 +1,10 @@
 import config from "@/config/config";
 import { randomString } from "@/util/chatUtil";
 // 預設值
-export const ME_USER_NAME = randomString(3); // 自己
+// export const ME_USER_NAME = randomString(3); // 自己
+export const ME_USER_NAME = "admin1"; // 自己
 export const DO_CALL_NAME = "123";
-export const YOU_USER_NAME = ["tony1", "123", randomString(3)]; // 對方
+export const YOU_USER_NAME = ["tony1"]; // 對方
 export const OPAQUEID = "SMS_Plugin-123456789123";
 export const MY_ROOM = 1234; //Demo room
 export const JANUS_URL: any = `${config.janusUrl}/janus`;
@@ -14,9 +15,6 @@ export const JANUS_URL: any = `${config.janusUrl}/janus`;
 // } else {
 //     JANUS_URL = "https://" + window.location.hostname + ":8089/janus";
 // }
-
-// chatroomID
-export const chatroomID = (chatToken: any) => chatToken?.slice(-7);
 
 // 回覆點擊功能
 export const scrollPageTo = (replyId: string | null) => {
@@ -111,3 +109,11 @@ export const convertTime = (seconds: any) => {
 export const isObjToBeZero = (obj: any) => {
     return Object.keys(obj).length === 0;
 };
+
+export function removeDuplicates(originalArray) {
+    originalArray.filter(function (element, index, arr) {
+        return arr.filter((vendor) => {
+            return vendor.format.id !== element.format.id;
+        });
+    });
+}

@@ -31,9 +31,9 @@
                                 @click="previewURL(picture.format.Fileid)"
                             >
                                 <img
-                                    :src="`${config.fileUrl}/fls/${picture.format.Fileid}${String(
-                                        picture.format.ShowName
-                                    ).slice(-4)}`"
+                                    :src="`${config.fileUrl}/fls/${
+                                        picture.format.Fileid
+                                    }.${picture.format.ShowName.split('.').pop()}`"
                                 />
                             </div>
                             <div
@@ -161,13 +161,13 @@ const previewURL = (fileid: string): void => {
     pictures.value.forEach((img: any) => {
         if (
             !viewImgs.value.includes(
-                `${config.fileUrl}/fls/${img.format.Fileid}${String(img.format.ShowName).slice(-4)}`
+                `${config.fileUrl}/fls/${img.format.Fileid}.${img.format.ShowName.split(".").pop()}`
             ) &&
             img.msgType === 6 &&
             !img.isExpire
         ) {
             viewImgs.value.push(
-                `${config.fileUrl}/fls/${img.format.Fileid}${String(img.format.ShowName).slice(-4)}`
+                `${config.fileUrl}/fls/${img.format.Fileid}.${img.format.ShowName.split(".").pop()}`
             );
         }
     });

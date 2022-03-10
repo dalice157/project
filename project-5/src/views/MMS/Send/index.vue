@@ -19,15 +19,13 @@
                         (「訊息主旨」內容出現於訊息內文最上方，字數限制:純英數為39字、中英數混合為15字)
                     </p>
                 </div>
-                <n-config-provider :theme-overrides="themeOverrides">
-                    <n-input
-                        id="input"
-                        v-model:value.trim="mmsSubject"
-                        type="text"
-                        placeholder="請輸入MMS訊息主旨(必填)"
-                        @input="KBCount"
-                    />
-                </n-config-provider>
+                <n-input
+                    id="input"
+                    v-model:value.trim="mmsSubject"
+                    type="text"
+                    placeholder="請輸入MMS訊息主旨(必填)"
+                    @input="KBCount"
+                />
             </div>
             <div class="mmsImageInfo">
                 <h3>訊息圖檔</h3>
@@ -52,22 +50,20 @@
                 <div class="contentTitle">
                     <h3>發送內容</h3>
                 </div>
-                <n-config-provider :theme-overrides="themeOverrides">
-                    <n-input
-                        ref="inputInstRef"
-                        id="textarea"
-                        v-model:value.trim="mmsContent"
-                        type="textarea"
-                        placeholder="請輸入簡訊內容..."
-                        :autosize="{
-                            minRows: 7,
-                            maxRows: 7,
-                        }"
-                        @focus="focusType"
-                        @blur="blurJudge"
-                        @input="KBCount"
-                    />
-                </n-config-provider>
+                <n-input
+                    ref="inputInstRef"
+                    id="textarea"
+                    v-model:value.trim="mmsContent"
+                    type="textarea"
+                    placeholder="請輸入簡訊內容..."
+                    :autosize="{
+                        minRows: 7,
+                        maxRows: 7,
+                    }"
+                    @focus="focusType"
+                    @blur="blurJudge"
+                    @input="KBCount"
+                />
             </div>
             <div class="messageCount">
                 <div class="messageInfo">
@@ -88,7 +84,6 @@
             <OptionSetting
                 :nextPageRouter="nextPageRouter"
                 :demoContent="demoContent"
-                @excelFile="excelFile"
                 optionType="mms"
             ></OptionSetting>
         </div>
@@ -115,7 +110,7 @@ const router = useRouter();
 const route = useRoute();
 
 const apiStore = useApiStore();
-const { eventList } = storeToRefs(apiStore);
+const { eventList, uploadRef: getUploadFile } = storeToRefs(apiStore);
 
 //mmsStore
 const mmsStore = useMmsStore();
@@ -143,11 +138,6 @@ const filterChannelList = computed(() => {
         }));
 });
 
-//接收組件傳來的excel檔
-const excelFile = (value: any) => {
-    mmsExcelFile.value = value;
-};
-
 //textarea dom元素
 const inputInstRef = ref(null);
 const errorMsg = ref("");
@@ -157,8 +147,16 @@ const demoContent =
     "輸入MMS簡訊內容\n\n說明：\n1.為使簡訊內容正常呈現於手機中,請勿在簡訊内容中填入~·^)I1>等特殊符號。\n2.訊息主旨及發送圖片為必填欄位，圖片格式僅支援 png, jpg, jpeg, gif。\n3.MMS扣點:圖檔+文案<50K→單則扣除點數3點，圖檔+文案50K~300K內→單則扣除點數5點。";
 
 const params = route.params;
-
+const uploadRef = computed({
+    get() {
+        return getUploadFile.value;
+    },
+    set(val) {
+        getUploadFile.value = val;
+    },
+});
 onMounted(() => {
+    uploadRef.value = null;
     if (mmsContent.value === "") {
         mmsContent.value = demoContent;
     }
@@ -181,27 +179,29 @@ const lengthInUtf8Bytes = (str) => {
 
     return str.length + (m ? m.length : 0);
 };
+
 const RoundUp = (input, num) => {
     let tmpNum = Math.floor(input);
-    let _input = new Number(input);
-    if (input - tmpNum <= 0 || input - Math.round(input) == 0) {
+    if (input - tmpNum <= 0 || input - Math.round(input) <= 0) {
         return input;
     }
-    (input * Math.pow(10, num + 1)) % 10 < 5
-        ? _input.toFixed(num) + Math.pow(0.1, num)
-        : _input.toFixed(num);
+    let _input = new Number(input);
+    if ((input * Math.pow(10, num + 1)) % 10 < 5) {
+        return _input.toFixed(num) + Math.pow(0.1, num);
+    } else {
+        return _input.toFixed(num);
+    }
 };
 
 //計算主旨+內容大小(KB)
 const mmsContentLen = ref(0);
 const mmsSubjectLen = ref(0);
 const KBCount = () => {
-    mmsContentLen.value =
-        mmsContent.value !== demoContent
-            ? lengthInUtf8Bytes(mmsContent.value) / 1024
-            : lengthInUtf8Bytes("") / 1024;
-    // console.log("mmsContentLen.value", mmsContentLen.value);
-    // mmsContentLen.value = Number(parseFloat(RoundUp(mmsContentLen.value, 3)).toFixed(3));
+    if (mmsContent.value !== demoContent) {
+        mmsContentLen.value = lengthInUtf8Bytes(mmsContent.value) / 1024;
+    } else {
+        mmsContentLen.value = lengthInUtf8Bytes("") / 1024;
+    }
     if (mmsSubject.value) {
         mmsSubjectLen.value = lengthInUtf8Bytes(`<主旨 : ${mmsSubject.value} >`) / 1024;
         mmsSubjectLen.value = Number(parseFloat(RoundUp(mmsSubjectLen.value, 3)).toFixed(3));
@@ -220,7 +220,6 @@ const KBCount = () => {
             mmsKB.value.toString().substring(0, mmsKB.value.toString().lastIndexOf(".") + 3)
         );
     }
-    // console.log("MMSkb.value:", mmsKB.value);
 };
 
 //下一頁按鈕
@@ -244,7 +243,6 @@ const handleChange = ({ fileList }) => {
     mmsKB.value = Number(
         mmsKB.value.toString().substring(0, mmsKB.value.toString().lastIndexOf(".") + 3)
     );
-    // console.log("MMSkb.value:", mmsKB.value);
 };
 const clearFile = () => {
     mmsUploadImgRef.value = null;
@@ -253,30 +251,6 @@ const clearFile = () => {
     mmsKB.value = Number(
         mmsKB.value.toString().substring(0, mmsKB.value.toString().lastIndexOf(".") + 3)
     );
-    // console.log("MMSkb.value:", mmsKB.value);
-};
-
-//更改naive-ui主題
-const themeOverrides = {
-    common: {},
-    Select: {
-        border: "1px solid #000",
-        borderRadius: "4px",
-        caretColor: "black",
-        borderHover: "transparent",
-        borderFocus: "transparent",
-        boxShadowFocus: "none",
-    },
-    Input: {
-        fontSize: "18px",
-        border: "1px solid #8b8b8b",
-        borderRadius: "4px",
-        caretColor: "black",
-        borderHover: "transparent",
-        borderFocus: "transparent",
-        height: "40px",
-        boxShadowFocus: "none",
-    },
 };
 </script>
 

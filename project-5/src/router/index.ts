@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 
 import ChatRoom from "@/views/ChatRoom.vue";
-import Phone from "@/views/Phone.vue";
 import Login from "@/views/Login.vue";
 import Header from "@/components/Headers";
 import Manage from "@/views/Manage.vue";
@@ -40,14 +39,6 @@ const routes: Array<RouteRecordRaw> = [
         name: "Gallery",
         components: {
             container: Gallery,
-        },
-        meta: { show: true, home: false },
-    },
-    {
-        path: "/phone/:id",
-        name: "Phone",
-        components: {
-            container: Phone,
         },
         meta: { show: true, home: false },
     },

@@ -40,36 +40,30 @@
                     </div>
                     <div class="activityTitle">
                         <h1>活動名稱</h1>
-                        <n-config-provider :themeOverrides="themeOverrides">
-                            <n-input
-                                placeholder="請輸入活動名稱"
-                                maxlength="25"
-                                show-count
-                                v-model:value="name"
-                            ></n-input>
-                        </n-config-provider>
+                        <n-input
+                            placeholder="請輸入活動名稱"
+                            maxlength="25"
+                            show-count
+                            v-model:value="name"
+                        ></n-input>
                     </div>
                     <div class="homeURL">
                         <h1>活動網址</h1>
-                        <n-config-provider :themeOverrides="themeOverrides">
-                            <n-input placeholder="請輸入活動網址" v-model:value="url"></n-input>
-                        </n-config-provider>
+                        <n-input placeholder="請輸入活動網址" v-model:value="url"></n-input>
                     </div>
                     <div class="introduction">
                         <h1>簡介</h1>
-                        <n-config-provider :themeOverrides="themeOverrides">
-                            <n-input
-                                type="textarea"
-                                placeholder="當使用者點及頭像即可看到聊天室簡介"
-                                maxlength="100"
-                                show-count
-                                :autosize="{
-                                    minRows: 3,
-                                    maxRows: 3,
-                                }"
-                                v-model:value="description"
-                            ></n-input>
-                        </n-config-provider>
+                        <n-input
+                            type="textarea"
+                            placeholder="當使用者點及頭像即可看到聊天室簡介"
+                            maxlength="100"
+                            show-count
+                            :autosize="{
+                                minRows: 3,
+                                maxRows: 3,
+                            }"
+                            v-model:value="description"
+                        ></n-input>
                     </div>
                     <div class="customerService">
                         <div class="customerServiceTitle">
@@ -103,10 +97,7 @@
                         v-for="(item, index) in welcomeMsgCount"
                         :key="item.id"
                     >
-                        <n-config-provider
-                            :themeOverrides="themeOverrides"
-                            v-if="item.MsgType === 1"
-                        >
+                        <div v-if="item.MsgType === 1">
                             <n-input
                                 type="textarea"
                                 placeholder="請輸入歡迎訊息"
@@ -115,7 +106,7 @@
                                 }"
                                 v-model:value="item.MsgContent"
                             ></n-input>
-                        </n-config-provider>
+                        </div>
                         <div class="welcomeImg" v-else-if="item.MsgType === 6">
                             <img
                                 :src="`${config.fileUrl}/fls/${item.Format.fileid}${item.Format.ext}`"
@@ -209,7 +200,6 @@ import { nanoid } from "nanoid";
 import config from "@/config/config";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
-import { chatroomID } from "@/util/commonUtil";
 import Compressor from "compressorjs";
 import { useApiStore } from "@/store/api";
 import { storeToRefs } from "pinia";
@@ -360,7 +350,9 @@ const welcomePicture = (e: any, index: any) => {
                             Format: {
                                 exp: res.data.exp,
                                 ext: res.data.ext,
-                                fileid: res.data.fileid,
+                                Fileid: res.data.fileid,
+                                ShowName: fileName,
+                                FileSize: file.size,
                             },
                         };
                         welcomeMsgCount.value.splice(index, 1, welcomeMsg);
@@ -447,7 +439,11 @@ const themeOverrides = {
     },
 };
 </script>
-
+<style lang="scss">
+.n-upload-file-list {
+    display: none;
+}
+</style>
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
@@ -619,26 +615,17 @@ const themeOverrides = {
                     h1 {
                         margin-bottom: 15px;
                     }
-                    .n-input {
-                        border: 1px solid $gray-1;
-                    }
                 }
                 .homeURL {
                     margin-bottom: 30px;
                     h1 {
                         margin-bottom: 15px;
                     }
-                    .n-input {
-                        border: 1px solid $gray-1;
-                    }
                 }
                 .introduction {
                     margin-bottom: 30px;
                     h1 {
                         margin-bottom: 15px;
-                    }
-                    .n-input {
-                        border: 1px solid $gray-1;
                     }
                 }
                 .customerService {
@@ -658,7 +645,7 @@ const themeOverrides = {
                         display: flex;
                         flex-wrap: wrap;
                         align-items: center;
-                        border: 1px solid $gray-1;
+                        border: 1px solid $gray-3;
                         min-height: 34px;
                         border-radius: 4px;
                         padding: 0 5px;

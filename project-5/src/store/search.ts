@@ -32,6 +32,7 @@ export const useSearchStore = defineStore({
         },
         clearRecordKeyWord() {
             this.recordKeyWord = "";
+            this.searcRecordMessages = [];
         },
         clearMoreKeyWord() {
             this.moreKeyWord = "";

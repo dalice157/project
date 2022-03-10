@@ -37,7 +37,7 @@
                 </div>
                 <div class="phoneClose">
                     <img
-                        @click="doHangup(!isAccepted ? 2 : 3)"
+                        @click="doHangup(!isAccepted ? 2 : 3, eventID(chatToken))"
                         src="../assets/Images/chatroom/close-round-red.svg"
                         alt="掛斷"
                     />
@@ -58,6 +58,7 @@ import { useModelStore } from "@/store/model";
 import { useApiStore } from "@/store/api";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import config from "@/config/config";
+import { eventID } from "@/util/commonUtil";
 
 //route
 const route = useRoute();

@@ -123,7 +123,6 @@ getCustomServiceStaffList();
 //搜尋新陣列
 let filterStaff = computed(() => {
     let arr = staffList.value.filter((p: any) => {
-        p.events = p.events.split(",").join("/");
         return p.name.toLowerCase().includes(searchStaff.value.toLowerCase());
     });
     return arr;
@@ -142,12 +141,8 @@ const addChannel = () => {
     router.push(`/manage/${params.id}/activitySetting/addChannel`);
 };
 const themeOverrides = {
-    common: { primaryColor: "#FFb400" },
     Input: {
-        caretColor: "black",
-        borderHover: "transparent",
-        borderFocus: "transparent",
-        boxShadowFocus: "none",
+        border: "1px solid #ececec",
         borderRadius: "20px",
     },
 };

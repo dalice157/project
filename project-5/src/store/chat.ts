@@ -1,6 +1,5 @@
 import { defineStore, storeToRefs } from "pinia";
 
-import { ME_USER_NAME } from "@/util/commonUtil";
 import { useApiStore } from "@/store/api";
 
 export const useChatStore = defineStore({
@@ -24,6 +23,8 @@ export const useChatStore = defineStore({
         stickerGroupID: <number>1,
         stickerGroup: <any>[],
         stickerItems: <any>[],
+        isMmsSend: <boolean>false,
+        participantList: <any>[],
     }),
     getters: {},
     actions: {
@@ -57,18 +58,14 @@ export const useChatStore = defineStore({
             msg.msgFunctionStatus = false;
         },
         //獲取janus訊息
-        getCompanyMsg(msgObj: any, chatToken: any) {
-            console.log("msgObj:", msgObj);
+        getCompanyMsg() {
+            console.log("獲取janus訊息");
 
-            const messagesParse = JSON.parse(msgObj.msg);
-            messagesParse.janusMsg.sender = 0;
-            this.messages.push(messagesParse);
-            if (msgObj.display !== ME_USER_NAME) {
-                this.messages = JSON.parse(localStorage.getItem(`${chatToken}-backend`) || "[]");
-                this.messages.forEach((element) => {
-                    element.isRead = true;
-                });
-            }
+            // api store
+            const apiStore = useApiStore();
+            const { isInput, isUserMsg } = storeToRefs(apiStore);
+            isUserMsg.value = true;
+            isInput.value = true;
         },
         // 開啟錄音視窗
         openRecorder() {

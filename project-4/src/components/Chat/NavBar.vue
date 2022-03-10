@@ -21,7 +21,7 @@
                     <img
                         src="../../assets/Images/chatroom/phone.svg"
                         alt="撥打電話"
-                        @click="onPhoneCallModal"
+                        @click="webPhoneCall"
                     />
                 </a>
                 <phoneCallModel />
@@ -29,7 +29,7 @@
                     <img
                         src="../../assets/Images/chatroom/phone.svg"
                         alt="撥打電話"
-                        @touchend="doCall(DO_CALL_NAME)"
+                        @touchend="phoneCall"
                     />
                 </router-link>
                 <router-link class="gallery" :to="`/gallery?chatToken=${chatToken}`">
@@ -54,6 +54,7 @@ import { NAvatar } from "naive-ui";
 import { useRouter, useRoute } from "vue-router";
 
 import { useApiStore } from "@/store/api";
+import { useChatStore } from "@/store/chat";
 import { useSearchStore } from "@/store/search";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { useModelStore } from "@/store/model";
@@ -64,6 +65,10 @@ import phoneCallModel from "@/components/phoneCallModel.vue";
 // api store
 const apiStore = useApiStore();
 const { eventInfo } = storeToRefs(apiStore);
+
+// chat store
+const chatStore = useChatStore();
+const { participantList } = storeToRefs(chatStore);
 
 //search store
 const searchStore = useSearchStore();
@@ -83,9 +88,20 @@ const router = useRouter();
 const route = useRoute();
 const chatToken = computed(() => route.query.chatToken);
 
-const onPhoneCallModal = () => {
+const webPhoneCall = () => {
     phoneCallModal.value = true;
-    doCall(DO_CALL_NAME);
+    console.log("participantList phone", participantList.value);
+
+    const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
+    console.log("getCutomer", getCutomer);
+    doCall(getCutomer);
+};
+const phoneCall = () => {
+    console.log("participantList phone", participantList.value);
+
+    const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
+    console.log("getCutomer", getCutomer);
+    doCall(getCutomer);
 };
 </script>
 

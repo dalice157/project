@@ -1,11 +1,24 @@
 <template>
-    <n-layout has-sider class="chatroom">
+    <n-layout has-sider class="chatroom" @click="closeChatBubble">
         <n-layout-sider width="330px" bordered>
             <Sidebar />
         </n-layout-sider>
         <n-layout class="content">
             <Headers />
-            <n-layout class="room-wrap" v-if="route.params.id" has-sider sider-placement="right">
+            <n-layout-content
+                ref="content"
+                content-style="padding: 24px;"
+                :native-scrollbar="false"
+                v-if="Object.keys(route.query).length == 0"
+                class="notFound"
+                >點擊左側開始交談</n-layout-content
+            >
+            <n-layout
+                class="room-wrap"
+                v-if="Object.keys(route.query).length > 0"
+                has-sider
+                sider-placement="right"
+            >
                 <n-layout-content ref="content" content-style="padding: 0;" class="msg-wrap">
                     <NavBar />
                     <SearchBar />
@@ -18,33 +31,25 @@
                     <UserInfoSider />
                 </n-layout-sider>
             </n-layout>
-            <n-layout-content
-                ref="content"
-                content-style="padding: 24px;"
-                :native-scrollbar="false"
-                v-if="!route.params.id"
-                class="notFound"
-                >點擊左側開始交談</n-layout-content
-            >
         </n-layout>
     </n-layout>
 
-    <n-modal class="chatRecordCard" v-model:show="isIncomingCall" preset="card">
+    <n-modal
+        class="chatRecordCard"
+        v-model:show="isIncomingCall"
+        :mask-closable="false"
+        preset="card"
+    >
         <n-card :bordered="false" size="huge" class="container">
             <UserInfo :info="eventInfo" />
             <div class="description">語音來電</div>
             <ul class="call_container">
-                <li @touchend="doHangup(3, chatRoomID)">
+                <li @click="doHangup(2, chatRoomID, route.params.id)">
                     <span class="icon"><img :src="hangUpIcon" alt="掛斷" /></span>
                     <h4 class="text">掛斷</h4>
                 </li>
                 <li>
-                    <router-link :to="`/phone/${eventID}`">
-                        <button
-                            class="icon"
-                            @touchend="onIncomingCall(yourUsername, jsepMsg)"
-                        ></button>
-                    </router-link>
+                    <button class="icon" @click="onIncomingCall(yourUsername, jsepMsg)"></button>
                     <h4 class="text">接聽</h4>
                 </li>
             </ul>
@@ -67,8 +72,9 @@ import { processDataEvent, onHangup, onError, randomString } from "@/util/chatUt
 import { useApiStore } from "@/store/api";
 import { useChatStore } from "@/store/chat";
 import { usePhoneCallStore } from "@/store/phoneCall";
+import { useModelStore } from "@/store/model";
 import { currentTime, currentDate } from "@/util/dateUtil";
-import { ME_USER_NAME, OPAQUEID, MY_ROOM, JANUS_URL, convertTime } from "@/util/commonUtil";
+import { OPAQUEID, MY_ROOM, JANUS_URL, convertTime, ME_USER_NAME } from "@/util/commonUtil";
 import NavBar from "@/components/ChatRoom/NavBar.vue";
 import MessageBox from "@/components/ChatRoom/MessageBox";
 import SearchBar from "@/components/ChatRoom/SearchBar.vue";
@@ -87,7 +93,6 @@ let participants: any = {};
 // let callPlugin: any = null;
 let yourusername: any = null;
 let simulcastStarted: any = false;
-let welcomeStatus: any = ref(false);
 
 //router
 const route = useRoute();
@@ -95,11 +100,15 @@ const eventID = computed(() => route.params.id);
 // api store
 const apiStore = useApiStore();
 const { getChatroomlistApi, getHistoryApi, getChatroomUserInfoApi } = apiStore;
-const { eventInfo, chatroomList: getChatRoomList } = storeToRefs(apiStore);
+const { eventInfo, isInput } = storeToRefs(apiStore);
+
+//modal store
+const modelStore = useModelStore();
+const { phoneCallModal, info } = storeToRefs(modelStore);
 
 //Chat store
 const chatStore = useChatStore();
-const { textPlugin } = storeToRefs(chatStore);
+const { textPlugin, participantList } = storeToRefs(chatStore);
 
 //phoneCall store
 const phoneCallStore = usePhoneCallStore();
@@ -108,17 +117,8 @@ const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime
     storeToRefs(phoneCallStore);
 
 getChatroomlistApi(route.params.id);
-const chatroomList = computed(() => getChatRoomList.value);
-const chatRoomID: any = computed(() =>
-    chatroomList.value.length > 0 && !(route.query && route.query.chatroomID)
-        ? chatroomList.value[0].chatroomID
-        : route.query.chatroomID
-);
-const mobile: any = computed(() =>
-    chatroomList.value.length > 0 && !(route.query && route.query.mobile)
-        ? chatroomList.value[0].mobile
-        : route.query.mobile
-);
+const chatRoomID: any = computed(() => route.query.chatroomID);
+const mobile: any = computed(() => route.query.mobile);
 //janus 初始值
 onMounted(() => {
     Janus.init({
@@ -162,15 +162,17 @@ const registerUsername = (username: undefined | string) => {
     if (username === "") {
         return;
     }
+    console.log("username:", username);
+
     // myid = randomString(12);
-    myid = ME_USER_NAME;
+    myid = username;
     let transaction = randomString(12);
     let register = {
         textroom: "join",
         transaction: transaction,
-        room: MY_ROOM,
+        room: Number(route.params.id),
         username: myid,
-        display: username,
+        display: "admin",
     };
 
     myusername = username;
@@ -179,9 +181,9 @@ const registerUsername = (username: undefined | string) => {
             // Something went wrong
             if (response["error_code"] === 417) {
                 // This is a "no such room" error: give a more meaningful description
-                bootbox.alert("No such room : <code>" + MY_ROOM + "</code>");
+                console.log("No such room : <code>" + route.params.id + "</code>");
             } else {
-                bootbox.alert(response["error"]);
+                console.log("response[error]", response["error"]);
             }
             return;
         }
@@ -276,7 +278,8 @@ const attachTextroomPlugin = () => {
             Janus.log("text-> The DataChannel is available!", data);
             console.log("text-> The DataChannel is available!", data);
             // registerUsername(自己的username);
-            registerUsername(ME_USER_NAME);
+            const myUserName = randomString(7);
+            registerUsername(myUserName);
         },
         ondata: function (item: any) {
             // @ts-ignore
@@ -292,6 +295,7 @@ const attachTextroomPlugin = () => {
             }
             let what = json["textroom"];
             let data: any = { what: what };
+
             if (what === "message") {
                 // Incoming message: public or private?
                 let msg = json["text"];
@@ -305,6 +309,8 @@ const attachTextroomPlugin = () => {
                 data.date = dateString;
                 data.from = participants[from];
                 data.msg = msg;
+                getHistoryApi(chatRoomID.value);
+                getChatroomlistApi(route.params.id);
             } else if (what === "announcement") {
                 // Room announcement
                 let msg = json["text"];
@@ -322,6 +328,13 @@ const attachTextroomPlugin = () => {
 
                 data.username = username;
                 data.display = display;
+                data.mobile = mobile.value;
+                participantList.value = Object.keys(participants).map((key) => {
+                    return {
+                        [key]: participants[key],
+                    };
+                });
+                console.log("participantList", participantList.value);
             } else if (what === "leave") {
                 // Somebody left
                 let username = json["username"];
@@ -350,6 +363,8 @@ const attachTextroomPlugin = () => {
                 });
             } else if (what === "success") {
                 console.log("success:", data);
+                getHistoryApi(chatRoomID.value);
+                getChatroomlistApi(route.params.id);
             }
 
             processDataEvent(data, chatRoomID.value, route.params.id);
@@ -411,14 +426,16 @@ const attachVideocallPlugin = () => {
             // @ts-ignore
             Janus.debug("call-> ::: Got a message :::", msg);
             let result = msg["result"];
+            console.log("result:", result);
+
             if (result) {
                 if (result["list"]) {
                     let list = result["list"];
                     // @ts-ignore
-                    Janus.debug("call-> Got a list of registered peers:", list);
+                    Janus.debug("call-> Got a list of phone registered peers:", list);
                     for (let mp in list) {
                         // @ts-ignore
-                        Janus.debug("call->  >> [" + list[mp] + "]");
+                        Janus.debug("call list->  >> [" + list[mp] + "]");
                     }
                 } else if (result["event"]) {
                     let event = result["event"];
@@ -435,7 +452,7 @@ const attachVideocallPlugin = () => {
                         // TODO Any ringtone?
                         calling.value = setTimeout(() => {
                             // 撥打超過30秒， 自動掛掉
-                            doHangup(1, chatRoomID.value);
+                            doHangup(1, chatRoomID.value, route.params.id);
                         }, 15000);
                         // @ts-ignore
                         Janus.log("call-> Waiting for the peer to answer...");
@@ -511,6 +528,8 @@ const attachVideocallPlugin = () => {
                         clearInterval(connecting.value);
                         // Reset status
                         callPlugin.value.hangup();
+                        isIncomingCall.value = false;
+                        phoneCallModal.value = false;
                         location.href = route.query
                             ? `/chat/${eventID.value}?chatroomID=${chatRoomID.value}&mobile=${mobile.value}`
                             : `/chat/${eventID.value}`;
@@ -541,9 +560,14 @@ const attachVideocallPlugin = () => {
                 if (error.indexOf("already taken") > 0) {
                     // FIXME Use status codes...
                 }
+                isIncomingCall.value = false;
+                phoneCallModal.value = false;
                 // TODO Reset status
                 callPlugin.value.hangup();
                 onHangup();
+                location.href = route.query
+                    ? `/chat/${eventID.value}?chatroomID=${chatRoomID.value}&mobile=${mobile.value}`
+                    : `/chat/${eventID.value}`;
             }
         },
         onlocalstream: function (stream: any) {
@@ -567,10 +591,31 @@ const attachVideocallPlugin = () => {
             Janus.log("call-> ::: Got a cleanup notification :::");
             yourusername = null;
             simulcastStarted = false;
+            isIncomingCall.value = false;
+            phoneCallModal.value = false;
             location.href = route.query
                 ? `/chat/${eventID.value}?chatroomID=${chatRoomID.value}&mobile=${mobile.value}`
                 : `/chat/${eventID.value}`;
         },
+    });
+};
+
+const { chatroomMsg } = storeToRefs(apiStore);
+
+const messageList: any = computed({
+    get() {
+        return chatroomMsg.value.messageList;
+    },
+    set(val) {
+        chatroomMsg.value.messageList = val;
+    },
+});
+
+//取消訊息功能泡泡
+const closeChatBubble = (): void => {
+    messageList.value = chatroomMsg.value.messageList.map((text: txt) => {
+        text.msgFunctionStatus = false;
+        return text;
     });
 };
 </script>
@@ -578,6 +623,48 @@ const attachVideocallPlugin = () => {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
+.chatRecordCard.n-card.n-modal {
+    width: 300px;
+    border-radius: 4px;
+    background: $white url("~@/assets/Images/chatRecord/lightboxHeader.svg") no-repeat center top;
+    background-size: 100% auto;
+    .description {
+        width: 100%;
+        text-align: center;
+        margin: 1em auto;
+        color: $gray-1;
+        font-size: $font-size-16;
+        font-weight: 500;
+        line-height: 1.6;
+    }
+    .call_container {
+        margin-top: 30px;
+        display: flex;
+        justify-content: space-around;
+        li {
+            text-align: center;
+            .icon {
+                display: block;
+                width: 60px;
+                height: 60px;
+                cursor: pointer;
+                img {
+                    width: 100%;
+                }
+            }
+            button.icon {
+                cursor: pointer;
+                border: none;
+                background: url("~@/assets/Images/common/connect-round.svg") no-repeat center;
+            }
+        }
+        h4.text {
+            @extend %h4;
+            margin-top: 10px;
+            color: $gray-1;
+        }
+    }
+}
 .room-wrap {
     height: calc(100% - 80px);
     background-color: $gray-8;
@@ -608,8 +695,9 @@ const attachVideocallPlugin = () => {
     }
     .notFound {
         height: calc(100% - 80px);
-        font-size: 30px;
-        color: #86999c;
+        font-size: $font-size-30;
+        padding-top: 15%;
+        color: $gray-3;
         text-align: center;
         display: flex;
         justify-content: center;

@@ -9,6 +9,7 @@ import { chatroomID } from "@/util/commonUtil";
 import { useChatStore } from "@/store/chat";
 import { localStorageMsg } from "@/util/commonUtil";
 import { sendPrivateMsg } from "@/util/chatUtil";
+import { useModelStore } from "@/store/model";
 
 /**
  * phoneType 狀態
@@ -34,6 +35,7 @@ export const usePhoneCallStore = defineStore({
     actions: {
         //撥打電話
         doCall(display: any) {
+            console.log("do Call display", display);
             // Call someone
             if (/[^a-zA-Z0-9]/.test(display)) {
                 alert("Input is not alphanumeric");
@@ -65,6 +67,11 @@ export const usePhoneCallStore = defineStore({
             console.log("有電話進來");
             console.log("name:", name);
             console.log("jsep:", jsep);
+            //modal store
+            const modelStore = useModelStore();
+            const { phoneCallModal } = storeToRefs(modelStore);
+            phoneCallModal.value = true;
+            this.isIncomingCall = false;
             // eslint-disable-next-line @typescript-eslint/no-this-alias
             const that = this;
             this.callPlugin.createAnswer({
@@ -84,16 +91,11 @@ export const usePhoneCallStore = defineStore({
             });
         },
         //掛電話
-        doHangup(type: any) {
+        doHangup(type: any, eventID: any) {
             console.log("掛掉電話", type);
-            this.isIncomingCall = false;
-            // Hangup a call
-            const hangup = { request: "hangup" };
-            this.callPlugin.send({ message: hangup });
-            this.callPlugin.hangup();
             this.yourUsername = null;
             const chatstore = useChatStore();
-            const { messages, replyMsg, textPlugin } = storeToRefs(chatstore);
+            const { messages, participantList, textPlugin } = storeToRefs(chatstore);
             const phoneObj = {
                 janusMsg: {
                     chatroomID: chatroomID(this.route.query.chatToken),
@@ -102,35 +104,23 @@ export const usePhoneCallStore = defineStore({
                     msgType: 9,
                     message: "",
                     format: {
+                        id: nanoid(),
+                        isReplay: false,
+                        replyObj: "",
                         phoneType: type,
+                        phoneTypeOther: type === 2 ? 4 : null,
                         phoneTime: this.phoneTime,
                     },
                 },
-                id: nanoid(),
-
-                audioInfo: "",
-                ext: "",
+                currentDate: currentDate(),
+                time: currentTime(),
                 msgMoreStatus: false,
                 msgFunctionStatus: false,
                 recallStatus: false,
                 recallPopUp: false,
-                time: currentTime(),
-                currentDate: currentDate(),
-                currentMonth: currentMonth(),
-                expirationDate: "",
                 isExpire: false,
-                replyObj: replyMsg.value
-                    ? {
-                          id: replyMsg.value.id,
-                          ext: replyMsg.value.ext,
-                          msgType: replyMsg.value.janusMsg.msgType,
-                          message: replyMsg.value.janusMsg.message,
-                          format: replyMsg.value.janusMsg.format,
-                          recallStatus: replyMsg.value.recallStatus,
-                          recallPopUp: replyMsg.value.recallPopUp,
-                          sender: replyMsg.value.janusMsg.sender,
-                      }
-                    : "",
+                isRead: false,
+                isPlay: false,
             };
             console.log("phoneObj", phoneObj);
             messages.value.push(phoneObj);
@@ -138,9 +128,16 @@ export const usePhoneCallStore = defineStore({
                 msg: phoneObj,
                 textPlugin: textPlugin.value,
                 chatToken: this.route.query.chatToken,
+                msgParticipantList: participantList.value,
+                eventID: eventID,
             };
             sendPrivateMsg(sendMsgObj);
             localStorageMsg(messages.value, this.route.query.chatToken);
+
+            // Hangup a call
+            const hangup = { request: "hangup" };
+            this.callPlugin.send({ message: hangup });
+            this.callPlugin.hangup();
             console.log("電話傳電話訊息掛掉");
         },
     },

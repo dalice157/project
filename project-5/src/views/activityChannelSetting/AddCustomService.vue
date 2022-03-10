@@ -152,12 +152,8 @@ const goActivity = () => {
 };
 
 const themeOverrides = {
-    common: { primaryColor: "#FFb400" },
     Input: {
-        caretColor: "black",
-        borderHover: "transparent",
-        borderFocus: "transparent",
-        boxShadowFocus: "none",
+        border: "1px solid #ececec",
         borderRadius: "20px",
     },
 };

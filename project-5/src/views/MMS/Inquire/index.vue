@@ -15,7 +15,6 @@
                         </template>
                     </n-input>
                 </div>
-                <n-button class="sms_exportButton">匯出</n-button>
             </div>
             <n-divider />
             <n-form class="inquireCondition1" :model="model" :rules="rules" ref="formRef">
@@ -25,30 +24,26 @@
                             <div class="timeInquire">
                                 <n-checkbox value="box_time">依發送時間查詢</n-checkbox>
                                 <n-form-item path="searchSend_date">
-                                    <n-config-provider :theme-overrides="themeOverrides">
-                                        <n-date-picker
-                                            class="datePicker"
-                                            v-model:value="model.searchSend_date"
-                                            type="daterange"
-                                            clearable
-                                            size="small"
-                                        />
-                                    </n-config-provider>
+                                    <n-date-picker
+                                        class="datePicker"
+                                        v-model:value="model.searchSend_date"
+                                        type="daterange"
+                                        clearable
+                                        size="small"
+                                    />
                                 </n-form-item>
                                 <p>(可查詢三個月內的發送紀錄)</p>
                             </div>
                             <div class="phoneNumberInquire">
                                 <n-checkbox value="box_phone">依接收門號查詢</n-checkbox>
                                 <n-form-item path="searchSend_phone">
-                                    <n-config-provider :theme-overrides="themeOverrides">
-                                        <n-input
-                                            class="input"
-                                            v-model:value="model.searchSend_phone"
-                                            placeholder=""
-                                            size="small"
-                                        >
-                                        </n-input>
-                                    </n-config-provider>
+                                    <n-input
+                                        class="input"
+                                        v-model:value="model.searchSend_phone"
+                                        placeholder=""
+                                        size="small"
+                                    >
+                                    </n-input>
                                 </n-form-item>
                             </div>
                         </n-space>
@@ -85,25 +80,6 @@ import {
     NConfigProvider,
     NSpace,
 } from "naive-ui";
-
-const themeOverrides = {
-    common: { primaryColor: "#FFb400" },
-    Input: {
-        fontSize: "14px",
-        caretColor: "black",
-        borderHover: "transparent",
-        borderFocus: "transparent",
-        boxShadowFocus: "none",
-    },
-    Button: {
-        textColorHover: "#FFb400",
-        textColorPressed: "#FFb400",
-        textColorFocus: "#FFb400",
-        borderFocus: "#FFb400",
-        borderPressed: "#FFb400",
-        borderHover: "#FFb400",
-    },
-};
 
 const search = ref("");
 
@@ -505,7 +481,7 @@ const pagination = {
     .link {
         color: $gray-1;
         &:hover {
-            color: $gray-4;
+            color: $primary-1;
         }
         &:visited {
             color: $primary-1;

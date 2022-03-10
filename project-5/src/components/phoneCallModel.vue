@@ -38,7 +38,7 @@
                 </div>
                 <div class="phoneClose">
                     <img
-                        @click="doHangup(!isAccepted ? 2 : 3, chatRoomID)"
+                        @click="doHangup(!isAccepted ? 2 : 3, chatRoomID, route.params.id)"
                         src="../assets/Images/chatroom/close-round-red.svg"
                         alt="掛斷"
                     />
@@ -78,11 +78,7 @@ const modelStore = useModelStore();
 const { closeModal } = modelStore;
 const { phoneCallModal, info } = storeToRefs(modelStore);
 
-const chatRoomID: any = computed(() =>
-    chatroomList.value.length > 0 && !(route.query && route.query.chatroomID)
-        ? chatroomList.value[0].chatroomID
-        : route.query.chatroomID
-);
+const chatRoomID: any = computed(() => route.query.chatroomID);
 const filterUserInfo = computed(() => {
     return chatroomList.value.find((item) => {
         return item.chatroomID === chatRoomID.value;

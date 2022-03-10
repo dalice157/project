@@ -39,7 +39,7 @@
                 </div>
                 <div class="deliveryList">
                     <h3>發送名單</h3>
-                    <p>{{ smsPhoneArray.length }}筆</p>
+                    <p>{{ getPhones.length }}筆</p>
                 </div>
             </div>
             <div class="smsPage2Button">
@@ -51,7 +51,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useSmsStore } from "@/store/smsStore";
 import { useApiStore } from "@/store/api";
@@ -62,6 +62,9 @@ import config from "@/config/config";
 const route = useRoute();
 const router = useRouter();
 const params = route.params;
+
+const apiStore = useApiStore();
+const { uploadRef } = storeToRefs(apiStore);
 
 //smsStore
 const smsStore = useSmsStore();
@@ -85,16 +88,23 @@ const {
 const goPage1 = () => {
     router.push(`/manage/${params.id}/SMSSend`);
 };
+const getPhones: any = ref(null);
+if (smsTabsType.value === "automatic") {
+    getPhones.value = uploadRef.value.valid.map((file) => `0${file.mobile}`);
+} else {
+    getPhones.value = smsPhoneArray.value;
+}
+
 //確認傳送
 const onSend = () => {
     const newsletterDepartmentToken = localStorage.getItem("newsletterDepartmentToken");
-    const getPhones = smsTabsType.value === "automatic" ? smsExcelFile.value : smsPhoneString.value;
+
     const sendObj = {
         token: newsletterDepartmentToken,
         text: smsContent.value,
         type: "0",
         subject: smsSubject.value,
-        list: getPhones,
+        list: getPhones.value.toString(),
         sendTime: smsSendTime.value,
         eventId: smsChannel.value,
     };
@@ -115,19 +125,6 @@ const onSend = () => {
     })
         .then((res) => {
             console.log("SMS 確認傳送 res", res);
-            smsChannel.value = null;
-            smsSubject.value = "";
-            smsContent.value = "";
-            smsWord.value = 0;
-            smsCount.value = 0;
-            smsPoint.value = 0;
-            smsSendOption.value = 0;
-            smsSendTimeStamp.value = 0;
-            smsSendTime.value = null;
-            smsExcelFile.value = null;
-            smsPhoneArray.value = [];
-            smsPhoneString.value = "";
-            smsTabsType.value = "automatic";
             location.href = `/manage/${params.id}/SMSSend`;
         })
         .catch((err) => {
