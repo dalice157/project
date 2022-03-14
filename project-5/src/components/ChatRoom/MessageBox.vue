@@ -24,6 +24,7 @@
                     otherMsg: text.sender === 1,
                     myMsg: text.sender === 0,
                     mapMsg: text.msgType === 8,
+                    mobileMsg: text.msgType === 9,
                     delChoice: deleteBoolean,
                     recallChoice: text.recallStatus,
                     dateMsg:
@@ -483,7 +484,7 @@ import { useSearchStore } from "@/store/search";
 import { txt } from "@/util/interfaceUtil";
 import { sendPrivateMsg } from "@/util/chatUtil";
 import user_pic_defaul from "@/assets/Images/chatroom/User-round.svg";
-import { scrollPageTo, convertTime, DO_CALL_NAME, removeDuplicates } from "@/util/commonUtil";
+import { scrollPageTo, convertTime, DO_CALL_NAME } from "@/util/commonUtil";
 import { currentTime, currentDate, currentMonth, chDateFormat } from "@/util/dateUtil";
 import UserInfoModel from "@/components/UserInfoModel.vue";
 import config from "@/config/config";
@@ -496,7 +497,7 @@ const timeOutEvent = ref(0);
 
 // 彈窗 store
 const modelStore = useModelStore();
-const { showCompanyInfo, gotoPhone, closeAll } = modelStore;
+const { showCompanyInfo, closeAll } = modelStore;
 const { info, phoneCallModal } = storeToRefs(modelStore);
 
 //phone store
@@ -1196,6 +1197,17 @@ const previewURL = (fileid: string): void => {
         display: flex;
         justify-content: flex-end;
         padding: 10px 15px;
+        &.mobileMsg {
+            &:hover {
+                .dialog {
+                    .dialog-inner {
+                        .msg_more {
+                            display: none;
+                        }
+                    }
+                }
+            }
+        }
         &:hover {
             .dialog {
                 .dialog-inner {

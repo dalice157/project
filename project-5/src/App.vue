@@ -1,6 +1,7 @@
 <template>
     <n-config-provider class="all" :theme-overrides="themeOverrides">
         <router-view name="login"></router-view>
+        <!--監聽route query change寫法 1 <router-view name="container":key="route.query"></router-view> -->
         <router-view name="container"></router-view>
     </n-config-provider>
 </template>
@@ -17,6 +18,8 @@ import config from "@/config/config";
 
 const apiStore = useApiStore();
 const { chatroomMsg } = storeToRefs(apiStore);
+
+const route = useRoute();
 
 const themeOverrides: GlobalThemeOverrides = {
     common: {

@@ -19,7 +19,7 @@
                 </li>
                 <li
                     v-if="route.path !== '/'"
-                    @touchend.prevent="gotoChat(info.eventID, info.chatroomID, info.mobile)"
+                    @touchend.prevent="gotoChat(info.eventID, info.chatroomID, info.mobile, router)"
                 >
                     <span class="icon"><img :src="messageIcon" alt="傳送訊息" /></span>
                     <p class="text">傳送訊息</p>
@@ -30,7 +30,7 @@
 </template>
 <script setup lang="ts">
 import { defineComponent, ref, toRef, watchEffect, computed } from "vue";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { NModal, NCard } from "naive-ui";
 
@@ -42,9 +42,10 @@ import { DO_CALL_NAME } from "@/util/commonUtil";
 import UserInfo from "@/components/UserInfo.vue";
 
 const route = useRoute();
+const router = useRouter();
 //model store
 const modelStore = useModelStore();
-const { closeModal, gotoPhone, gotoChat } = modelStore;
+const { closeModal, gotoChat } = modelStore;
 const { showModal, info, phoneCallModal } = storeToRefs(modelStore);
 //phone store
 const phoneCallStore = usePhoneCallStore();

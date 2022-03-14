@@ -337,6 +337,10 @@ const pagination = {
 <style lang="scss">
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
+.mms_inquire .n-data-table__pagination {
+    position: relative;
+    margin-top: 25px;
+}
 .mms_search {
     width: 100%;
     box-shadow: 1px 2px 4px 0 $gray-6;

@@ -2,12 +2,12 @@
     <n-layout class="bg">
         <Headers />
         <n-layout class="bg">
-            <a
+            <router-link
                 class="close"
-                :href="`/chat/${route.params.id}?chatroomID=${route.query.chatroomID}&mobile=${route.query.mobile}`"
+                :to="`/chat/${route.params.id}?chatroomID=${route.query.chatroomID}&mobile=${route.query.mobile}`"
             >
                 <img src="../assets/Images/chatroom/close-round.svg" />
-            </a>
+            </router-link>
             <div class="noPicture" v-if="pictures.length === 0">
                 <p>尚未有任何相片!!!</p>
             </div>
@@ -55,6 +55,7 @@
                                 "
                             >
                                 <a
+                                    target="_blank"
                                     :href="`${config.serverUrl}/v1/file/${route.params.id}/${picture.format.Fileid}`"
                                 >
                                     <img src="../assets/Images/chatroom/file-fill.svg" />
@@ -117,7 +118,9 @@ const apiStore = useApiStore();
 const { getHistoryApi } = apiStore;
 const { chatroomMsg } = storeToRefs(apiStore);
 
-getHistoryApi(route.query.chatroomID);
+if (route.query) {
+    getHistoryApi(route.query.chatroomID);
+}
 const pictures: any = computed(() => {
     const set = new Set();
     return chatroomMsg.value.messageList.filter((item: any) => {

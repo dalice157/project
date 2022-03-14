@@ -22,6 +22,7 @@
                                 <div class="downloadText">
                                     <a
                                         v-if="uploadRef === null"
+                                        target="_blank"
                                         :href="`${config.fileUrl}/fls/一般大量發送範例檔.xlsx`"
                                     >
                                         <h2>下載一般大量發送範例檔</h2>
@@ -208,12 +209,14 @@
 import { ref, watch, computed, watchEffect } from "vue";
 import { NConfigProvider } from "naive-ui";
 import { NTabs, NTabPane, NInput, NButton, NIcon, NDivider, NUpload, NDataTable } from "naive-ui";
+import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
+
 import { useSmsStore } from "@/store/smsStore";
 import { useMmsStore } from "@/store/mmsStore";
 import { useApiStore } from "@/store/api";
-import { storeToRefs } from "pinia";
 import config from "@/config/config";
+import { isphone } from "@/util/commonUtil";
 
 //smsStore
 const smsStore = useSmsStore();
@@ -265,73 +268,82 @@ const onChange = (value) => {
 //下一頁
 const router = useRouter();
 const nextPageList = () => {
-    if (props.optionType === "sms") {
+    const smsValidate = () => {
         if (
-            smsChannel.value === null ||
-            smsContent.value === "" ||
+            !smsChannel.value ||
+            !smsContent.value ||
             smsContent.value === props.demoContent ||
-            (smsSendOption.value !== 0 && smsSendTimeStamp.value === null)
+            (smsSendOption.value !== 0 && !smsSendTimeStamp.value)
         ) {
             alert("仍有必填欄位尚未填寫!!");
-        } else {
-            router.push(props.nextPageRouter);
+            return;
         }
-    } else {
+        router.push(props.nextPageRouter);
+    };
+    const mmsValidate = () => {
         if (
-            mmsChannel.value === null ||
-            mmsSubject.value === "" ||
-            mmsUploadImgRef.value === null ||
-            mmsContent.value === "" ||
+            !mmsChannel.value ||
+            !mmsSubject.value ||
+            !mmsUploadImgRef.value ||
+            !mmsContent.value ||
             mmsContent.value === props.demoContent ||
-            (mmsSendOption.value !== 0 && mmsSendTimeStamp.value === null)
+            (mmsSendOption.value !== 0 && !mmsSendTimeStamp.value)
         ) {
             alert("仍有必填欄位尚未填寫!!");
-        } else {
-            router.push(props.nextPageRouter);
+            return;
         }
-    }
+        router.push(props.nextPageRouter);
+    };
+    props.optionType == "sms" && smsValidate();
+    props.optionType == "mms" && mmsValidate();
 };
 const nextPageManual = () => {
-    // 檢查每筆電話是否符合正則表達
-    function isphone(ele: any) {
-        return ele.match(/^09\d{2}-?\d{3}-?\d{3}$/);
-    }
     phoneReg.value = phoneArray.value.every(isphone);
-
     //檢查手機格式及必填欄位 有誤跳彈窗
-    if (props.optionType == "sms") {
-        if (phoneReg.value === false) {
-            alert("手機號碼格式有誤");
-        } else if (
-            smsChannel.value === null ||
-            smsContent.value === "" ||
+    const smsValidate = () => {
+        if (
+            !smsChannel.value ||
+            !smsContent.value ||
             smsContent.value === props.demoContent ||
-            (smsSendOption.value !== 0 && smsSendTimeStamp.value === null)
+            (smsSendOption.value !== 0 && !smsSendTimeStamp.value)
         ) {
             alert("仍有必填欄位尚未填寫!!");
-        } else {
-            smsPhoneString.value = phoneNumberList.value;
-            router.push(props.nextPageRouter);
+            return;
         }
-    } else {
         if (phoneReg.value === false) {
             alert("手機號碼格式有誤");
-        } else if (
-            mmsChannel.value === null ||
-            mmsSubject.value === "" ||
-            mmsUploadImgRef.value === null ||
-            mmsContent.value === "" ||
+            return;
+        }
+        smsPhoneString.value = phoneNumberList.value;
+        router.push(props.nextPageRouter);
+    };
+    const mmsValidate = () => {
+        if (
+            !mmsChannel.value ||
+            !mmsSubject.value ||
+            !mmsUploadImgRef.value ||
+            !mmsContent.value ||
             mmsContent.value === props.demoContent ||
-            (mmsSendOption.value !== 0 && mmsSendTimeStamp.value === null)
+            (mmsSendOption.value !== 0 && !mmsSendTimeStamp.value)
         ) {
             alert("仍有必填欄位尚未填寫!!");
-        } else if (mmsKB.value > 300) {
-            alert("請將圖文訊息調整至小於300KB！!");
-        } else {
-            mmsPhoneString.value = phoneNumberList.value;
-            router.push(props.nextPageRouter);
+            return;
         }
-    }
+        if (mmsKB.value > 300) {
+            alert("請將圖文訊息調整至小於300KB！!");
+            return;
+        }
+        if (phoneReg.value === false) {
+            alert("手機號碼格式有誤");
+            return;
+        }
+
+        mmsPhoneString.value = phoneNumberList.value;
+        router.push(props.nextPageRouter);
+    };
+
+    props.optionType == "sms" && smsValidate();
+    props.optionType == "mms" && mmsValidate();
 };
 //手動輸入textarea v-model
 const phoneNumberList = ref("");

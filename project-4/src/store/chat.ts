@@ -122,7 +122,6 @@ export const useChatStore = defineStore({
                 return item.stickerPackID === this.stickerGroupID;
             });
             this.stickerGroup = id == 0 ? this.stickerItems : getlist;
-            console.log('this.stickerGroup"', this.stickerGroup);
         },
     },
 });

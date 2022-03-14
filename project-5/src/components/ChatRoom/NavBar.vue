@@ -21,7 +21,7 @@
                 />
             </a>
             <phoneCallModel />
-            <router-link
+            <!-- <router-link
                 class="phone"
                 :to="`/phone/${route.params.id}?chatroomID=${chatroomID}&mobile=${mobile}`"
             >
@@ -30,7 +30,7 @@
                     alt="#"
                     @touchend="doCall(DO_CALL_NAME)"
                 />
-            </router-link>
+            </router-link> -->
             <router-link
                 class="gallery"
                 :to="`/gallery/${route.params.id}?chatroomID=${chatroomID}&mobile=${mobile}`"

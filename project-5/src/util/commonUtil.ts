@@ -110,10 +110,7 @@ export const isObjToBeZero = (obj: any) => {
     return Object.keys(obj).length === 0;
 };
 
-export function removeDuplicates(originalArray) {
-    originalArray.filter(function (element, index, arr) {
-        return arr.filter((vendor) => {
-            return vendor.format.id !== element.format.id;
-        });
-    });
+// 判檢查每筆電話是否符合正則表達
+export function isphone(ele: any) {
+    return ele.match(/^09\d{2}-?\d{3}-?\d{3}$/);
 }

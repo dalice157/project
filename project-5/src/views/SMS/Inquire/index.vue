@@ -453,6 +453,10 @@ const pagination = {
 <style lang="scss">
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
+.sms_inquire .n-data-table__pagination {
+    position: relative;
+    margin-top: 25px;
+}
 .inquireCondition {
     margin-top: -45px;
     margin-bottom: -65px;

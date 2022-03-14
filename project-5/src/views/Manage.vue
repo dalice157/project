@@ -50,6 +50,7 @@
                     >活動頻道管理</router-link
                 >
                 <router-link
+                    v-if="adminStatus == '2'"
                     :to="`/manage/${params.id}/manageSetting`"
                     :active-class="$route.name === 'ManageSetting' ? 'active' : ''"
                     >管理者設定</router-link
@@ -83,6 +84,8 @@ getEventListApi();
 const route = useRoute();
 const pathPage = route.path.split("/")[3];
 const params = route.params;
+// adminStatus: 0-客服, 1-管理者,
+const adminStatus: string | null = localStorage.getItem("adminStatus");
 </script>
 
 <style lang="scss">

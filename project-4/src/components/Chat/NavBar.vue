@@ -91,14 +91,12 @@ const chatToken = computed(() => route.query.chatToken);
 const webPhoneCall = () => {
     phoneCallModal.value = true;
     console.log("participantList phone", participantList.value);
-
     const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
     console.log("getCutomer", getCutomer);
     doCall(getCutomer);
 };
 const phoneCall = () => {
     console.log("participantList phone", participantList.value);
-
     const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
     console.log("getCutomer", getCutomer);
     doCall(getCutomer);

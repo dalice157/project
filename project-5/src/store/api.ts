@@ -57,6 +57,7 @@ export const useApiStore = defineStore({
         commonMsgList: <any>[],
         isInput: <boolean>false,
         isUserMsg: <boolean>false,
+        isJanusinit: false,
     }),
     getters: {},
     actions: {
@@ -143,6 +144,8 @@ export const useApiStore = defineStore({
                 headers: { Authorization: `Bearer ${getToken}` },
             })
                 .then((res: any) => {
+                    console.log("isInput:", this.isInput);
+
                     const list = res.data.messageList
                         ? res.data.messageList
                               .map((item) => {
@@ -278,14 +281,12 @@ export const useApiStore = defineStore({
                     this.staffList = res.data.cslist;
                 })
                 .catch((err: any) => {
-                    if (err.response) {
-                        // console.log("data", err.response.data);
-                        // console.log("status", err.response.status);
-                        // console.log("headers", err.response.headers);
-                        if (err.response.data.msg === "沒有客服人員") {
-                            this.staffList = [];
-                            console.error(err);
-                        }
+                    // console.log("data", err.response.data);
+                    // console.log("status", err.response.status);
+                    // console.log("headers", err.response.headers);
+                    if (err.response && err.response.data.msg === "沒有客服人員") {
+                        this.staffList = [];
+                        console.error(err);
                     }
                 });
         },
@@ -409,7 +410,7 @@ export const useApiStore = defineStore({
                 });
         },
         //獲取點數
-        async getPoint() {
+        async getPoint(eventID) {
             const getToken = localStorage.getItem("access_token");
             const fd = new FormData();
             const newsletterDepartmentToken = localStorage.getItem("newsletterDepartmentToken");
@@ -425,6 +426,9 @@ export const useApiStore = defineStore({
                     this.point = res.data.point;
                 })
                 .catch((err: any) => {
+                    if (err.response && [-1, -2, -3, -4].includes(err.response.data.status)) {
+                        location.href = `/${eventID}`;
+                    }
                     console.error(err);
                 });
         },

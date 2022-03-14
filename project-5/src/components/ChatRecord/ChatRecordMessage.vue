@@ -5,7 +5,7 @@
             class="chatRoomBox"
             v-for="num in searcRecordMessages"
             :key="num.chatroomID"
-            @click.stop="gotoChat(route.params.id, num.chatroomID, num.mobile)"
+            @click.stop="gotoChat(route.params.id, num.chatroomID, num.mobile, router)"
         >
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
@@ -61,7 +61,7 @@
             class="chatRoomBox"
             v-for="(num, index) in changeList"
             :key="num.chatroomID"
-            @click.stop="gotoChat(route.params.id, num.chatroomID, num.mobile)"
+            @click.stop="gotoChat(route.params.id, num.chatroomID, num.mobile, router)"
         >
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
@@ -175,7 +175,7 @@ const chatRecordStore = useChatRecordStore();
 const { recordMessages } = storeToRefs(chatRecordStore);
 
 const modelStore = useModelStore();
-const { showCompanyInfo, gotoChat, gotoPhone } = modelStore;
+const { showCompanyInfo, gotoChat } = modelStore;
 const { isInfoPop, info } = storeToRefs(modelStore);
 
 let list = ref([]);

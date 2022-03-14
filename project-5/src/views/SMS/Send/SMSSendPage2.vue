@@ -125,7 +125,7 @@ const onSend = () => {
     })
         .then((res) => {
             console.log("SMS 確認傳送 res", res);
-            location.href = `/manage/${params.id}/SMSSend`;
+            router.push(`/manage/${params.id}/SMSSend`);
         })
         .catch((err) => {
             console.error(err);

@@ -15,6 +15,7 @@
                     myMsg: text.janusMsg.sender === 1,
                     yourMsg: text.janusMsg.sender === 0,
                     mapMsg: text.janusMsg.msgType === 8,
+                    mobileMsg: text.janusMsg.msgType === 9,
                     delChoice: deleteBoolean,
                     recallChoice: text.recallStatus,
                     dateMsg:
@@ -359,7 +360,7 @@
                         <!-- google maps -->
                         <div
                             class="googleMapsMsg content"
-                            v-if="text.msgType === 8"
+                            v-if="text.janusMsg.msgType === 8"
                             @touchstart="gtouchstart(text)"
                             @touchmove="gtouchmove()"
                             @touchend="gtouchend()"
@@ -450,7 +451,7 @@
                         <div
                             class="phoneMsg content"
                             v-else-if="text.janusMsg.msgType === 9"
-                            @touchend="doCall(DO_CALL_NAME)"
+                            @touchend="callAgain"
                         >
                             <router-link
                                 class="phone"
@@ -520,7 +521,7 @@
                     size="30"
                     class="scrollToBottom"
                     v-show="
-                        chatroomScrolltopAndWindowHeight < chatroomScrollHeight &&
+                        chatroomScrolltopAndWindowHeight + 1 < chatroomScrollHeight &&
                         !text.janusMsg.format.isReplay &&
                         !isReplyBox &&
                         !inputFunctionBoolean &&
@@ -640,7 +641,10 @@ const onPhoneCallModal = () => {
     const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
     doCall(getCutomer);
 };
-
+const callAgain = () => {
+    const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
+    doCall(getCutomer);
+};
 //search store
 const searchStore = useSearchStore();
 const { closeSearchBar } = searchStore;
@@ -1276,6 +1280,17 @@ const themeOverrides = {
         display: flex;
         justify-content: flex-end;
         padding: 10px 15px;
+        &.mobileMsg {
+            &:hover {
+                .dialog {
+                    .dialog-inner {
+                        .msg_more {
+                            display: none;
+                        }
+                    }
+                }
+            }
+        }
         &:hover {
             .dialog {
                 .dialog-inner {

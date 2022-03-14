@@ -17,9 +17,24 @@
                 <n-form-item label="密碼" path="password">
                     <n-input
                         v-model:value="modelRef.password"
-                        type="password"
+                        :type="passwordShow"
                         placeholder="請輸入密碼"
-                    />
+                    >
+                        <template #suffix>
+                            <n-icon
+                                v-show="passwordShow === 'password'"
+                                @click="passwordShow = 'text'"
+                            >
+                                <eye-outline />
+                            </n-icon>
+                            <n-icon
+                                v-show="passwordShow === 'text'"
+                                @click="passwordShow = 'password'"
+                            >
+                                <eye-off-outline />
+                            </n-icon>
+                        </template>
+                    </n-input>
                 </n-form-item>
                 <n-form-item label="驗證碼" path="varificationCode">
                     <n-input
@@ -62,12 +77,15 @@ import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import jwt from "jws";
 import { NIcon } from "naive-ui";
-import { RefreshOutline } from "@vicons/ionicons5";
+import { RefreshOutline, EyeOutline, EyeOffOutline } from "@vicons/ionicons5";
 import config from "@/config/config";
 import identify from "@/components/imageCode.vue";
 import { useApiStore } from "@/store/api";
 const apiStore = useApiStore();
 const { connectionWithNewsletterDepartment } = apiStore;
+
+//密碼變為文字
+const passwordShow = ref("password");
 
 //圖形驗證碼
 let identifyCode = ref("1234");

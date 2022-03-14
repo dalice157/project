@@ -36,7 +36,7 @@
                             <img
                                 :src="`${config.fileUrl}/fls/${
                                     picture.janusMsg.format.Fileid
-                                }${String(picture.janusMsg.format.ShowName).slice(-4)}`"
+                                }.${picture.janusMsg.format.ShowName.split('.').pop()}`"
                             />
                         </div>
                         <div
@@ -94,9 +94,9 @@
                     </div>
                 </div>
             </div>
-            <div class="noPicture" v-if="pictures.length === 0">
-                <p>尚未有任何相片!!!</p>
-            </div>
+        </div>
+        <div class="noPicture" v-if="pictures.length === 0">
+            <p>尚未有任何相片!!!</p>
         </div>
     </div>
 </template>
@@ -136,7 +136,7 @@ getBackendApi(route.query.chatToken);
 //獲取當天日期 判斷圖片及檔案是否失效
 watchEffect(() => {
     pictures.value = JSON.parse(localStorage.getItem(`${chatToken.value}-pictures`) || "[]");
-
+    console.log("pictures.value", pictures.value);
     pictures.value.forEach((pic: any, index: any) => {
         if (dayjs().isAfter(dayjs(pic.janusMsg.format.expirationDate))) {
             pic.isExpire = true;
@@ -385,12 +385,12 @@ const previewURL = (fileid: string): void => {
                 }
             }
         }
-        .noPicture {
-            p {
-                margin-top: 4em;
-                font-size: $font-size-20;
-                text-align: center;
-            }
+    }
+    .noPicture {
+        p {
+            margin-top: 10em;
+            font-size: $font-size-20;
+            text-align: center;
         }
     }
 }
@@ -435,13 +435,12 @@ const previewURL = (fileid: string): void => {
             display: block;
             margin: 100px auto 20px;
             overflow-y: auto;
-
-            .noPicture {
-                p {
-                    margin-top: 4em;
-                    font-size: $font-size-20;
-                    text-align: center;
-                }
+        }
+        .noPicture {
+            p {
+                margin-top: 8em;
+                font-size: $font-size-20;
+                text-align: center;
             }
         }
     }

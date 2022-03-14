@@ -252,7 +252,7 @@ const apiStore = useApiStore();
 const { eventList, uploadRef: getUploadFile, commonMsgList } = storeToRefs(apiStore);
 const { getCommonMsgList, addCommonMsgObj, removeCommonMsgObj, editCommonMsgObj } = apiStore;
 //smsStore
-const smsStore = useSmsStore();
+const smsStore: any = useSmsStore();
 const { smsChannel, smsSubject, smsContent, smsWord, smsCount, smsPoint } = storeToRefs(smsStore);
 // 常用簡訊彈窗
 const commonMsgPopUp = ref(false);

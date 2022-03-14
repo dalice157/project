@@ -112,22 +112,6 @@ const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime
 getEventListApi(route.query.chatToken);
 getBackendApi(route.query.chatToken);
 
-//janus 初始值
-onMounted(() => {
-    Janus.init({
-        debug: "all",
-        dependencies: Janus.useDefaultDependencies({
-            adapter: adapter,
-        }),
-        callback: () => {
-            if (!Janus.isWebrtcSupported()) {
-                console.log("No WebRTC support... ");
-                return;
-            }
-            connect();
-        },
-    });
-});
 watchEffect(() => {
     messages.value = JSON.parse(localStorage.getItem(`${route.query.chatToken}`) || "[]");
     welcomeStatus.value = JSON.parse(
@@ -192,6 +176,23 @@ watchEffect(() => {
         localStorage.getItem(`${route.query.chatToken}-welcomeStatus`) || "false"
     );
     pictures.value = JSON.parse(localStorage.getItem(`${route.query.chatToken}-pictures`) || "[]");
+});
+
+//janus 初始值
+onMounted(() => {
+    Janus.init({
+        debug: "all",
+        dependencies: Janus.useDefaultDependencies({
+            adapter: adapter,
+        }),
+        callback: () => {
+            if (!Janus.isWebrtcSupported()) {
+                console.log("No WebRTC support... ");
+                return;
+            }
+            connect();
+        },
+    });
 });
 
 // 連線
@@ -516,7 +517,7 @@ const attachVideocallPlugin = () => {
                     } else if (event === "calling") {
                         // TODO Any ringtone?
                         calling.value = setTimeout(() => {
-                            // 撥打超過30秒， 自動掛掉
+                            // 撥打超過15秒， 自動掛掉
                             doHangup(1, eventID(route.query.chatToken));
                         }, 15000);
                         // @ts-ignore

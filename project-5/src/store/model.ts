@@ -1,7 +1,7 @@
 import { defineStore, storeToRefs } from "pinia";
 
 import { usePhoneCallStore } from "@/store/phoneCall";
-import { DO_CALL_NAME } from "@/util/commonUtil";
+import { useApiStore } from "@/store/api";
 import { useSearchStore } from "@/store/search";
 import { useChatStore } from "@/store/chat";
 
@@ -24,16 +24,11 @@ export const useModelStore = defineStore({
         closeModal() {
             this.showModal = false;
         },
-        gotoChat(eventID: any, chatroomID: any, mobile: any) {
-            location.href = `/chat/${eventID}?chatroomID=${chatroomID}&mobile=${mobile}`;
+        gotoChat(eventID: any, chatroomID: any, mobile: any, router: any) {
+            router.push(`/chat/${eventID}?chatroomID=${chatroomID}&mobile=${mobile}`);
         },
         gotoPhone(eventID: any, chatroomID: any, mobile: any) {
             location.href = `/phone/${eventID}?chatroomID=${chatroomID}&mobile=${mobile}`;
-
-            // const phoneCallStore = usePhoneCallStore()
-            // const { doCall } = phoneCallStore
-            // this.phoneCallModal = true
-            // doCall(DO_CALL_NAME);
         },
         closeAll() {
             const chatStore = useChatStore();

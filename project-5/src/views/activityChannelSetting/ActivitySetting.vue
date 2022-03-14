@@ -33,11 +33,11 @@
                         </div>
                         <p class="channelName">{{ channel.name }}</p>
                         <div class="channelSetting">
-                            <a
-                                :href="`/manage/${route.params.id}/activitySetting/editChannel?eventID=${channel.eventID}`"
+                            <router-link
+                                :to="`/manage/${route.params.id}/activitySetting/editChannel?eventID=${channel.eventID}`"
                             >
                                 <img src="../../assets/Images/manage/edit-round.svg" alt="#" />
-                            </a>
+                            </router-link>
                         </div>
                     </li>
                 </ul>
