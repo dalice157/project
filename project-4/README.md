@@ -1,4 +1,4 @@
-# userWeb
+# vue3-chat
 
 ## Project setup
 ```
