@@ -1,4 +1,4 @@
-# vue3-chat
+# vue3-backend-system
 
 ## Project setup
 ```
