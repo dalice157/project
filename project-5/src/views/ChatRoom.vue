@@ -59,17 +59,15 @@
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { watch, ref, onMounted, computed } from "vue";
+import { watch, ref, onMounted, computed, onUpdated } from "vue";
 import { NModal, NCard, NLayout, NLayoutSider, NLayoutContent } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
 
 import { txt, ITransactions, IAttachPlugin } from "@/util/interfaceUtil";
 
 import { useApiStore } from "@/store/api";
-
 import { usePhoneCallStore } from "@/store/phoneCall";
-
-import { currentTime, currentDate } from "@/util/dateUtil";
+import { useChatStore } from "@/store/chat";
 
 import NavBar from "@/components/ChatRoom/NavBar.vue";
 import MessageBox from "@/components/ChatRoom/MessageBox";
@@ -95,45 +93,72 @@ const { onIncomingCall, doHangup } = phoneCallStore;
 const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime } =
     storeToRefs(phoneCallStore);
 
-getChatroomlistApi(route.params.id);
+//chat store
+const chatStore = useChatStore();
+const { showStickerModal } = storeToRefs(chatStore);
+
 const chatRoomID: any = computed(() => route.query.chatroomID);
 const mobile: any = computed(() => route.query.mobile);
 const eventID = computed(() => route.params.id);
 
+onMounted(() => {
+    getChatroomlistApi(route.params.id);
+});
+
 // 監聽route query change寫法 2
 const initData = () => {
+    console.log("initData");
     getChatroomUserInfoApi(route.query.chatroomID);
     getHistoryApi(route.query.chatroomID);
 };
-if (route.query) {
+if (Object.keys(route.query).length > 0) {
     isInput.value = true;
     initData();
 }
+
 watch(
     () => route.query,
     (val) => {
-        isInput.value = true;
-        initData();
+        if (Object.keys(val).length > 0) {
+            isInput.value = true;
+            initData();
+        }
     }
 );
 
-const { chatroomMsg } = storeToRefs(apiStore);
+const { messageList } = storeToRefs(apiStore);
+const messageListLength = computed(() => {
+    return messageList.value.length;
+});
+//監聽 messageList 打chatroomlist api
+watch(
+    messageListLength,
+    (newVal, oldVal) => {
+        if (newVal !== oldVal) {
+            setTimeout(() => {
+                getChatroomlistApi(route.params.id);
+            }, 500);
+        }
+    },
+    { immediate: true }
+);
 
-const messageList: any = computed({
+const messages: any = computed({
     get() {
-        return chatroomMsg.value.messageList;
+        return messageList.value;
     },
     set(val) {
-        chatroomMsg.value.messageList = val;
+        messageList.value = val;
     },
 });
 
 //取消訊息功能泡泡
 const closeChatBubble = (): void => {
-    messageList.value = chatroomMsg.value.messageList.map((text: txt) => {
-        text.msgFunctionStatus = false;
+    messages.value = messageList.value.map((text: txt) => {
+        text.janusMsg.config.msgFunctionStatus = false;
         return text;
     });
+    showStickerModal.value = false;
 };
 </script>
 

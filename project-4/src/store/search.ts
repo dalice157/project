@@ -61,11 +61,11 @@ export const useSearchStore = defineStore({
                 messages.value.forEach((msg: any) => {
                     const message =
                         (msg.janusMsg.format && msg.janusMsg.format.ShowName) ||
-                        msg.janusMsg.message;
+                        msg.janusMsg.msgContent;
                     const regMatch = message.match(reg);
                     if (regMatch) {
-                        if (msg.janusMsg.message) {
-                            msg.tagMsg = msg.janusMsg.message.replace(
+                        if (msg.janusMsg.msgContent) {
+                            msg.janusMsg.tagMsg = msg.janusMsg.msgContent.replace(
                                 reg,
                                 `<span style="color: #FFB400; font-weight: bold;">${regStr}</span>`
                             );
@@ -94,10 +94,10 @@ export const useSearchStore = defineStore({
                 const reg = new RegExp(regStr);
                 console.log("recordMessages.value:", recordMessages.value);
                 recordMessages.value.forEach((msg: any) => {
-                    const regMatch = msg.message.match(reg);
+                    const regMatch = msg.janusMsg.msgContent.match(reg);
                     if (regMatch) {
-                        if (msg.message) {
-                            msg.tagMsg = msg.message.replace(
+                        if (msg.janusMsg.msgContent) {
+                            msg.janusMsg.tagMsg = msg.janusMsg.msgContent.replace(
                                 reg,
                                 `<span style="color: #FFB400; font-weight: bold;">${regStr}</span>`
                             );
@@ -141,16 +141,15 @@ export const useSearchStore = defineStore({
             }
             console.log("searcMessages:", this.searcMoreMessages);
         },
-        onClickGoto(id: string, chatToken: any) {
-            console.log("chatToken:", chatToken);
+        onClickGoto(id: string, eventKey: any) {
+            console.log("eventKey:", eventKey);
             //chat store
             const chatStore = useChatStore();
             const { messages } = storeToRefs(chatStore);
             const route = useRoute();
             scrollPageTo(id);
-            messages.value = JSON.parse(localStorage.getItem(`${chatToken}`) || "[]");
+            messages.value = JSON.parse(localStorage.getItem(`${eventKey}`) || "[]");
             this.closeSearchBar();
-            this.isResult = false;
         },
     },
 });

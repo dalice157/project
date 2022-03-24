@@ -3,7 +3,7 @@
         <n-layout-sider bordered content-style="padding: 20px 0;">
             <div class="logo">
                 <div class="logoImg"></div>
-                <h1>溝通雲</h1>
+                <h1>talkOD</h1>
             </div>
             <div class="sms">
                 <h1>SMS</h1>
@@ -12,11 +12,13 @@
                     :class="
                         $route.name === 'SMSSend' || $route.name === 'SMSSendPage2' ? 'active' : ''
                     "
+                    @click="onMmsReset"
                     >SMS發送</router-link
                 >
                 <router-link
                     :to="`/manage/${params.id}/SMSInquire`"
                     :class="$route.name === 'SMSInquire' ? 'active' : ''"
+                    @click="storeReset"
                     >SMS發送查詢</router-link
                 >
             </div>
@@ -28,11 +30,13 @@
                     :class="
                         $route.name === 'MMSSend' || $route.name === 'MMSSendPage2' ? 'active' : ''
                     "
+                    @click="onSmsReset"
                     >MMS發送</router-link
                 >
                 <router-link
                     :to="`/manage/${params.id}/MMSInquire`"
                     :active-class="$route.name === 'MMSInquire' ? 'active' : ''"
+                    @click="storeReset"
                     >MMS發送查詢</router-link
                 >
             </div>
@@ -47,12 +51,14 @@
                             ? 'active'
                             : ''
                     "
+                    @click="storeReset"
                     >活動頻道管理</router-link
                 >
                 <router-link
                     v-if="adminStatus == '2'"
                     :to="`/manage/${params.id}/manageSetting`"
                     :active-class="$route.name === 'ManageSetting' ? 'active' : ''"
+                    @click="storeReset"
                     >管理者設定</router-link
                 >
             </div>
@@ -60,7 +66,7 @@
         <n-layout>
             <Headers />
             <router-view name="manage" v-slot="{ Component }">
-                <keep-alive :include="['SMSSend', 'MMSSend']">
+                <keep-alive :include="cacheComponent">
                     <component :is="Component" />
                 </keep-alive>
             </router-view>
@@ -69,23 +75,54 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, h } from "vue";
+import { computed } from "vue";
 import { NLayout, NLayoutSider, NMenu } from "naive-ui";
-import { RouterLink, useRoute } from "vue-router";
+import { RouterLink, useRoute, onBeforeRouteUpdate } from "vue-router";
 
 import Headers from "@/components/Headers.vue";
 import { useApiStore } from "@/store/api";
-import config from "@/config/config";
+import { useSmsStore } from "@/store/smsStore";
+import { useMmsStore } from "@/store/mmsStore";
+import { storeToRefs } from "pinia";
+
+//store
+const smsStore = useSmsStore();
+const onSmsReset = () => {
+    smsStore.$reset();
+};
+
+const mmsStore = useMmsStore();
+const onMmsReset = () => {
+    mmsStore.$reset();
+};
+const storeReset = () => {
+    smsStore.$reset();
+    mmsStore.$reset();
+};
+
+//緩存組件陣列
+const { smsCacheComponent } = storeToRefs(smsStore);
+const { mmsCacheComponent } = storeToRefs(mmsStore);
+
+const cacheComponent = computed(() => {
+    return smsCacheComponent.value.concat(mmsCacheComponent.value);
+});
+
+//路由
+const route = useRoute();
+const params = route.params;
 
 const apiStore = useApiStore();
 const { getEventListApi } = apiStore;
 getEventListApi();
 
-const route = useRoute();
-const pathPage = route.path.split("/")[3];
-const params = route.params;
 // adminStatus: 0-客服, 1-管理者,
 const adminStatus: string | null = localStorage.getItem("adminStatus");
+//監聽路由變化
+// onBeforeRouteUpdate((to, from) => {
+//     console.log(to);
+//     console.log(from);
+// });
 </script>
 
 <style lang="scss">

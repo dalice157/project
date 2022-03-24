@@ -22,20 +22,20 @@ import ChatRecordMessage from "@/components/ChatRecord/ChatRecordMessage.vue";
 const apiStore = useApiStore();
 const { getEventListApi, getBackendApi } = apiStore;
 const route = useRoute();
-getEventListApi(route.query.chatToken);
-getBackendApi(route.query.chatToken);
+getEventListApi(route.params.eventKey);
+getBackendApi(route.params.eventKey);
 //漢堡選單
 const hamburgerBoolean = ref();
 const menuToggle = (menuBoolean: any) => {
     hamburgerBoolean.value = menuBoolean;
 };
 
-const getChangeList = (lists:any) => {
+const getChangeList = (lists: any) => {
     // console.log("=======",lists);
-    lists.forEach((list:any)=>{
-        list.isfunctionPopUp = false
-    })
-}
+    lists.forEach((list: any) => {
+        list.isfunctionPopUp = false;
+    });
+};
 </script>
 <style lang="scss" scoped>
 .chatRecord {

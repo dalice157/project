@@ -25,22 +25,25 @@ export const useChatStore = defineStore({
         stickerItems: <any>[],
         isMmsSend: <boolean>false,
         participantList: <any>[],
+        onlineList: <any>[],
+        isOnline: <boolean>false,
     }),
     getters: {},
     actions: {
         // 回覆訊息
         replyMsgEvent(msg: any) {
+            console.log("reply msg:", msg);
+
             // api store
             const apiStore = useApiStore();
-            const { chatroomMsg } = storeToRefs(apiStore);
-            const findId = chatroomMsg.value.messageList.find((text: any) => {
-                return text.format.id === msg.format.id;
+            const { messageList } = storeToRefs(apiStore);
+            const findId = messageList.value.find((text: any) => {
+                return text.janusMsg.config.id === msg.janusMsg.config.id;
             });
-
+            console.log("findid", findId);
             this.replyMsg = findId;
             this.isReplyBox = true;
-            msg.msgFunctionStatus = false;
-
+            msg.janusMsg.config.msgFunctionStatus = false;
             console.log("replyMsg:", this.replyMsg);
             this.inputVal.focus();
             this.inputFunctionBoolean = false;
@@ -58,14 +61,13 @@ export const useChatStore = defineStore({
             msg.msgFunctionStatus = false;
         },
         //獲取janus訊息
-        getCompanyMsg() {
+        getCompanyMsg(msg) {
             console.log("獲取janus訊息");
-
             // api store
             const apiStore = useApiStore();
-            const { isInput, isUserMsg } = storeToRefs(apiStore);
-            isUserMsg.value = true;
+            const { isInput, messageList } = storeToRefs(apiStore);
             isInput.value = true;
+            
         },
         // 開啟錄音視窗
         openRecorder() {

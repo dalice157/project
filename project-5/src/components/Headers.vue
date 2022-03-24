@@ -15,14 +15,25 @@
         </h1>
         <ul class="pages">
             <li class="btnBg">
-                點數<span class="point">{{ point }}點</span>(<a class="store-value" href="#">儲值</a
+                點數<span class="point">{{ point }}點</span>(<a
+                    class="store-value"
+                    href="https://www.teamplus.tech/product/every8d-prepaid/"
+                    target="_blank"
+                    >儲值</a
                 >)
             </li>
             <li class="btnBg" v-if="isAdmin >= 1">
                 <router-link :to="`/manage/${params.id}/SMSSend`">管理功能</router-link>
             </li>
-            <li class="btnBg">
-                <router-link :to="`/chat/${params.id}`">我的聊天室</router-link>
+            <li class="btnBg myChatRoom">
+                <n-dropdown
+                    class="dropdown"
+                    :show="showDropdown"
+                    :options="options"
+                    @select="handleSelect"
+                >
+                    <span @click="handleClick">我的聊天室</span>
+                </n-dropdown>
             </li>
             <li v-if="!access_token">
                 <a :href="`/${params.id}`">登入</a>
@@ -37,7 +48,7 @@
 <script lang="ts" setup>
 import { computed, watch, onMounted, ref, watchEffect } from "vue";
 import { useRoute } from "vue-router";
-import { NAvatar, NPopover, NIcon, NLayoutHeader } from "naive-ui";
+import { NDropdown, NPopover, NIcon, NLayoutHeader } from "naive-ui";
 import { storeToRefs } from "pinia";
 import adapter from "webrtc-adapter";
 import Janus from "@/assets/js/janus";
@@ -52,6 +63,7 @@ import { ITransactions, IAttachPlugin } from "@/util/interfaceUtil";
 import { useChatStore } from "@/store/chat";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { useModelStore } from "@/store/model";
+import router from "@/router";
 
 const route = useRoute();
 const params = route.params;
@@ -63,7 +75,7 @@ const { phoneCallModal } = storeToRefs(modelStore);
 
 //Chat store
 const chatStore = useChatStore();
-const { textPlugin, participantList } = storeToRefs(chatStore);
+const { textPlugin, participantList, onlineList, isOnline } = storeToRefs(chatStore);
 
 //phoneCall store
 const phoneCallStore = usePhoneCallStore();
@@ -73,8 +85,8 @@ const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime
 
 // api store
 const apiStore = useApiStore();
-const { getPoint, getEventApi, getChatroomlistApi, getHistoryApi } = apiStore;
-const { eventInfo, point, isJanusinit } = storeToRefs(apiStore);
+const { getPoint, getEventApi, getChatroomlistApi, getEventListApi } = apiStore;
+const { eventInfo, point, isJanusinit, eventList } = storeToRefs(apiStore);
 const access_token = localStorage.getItem("access_token");
 
 const chatRoomID: any = computed(() => route.query.chatroomID);
@@ -83,8 +95,11 @@ const eventID = computed(() => route.params.id);
 
 // adminStatus: 0-客服, 1-管理者,
 const isAdmin: number | null = Number(localStorage.getItem("adminStatus"));
-getEventApi(eventID.value);
-getPoint(eventID.value);
+
+onMounted(() => {
+    getEventApi(eventID.value);
+    getPoint(eventID.value);
+});
 
 const showTitle = () => {
     const managePath = `/manage/${eventID.value}`;
@@ -113,6 +128,12 @@ const showTitle = () => {
     if (route.path === `${managePath}/activitySetting/editChannel`) {
         return "編輯活動頻道";
     }
+    if (route.path === `${managePath}/activitySetting/addAutoReply`) {
+        return "建立自動回覆訊息";
+    }
+    if (route.path === `${managePath}/activitySetting/autoReplyList`) {
+        return "自動回覆訊息列表";
+    }
     if (route.path === `${managePath}/manageSetting`) {
         return "管理者設定";
     }
@@ -126,6 +147,26 @@ let participants: any = {};
 let yourusername: any = null;
 let simulcastStarted: any = false;
 
+const showDropdown = ref(false);
+const options: any = ref([]);
+getEventListApi();
+
+const handleSelect = (key: string | number) => {
+    console.log("key:", key);
+    location.href = `/chat/${key}`;
+};
+
+const handleClick = () => {
+    options.value = eventList.value.map((item) => {
+        return {
+            label: item.name,
+            key: item.eventID,
+        };
+    });
+
+    showDropdown.value = !showDropdown.value;
+};
+
 // 連線
 const connect = () => {
     janus = new Janus({
@@ -136,17 +177,23 @@ const connect = () => {
         },
         error: (error: any) => {
             onError("Failed to connect to janus server", error);
+            // alert("連線中斷,按下確認重新連線");
+            // window.location.reload();
         },
         destroyed: () => {
             window.location.reload();
         },
     });
 };
+watchEffect(() => {
+    const chatRoomIDArr = Object.keys(onlineList.value);
+    if (chatRoomIDArr.includes(chatRoomID.value)) {
+        isOnline.value = true;
+    }
+});
 
 //janus 初始值
 watchEffect(() => {
-    console.log("id 初始值:", isJanusinit.value);
-
     if (!isJanusinit.value) {
         Janus.init({
             debug: "all",
@@ -170,7 +217,6 @@ const registerUsername = (username: undefined | string) => {
     if (username === "") {
         return;
     }
-    console.log("username:", username);
 
     // myid = randomString(12);
     myid = username;
@@ -207,6 +253,17 @@ const registerUsername = (username: undefined | string) => {
                 participants[p.username] = p.display ? p.display : p.username;
             }
             //TODO do something
+
+            participantList.value = Object.keys(participants).map((key) => {
+                return {
+                    [key]: participants[key],
+                };
+            });
+            onlineList.value = participants;
+            const chatRoomIDArr = Object.keys(onlineList.value);
+            if (chatRoomIDArr.includes(chatRoomID.value)) {
+                isOnline.value = true;
+            }
         }
     };
     textPlugin.value.data({
@@ -282,16 +339,13 @@ const attachTextroomPlugin = () => {
             }
         },
         ondataopen: function (data: any) {
-            // @ts-ignore
-            Janus.log("text-> The DataChannel is available!", data);
             console.log("text-> The DataChannel is available!", data);
             // registerUsername(自己的username);
             const myUserName = randomString(7);
             registerUsername(myUserName);
         },
         ondata: function (item: any) {
-            // @ts-ignore
-            Janus.debug("text-> We got data from the DataChannel!", item);
+            console.log("text-> We got data from the DataChannel!", item);
 
             let json = JSON.parse(item);
             let transaction = json["transaction"];
@@ -317,7 +371,7 @@ const attachTextroomPlugin = () => {
                 data.date = dateString;
                 data.from = participants[from];
                 data.msg = msg;
-                getHistoryApi(chatRoomID.value);
+                // getHistoryApi(chatRoomID.value);
                 getChatroomlistApi(route.params.id);
             } else if (what === "announcement") {
                 // Room announcement
@@ -342,13 +396,26 @@ const attachTextroomPlugin = () => {
                         [key]: participants[key],
                     };
                 });
-                console.log("participantList", participantList.value);
+                onlineList.value = participants;
+                const chatRoomIDArr = Object.keys(onlineList.value);
+                if (chatRoomIDArr.includes(chatRoomID.value)) {
+                    isOnline.value = true;
+                }
             } else if (what === "leave") {
                 // Somebody left
                 let username = json["username"];
                 delete participants[username];
-
+                participantList.value = Object.keys(participants).map((key) => {
+                    return {
+                        [key]: participants[key],
+                    };
+                });
                 data.username = username;
+                onlineList.value = participants;
+                const chatRoomIDArr = Object.keys(onlineList.value);
+                if (chatRoomIDArr.includes(chatRoomID.value)) {
+                    isOnline.value = false;
+                }
             } else if (what === "kicked") {
                 // Somebody was kicked
                 let username = json["username"];
@@ -359,10 +426,9 @@ const attachTextroomPlugin = () => {
                         window.location.reload();
                     });
                 }
-
                 data.username = username;
             } else if (what === "destroyed") {
-                if (json["room"] !== MY_ROOM) return;
+                if (json["room"] !== route.params.id) return;
                 // Room was destroyed, goodbye!
                 // @ts-ignore
                 Janus.warn("text-> The room has been destroyed!");
@@ -371,7 +437,7 @@ const attachTextroomPlugin = () => {
                 });
             } else if (what === "success") {
                 console.log("success:", data);
-                getHistoryApi(chatRoomID.value);
+                // getHistoryApi(chatRoomID.value);
                 getChatroomlistApi(route.params.id);
             }
 
@@ -441,6 +507,7 @@ const attachVideocallPlugin = () => {
                     let list = result["list"];
                     // @ts-ignore
                     Janus.debug("call-> Got a list of phone registered peers:", list);
+
                     for (let mp in list) {
                         // @ts-ignore
                         Janus.debug("call list->  >> [" + list[mp] + "]");
@@ -608,7 +675,11 @@ const attachVideocallPlugin = () => {
     });
 };
 </script>
-
+<style lang="scss">
+.dropdown.n-popover {
+    width: 100%;
+}
+</style>
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
@@ -679,6 +750,9 @@ $headerHeight: 80px;
             margin-left: 30px;
         }
         &.btnBg {
+            &.myChatRoom {
+                cursor: pointer;
+            }
             border-radius: 20px;
             box-shadow: $gray-6 1px 2px 4px 0;
             background-color: $primary-4;

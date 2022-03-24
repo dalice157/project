@@ -3,7 +3,7 @@
         <div class="loginScreen">
             <div class="logo">
                 <div class="logoImg"></div>
-                <h1>溝通雲</h1>
+                <h1>talkOD</h1>
             </div>
             <n-form class="loginForm" :model="modelRef" ref="formRef" :rules="rules">
                 <n-form-item label="帳號" path="account">
@@ -82,7 +82,7 @@ import config from "@/config/config";
 import identify from "@/components/imageCode.vue";
 import { useApiStore } from "@/store/api";
 const apiStore = useApiStore();
-const { connectionWithNewsletterDepartment } = apiStore;
+// const { connectionWithNewsletterDepartment } = apiStore;
 
 //密碼變為文字
 const passwordShow = ref("password");
@@ -175,6 +175,7 @@ onMounted(() => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("accountID");
     localStorage.removeItem("newsletterDepartmentToken");
+    localStorage.removeItem("userName");
 });
 
 const login = () => {
@@ -196,7 +197,7 @@ const login = () => {
             .post(`${config.serverUrl}/v1/token/`, bodyFormData)
             .then((res) => {
                 // console.log("res", res);
-                const secret = res.data.token;
+                const secret = res.data.key;
                 const admin = res.data.admin;
                 const accountID = res.data.id;
                 // const exp = res.data.expire;
@@ -217,7 +218,9 @@ const login = () => {
                 localStorage.setItem("access_token", access_token);
                 localStorage.setItem("accountID", accountID);
                 localStorage.setItem("adminStatus", admin);
-                connectionWithNewsletterDepartment(params.id);
+                localStorage.setItem("userName", res.data.name);
+                localStorage.setItem("newsletterDepartmentToken", res.data.token);
+                location.href = `/chat/${route.params.id}`;
             })
             .catch((err) => {
                 console.error("err", err);

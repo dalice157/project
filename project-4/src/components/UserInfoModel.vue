@@ -6,21 +6,21 @@
         preset="card"
     >
         <n-card :bordered="false" size="huge" class="container">
-            <div class="closeBtn" @click.prevent="closeModal">
+            <div class="closeBtn" @click.stop="closeModal">
                 <img src="../assets/Images/common/close-round.svg" alt="關閉" />
             </div>
             <UserInfo :info="info" />
             <div class="description">{{ info.description }}</div>
             <ul class="call_container">
-                <li class="call-mobile" @touchend.prevent="gotoPhone(info.chatToken)">
+                <li
+                    v-if="eventInfo.callable === true"
+                    class="call-phone"
+                    @click.stop="onPhoneCallModal"
+                >
                     <span class="icon"><img :src="phoneIcon" alt="語音通話" /></span>
                     <p class="text">語音通話</p>
                 </li>
-                <li class="call-web" @click.prevent="onPhoneCallModal">
-                    <span class="icon"><img :src="phoneIcon" alt="語音通話" /></span>
-                    <p class="text">語音通話</p>
-                </li>
-                <li v-if="route.path !== '/'" @touchend.prevent="gotoChat(info.chatToken)">
+                <li v-if="route.path !== '/'" @click.stop="gotoChat(info.eventKey)">
                     <span class="icon"><img :src="messageIcon" alt="傳送訊息" /></span>
                     <p class="text">傳送訊息</p>
                 </li>
@@ -39,6 +39,7 @@ import messageIcon from "@/assets/Images/common/message-round.svg";
 import { useModelStore } from "@/store/model";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { useChatStore } from "@/store/chat";
+import { useApiStore } from "@/store/api";
 import { DO_CALL_NAME } from "@/util/commonUtil";
 import UserInfo from "@/components/UserInfo.vue";
 
@@ -53,12 +54,21 @@ const { doCall } = phoneCallStore;
 
 // chat store
 const chatStore = useChatStore();
-const { participantList } = storeToRefs(chatStore);
+const { participantList, isOnline } = storeToRefs(chatStore);
+
+// api store
+const apiStore = useApiStore();
+const { eventInfo } = storeToRefs(apiStore);
 
 const onPhoneCallModal = () => {
-    phoneCallModal.value = true;
-    const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
-    doCall(getCutomer);
+    if (isOnline.value === true) {
+        showModal.value = false;
+        phoneCallModal.value = true;
+        const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
+        doCall(getCutomer);
+    } else {
+        alert("對方已離線,電話無法撥通!!!");
+    }
 };
 </script>
 <style lang="scss">
@@ -144,21 +154,8 @@ const onPhoneCallModal = () => {
         margin-top: 30px;
         display: flex;
         justify-content: space-around;
-        .call-mobile {
-            display: none;
-        }
-        @media (max-width: 768px) {
-            .call-mobile {
-                display: block;
-            }
-        }
-        .call-web {
+        .call-phone {
             display: block;
-        }
-        @media (max-width: 768px) {
-            .call-web {
-                display: none;
-            }
         }
         li {
             text-align: center;

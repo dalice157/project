@@ -18,7 +18,7 @@
             <UserInfo :info="eventInfo" />
             <div class="description">語音來電</div>
             <ul class="call_container">
-                <li @click="doHangup(2, eventID(route.query.chatToken))">
+                <li @click="doHangup(2, eventID(route.params.eventKey))">
                     <span class="icon"><img :src="hangUpIcon" alt="掛斷" /></span>
                     <h4 class="text">掛斷</h4>
                 </li>
@@ -29,6 +29,17 @@
             </ul>
         </n-card>
     </n-modal>
+    <!-- 使用者重覆蓋板popup -->
+    <teleport to="body">
+        <div class="mask2" v-show="isAlreadyTaken">
+            <div class="popUp">
+                您已在其他設備使用, 請關閉其他設備後點選重整按鈕
+                <div class="btnWrap">
+                    <n-button type="primary" @click="onReload"> 重整 </n-button>
+                </div>
+            </div>
+        </div>
+    </teleport>
 </template>
 
 <script setup lang="ts">
@@ -37,9 +48,10 @@ import adapter from "webrtc-adapter";
 import Janus from "@/assets/js/janus";
 import { nanoid } from "nanoid";
 import bootbox from "bootbox";
-import { defineComponent, ref, onMounted, computed, watchEffect } from "vue";
-import { NModal, NCard } from "naive-ui";
+import { defineComponent, ref, onMounted, computed, watchEffect, watch } from "vue";
+import { NModal, NCard, NButton } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
+import dayjs from "dayjs";
 
 import { txt, ITransactions, IAttachPlugin, IMessageList } from "@/util/interfaceUtil";
 import {
@@ -55,7 +67,7 @@ import { useApiStore } from "@/store/api";
 import { useChatStore } from "@/store/chat";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { useModelStore } from "@/store/model";
-import { currentTime, currentDate } from "@/util/dateUtil";
+import { currentTime, currentDate, unixTime } from "@/util/dateUtil";
 import {
     localStorageMsg,
     eventID,
@@ -87,7 +99,7 @@ let welcomeStatus: any = ref(false);
 //router
 const router = useRouter();
 const route = useRoute();
-const chatToken = computed(() => route.query.chatToken);
+const eventKey = computed(() => route.params.eventKey);
 
 // 彈窗 store
 const modelStore = useModelStore();
@@ -100,7 +112,7 @@ const { eventInfo } = storeToRefs(apiStore);
 
 //Chat store
 const chatStore = useChatStore();
-const { msgParticipantList, messages, pictures, textPlugin, participantList } =
+const { msgParticipantList, messages, pictures, textPlugin, participantList, isOnline } =
     storeToRefs(chatStore);
 
 //phoneCall store
@@ -109,73 +121,77 @@ const { onIncomingCall, doHangup } = phoneCallStore;
 const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime } =
     storeToRefs(phoneCallStore);
 
-getEventListApi(route.query.chatToken);
-getBackendApi(route.query.chatToken);
+getEventListApi(route.params.eventKey);
+getBackendApi(route.params.eventKey);
+
+console.log("dayjs", dayjs(new Date()).format("A hh:mm"));
 
 watchEffect(() => {
-    messages.value = JSON.parse(localStorage.getItem(`${route.query.chatToken}`) || "[]");
+    messages.value = JSON.parse(localStorage.getItem(`${route.params.eventKey}`) || "[]");
+    if (participantList.value.length > 0) {
+        isOnline.value = true;
+    }
+
     welcomeStatus.value = JSON.parse(
-        localStorage.getItem(`${route.query.chatToken}-welcomeStatus`) || "false"
+        localStorage.getItem(`${route.params.eventKey}-welcomeStatus`) || "false"
     );
-    pictures.value = JSON.parse(localStorage.getItem(`${route.query.chatToken}-pictures`) || "[]");
+    pictures.value = JSON.parse(localStorage.getItem(`${route.params.eventKey}-pictures`) || "[]");
 });
 
 watchEffect(() => {
     let otherMsg: any = null;
     if (!welcomeStatus.value) {
         eventInfo.value.messagelist.forEach((item: any) => {
-            console.log("item:", item);
-
+            // console.log("item:", item);
             otherMsg = {
                 janusMsg: {
-                    ...item,
-                    msgType: item.MsgType,
-                    chatroomID: chatroomID(route.query.chatToken),
-                    sender: 0,
-                    type: 2,
-                    message: item.MsgContent,
-                    format: {
-                        ...item.Format,
-                        id: item.id,
-                        isMMS: false,
-                        isReplay: false,
+                    chatroomID: chatroomID(route.params.eventKey),
+                    msgType: item.janusMsg.msgType,
+                    sender: 0, // 0:客服, 1:使用者
+                    msgContent: item.janusMsg.msgContent,
+                    time: unixTime(),
+                    type: 2, //1:簡訊 2: 文字
+                    format: item.janusMsg.format,
+                    config: {
+                        id: nanoid(),
+                        isReply: false,
                         replyObj: "",
+                        currentDate: currentDate(),
+                        isExpire: false,
+                        isPlay: false,
+                        isRead: false,
+                        msgFunctionStatus: false,
+                        msgMoreStatus: false,
+                        recallPopUp: false,
+                        recallStatus: false,
                     },
                 },
-                currentDate: currentDate(),
-                time: currentTime(),
-                msgMoreStatus: false,
-                msgFunctionStatus: false,
-                recallStatus: false,
-                recallPopUp: false,
-                isExpire: false,
-                isRead: false,
-                isPlay: false,
             };
 
-            localStorage.setItem(`${route.query.chatToken}-welcomeStatus`, JSON.stringify(true));
-            delete otherMsg.janusMsg.Format;
-            delete otherMsg.janusMsg.MsgContent;
-            delete otherMsg.janusMsg.MsgType;
+            localStorage.setItem(`${route.params.eventKey}-welcomeStatus`, JSON.stringify(true));
             messages.value.push(otherMsg);
             messages.value.reduce((unique, o) => {
                 const hasRepeatId = unique.some((obj) => {
-                    return obj.janusMsg.format.id === o.janusMsg.format.id;
+                    return obj.janusMsg.config.id === o.janusMsg.config.id;
                 });
                 if (!hasRepeatId) {
                     unique.push(o);
                 }
                 return unique;
             }, []);
-            localStorageMsg(messages.value, route.query.chatToken);
+            if ([6, 7].includes(otherMsg.janusMsg.msgType)) {
+                pictures.value.push(otherMsg);
+            }
+            localStorageMsg(messages.value, route.params.eventKey);
         });
     }
-    localStorageMsg(messages.value, route.query.chatToken);
-    messages.value = JSON.parse(localStorage.getItem(`${route.query.chatToken}`) || ([] as any));
+    localStorage.setItem(`${route.params.eventKey}-pictures`, JSON.stringify(pictures.value));
+    localStorageMsg(messages.value, route.params.eventKey);
+    messages.value = JSON.parse(localStorage.getItem(`${route.params.eventKey}`) || ([] as any));
     welcomeStatus.value = JSON.parse(
-        localStorage.getItem(`${route.query.chatToken}-welcomeStatus`) || "false"
+        localStorage.getItem(`${route.params.eventKey}-welcomeStatus`) || "false"
     );
-    pictures.value = JSON.parse(localStorage.getItem(`${route.query.chatToken}-pictures`) || "[]");
+    pictures.value = JSON.parse(localStorage.getItem(`${route.params.eventKey}-pictures`) || "[]");
 });
 
 //janus 初始值
@@ -207,6 +223,8 @@ const connect = () => {
         },
         error: (error: any) => {
             onError("Failed to connect to janus server", error);
+            // alert("連線中斷,按下確認重新連線");
+            // window.location.reload();
         },
         destroyed: () => {
             window.location.reload();
@@ -225,7 +243,7 @@ const registerUsername = (username: undefined | string) => {
     let register = {
         textroom: "join",
         transaction: transaction,
-        room: Number(eventID(route.query.chatToken)),
+        room: Number(eventID(route.params.eventKey)),
         username: myid,
         display: "user",
     };
@@ -236,7 +254,7 @@ const registerUsername = (username: undefined | string) => {
             // Something went wrong
             if (response["error_code"] === 417) {
                 // This is a "no such room" error: give a more meaningful description
-                bootbox.alert("No such room : <code>" + eventID(route.query.chatToken) + "</code>");
+                bootbox.alert("No such room : <code>" + eventID(route.params.eventKey) + "</code>");
             } else {
                 bootbox.alert(response["error"]);
             }
@@ -256,30 +274,41 @@ const registerUsername = (username: undefined | string) => {
             //TODO do something
         }
         participantList.value = participants;
+        participantList.value = Object.keys(participants).filter((participant) => {
+            return participant !== myid;
+        });
         participantList.value = Object.keys(participants).map((key) => {
             return {
                 [key]: participants[key],
             };
         });
+
         participantList.value = participantList.value.filter((item, index) => {
             const keyName: any = Object.keys(participantList.value[index])[0];
             return item[keyName] === "admin";
         });
+
         msgParticipantList.value = participantList.value;
         participantList.value = participantList.value.map((display) => {
             return Object.keys(display)[0];
         });
-
-        console.log("register participantList:", participantList.value);
-        console.log("register msgParticipantList:", msgParticipantList.value);
+        console.log("剛註冊時的發送名單", participantList.value);
+        if (participantList.value.length > 0) {
+            isOnline.value = true;
+        }
     };
     textPlugin.value.data({
         text: JSON.stringify(register),
         error: function (reason: any) {
-            bootbox.alert(reason);
+            alert(reason);
             //TODO do something
         },
     });
+};
+const isAlreadyTaken = ref(false);
+const onReload = () => {
+    isAlreadyTaken.value = false;
+    location.reload();
 };
 // attach textroom plugin
 const attachTextroomPlugin = () => {
@@ -349,7 +378,7 @@ const attachTextroomPlugin = () => {
             // @ts-ignore
             console.log("text-> The DataChannel is available!", data);
             // registerUsername(自己的username);
-            const chatroomId = chatroomID(route.query.chatToken);
+            const chatroomId = chatroomID(route.params.eventKey);
             registerUsername(chatroomId);
         },
         ondata: function (item: any) {
@@ -357,7 +386,10 @@ const attachTextroomPlugin = () => {
             Janus.debug("text-> We got data from the DataChannel!", item);
 
             let json = JSON.parse(item);
-
+            console.log("error:", json);
+            if (json.error == "Username already taken") {
+                isAlreadyTaken.value = true;
+            }
             let transaction = json["transaction"];
 
             if (transactions[transaction]) {
@@ -399,17 +431,54 @@ const attachTextroomPlugin = () => {
                 data.username = username;
                 data.display = display;
 
-                console.log("participantsparticipants:", participants);
-                const participant = Object.keys(participants).filter((participant) => {
+                console.log("participants:", participants);
+                participantList.value = participants;
+                //過濾掉自己
+                participantList.value = Object.keys(participants).filter((participant) => {
                     return participant !== myid;
                 });
-
-                participantList.value = participant;
+                //map成新陣列
+                participantList.value = Object.keys(participants).map((key) => {
+                    return {
+                        [key]: participants[key],
+                    };
+                });
+                participantList.value = participantList.value.filter((item, index) => {
+                    const keyName: any = Object.keys(participantList.value[index])[0];
+                    return item[keyName] === "admin";
+                });
+                msgParticipantList.value = participantList.value;
+                participantList.value = participantList.value.map((display) => {
+                    return Object.keys(display)[0];
+                });
+                console.log("有人join後的發送名單", participantList.value);
+                if (participantList.value.length > 0) {
+                    isOnline.value = true;
+                }
             } else if (what === "leave") {
                 // Somebody left
                 let username = json["username"];
                 delete participants[username];
                 data.username = username;
+                participantList.value = participants;
+                //過濾掉自己
+                participantList.value = Object.keys(participants).filter((participant) => {
+                    return participant !== myid;
+                });
+                //map成新陣列
+                participantList.value = Object.keys(participants).map((key) => {
+                    return {
+                        [key]: participants[key],
+                    };
+                });
+                participantList.value = participantList.value.filter((item, index) => {
+                    const keyName: any = Object.keys(participantList.value[index])[0];
+                    return item[keyName] === "admin";
+                });
+                msgParticipantList.value = participantList.value;
+                participantList.value = participantList.value.map((display) => {
+                    return Object.keys(display)[0];
+                });
             } else if (what === "kicked") {
                 // Somebody was kicked
                 let username = json["username"];
@@ -434,7 +503,7 @@ const attachTextroomPlugin = () => {
                 console.log("success:", data);
             }
 
-            processDataEvent(data, route.query.chatToken);
+            processDataEvent(data, route.params.eventKey);
         },
         oncleanup: function () {
             // @ts-ignore
@@ -518,7 +587,7 @@ const attachVideocallPlugin = () => {
                         // TODO Any ringtone?
                         calling.value = setTimeout(() => {
                             // 撥打超過15秒， 自動掛掉
-                            doHangup(1, eventID(route.query.chatToken));
+                            doHangup(1, eventID(route.params.eventKey));
                         }, 15000);
                         // @ts-ignore
                         Janus.log("call-> Waiting for the peer to answer...");
@@ -597,7 +666,7 @@ const attachVideocallPlugin = () => {
                         callPlugin.value.hangup();
                         isIncomingCall.value = false;
                         phoneCallModal.value = false;
-                        location.href = `/?chatToken=${chatToken.value}`;
+                        location.href = `/${eventKey.value}`;
                     } else if (event === "simulcast") {
                         // Is simulcast in place?
                         let substream = result["substream"];
@@ -629,7 +698,7 @@ const attachVideocallPlugin = () => {
                 phoneCallModal.value = false;
                 // TODO Reset status
                 callPlugin.value.hangup();
-                location.href = `/?chatToken=${chatToken.value}`;
+                location.href = `/${eventKey.value}`;
             }
         },
         onlocalstream: function (stream: any) {
@@ -655,7 +724,7 @@ const attachVideocallPlugin = () => {
             simulcastStarted = false;
             isIncomingCall.value = false;
             phoneCallModal.value = false;
-            location.href = `/?chatToken=${chatToken.value}`;
+            location.href = `/${eventKey.value}`;
         },
     });
 };
@@ -664,6 +733,37 @@ const attachVideocallPlugin = () => {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
+
+.mask2 {
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    .popUp {
+        border-radius: 20px;
+        width: 342px;
+        height: auto;
+        min-height: 100px;
+        padding: 15px;
+        line-height: 1.6;
+        background-color: #ffffff;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: block;
+        .btnWrap {
+            text-align: center;
+            display: block;
+            padding-bottom: 10px;
+        }
+    }
+}
+
 .chatroom {
     position: relative;
     box-sizing: border-box;

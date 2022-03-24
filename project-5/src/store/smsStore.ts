@@ -18,6 +18,7 @@ export const useSmsStore = defineStore({
         smsPhoneArray: <any>[],
         smsPhoneString:<any>"",
         smsTabsType: <string>"automatic",
+        smsCacheComponent:<any>[]
     }),
     getters: {},
     actions: {},

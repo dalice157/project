@@ -114,3 +114,130 @@ export const isObjToBeZero = (obj: any) => {
 export function isphone(ele: any) {
     return ele.match(/^09\d{2}-?\d{3}-?\d{3}$/);
 }
+//點數判斷
+//簡訊點數計算(傳入簡訊內容)
+export function pointCalculation(smsContentStr) {
+    //檢查內容是否含有中文字
+    const hasCh = hasChinese(smsContentStr);
+
+    let messageArray;
+    let point = 0;
+    let smsCount = 0;
+    if (hasCh) {
+        messageArray = getSplitMessage(smsContentStr, 333); //拆則--(1-2)、(2-2)
+
+        if (messageArray.length > 0) {
+            if (messageArray[messageArray.length - 1].length <= 70) {
+                point = 5 * (messageArray.length - 1) + 1;
+            } else {
+                point =
+                    5 * (messageArray.length - 1) +
+                    (Math.trunc(messageArray[messageArray.length - 1].length / 67) +
+                        (messageArray[messageArray.length - 1].length % 67 != 0 ? 1 : 0));
+            }
+        }
+    } else {
+        if (!editsend_isPureEnglishCheck(smsContentStr)) {
+            alert("純英文發送內容時不可有`^");
+        }
+        messageArray = getSplitMessage(smsContentStr, 765);
+        if (messageArray.length > 0) {
+            if (messageArray[messageArray.length - 1].length <= 160) {
+                point = 5 * (messageArray.length - 1) + 1;
+            } else {
+                point =
+                    5 * (messageArray.length - 1) +
+                    (Math.trunc(messageArray[messageArray.length - 1].length / 153) +
+                        (messageArray[messageArray.length - 1].length % 153 != 0 ? 1 : 0));
+            }
+        }
+    }
+
+    smsCount = messageArray.length;
+
+    return {
+        smsCount: smsCount, //拆為幾則
+        point: point, //幾點
+    };
+}
+
+//參考MQ扣點(MQ方法getSplitMessage)
+function getSplitMessage(message, charMax) {
+    let frameSize = Math.trunc(message.length / charMax) + (message.length % charMax != 0 ? 1 : 0);
+    frameSize = frameSize == 0 ? 1 : frameSize;
+    let messageArray = new Array(frameSize);
+
+    if (frameSize == 1) {
+        messageArray[0] = message;
+    } else {
+        while (frameSize > 1) {
+            let fromPos = 0;
+            let seqIndi;
+            for (let i = 0; i < frameSize; i++) {
+                seqIndi = "(" + (i + 1) + "-" + frameSize + ")";
+                if (i < frameSize - 1) {
+                    messageArray[i] =
+                        seqIndi + message.substring(fromPos, charMax - seqIndi.length);
+                } else {
+                    messageArray[i] = seqIndi + message.substring(fromPos);
+                }
+                fromPos += charMax - seqIndi.length;
+            }
+            if (messageArray[frameSize - 1].length > charMax) {
+                // ==表示因為加入了 seq indicator, 長度加長, 有必要再調整
+                frameSize++;
+                messageArray = null;
+                messageArray = new Array(frameSize);
+            } else {
+                break;
+            }
+        }
+    }
+    return messageArray;
+}
+
+//檢查是否有中文
+function hasChinese(str) {
+    let i;
+    let ch, cch;
+    if (str.length > 0) {
+        for (i = 0; i < str.length; i++) {
+            ch = "";
+            if (str.charCodeAt(i) > 127) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+/*檢查發送內容是否有無法輸入字元*/
+function editsend_isPureEnglishCheck(str) {
+    /*
+	含全形字元時
+	這是發送測試~`^{}[]|\\
+
+	純英文時候
+	~=-
+	`=@
+	^= 
+	{=(
+	}=)
+	[=<
+	]=>
+	|=/
+	/=/
+	*/
+    let isOk = true;
+    const checkCharArray = ["`", "^"];
+    const checkCharArrayLength = checkCharArray.length;
+    const strLength = str.length;
+    for (let i = 0; i < checkCharArrayLength; i++) {
+        for (let j = 0; j < strLength; j++) {
+            if (checkCharArray[i] == str.charAt(j)) {
+                isOk = false;
+            }
+        }
+    }
+    return isOk;
+}

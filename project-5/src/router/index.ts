@@ -16,6 +16,8 @@ import Gallery from "@/views/Gallery.vue";
 import AddChannel from "@/views/activityChannelSetting/AddChannel.vue";
 import EditChannel from "@/views/activityChannelSetting/EditChannel.vue";
 import AddCustomService from "@/views/activityChannelSetting/AddCustomService.vue";
+import AddAutoReply from "@/views/activityChannelSetting/AddAutoReply.vue";
+import AutoReplyList from "@/views/activityChannelSetting/AutoReplyList.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -55,6 +57,7 @@ const routes: Array<RouteRecordRaw> = [
                 components: {
                     manage: SMSSend,
                 },
+                meta: { keepAlive: true },
             },
             {
                 path: "/manage/:id/SMSSendPage2",
@@ -76,6 +79,7 @@ const routes: Array<RouteRecordRaw> = [
                 components: {
                     manage: MMSSend,
                 },
+                meta: { keepAlive: true },
             },
             {
                 path: "/manage/:id/MMSSendPage2",
@@ -117,6 +121,20 @@ const routes: Array<RouteRecordRaw> = [
                 name: "EditChannel",
                 components: {
                     manage: EditChannel,
+                },
+            },
+            {
+                path: "/manage/:id/activitySetting/addAutoReply",
+                name: "AddAutoReply",
+                components: {
+                    manage: AddAutoReply,
+                },
+            },
+            {
+                path: "/manage/:id/activitySetting/autoReplyList",
+                name: "AutoReplyList",
+                components: {
+                    manage: AutoReplyList,
                 },
             },
             {

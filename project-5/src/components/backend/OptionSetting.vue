@@ -229,6 +229,7 @@ const {
     smsPhoneString,
     smsTabsType,
     smsExcelFile,
+    smsCacheComponent,
 } = storeToRefs(smsStore);
 
 //mmsStore
@@ -245,6 +246,7 @@ const {
     mmsTabsType,
     mmsKB,
     mmsExcelFile,
+    mmsCacheComponent,
 } = storeToRefs(mmsStore);
 
 const apiStore = useApiStore();
@@ -278,6 +280,7 @@ const nextPageList = () => {
             alert("仍有必填欄位尚未填寫!!");
             return;
         }
+        smsCacheComponent.value.push("SMSSend");
         router.push(props.nextPageRouter);
     };
     const mmsValidate = () => {
@@ -292,6 +295,7 @@ const nextPageList = () => {
             alert("仍有必填欄位尚未填寫!!");
             return;
         }
+        mmsCacheComponent.value.push("MMSSend");
         router.push(props.nextPageRouter);
     };
     props.optionType == "sms" && smsValidate();
@@ -315,6 +319,7 @@ const nextPageManual = () => {
             return;
         }
         smsPhoneString.value = phoneNumberList.value;
+        smsCacheComponent.value.push("SMSSend");
         router.push(props.nextPageRouter);
     };
     const mmsValidate = () => {
@@ -339,6 +344,7 @@ const nextPageManual = () => {
         }
 
         mmsPhoneString.value = phoneNumberList.value;
+        mmsCacheComponent.value.push("MMSSend");
         router.push(props.nextPageRouter);
     };
 

@@ -20,7 +20,8 @@
                 </div>
                 <div class="chatRoomInfo">
                     <h2 class="info_title">
-                        ({{ String(num.mobile).slice(0, 3) }}) {{ String(num.mobile).slice(-9) }}
+                        {{ "+" + String(num.mobile).slice(0, 3) }}
+                        {{ String(num.mobile).slice(-9) }}
                     </h2>
                     <n-ellipsis
                         style="max-width: 600px"
@@ -35,18 +36,18 @@
                 <div class="time">
                     {{
                         isToday
-                            ? dayjs.unix(num.time).format("A hh:mm")
+                            ? dayjs(num.time / 1000000).format("A hh:mm")
                             : isYesterday
                             ? "昨天"
-                            : dayjs.unix(num.time).format("MM/DD")
+                            : dayjs(num.time / 1000000).format("MM/DD")
                     }}
                 </div>
-                <div class="badge" v-if="num.unread === 1">
+                <!-- <div class="badge" v-if="num.unread === 1">
                     <div class="badgeBg">
                         <span class="badgeSup">未讀</span>
-                        <!-- <span class="badgeSup">{{ num.sup > 999 ? "999+" : num.sup }}</span> -->
+                        <span class="badgeSup">{{ num.sup > 999 ? "999+" : num.sup }}</span>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
@@ -63,6 +64,7 @@
             :key="num.chatroomID"
             @click.stop="gotoChat(route.params.id, num.chatroomID, num.mobile, router)"
         >
+            <!-- {{num.msg}} -->
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
                 <div class="avatar" @click.stop="showCompanyInfo(num)">
@@ -77,20 +79,22 @@
                         class="img"
                         src="../../assets/Images/chatRecord/pushpin-round.svg"
                         alt="置頂"
-                        v-if="num.toTop"
+                        v-if="num.pinTop"
                     />
                 </div>
                 <div class="chatRoomInfo">
                     <h2 class="info_title">
-                        ({{ String(num.mobile).slice(0, 3) }}) {{ String(num.mobile).slice(-9) }}
+                        {{ "+" + String(num.mobile).slice(0, 3) }}
+                        {{ String(num.mobile).slice(-9) }}
                     </h2>
                     <n-ellipsis class="messageEllipsis" :line-clamp="1" :tooltip="false">
-                        <p v-if="num.msgType === 1">
+                        <p v-if="num.msgType === 1 && num.msg != ''">
                             {{ num.msg }}
                         </p>
                         <p v-if="[3, 5, 6, 7, 8, 9].includes(num.msgType)">
                             傳送了{{ sendMsgTypeObj[num.msgType] }}
                         </p>
+                        <p v-if="num.msgType === 1 && num.msg == ''"></p>
                     </n-ellipsis>
                 </div>
             </div>
@@ -99,10 +103,10 @@
                     <div class="time">
                         {{
                             isToday
-                                ? dayjs.unix(num.time).format("A hh:mm")
+                                ? dayjs(num.time / 1000000).format("A hh:mm")
                                 : isYesterday
                                 ? "昨天"
-                                : dayjs.unix(num.time).format("MM/DD")
+                                : dayjs(num.time / 1000000).format("MM/DD")
                         }}
                     </div>
 
@@ -112,20 +116,21 @@
                             src="@/assets/Images/chatRecord/more.svg"
                             alt="#"
                         />
+
                         <div class="functionPopUp" v-show="num.isfunctionPopUp">
                             <ul class="ulList">
-                                <li @click.stop="pin(num, index)" v-if="!num.toTop">開啟置頂</li>
-                                <li @click.stop="unpin(num, index)" v-if="num.toTop">取消置頂</li>
-                                <li @click.stop="deletechatRoomBox(num)">刪除</li>
+                                <li @click.stop="pin(num, index)" v-if="!num.pinTop">開啟置頂</li>
+                                <li @click.stop="unpin(num, index)" v-if="num.pinTop">取消置頂</li>
+                                <!-- <li @click.stop="deletechatRoomBox(num)">刪除</li> -->
                             </ul>
                         </div>
                     </div>
-                    <div class="badge" v-if="num.unread === 1">
+                    <!-- <div class="badge" v-if="num.unread === 1">
                         <div class="badgeBg">
                             <span class="badgeSup">未讀</span>
-                            <!-- <span class="badgeSup">{{ num.sup > 999 ? "999+" : num.sup }}</span> -->
+                            <span class="badgeSup">{{ num.sup > 999 ? "999+" : num.sup }}</span>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -169,7 +174,8 @@ const searchStore = useSearchStore();
 const { isResult, searcRecordMessages, recordKeyWord } = storeToRefs(searchStore);
 
 const apiStore = useApiStore();
-const { chatroomList, eventInfo } = storeToRefs(apiStore);
+const { sendUserInfo, getChatroomlistApi } = apiStore;
+const { chatroomList, userInfo } = storeToRefs(apiStore);
 
 const chatRecordStore = useChatRecordStore();
 const { recordMessages } = storeToRefs(chatRecordStore);
@@ -210,6 +216,9 @@ let changeList: any = computed({
         recordMessages.value = val;
     },
 });
+watchEffect(() => {
+    // console.log("changeList", changeList.value);
+});
 
 let i = ref(0);
 watchEffect(() => {
@@ -246,38 +255,34 @@ const deletechatRoomBox = (item: any): void => {
 
 //置頂功能
 const pin = (item: any, idx: any): void => {
-    const lists = changeList.value;
-    lists.unshift(lists.splice(idx, 1)[0]);
-    lists.forEach((it: any, index: any) => {
-        if (it.chatroomID === item.chatroomID) {
-            it.toTop = true;
-        }
-        it.isfunctionPopUp = false;
-    });
-    changeList.value = lists;
-    console.log("新增置頂nums.value:", changeList.value);
+    console.log("item:", userInfo.value);
+
+    const infoObj = {
+        chatroomID: item.chatroomID,
+        name: userInfo.value.name,
+        mobile: item.mobile,
+        icon: item.icon,
+        tag: userInfo.value.tag,
+        description: userInfo.value.description,
+        pinTop: 1,
+        eventID: route.params.id,
+    };
+    sendUserInfo(infoObj);
 };
 
 // 取消置頂功能
 const unpin = (item: any, index: any): void => {
-    const lists = changeList.value;
-    const getItem = lists.splice(index, 1)[0];
-    lists.splice(item.key, 0, getItem);
-    lists.forEach((it) => {
-        if (it.chatroomID === item.chatroomID) {
-            it.toTop = false;
-        }
-        it.isfunctionPopUp = false;
-    });
-
-    const toTopLists = lists.filter((isTop) => {
-        return isTop.toTop;
-    });
-    const doNotTopLists = lists.filter((isTop) => {
-        return !isTop.toTop;
-    });
-    changeList.value = [...toTopLists, ...doNotTopLists];
-    console.log("取消nums.value:", changeList.value);
+    const infoObj = {
+        chatroomID: item.chatroomID,
+        name: userInfo.value.name,
+        mobile: item.mobile,
+        icon: item.icon,
+        tag: userInfo.value.tag,
+        description: userInfo.value.description,
+        pinTop: 0,
+        eventID: route.params.id,
+    };
+    sendUserInfo(infoObj);
 };
 
 // //隱藏功能

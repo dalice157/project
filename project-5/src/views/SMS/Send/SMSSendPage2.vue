@@ -44,7 +44,10 @@
             </div>
             <div class="smsPage2Button">
                 <div class="smsPage2PreviousPage" @click="goPage1">上一步</div>
-                <div class="smsPage2Confirm" @click="onSend">確認傳送</div>
+                <div class="smsPage2ConfirmFail" v-if="disable" :class="{ disable: disable }">
+                    確認傳送
+                </div>
+                <div class="smsPage2Confirm" v-else @click="onSend">確認傳送</div>
             </div>
         </div>
     </div>
@@ -64,7 +67,7 @@ const router = useRouter();
 const params = route.params;
 
 const apiStore = useApiStore();
-const { uploadRef } = storeToRefs(apiStore);
+const { uploadRef, point } = storeToRefs(apiStore);
 
 //smsStore
 const smsStore = useSmsStore();
@@ -96,9 +99,10 @@ if (smsTabsType.value === "automatic") {
 }
 
 //確認傳送
+const disable = ref(false);
 const onSend = () => {
+    disable.value = true;
     const newsletterDepartmentToken = localStorage.getItem("newsletterDepartmentToken");
-
     const sendObj = {
         token: newsletterDepartmentToken,
         text: smsContent.value,
@@ -125,10 +129,17 @@ const onSend = () => {
     })
         .then((res) => {
             console.log("SMS 確認傳送 res", res);
+            point.value = res.data.point;
+            alert(`資料已成功傳送!\n您剩餘的點數為: ${point.value}`);
             router.push(`/manage/${params.id}/SMSSend`);
+            smsStore.$reset();
+            disable.value = false;
         })
         .catch((err) => {
             console.error(err);
+            alert("傳送失敗, 請重新填寫");
+            router.push(`/manage/${params.id}/SMSSend`);
+            disable.value = false;
         });
 };
 </script>
@@ -314,6 +325,19 @@ const onSend = () => {
                 background-color: $gray-1;
                 margin-left: 15px;
                 cursor: pointer;
+            }
+            .smsPage2ConfirmFail {
+                width: 200px;
+                height: 36px;
+                border-radius: 18px;
+                line-height: 36px;
+                text-align: center;
+                color: $white;
+                background-color: $gray-1;
+                margin-left: 15px;
+                &.disable {
+                    background-color: $gray-4;
+                }
             }
         }
     }

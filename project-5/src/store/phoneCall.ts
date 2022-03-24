@@ -4,10 +4,11 @@ import { useRoute } from "vue-router";
 import { nanoid } from "nanoid";
 import { storeToRefs } from "pinia";
 
-import { currentTime, currentDate, currentMonth } from "@/util/dateUtil";
+import { unixTime, currentDate, currentMonth } from "@/util/dateUtil";
 import { useChatStore } from "@/store/chat";
 import { sendPrivateMsg } from "@/util/chatUtil";
 import { useModelStore } from "@/store/model";
+import { useApiStore } from "@/store/api";
 
 /**
  * phoneType 狀態
@@ -17,6 +18,7 @@ import { useModelStore } from "@/store/model";
  * 4:未接來電
  */
 
+const getUserName = localStorage.getItem("userName");
 export const usePhoneCallStore = defineStore({
     id: "phoneCall",
     state: () => ({
@@ -90,37 +92,42 @@ export const usePhoneCallStore = defineStore({
         //掛電話
         doHangup(type: any, chatRoomID, eventID) {
             const chatstore = useChatStore();
-            const { textPlugin } = storeToRefs(chatstore);
+            const { textPlugin, isOnline } = storeToRefs(chatstore);
 
             console.log("掛掉電話種類", type);
             this.yourUsername = null;
             const phoneObj = {
                 janusMsg: {
                     chatroomID: chatRoomID,
-                    sender: 0,
-                    type: 2,
                     msgType: 9,
-                    message: "",
+                    sender: 0,
+                    msgContent: "",
+                    time: unixTime(),
+                    type: 2,
                     format: {
-                        id: nanoid(),
-                        isReplay: false,
-                        replyObj: "",
-                        isMMS: false,
                         phoneType: type,
-                        phoneTypeOther: type === 2 ? 4 : null,
+                        phoneTypeOther: type === 2 && this.isAccepted ? 4 : null,
                         phoneTime: this.phoneTime,
                     },
+                    config: {
+                        id: nanoid(),
+                        isReply: false,
+                        replyObj: "",
+                        currentDate: currentDate(),
+                        isExpire: false,
+                        isPlay: false,
+                        isRead: isOnline.value ? true : false,
+                        msgFunctionStatus: false,
+                        msgMoreStatus: false,
+                        recallPopUp: false,
+                        recallStatus: false,
+                        userName: getUserName,
+                    },
                 },
-                currentDate: currentDate(),
-                time: currentTime(),
-                msgMoreStatus: false,
-                msgFunctionStatus: false,
-                recallStatus: false,
-                recallPopUp: false,
-                isExpire: false,
-                isRead: false,
-                isPlay: false,
             };
+            const apiStore = useApiStore();
+            const { messageList } = storeToRefs(apiStore);
+            messageList.value.push(phoneObj);
             const sendMsgObj = {
                 msg: phoneObj,
                 textPlugin: textPlugin.value,

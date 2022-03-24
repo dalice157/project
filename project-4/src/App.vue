@@ -15,10 +15,12 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, onUnmounted, ref } from "vue";
 import VConsole from "vconsole";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
+import FingerprintJS from "@fingerprintjs/fingerprintjs";
+import vConsole from "@/plugin/vConsole";
 
 import NavBar from "@/components/Chat/NavBar.vue";
 import HamburgerBar from "@/components/HamburgerBar.vue";
@@ -34,21 +36,34 @@ const { messages, inputFunctionBoolean } = storeToRefs(chatStore);
 //取消訊息功能泡泡
 const closeChatBubble = (): void => {
     messages.value.forEach((text: txt) => {
-        text.msgFunctionStatus = false;
+        text.janusMsg.config.msgFunctionStatus = false;
     });
     inputFunctionBoolean.value = false;
 };
 
+onMounted(() => {
+    vConsole;
+    const fpPromise = FingerprintJS.load();
+    (async () => {
+        // Get the visitor identifier when you need it.
+        const fp = await fpPromise;
+        const result = await fp.get();
+        console.log("visitorId:", result.visitorId);
+        console.log("FingerprintJS result:", result);
+    })();
+});
+
 const shieldBoolean = ref(false);
 let phoneDirection = window.matchMedia("(orientation: portrait)");
+
 //判斷設備使用者設備瀏覽方向
 onMounted(() => {
     if (
         navigator.userAgent.match(
             /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|SAMSUNG|SGH-[I|N|T]|GT-[I|P|N]|SM-[N|P|T|Z|G]|SHV-E|SCH-[I|J|R|S]|SPH-L|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennc|wOSBrowser|BrowserNG|WebOS|Symbian|Windos Phone)/i
         ) &&
-        !phoneDirection.matches
-        // document.body.clientWidth > document.body.clientHeight
+        // !phoneDirection.matches
+        document.body.clientWidth > document.body.clientHeight
     ) {
         console.log("橫屏");
         shieldBoolean.value = true;
@@ -57,22 +72,49 @@ onMounted(() => {
         shieldBoolean.value = false;
     }
 });
+onMounted(() => {
+    window.addEventListener("resize", () => {
+        if (
+            navigator.userAgent.match(
+                /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|SAMSUNG|SGH-[I|N|T]|GT-[I|P|N]|SM-[N|P|T|Z|G]|SHV-E|SCH-[I|J|R|S]|SPH-L|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennc|wOSBrowser|BrowserNG|WebOS|Symbian|Windos Phone)/i
+            ) &&
+            // !phoneDirection.matches
+            document.body.clientWidth > document.body.clientHeight + 20
+        ) {
+            console.log("橫屏");
+            shieldBoolean.value = true;
+        } else {
+            console.log("豎屏");
+            shieldBoolean.value = false;
+        }
+    });
+});
+onUnmounted(() => {
+    window.removeEventListener("resize", () => {
+        if (
+            navigator.userAgent.match(
+                /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|SAMSUNG|SGH-[I|N|T]|GT-[I|P|N]|SM-[N|P|T|Z|G]|SHV-E|SCH-[I|J|R|S]|SPH-L|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennc|wOSBrowser|BrowserNG|WebOS|Symbian|Windos Phone)/i
+            ) &&
+            // !phoneDirection.matches
+            document.body.clientWidth > document.body.clientHeight + 20
+        ) {
+            console.log("橫屏");
+            shieldBoolean.value = true;
+        } else {
+            console.log("豎屏");
+            shieldBoolean.value = false;
+        }
+    });
+}),
+    // notifications test
+    document.addEventListener("DOMContentLoaded", function () {
+        if (!Notification) {
+            alert("Desktop notifications not available in your browser. Try Chromium.");
+            return;
+        }
 
-window.addEventListener("resize", () => {
-    if (
-        navigator.userAgent.match(
-            /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|SAMSUNG|SGH-[I|N|T]|GT-[I|P|N]|SM-[N|P|T|Z|G]|SHV-E|SCH-[I|J|R|S]|SPH-L|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennc|wOSBrowser|BrowserNG|WebOS|Symbian|Windos Phone)/i
-        ) &&
-        !phoneDirection.matches
-        // document.body.clientWidth > document.body.clientHeight + 20
-    ) {
-        console.log("橫屏");
-        shieldBoolean.value = true;
-    } else {
-        console.log("豎屏");
-        shieldBoolean.value = false;
-    }
-});
+        if (Notification.permission !== "granted") Notification.requestPermission();
+    });
 
 // notifications test
 document.addEventListener("DOMContentLoaded", function () {
@@ -83,18 +125,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (Notification.permission !== "granted") Notification.requestPermission();
 });
-
-// notifications test
-document.addEventListener("DOMContentLoaded", function () {
-    if (!Notification) {
-        alert("Desktop notifications not available in your browser. Try Chromium.");
-        return;
-    }
-
-    if (Notification.permission !== "granted") Notification.requestPermission();
-});
-
-const vConsole = new VConsole();
 </script>
 
 <style lang="scss">

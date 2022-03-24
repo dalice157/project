@@ -1,17 +1,22 @@
 const env = process.env.NODE_ENV || "development";
 console.log(`"env" is ${env}`);
 const SERVER_SITE = {
-    develop: "https://test.gayu.biz:9000",
-    production: "https://192.168.1.178:9000",
+    develop: "https://t.Talkod.im:9000",
+    production: "https://Talkod.im",
 };
 const JANUS_SITE = {
-    develop: "https://test.gayu.biz:8089",
-    production: "https://test.gayu.biz:8089",
+    develop: "https://t.Talkod.im:8089",
+    production: "https://Talkod.im",
 };
 
 const FILE_SITE = {
-    develop: "https://test.gayu.biz:8029",
-    production: "https://test.gayu.biz:443",
+    develop: "https://t.Talkod.im:8029",
+    production: "https://Talkod.im",
+};
+
+const WORD_LIMIT = {
+    develop: 19,
+    production: 17,
 };
 
 const setting = {
@@ -19,16 +24,19 @@ const setting = {
         serverUrl: SERVER_SITE.develop,
         janusUrl: JANUS_SITE.develop,
         fileUrl: FILE_SITE.develop,
+        wordLimit: WORD_LIMIT.develop,
     },
     develop: {
         serverUrl: SERVER_SITE.develop,
         janusUrl: JANUS_SITE.develop,
         fileUrl: FILE_SITE.develop,
+        wordLimit: WORD_LIMIT.develop,
     },
     production: {
         serverUrl: SERVER_SITE.production,
         janusUrl: JANUS_SITE.production,
         fileUrl: FILE_SITE.production,
+        wordLimit: WORD_LIMIT.production,
     },
 };
 

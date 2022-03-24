@@ -17,7 +17,6 @@ import { txt } from "@/util/interfaceUtil";
 import config from "@/config/config";
 
 const apiStore = useApiStore();
-const { chatroomMsg } = storeToRefs(apiStore);
 
 const route = useRoute();
 

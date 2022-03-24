@@ -70,13 +70,12 @@ export const sendPrivateMsg = ({
 export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
     const chatStore = useChatStore();
     const { getCompanyMsg } = chatStore;
-    const { chatRoomMsg, messages, replyMsg } = storeToRefs(chatStore);
+    const { isOnline } = storeToRefs(chatStore);
 
     // api store
     const apiStore = useApiStore();
     const { getHistoryApi, getChatroomlistApi } = apiStore;
-    const { isInput, isUserMsg } = storeToRefs(apiStore);
-
+    const { isInput, messageList } = storeToRefs(apiStore);
     interface whatType {
         [key: string]: any;
     }
@@ -85,22 +84,31 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
         message: () => {
             if (whisper === true) {
                 console.log("Private message->", data);
-                const getFrom = JSON.parse(data.msg).janusMsg.chatroomID;
+                const msg = JSON.parse(data.msg);
+                const getFrom = msg.janusMsg.chatroomID;
+                setTimeout(() => {
+                    getChatroomlistApi(eventID);
+                }, 500);
                 console.log("getFrom:", getFrom);
                 console.log("chatroomID:", chatroomID);
-                if (chatroomID == getFrom) {
-                    isUserMsg.value = true;
+                notifyMe(data);
+                if (chatroomID == getFrom && data.from) {
                     isInput.value = true;
-
-                    setTimeout(() => {
-                        getHistoryApi(chatroomID);
-                        getChatroomlistApi(eventID);
-                    }, 1000);
+                    messageList.value.push(msg);
                 }
+
+                messageList.value = messageList.value.reduce((unique, o) => {
+                    const hasRepeatId = unique.some((obj) => {
+                        return obj.janusMsg.config.id === o.janusMsg.config.id;
+                    });
+                    if (!hasRepeatId) {
+                        o.janusMsg.config.isRead = true;
+                        unique.push(o);
+                    }
+                    return unique;
+                }, []);
                 return;
             }
-            notifyMe(data);
-
             console.log("Public message->", data);
             return;
         },
@@ -108,14 +116,21 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
             console.log("房間公告消息->", data);
         },
         join: () => {
+            // console.log("join chatroomID:", chatroomID);
+            // console.log("join username:", data.username);
+
+            console.log("onlineList join:");
             if (chatroomID == data.username) {
-                isUserMsg.value = true;
+                isOnline.value = true;
                 isInput.value = true;
                 console.log(`${data.username} 加入房間`);
             }
             console.log("有人加入房間->", data);
         },
         leave: () => {
+            if (chatroomID == data.username) {
+                isOnline.value = false;
+            }
             console.log("有人離開房間->", data);
         },
         kicked: () => {

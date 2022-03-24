@@ -1,16 +1,16 @@
 const env = process.env.NODE_ENV || "development";
 console.log(`"env" is ${env}`);
 const SERVER_SITE = {
-    develop: "https://test.gayu.biz:443",
-    production: "https://test.gayu.biz:443",
+    develop: "https://t.talkod.im:443",
+    production: "https://talkod.im",
 };
 const FILE_SITE = {
-    develop: "https://test.gayu.biz:8029",
-    production: "https://test.gayu.biz:8029",
+    develop: "https://t.talkod.im:8029",
+    production: "https://talkod.im",
 };
 const JANUS_SITE = {
-    develop: "https://test.gayu.biz:8089",
-    production: "https://test.gayu.biz:8089",
+    develop: "https://t.talkod.im:8089",
+    production: "https://talkod.im",
 };
 
 const setting = {

@@ -65,7 +65,8 @@
         <div v-show="!isEdited">
             <div class="userName">{{ userInfo.name }}</div>
             <p class="phone-number">
-                ({{ String(userInfo.mobile).slice(0, 3) }}) {{ String(userInfo.mobile).slice(-9) }}
+                {{ "+" + String(userInfo.mobile).slice(0, 3) }}
+                {{ String(userInfo.mobile).slice(-9) }}
             </p>
             <div class="tags-group" v-if="userInfo.tag.length > 0">
                 <n-tag v-for="tag in userInfo.tag" round :key="tag"> #{{ tag }} </n-tag>
@@ -81,12 +82,7 @@
                 <n-grid-item v-for="icon in imgList" :key="icon">
                     <n-avatar
                         class="iconImg"
-                        :class="[
-                            icon.split('/')[2] ===
-                            (img.split('/').length > 3 ? img.split('/')[4] : img.split('/')[2])
-                                ? 'active'
-                                : '',
-                        ]"
+                        :class="{ active: icon.split('/')[3] == img.split('/')[5] }"
                         @click="onClickChoose"
                         round
                         :size="56"
@@ -189,10 +185,12 @@ const onSaveEdited = () => {
     const infoObj = {
         chatroomID: chatroomID.value,
         name: userInfo.value.name,
-        mobile: userInfo.value.mobile,
+        mobile: Number(userInfo.value.mobile),
         icon: userInfo.value.icon,
         tag: userInfo.value.tag,
         description: userInfo.value.description,
+        pinTop: userInfo.value.pinTop || 0,
+        eventID: route.params.id,
     };
     sendUserInfo(infoObj);
     isEdited.value = false;
@@ -200,6 +198,8 @@ const onSaveEdited = () => {
 
 // 選擇圖像
 const onClickChoose = (e: any) => {
+    console.log("e:", e.target.src.split("/").slice(4));
+
     img.value = e.target.src;
     showPopover.value = false;
 };

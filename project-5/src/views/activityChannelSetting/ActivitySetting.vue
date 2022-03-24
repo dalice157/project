@@ -28,16 +28,30 @@
                         @mouseleave="channelHoverIndex = '0'"
                         :class="{ hoverEffect: channelHoverIndex === channel.eventID }"
                     >
+                        <!-- {{ channel }} -->
                         <div class="channelTitle">
                             <img :src="`${config.fileUrl}/fls/${channel.icon}`" alt="#" />
                         </div>
                         <p class="channelName">{{ channel.name }}</p>
                         <div class="channelSetting">
-                            <router-link
+                            <img
+                                src="@/assets/Images/manage/more.svg"
+                                @click="channelPopUp(channel)"
+                                alt="#"
+                            />
+                            <div class="channelPopUp">
+                                <ul class="channelUL" v-if="channel.popUpBoolean">
+                                    <li @click="goEditChannel(channel.eventID)">編輯活動頻道</li>
+                                    <li @click="goAutoReply(channel.eventID)">自動回覆訊息</li>
+                                    <li @click="goAutoReplyList(channel.eventID)">
+                                        自動回覆訊息列表
+                                    </li>
+                                </ul>
+                            </div>
+                            <!-- <router-link
                                 :to="`/manage/${route.params.id}/activitySetting/editChannel?eventID=${channel.eventID}`"
                             >
-                                <img src="../../assets/Images/manage/edit-round.svg" alt="#" />
-                            </router-link>
+                            </router-link> -->
                         </div>
                     </li>
                 </ul>
@@ -120,18 +134,19 @@ const loading = ref(false);
 getEventListApi();
 getCustomServiceStaffList();
 
-//搜尋新陣列
-let filterStaff = computed(() => {
+//搜尋客服陣列
+const filterStaff = computed(() => {
     let arr = staffList.value.filter((p: any) => {
         return p.name.toLowerCase().includes(searchStaff.value.toLowerCase());
     });
     return arr;
 });
-
+//搜尋頻道陣列
 const filterChannel = computed(() => {
     let arr = eventList.value.filter((p: any) => {
         return p.name.toLowerCase().includes(searchChannel.value.toLowerCase());
     });
+
     return arr;
 });
 
@@ -140,6 +155,29 @@ const params = route.params;
 const addChannel = () => {
     router.push(`/manage/${params.id}/activitySetting/addChannel`);
 };
+//前往編輯活動頻道
+const goEditChannel = (eventID) => {
+    router.push(`/manage/${route.params.id}/activitySetting/editChannel?eventID=${eventID}`);
+};
+//前往自動回覆訊息頁面
+const goAutoReply = (eventID) => {
+    router.push(`/manage/${route.params.id}/activitySetting/addAutoReply?eventID=${eventID}`);
+};
+//前往自動回覆訊息列表
+const goAutoReplyList = (eventID) => {
+    router.push(`/manage/${route.params.id}/activitySetting/autoReplyList?eventID=${eventID}`);
+};
+//頻道開關
+const channelPopUp = (channel) => {
+    filterChannel.value.forEach((p) => {
+        if (p.eventID === channel.eventID) {
+            p.popUpBoolean = !p.popUpBoolean;
+        } else {
+            p.popUpBoolean = false;
+        }
+    });
+};
+//naive ui 主題
 const themeOverrides = {
     Input: {
         border: "1px solid #ececec",
@@ -246,18 +284,41 @@ const themeOverrides = {
                         white-space: nowrap;
                         margin-right: 10px;
                     }
+
                     .channelSetting {
-                        display: flex;
+                        padding: 8px 5px 0 12px;
+                        position: relative;
+                        justify-content: flex-end;
                         align-items: center;
                         img {
-                            width: 32px;
-                            height: 32px;
+                            width: 25px;
                             cursor: pointer;
                         }
-                        img + img {
-                            width: 24px;
-                            height: 24px;
-                            margin-left: 15px;
+                        .channelPopUp {
+                            position: absolute;
+                            box-shadow: 0 2px 4px 0 rgba(209, 209, 209, 0.5);
+                            border-radius: 4px;
+                            top: 25px;
+                            right: 0px;
+                            z-index: 1;
+                            .channelUL {
+                                background-color: $primary-4;
+                                li {
+                                    width: 76px;
+                                    height: 50px;
+                                    padding: 10px 10px;
+                                    text-align: center;
+                                    display: flex;
+                                    justify-content: center;
+                                    align-items: center;
+                                    color: $gray-1;
+                                    border-bottom: 1px solid $white;
+                                    cursor: pointer;
+                                }
+                                li:last-child {
+                                    border-bottom: 0px;
+                                }
+                            }
                         }
                     }
                 }

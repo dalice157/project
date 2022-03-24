@@ -1,19 +1,20 @@
 <template>
     <div class="navbar" @click="closeSearchBar">
         <h2 class="title">
-            ({{ String(mobile).slice(0, 3) }})
+            {{ "+" + String(mobile).slice(0, 3) }}
             {{ String(mobile).slice(-9) }}
-            <span class="time"> 30分鐘前上線 </span>
+            <n-badge :color="isOnline ? 'green' : 'grey'" dot> </n-badge>
+            <!-- <span class="time"> 30分鐘前上線 </span> -->
         </h2>
         <!-- 功能欄 -->
         <div class="chatpane">
             <button v-show="!isMmsSend" @click="onChangMMSSend" class="change-mms">
-                切換發送MMS
+                切換發送簡訊
             </button>
             <button v-show="isMmsSend" @click="onChangSMSSend" class="change-mms">
-                切換發送SMS
+                切換發送文字
             </button>
-            <a class="phone-web">
+            <a class="phone-web" v-if="eventInfo.callable === 1">
                 <img
                     src="../../assets/Images/chatroom/phone.svg"
                     alt="#"
@@ -45,9 +46,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, watchEffect, computed } from "vue";
+import { ref, watch, watchEffect, computed, onMounted } from "vue";
 import { storeToRefs } from "pinia";
-import { NAvatar, NButton } from "naive-ui";
+import { NBadge } from "naive-ui";
 import { useRouter, useRoute } from "vue-router";
 
 import { useApiStore } from "@/store/api";
@@ -66,14 +67,14 @@ const eventID = computed(() => route.params.id);
 
 // api store
 const apiStore = useApiStore();
-const { chatroomList: getChatroomList } = storeToRefs(apiStore);
+const { chatroomList: getChatroomList, eventInfo, messageList } = storeToRefs(apiStore);
 
 const chatroomList: any = computed(() => getChatroomList.value);
 const mobile: any = computed(() => route.query.mobile);
-const chatroomID = computed(() => route.query.chatroomID);
+const chatroomID: any = computed(() => route.query.chatroomID);
 //chat store
 const chatStore = useChatStore();
-const { isMmsSend } = storeToRefs(chatStore);
+const { isMmsSend, isOnline, onlineList } = storeToRefs(chatStore);
 
 //search store
 const searchStore = useSearchStore();
@@ -88,8 +89,12 @@ const modelStore = useModelStore();
 const { phoneCallModal } = storeToRefs(modelStore);
 
 const onPhoneCallModal = (chatroomID) => {
-    phoneCallModal.value = true;
-    doCall(chatroomID);
+    if (isOnline.value === true) {
+        phoneCallModal.value = true;
+        doCall(chatroomID);
+    } else {
+        alert("對方已離線,電話無法撥通!!!");
+    }
 };
 
 const onChangMMSSend = () => {
@@ -98,6 +103,30 @@ const onChangMMSSend = () => {
 const onChangSMSSend = () => {
     isMmsSend.value = false;
 };
+
+const onLines = computed(() => {
+    return Object.entries(onlineList.value);
+});
+
+const filterOnLine = computed(() => {
+    return onLines.value
+        .filter((item) => {
+            console.log("item:", item);
+            return item[1] === "user";
+        })
+        .map((id) => id[0]);
+});
+
+watchEffect(() => {
+    if (isOnline.value) {
+        messageList.value = messageList.value.map((item) => {
+            item.janusMsg.config.isRead = true;
+            return item;
+        });
+
+        console.log("messageList watchEffect:", messageList.value);
+    }
+});
 </script>
 
 <style lang="scss">

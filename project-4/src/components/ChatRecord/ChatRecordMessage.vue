@@ -3,9 +3,9 @@
     <div v-if="searcRecordMessages?.length > 0 && recordKeyWord !== ''" class="searchRecordMessage">
         <div
             class="chatRoomBox"
-            @click.stop="gotoChat(num.chatToken)"
+            @click.stop="gotoChat(num.eventKey)"
             v-for="num in searcRecordMessages"
-            :key="num.chatToken"
+            :key="num.eventKey"
         >
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
@@ -18,20 +18,20 @@
                         style="max-width: 600px"
                         :line-clamp="1"
                         :tooltip="false"
-                        v-html="num.tagMsg"
+                        v-html="num.janusMsg.tagMsg"
                     >
                     </n-ellipsis>
                 </div>
             </div>
             <div class="functionBox">
                 <div class="time">
-                    {{ num.time }}
+                    {{ currentTime(num.time / 1000000) }}
                 </div>
-                <div class="badge">
+                <!-- <div class="badge">
                     <div class="badgeBg">
                         <span class="badgeSup">{{ num.sup > 999 ? "999+" : num.sup }}</span>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
@@ -41,13 +41,13 @@
         v-if="changeList?.length > 0 && searcRecordMessages?.length === 0 && recordKeyWord === ''"
         class="chatRecordMessage"
     >
-        <!-- @touchend.prevent="gotoChat(num.chatToken)" -->
-        <!-- :href="`/?chatToken=${num.chatToken}`" -->
+        <!-- @touchend.prevent="gotoChat(num.eventKey)" -->
+        <!-- :href="`/?eventKey=${num.eventKey}`" -->
         <a
             class="chatRoomBox"
             v-for="(num, index) in changeList"
-            :key="num.chatToken"
-            @click.stop="gotoChat(num.chatToken)"
+            :key="num.eventKey"
+            @click.stop="gotoChat(num.eventKey)"
         >
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
@@ -63,8 +63,8 @@
                 <div class="chatRoomInfo">
                     <h2 class="info_title">{{ num.name }}</h2>
                     <n-ellipsis class="messageEllipsis" :line-clamp="1" :tooltip="false">
-                        <p v-if="num.message">
-                            {{ num.message }}
+                        <p v-if="num.msgContent">
+                            {{ num.msgContent }}
                         </p>
                         <p v-if="[3, 5, 6, 7, 8, 9].includes(num.msgType)">
                             {{ num.sender === 0 ? "對方" : "您" }}傳送了{{
@@ -75,15 +75,15 @@
                 </div>
             </div>
             <div class="functionBox">
-                <div>
+                <div class="timeBox">
                     <div class="time">
-                        {{ num.time }}
+                        {{ currentTime(num.time / 1000000) }}
                     </div>
-                    <div class="badge">
+                    <!-- <div class="badge">
                         <div class="badgeBg">
                             <span class="badgeSup">{{ num.sup > 999 ? "999+" : num.sup }}</span>
                         </div>
-                    </div>
+                    </div> -->
                 </div>
                 <div class="functionBoxMore">
                     <img
@@ -123,6 +123,7 @@ import isYesterday from "dayjs/plugin/isYesterday";
 import isToday from "dayjs/plugin/isToday";
 
 import { getFileExtension } from "@/util/commonUtil";
+import { currentTime } from "@/util/dateUtil";
 import { useApiStore } from "@/store/api";
 import { useSearchStore } from "@/store/search";
 import { useChatRecordStore } from "@/store/chatRecord";
@@ -183,36 +184,41 @@ const sendMsgTypeObj: ISendMsgTypeObj = {
 };
 let i = ref(0);
 watchEffect(() => {
-    let messages = JSON.parse(localStorage.getItem(route.query.chatToken as any) || "[]");
+    let messages = JSON.parse(localStorage.getItem(route.params.eventKey as any) || "[]");
 
     if (eventList.value.length > 0) {
         eventList.value.forEach((item: any) => {
-            list.value = JSON.parse(localStorage.getItem(item.chatToken) || "[]");
+            list.value = JSON.parse(localStorage.getItem(item.eventKey) || "[]");
 
             if (list.value.length > 0) {
                 const infoLen = list.value.length;
                 const isInfoYesterday = dayjs(
-                    (list.value[infoLen - 1] as any).currentDate
+                    (list.value[infoLen - 1] as any).janusMsg.config.currentDate
                 ).isYesterday();
-                const isInfoToday = dayjs((list.value[infoLen - 1] as any).currentDate).isToday();
+                const isInfoToday = dayjs(
+                    (list.value[infoLen - 1] as any).janusMsg.config.currentDate
+                ).isToday();
                 const lastObj: IObj = {
                     ...item,
                     toTop: false,
                     show: true,
                     isfunctionPopUp: false,
                     sender: (list.value[infoLen - 1] as any).janusMsg.sender,
-                    currentDate: (list.value[infoLen - 1] as any).currentDate,
                     msgType: (list.value[infoLen - 1] as any).janusMsg.msgType,
+                    type: 2,
                     time: isInfoToday
-                        ? (list.value[infoLen - 1] as any).time
+                        ? (list.value[infoLen - 1] as any).janusMsg.time
                         : isInfoYesterday
                         ? "昨天"
-                        : (list.value[infoLen - 1] as any).currentDate,
-                    message: (list.value[infoLen - 1] as any).janusMsg.message,
+                        : (list.value[infoLen - 1] as any).janusMsg.config.currentDate,
+                    msgContent: (list.value[infoLen - 1] as any).janusMsg.msgContent,
                     format: (list.value[infoLen - 1] as any).janusMsg.format,
                     sup: list.value.length,
+                    config: {
+                        currentDate: (list.value[infoLen - 1] as any).janusMsg.config.currentDate,
+                    },
                 };
-                if (!recordMessages.value.some((msg: any) => msg.chatToken === item.chatToken)) {
+                if (!recordMessages.value.some((msg: any) => msg.eventKey === item.eventKey)) {
                     recordMessages.value.push(lastObj);
                 }
             }
@@ -221,14 +227,14 @@ watchEffect(() => {
     if (
         messages.length > 0 &&
         eventInfo.value.name &&
-        !recordMessages.value.some((msg: any) => msg.chatToken === route.query.chatToken)
+        !recordMessages.value.some((msg: any) => msg.eventKey === route.params.eventKey)
     ) {
         let getObj = {
-            chatToken: route.query.chatToken,
+            eventKey: route.params.eventKey,
             ...messages[messages.length - 1],
         };
-        const isInfoYesterday = dayjs(getObj.currentDate).isYesterday();
-        const isInfoToday = dayjs(getObj.currentDate).isToday();
+        const isInfoYesterday = dayjs(getObj.janusMsg.config.currentDate).isYesterday();
+        const isInfoToday = dayjs(getObj.janusMsg.config.currentDate).isToday();
         const lastObj: IObj = {
             ...getObj,
             ...eventInfo.value,
@@ -236,12 +242,18 @@ watchEffect(() => {
             show: true,
             isfunctionPopUp: false,
             sender: getObj.janusMsg.sender,
-            currentDate: getObj.currentDate,
             msgType: getObj.janusMsg.msgType,
-            time: isInfoToday ? getObj.time : isInfoYesterday ? "昨天" : getObj.currentDate,
-            message: getObj.janusMsg.message,
+            time: isInfoToday
+                ? getObj.janusMsg.time
+                : isInfoYesterday
+                ? "昨天"
+                : getObj.janusMsg.config.currentDate,
+            msgContent: getObj.janusMsg.msgContent,
             format: getObj.janusMsg.format,
             sup: messages.length,
+            config: {
+                currentDate: getObj.janusMsg.config.currentDate,
+            },
         };
         recordMessages.value.push(lastObj);
     }
@@ -255,7 +267,7 @@ watchEffect(() => {
 const openFunctionPopUp = (num: any) => {
     console.log(num);
     changeList.value.forEach((item: any) => {
-        if (item.chatToken === num.chatToken) {
+        if (item.eventKey === num.eventKey) {
             item.isfunctionPopUp = !item.isfunctionPopUp;
         } else {
             item.isfunctionPopUp = false;
@@ -267,7 +279,7 @@ const openFunctionPopUp = (num: any) => {
 const deletechatRoomBox = (item: any): void => {
     changeList.value = changeList.value.filter((num: any) => {
         num.isfunctionPopUp = false;
-        return num.chatToken !== item.chatToken;
+        return num.eventKey !== item.eventKey;
     });
 };
 
@@ -278,7 +290,7 @@ const pin = (item: any, idx: any): void => {
     const lists = changeList.value;
     lists.unshift(lists.splice(idx, 1)[0]);
     lists.forEach((it: any, index: any) => {
-        if (it.chatToken === item.chatToken) {
+        if (it.eventKey === item.eventKey) {
             it.toTop = true;
         }
         it.isfunctionPopUp = false;
@@ -293,7 +305,7 @@ const unpin = (item: any, index: any): void => {
     const getItem = lists.splice(index, 1)[0];
     lists.splice(item.key, 0, getItem);
     lists.forEach((it) => {
-        if (it.chatToken === item.chatToken) {
+        if (it.eventKey === item.eventKey) {
             it.toTop = false;
         }
         it.isfunctionPopUp = false;
@@ -312,7 +324,7 @@ const unpin = (item: any, index: any): void => {
 // //隱藏功能
 // const hideChatRoomBox = (item: any) => {
 //     recordMessages.value.forEach((num: any) => {
-//         if (num.chatToken === item.chatToken) {
+//         if (num.eventKey === item.eventKey) {
 //             num.show = false;
 //         }
 //     });
@@ -515,31 +527,33 @@ const unpin = (item: any, index: any): void => {
             }
         }
         .functionBox {
-            max-width: 120px;
+            // max-width: 120px;
             padding-top: 15px;
             padding-right: 15px;
             display: flex;
-            .time {
-                text-align: right;
-                min-width: 68px;
-                color: $gray-3;
-                font-size: $font-size-16;
-                font-weight: 500;
-            }
-            .badge {
-                display: flex;
-                justify-content: flex-end;
-                align-items: center;
-                margin-top: 10px;
-                .badgeBg {
-                    padding: 4px 8px;
-                    border-radius: 12px;
-                    background: $primary-1;
-                    width: auto;
+            .timeBox {
+                .time {
+                    text-align: right;
+                    min-width: 68px;
+                    color: $gray-3;
+                    font-size: $font-size-16;
+                    font-weight: 500;
                 }
-                .badgeSup {
-                    @extend %h4;
-                    color: $gray-1;
+                .badge {
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
+                    margin-top: 10px;
+                    .badgeBg {
+                        padding: 4px 8px;
+                        border-radius: 12px;
+                        background: $primary-1;
+                        width: auto;
+                    }
+                    .badgeSup {
+                        @extend %h4;
+                        color: $gray-1;
+                    }
                 }
             }
             .functionBoxMore {

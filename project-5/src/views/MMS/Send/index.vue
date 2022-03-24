@@ -97,7 +97,7 @@ export default {
 };
 </script>
 <script lang="ts" setup>
-import { onMounted, ref, watchEffect, computed } from "vue";
+import { onMounted, ref, watchEffect, computed, watch } from "vue";
 import { NConfigProvider, NInput, NUpload, NDivider, NSelect } from "naive-ui";
 import { useRouter, useRoute } from "vue-router";
 import TimeSetting from "../../../components/backend/TimeSetting.vue";
@@ -130,7 +130,7 @@ const {
 const filterChannelList = computed(() => {
     return eventList.value
         .filter((event: any) => {
-            return event.status === 0;
+            return event.status === 1;
         })
         .map((item) => ({
             label: `${item.name}`,
@@ -161,6 +161,15 @@ onMounted(() => {
         mmsContent.value = demoContent;
     }
 });
+
+watch(
+    () => route.path,
+    () => {
+        if (mmsContent.value === "") {
+            mmsContent.value = demoContent;
+        }
+    }
+);
 
 // textarea 預設文字
 const focusType = (e: any) => {

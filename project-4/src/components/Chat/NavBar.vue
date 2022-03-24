@@ -2,7 +2,7 @@
     <div class="navbar" @click="closeSearchBar">
         <div class="navbarFuncitonbar">
             <div class="navbartitle">
-                <router-link class="back" :to="`/chatRecord?chatToken=${chatToken}`">
+                <router-link class="back" :to="`/chatRecord/${eventKey}`">
                     <img src="../../assets/Images/chatroom/arrow-left.svg" alt="回交談紀錄" />
                 </router-link>
                 <!-- NavBar 大頭貼 -->
@@ -14,10 +14,10 @@
             </div>
             <!-- 功能欄 -->
             <div class="chatpane">
-                <router-link class="back" :to="`/chatRecord?chatToken=${chatToken}`">
+                <router-link class="back" :to="`/chatRecord/${eventKey}`">
                     <img src="../../assets/Images/chatroom/comment.svg" alt="回交談紀錄" />
                 </router-link>
-                <a class="phone-web">
+                <a class="phone" v-if="eventInfo.callable === true">
                     <img
                         src="../../assets/Images/chatroom/phone.svg"
                         alt="撥打電話"
@@ -25,21 +25,10 @@
                     />
                 </a>
                 <phoneCallModel />
-                <router-link class="phone" :to="`/phone?chatToken=${chatToken}`">
-                    <img
-                        src="../../assets/Images/chatroom/phone.svg"
-                        alt="撥打電話"
-                        @touchend="phoneCall"
-                    />
-                </router-link>
-                <router-link class="gallery" :to="`/gallery?chatToken=${chatToken}`">
+                <router-link class="gallery" :to="`/gallery/${eventKey}`">
                     <img src="../../assets/Images/chatroom/list.svg" alt="進入相本" />
                 </router-link>
-                <router-link
-                    class="search"
-                    :to="`/?chatToken=${chatToken}`"
-                    @click.stop="searchSwitch"
-                >
+                <router-link class="search" :to="`/${eventKey}`" @click.stop="searchSwitch">
                     <img src="../../assets/Images/chatroom/search.svg" alt="搜尋" />
                 </router-link>
             </div>
@@ -86,7 +75,7 @@ const { phoneCallModal } = storeToRefs(modelStore);
 //router
 const router = useRouter();
 const route = useRoute();
-const chatToken = computed(() => route.query.chatToken);
+const eventKey = computed(() => route.params.eventKey);
 
 const webPhoneCall = () => {
     phoneCallModal.value = true;
@@ -120,11 +109,10 @@ const phoneCall = () => {
     }
     .navbarFuncitonbar {
         width: 100%;
-        height: 66px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        padding-top: 0px;
+        padding-top: 8px;
         .navbartitle {
             margin-left: 15px;
             display: flex;
@@ -197,20 +185,9 @@ const phoneCall = () => {
         .chatpane {
             margin-right: 10px;
             display: flex;
-            .phone-web {
+            .phone {
                 display: block;
                 cursor: pointer;
-            }
-            .phone {
-                display: none;
-            }
-            @media (max-width: 768px) {
-                .phone-web {
-                    display: none;
-                }
-                .phone {
-                    display: block;
-                }
             }
             a {
                 background-color: transparent;
@@ -223,7 +200,7 @@ const phoneCall = () => {
 @media (max-width: 768px) {
     .navbar {
         width: 100%;
-        height: 120px;
+        height: 112px;
         background: transparent url("~@/assets/Images/chatroom/header-bg.png") no-repeat center top;
         background-size: 120% 150px;
         .back {

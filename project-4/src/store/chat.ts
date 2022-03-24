@@ -26,17 +26,18 @@ export const useChatStore = defineStore({
         stickerItems: <any>[],
         participantList: <any>[],
         msgParticipantList: <any>[],
+        isOnline: <boolean>false,
     }),
     getters: {},
     actions: {
         // 回覆訊息
         replyMsgEvent(msg: any) {
             const findId = this.messages.find((text: any) => {
-                return text.janusMsg.format.id === msg.janusMsg.format.id;
+                return text.janusMsg.config.id === msg.janusMsg.config.id;
             });
             this.replyMsg = findId;
             this.isReplyBox = true;
-            msg.msgFunctionStatus = false;
+            msg.janusMsg.config.msgFunctionStatus = false;
             this.inputVal.focus();
             this.inputFunctionBoolean = false;
         },
@@ -50,32 +51,34 @@ export const useChatStore = defineStore({
         deleteQuestion(msg: any) {
             this.deleteGroup = [];
             this.deleteBoolean = !this.deleteBoolean;
-            msg.msgFunctionStatus = false;
+            msg.janusMsg.config.msgFunctionStatus = false;
         },
         //刪除訊息
-        confirmDelete(chatToken: any) {
+        confirmDelete(eventKey: any) {
             this.messages = this.messages.filter((item: any) => {
-                return !this.deleteGroup.includes(item.janusMsg.format.id);
+                return !this.deleteGroup.includes(item.janusMsg.config.id);
             });
-            localStorageMsg(this.messages, chatToken);
+            localStorageMsg(this.messages, eventKey);
             this.deleteGroup = [];
             this.deleteBoolean = false;
             this.deletePopUp = false;
         },
 
         //獲取janus訊息
-        getCompanyMsg(msgObj: any, chatToken: any) {
-            this.messages = JSON.parse(localStorage.getItem(`${chatToken}`) || "[]");
+        getCompanyMsg(msgObj: any, eventKey: any) {
+            console.log("janus 訊息:", msgObj);
+            this.messages = JSON.parse(localStorage.getItem(`${eventKey}`) || "[]");
             const messagesParse: any = JSON.parse(msgObj.msg);
-            messagesParse.janusMsg.sender = 0;
-            this.messages.push(messagesParse);
+            if (messagesParse.janusMsg.sender === 0) {
+                this.messages.push(messagesParse);
+                localStorageMsg(this.messages, eventKey);
+            }
             this.messages.forEach((element) => {
-                element.isRead = true;
+                element.janusMsg.config.isRead = true;
             });
-            localStorageMsg(this.messages, chatToken);
             if (messagesParse.janusMsg.msgType === 6 || messagesParse.janusMsg.msgType === 7) {
                 this.pictures.push(messagesParse);
-                localStorage.setItem(`${chatToken}-pictures`, JSON.stringify(this.pictures));
+                localStorage.setItem(`${eventKey}-pictures`, JSON.stringify(this.pictures));
             }
             console.log("this.messages:", this.messages);
         },

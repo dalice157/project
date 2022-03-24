@@ -1,27 +1,31 @@
 <template>
     <!-- 回覆視窗 -->
-    <div class="reply" v-show="isReplyBox" @click.prevent="scrollPageTo(replyMsg.format.id)">
+    <div
+        class="reply"
+        v-show="isReplyBox"
+        @click.prevent="scrollPageTo(replyMsg.janusMsg.config.id)"
+    >
         <div class="usertext">
-            <div class="replyText" v-if="replyMsg && replyMsg.msgType === 6">[照片]</div>
-            <div class="replyText" v-if="replyMsg && replyMsg.msgType === 3">[貼圖]</div>
+            <div class="replyText" v-if="replyMsg && replyMsg.janusMsg.msgType === 6">[照片]</div>
+            <div class="replyText" v-if="replyMsg && replyMsg.janusMsg.msgType === 3">[貼圖]</div>
             <n-ellipsis
-                v-if="replyMsg && replyMsg.msgType === 1"
+                v-if="replyMsg && replyMsg.janusMsg.msgType === 1"
                 style="width: 80%"
                 class="replyText"
                 :tooltip="false"
             >
-                {{ replyMsg.msgContent }}
+                {{ replyMsg.janusMsg.msgContent }}
             </n-ellipsis>
-            <div class="img" v-if="replyMsg && replyMsg.msgType === 6">
+            <div class="img" v-if="replyMsg && replyMsg.janusMsg.msgType === 6">
                 <img
                     :src="`${config.fileUrl}/fls/${
-                        replyMsg.format.Fileid
-                    }.${replyMsg.format.ShowName.split('.').pop()}`"
+                        replyMsg.janusMsg.format.Fileid
+                    }.${replyMsg.janusMsg.format.ShowName.split('.').pop()}`"
                 />
             </div>
-            <div class="img" v-if="replyMsg && replyMsg.msgType === 3">
+            <div class="img" v-if="replyMsg && replyMsg.janusMsg.msgType === 3">
                 <img
-                    :src="`${replyMsg.format.stickerUrl}${replyMsg.format.stickerPackID}/${replyMsg.format.stickerFileID}.${replyMsg.format.ext}`"
+                    :src="`${replyMsg.janusMsg.format.stickerUrl}${replyMsg.janusMsg.format.stickerPackID}/${replyMsg.janusMsg.format.stickerFileID}.${replyMsg.janusMsg.format.ext}`"
                 />
             </div>
             <div @click.stop="replyHide" class="closeBtn">
@@ -54,49 +58,28 @@
     </div>
     <!-- 使用者輸入框 -->
     <div class="input">
-        <div class="deleteOption" v-if="deleteBoolean">
+        <!-- <div class="deleteOption" v-if="deleteBoolean">
             <div class="cancelBtn" @click="deleteBoolean = !deleteBoolean">取消</div>
             <div class="deleteBtn" @click="confirmDeletePopup">
                 刪除{{ deleteGroup.length > 0 ? `(${deleteGroup.length})` : "" }}
             </div>
-        </div>
-        <div class="input-inner" v-else>
-            <span
-                class="attachOpen"
-                @click.stop="inputFunctionOpen"
-                v-show="!inputFunctionBoolean"
-            ></span>
-            <span
-                class="attachClose"
-                @click.stop="inputFunctionClose"
-                v-show="inputFunctionBoolean"
-            ></span>
-            <span class="camera">
-                <input
-                    type="file"
-                    name="image"
-                    accept="image/*"
-                    capture="user"
-                    @change="uploadImage"
-                />
-            </span>
-            <span class="photo">
-                <input type="file" name="image" accept="image/*" @change="uploadImage" />
-            </span>
-            <span class="file-folder">
+        </div> -->
+        <div class="input-inner">
+            <span class="mmsSend" v-if="isMmsSend">簡訊發送</span>
+            <span class="file-folder" v-if="!isMmsSend">
                 <input type="file" @change="onUploadFilePC" />
             </span>
             <div class="textArea">
                 <n-input
                     class="n-input-modify"
-                    placeholder="Aa"
+                    :placeholder="isMmsSend ? '以簡訊發送' : 'Aa'"
                     type="textarea"
                     size="small"
                     :autosize="{
                         minRows: 1,
                         maxRows: 5,
                     }"
-                    v-model:value.trim="msg"
+                    v-model:value="msg"
                     @focus="closeAll()"
                     @keydown.enter.exact.prevent="addMsg"
                     ref="inputInstRef"
@@ -104,13 +87,13 @@
                 </n-input>
                 <img
                     @click.stop="closeStickerBox"
-                    v-if="showStickerModal"
+                    v-if="showStickerModal && !isMmsSend"
                     src="../../assets/Images/chatroom/emoji-enabled.svg"
                     alt="表情貼圖"
                 />
                 <img
                     @click.stop="openStickerBox"
-                    v-if="!showStickerModal"
+                    v-if="!showStickerModal && !isMmsSend"
                     src="../../assets/Images/chatroom/emoji.svg"
                     alt="表情貼圖"
                 />
@@ -259,17 +242,7 @@ import { computed, ref, onMounted } from "vue";
 import { nanoid } from "nanoid";
 import Compressor from "compressorjs";
 import axios from "axios";
-import {
-    NConfigProvider,
-    NInput,
-    NEllipsis,
-    NIcon,
-    NModal,
-    NCard,
-    NButton,
-    NGrid,
-    NGridItem,
-} from "naive-ui";
+import { NInput, NEllipsis, NIcon, NModal, NCard, NGrid, NGridItem } from "naive-ui";
 import { MicOutline, ArrowRedo } from "@vicons/ionicons5";
 import { storeToRefs } from "pinia";
 import Recorder from "js-audio-recorder";
@@ -281,7 +254,7 @@ import dayjs from "dayjs";
 import { txt } from "@/util/interfaceUtil";
 import { sendPrivateMsg } from "@/util/chatUtil";
 import { scrollPageTo, isObjToBeZero } from "@/util/commonUtil";
-import { currentTime, currentDate, currentMonth } from "@/util/dateUtil";
+import { currentTime, currentDate, unixTime } from "@/util/dateUtil";
 import { useApiStore } from "@/store/api";
 import { useChatStore } from "@/store/chat";
 import { useModelStore } from "@/store/model";
@@ -297,7 +270,7 @@ const { closeAll } = modelStore;
 // api store
 const apiStore = useApiStore();
 const { getSticker, sendMMSMsg } = apiStore;
-const { chatroomList, stickerList, stickerUrl } = storeToRefs(apiStore);
+const { messageList, stickerList, stickerUrl } = storeToRefs(apiStore);
 //store
 const chatStore = useChatStore();
 const inputInstRef: any = ref(null);
@@ -319,14 +292,16 @@ const {
     stickerGroupID,
     stickerGroup,
     isMmsSend,
+    isOnline,
 } = storeToRefs(chatStore);
 //router
 const route = useRoute();
 onMounted(() => {
-    // console.log("**************", inputInstRef);
     inputInstRef.value.blur();
     inputVal.value = inputInstRef.value;
 });
+
+const getUserName = localStorage.getItem("userName");
 
 // 可上傳檔案類型
 const fileAccept =
@@ -385,30 +360,32 @@ const shareMap = () => {
     let mapObj: any = {
         janusMsg: {
             chatroomID: chatRoomID.value,
-            sender: 0,
-            type: 2,
             msgType: 8,
-            message: "",
+            sender: 0,
+            msgContent: "",
+            time: unixTime(),
+            type: 2,
             format: {
-                id: nanoid(),
-                isReplay: false,
-                replyObj: "",
-                isMMS: isMmsSend.value,
                 Longitude: longitude.value,
                 Latitude: latitude.value,
                 LocateTime: new Date(),
                 LocateSource: 0,
             },
+            config: {
+                id: nanoid(),
+                isReply: false,
+                replyObj: "",
+                currentDate: currentDate(),
+                isExpire: false,
+                isPlay: false,
+                isRead: isOnline.value ? true : false,
+                msgFunctionStatus: false,
+                msgMoreStatus: false,
+                recallPopUp: false,
+                recallStatus: false,
+                userName: getUserName,
+            },
         },
-        currentDate: currentDate(),
-        time: currentTime(),
-        msgMoreStatus: false,
-        msgFunctionStatus: false,
-        recallStatus: false,
-        recallPopUp: false,
-        isExpire: false,
-        isRead: false,
-        isPlay: false,
     };
     const sendMsgObj = {
         msg: mapObj,
@@ -417,6 +394,7 @@ const shareMap = () => {
         eventID: route.params.id,
     };
     sendPrivateMsg(sendMsgObj);
+    messageList.value.push(mapObj);
 };
 
 // 錄音
@@ -550,15 +528,12 @@ const stopRecorder = (e: any) => {
             audioObj = {
                 janusMsg: {
                     chatroomID: chatRoomID.value,
-                    sender: 0,
-                    type: 2,
                     msgType: 5,
-                    message: "",
+                    sender: 0,
+                    msgContent: "",
+                    time: unixTime(),
+                    type: 2,
                     format: {
-                        id: nanoid(),
-                        isReplay: false,
-                        replyObj: "",
-                        isMMS: isMmsSend.value,
                         Fileid: res.data.fileid,
                         ShowName: `record_${audioFile.size}`,
                         Description: "",
@@ -566,16 +541,21 @@ const stopRecorder = (e: any) => {
                         SoundLength: duration.value,
                         expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                     },
+                    config: {
+                        id: nanoid(),
+                        isReply: false,
+                        replyObj: "",
+                        currentDate: currentDate(),
+                        isExpire: false,
+                        isPlay: false,
+                        isRead: isOnline.value ? true : false,
+                        msgFunctionStatus: false,
+                        msgMoreStatus: false,
+                        recallPopUp: false,
+                        recallStatus: false,
+                        userName: getUserName,
+                    },
                 },
-                currentDate: currentDate(),
-                time: currentTime(),
-                msgMoreStatus: false,
-                msgFunctionStatus: false,
-                recallStatus: false,
-                recallPopUp: false,
-                isExpire: false,
-                isRead: false,
-                isPlay: false,
             };
             const sendMsgObj = {
                 msg: audioObj,
@@ -584,6 +564,7 @@ const stopRecorder = (e: any) => {
                 eventID: route.params.id,
             };
             sendPrivateMsg(sendMsgObj);
+            messageList.value.push(audioObj);
         })
         .catch((err) => {
             console.error(err);
@@ -595,36 +576,39 @@ const clearRecorder = () => {
 };
 
 //發送訊息
+//input v-model
 const addMsg = (): void => {
     const str = msg.value.trim();
-
     let textObj: any = {
         janusMsg: {
             chatroomID: chatRoomID.value,
-            sender: 0,
-            type: 2,
             msgType: 1,
-            message: str,
-            format: {
+            sender: 0,
+            msgContent: str,
+            time: unixTime(),
+            type: isMmsSend.value ? 1 : 2,
+            format: {},
+            config: {
                 id: nanoid(),
-                isReplay: replyMsg.value ? true : false,
-                replyObj: replyMsg.value ? { ...replyMsg.value } : "",
-                isMMS: isMmsSend.value,
+                isReply: replyMsg.value ? true : false,
+                replyObj: replyMsg.value || "",
+                currentDate: currentDate(),
+                isExpire: false,
+                isPlay: false,
+                isRead: isOnline.value ? true : false,
+                msgFunctionStatus: false,
+                msgMoreStatus: false,
+                recallPopUp: false,
+                recallStatus: false,
+                userName: getUserName,
             },
         },
-        currentDate: currentDate(),
-        time: currentTime(),
-        msgMoreStatus: false,
-        msgFunctionStatus: false,
-        recallStatus: false,
-        recallPopUp: false,
-        isExpire: false,
-        isRead: false,
-        isPlay: false,
     };
 
     if (str !== "") {
-        messages.value.push(textObj);
+        messageList.value.push(textObj);
+        // 送出後清除 msg 及 replyMsg
+        console.log("msg", msg.value);
         const sendMsgObj = {
             msg: textObj,
             textPlugin: textPlugin.value,
@@ -638,27 +622,25 @@ const addMsg = (): void => {
         isMmsSend.value && sendMMSMsg(sendMMSObj);
         sendPrivateMsg(sendMsgObj);
     }
-    // 送出後清除 msg 及 replyMsg
     msg.value = "";
     replyHide();
 };
 //手機版發送圖片
 const image = ref();
 const uploadImage = (e: any) => {
-    const file = e.target.files[0];
-    const fileName = file.name;
-    if (!file) {
+    const fileArr = e.target.files[0];
+    const fileName = fileArr.name;
+    if (!fileArr) {
         return;
     }
     //壓縮圖片套件 compressor js
-    new Compressor(file, {
+    new Compressor(fileArr, {
         quality: 0.6,
         success(result) {
             //呼叫api
             const fd = new FormData();
-            console.log("file.name:", file);
             const getToken = localStorage.getItem("access_token");
-            fd.append("file", new File([result], file.name, { type: "image/*" }));
+            fd.append("file", new File([result], fileArr.name, { type: "image/*" }));
             axios({
                 method: "post",
                 url: `${config.serverUrl}/v1/file`,
@@ -667,36 +649,39 @@ const uploadImage = (e: any) => {
             })
                 .then((res) => {
                     const reader = new FileReader();
-                    reader.readAsDataURL(file);
+                    reader.readAsDataURL(fileArr);
                     reader.onload = (e: any) => {
                         image.value = e.target.result;
                         const imageObj: any = {
                             janusMsg: {
                                 chatroomID: chatRoomID.value,
-                                sender: 0,
-                                type: 2,
                                 msgType: 6,
-                                message: "",
+                                sender: 0,
+                                msgContent: "",
+                                time: unixTime(),
+                                type: 2,
                                 format: {
-                                    id: nanoid(),
-                                    isReplay: replyMsg.value ? true : false,
-                                    replyObj: replyMsg.value ? { ...replyMsg.value } : "",
-                                    isMMS: isMmsSend.value,
                                     Fileid: res.data.fileid,
                                     ShowName: fileName,
-                                    FileSize: file.size,
+                                    ExtensionName: res.data.ext,
+                                    FileSize: fileArr.size,
                                     expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                                 },
+                                config: {
+                                    id: nanoid(),
+                                    isReply: replyMsg.value ? true : false,
+                                    replyObj: replyMsg.value ? { ...replyMsg.value } : "",
+                                    currentDate: currentDate(),
+                                    isExpire: false,
+                                    isPlay: false,
+                                    isRead: isOnline.value ? true : false,
+                                    msgFunctionStatus: false,
+                                    msgMoreStatus: false,
+                                    recallPopUp: false,
+                                    recallStatus: false,
+                                    userName: getUserName,
+                                },
                             },
-                            currentDate: currentDate(),
-                            time: currentTime(),
-                            msgMoreStatus: false,
-                            msgFunctionStatus: false,
-                            recallStatus: false,
-                            recallPopUp: false,
-                            isExpire: false,
-                            isRead: false,
-                            isPlay: false,
                         };
 
                         const sendMsgObj = {
@@ -706,6 +691,7 @@ const uploadImage = (e: any) => {
                             eventID: route.params.id,
                         };
                         sendPrivateMsg(sendMsgObj);
+                        messageList.value.push(imageObj);
                         pictures.value.push(imageObj);
                     };
                 })
@@ -752,32 +738,35 @@ const onUploadFilePC = (e: any) => {
                             const imageObj: any = {
                                 janusMsg: {
                                     chatroomID: chatRoomID.value,
-                                    sender: 0,
-                                    type: 2,
                                     msgType: 6,
-                                    message: "",
+                                    sender: 0,
+                                    msgContent: "",
+                                    time: unixTime(),
+                                    type: 2,
                                     format: {
-                                        id: nanoid(),
-                                        isReplay: replyMsg.value ? true : false,
-                                        replyObj: replyMsg.value ? { ...replyMsg.value } : "",
-                                        isMMS: isMmsSend.value,
                                         Fileid: res.data.fileid,
                                         ShowName: fileName,
+                                        ExtensionName: res.data.ext,
                                         FileSize: fileArr.size,
                                         expirationDate: dayjs
                                             .unix(res.data.exp)
                                             .format("YYYY-MM-DD"),
                                     },
+                                    config: {
+                                        id: nanoid(),
+                                        isReply: replyMsg.value ? true : false,
+                                        replyObj: replyMsg.value ? { ...replyMsg.value } : "",
+                                        currentDate: currentDate(),
+                                        isExpire: false,
+                                        isPlay: false,
+                                        isRead: isOnline.value ? true : false,
+                                        msgFunctionStatus: false,
+                                        msgMoreStatus: false,
+                                        recallPopUp: false,
+                                        recallStatus: false,
+                                        userName: getUserName,
+                                    },
                                 },
-                                currentDate: currentDate(),
-                                time: currentTime(),
-                                msgMoreStatus: false,
-                                msgFunctionStatus: false,
-                                recallStatus: false,
-                                recallPopUp: false,
-                                isExpire: false,
-                                isRead: false,
-                                isPlay: false,
                             };
 
                             const sendMsgObj = {
@@ -787,6 +776,7 @@ const onUploadFilePC = (e: any) => {
                                 eventID: route.params.id,
                             };
                             sendPrivateMsg(sendMsgObj);
+                            messageList.value.push(imageObj);
                             pictures.value.push(imageObj);
                         };
                     })
@@ -820,31 +810,33 @@ const onUploadFilePC = (e: any) => {
                     fileObj = {
                         janusMsg: {
                             chatroomID: chatRoomID.value,
-                            sender: 0,
-                            type: 2,
                             msgType: 7,
-                            message: "",
+                            sender: 0,
+                            msgContent: "",
+                            time: unixTime(),
+                            type: 2,
                             format: {
-                                id: nanoid(),
-                                isReplay: false,
-                                replyObj: "",
-                                isMMS: isMmsSend.value,
                                 Fileid: res.data.fileid,
                                 ShowName: fileArr.name,
                                 ExtensionName: res.data.ext,
                                 FileSize: fileArr.size,
                                 expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                             },
+                            config: {
+                                id: nanoid(),
+                                isReply: false,
+                                replyObj: "",
+                                currentDate: currentDate(),
+                                isExpire: false,
+                                isPlay: false,
+                                isRead: isOnline.value ? true : false,
+                                msgFunctionStatus: false,
+                                msgMoreStatus: false,
+                                recallPopUp: false,
+                                recallStatus: false,
+                                userName: getUserName,
+                            },
                         },
-                        currentDate: currentDate(),
-                        time: currentTime(),
-                        msgMoreStatus: false,
-                        msgFunctionStatus: false,
-                        recallStatus: false,
-                        recallPopUp: false,
-                        isExpire: false,
-                        isRead: false,
-                        isPlay: false,
                     };
                     const sendMsgObj = {
                         msg: fileObj,
@@ -853,6 +845,7 @@ const onUploadFilePC = (e: any) => {
                         eventID: route.params.id,
                     };
                     sendPrivateMsg(sendMsgObj);
+                    messageList.value.push(fileObj);
                     pictures.value.push(fileObj);
                 };
             })
@@ -885,36 +878,37 @@ const onUploadFileMP = (e: any) => {
             reader.readAsDataURL(fileArr);
             reader.onload = (e: any) => {
                 files.value = e.target.result;
-
                 let fileObj: any = {};
                 fileObj = {
                     janusMsg: {
                         chatroomID: chatRoomID.value,
-                        sender: 0,
-                        type: 2,
                         msgType: 7,
-                        message: "",
+                        sender: 0,
+                        msgContent: "",
+                        time: unixTime(),
+                        type: 2,
                         format: {
-                            id: nanoid(),
-                            isReplay: false,
-                            replyObj: "",
-                            isMMS: isMmsSend.value,
                             Fileid: res.data.fileid,
                             ShowName: fileArr.name,
                             ExtensionName: res.data.ext,
                             FileSize: fileArr.size,
                             expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                         },
+                        config: {
+                            id: nanoid(),
+                            isReply: false,
+                            replyObj: "",
+                            currentDate: currentDate(),
+                            isExpire: false,
+                            isPlay: false,
+                            isRead: isOnline.value ? true : false,
+                            msgFunctionStatus: false,
+                            msgMoreStatus: false,
+                            recallPopUp: false,
+                            recallStatus: false,
+                            userName: getUserName,
+                        },
                     },
-                    currentDate: currentDate(),
-                    time: currentTime(),
-                    msgMoreStatus: false,
-                    msgFunctionStatus: false,
-                    recallStatus: false,
-                    recallPopUp: false,
-                    isExpire: false,
-                    isRead: false,
-                    isPlay: false,
                 };
                 const sendMsgObj = {
                     msg: fileObj,
@@ -923,6 +917,7 @@ const onUploadFileMP = (e: any) => {
                     eventID: route.params.id,
                 };
                 sendPrivateMsg(sendMsgObj);
+                messageList.value.push(fileObj);
                 pictures.value.push(fileObj);
             };
         })
@@ -952,31 +947,33 @@ const addSticker = (sticker, id) => {
     let stickerObj: any = {
         janusMsg: {
             chatroomID: chatRoomID.value,
-            sender: 0,
-            type: 2,
             msgType: 3,
-            message: "",
+            sender: 0,
+            msgContent: "",
+            time: unixTime(),
+            type: 2,
             format: {
-                id: nanoid(),
-                isReplay: replyMsg.value ? true : false,
-                replyObj: replyMsg.value ? { ...replyMsg.value } : "",
-                isMMS: isMmsSend.value,
                 stickerPackID: sticker.stickerPackID,
                 stickerUrl: stickerUrl.value,
                 ext: sticker.ext,
                 stickerFileID: id,
                 title: `貼圖${sticker.stickerPackID}-${id}`,
             },
+            config: {
+                id: nanoid(),
+                isReply: replyMsg.value ? true : false,
+                replyObj: replyMsg.value ? { ...replyMsg.value } : "",
+                currentDate: currentDate(),
+                isExpire: false,
+                isPlay: false,
+                isRead: isOnline.value ? true : false,
+                msgFunctionStatus: false,
+                msgMoreStatus: false,
+                recallPopUp: false,
+                recallStatus: false,
+                userName: getUserName,
+            },
         },
-        currentDate: currentDate(),
-        time: currentTime(),
-        msgMoreStatus: false,
-        msgFunctionStatus: false,
-        recallStatus: false,
-        recallPopUp: false,
-        isExpire: false,
-        isRead: false,
-        isPlay: false,
     };
     const stickers = {
         stickerPackID: sticker.stickerPackID,
@@ -1000,6 +997,7 @@ const addSticker = (sticker, id) => {
 
     window.localStorage.setItem("sticker-backend", JSON.stringify(stickerItems.value));
     sendPrivateMsg(sendMsgObj);
+    messageList.value.push(stickerObj);
     showStickerModal.value = false;
 };
 
@@ -1053,6 +1051,10 @@ const confirmDeletePopup = () => {
     &.n-input .n-input__input-el,
     &.n-input .n-input__textarea-el {
         caret-color: $primary-1;
+    }
+    &.mmsSend .n-input__textarea-el::placeholder {
+        /* CSS 3 標準 */
+        color: $danger;
     }
 }
 </style>
@@ -1264,108 +1266,12 @@ const confirmDeletePopup = () => {
         align-items: center;
         padding: 10px 0px;
 
-        .attachOpen {
-            display: none;
-            min-width: 24px;
-            height: 24px;
-            margin: 3px 6px 3px 0;
-            background-image: url("~@/assets/Images/chatroom/add-round.svg");
-            background-size: 24px;
-            cursor: pointer;
-        }
-        .attachClose {
-            display: none;
-            min-width: 24px;
-            height: 24px;
-            margin: 3px 6px 3px 0;
-            background-image: url("~@/assets/Images/chatroom/close-round.svg");
-            background-size: 24px;
-            cursor: pointer;
-        }
-
-        @media (max-width: 768px) {
-            .attachOpen {
-                display: block;
-            }
-            .attachClose {
-                display: block;
-            }
-        }
-        .camera {
-            display: none;
-            min-width: 24px;
-            height: 24px;
-            margin: 3px 6px 3px 0;
-            background-image: url("~@/assets/Images/chatroom/Photo.svg");
-            background-size: 24px;
-            cursor: pointer;
-            input {
-                opacity: 0;
-                box-sizing: border-box;
-                border: 12px solid #00a;
-                width: 24px;
-                height: 24px;
-                cursor: pointer;
-                position: relative;
-                z-index: 1;
-            }
-        }
-        @media (max-width: 768px) {
-            .camera {
-                display: block;
-                min-width: 24px;
-                height: 24px;
-                margin: 3px 6px 3px 0;
-                background-image: url("~@/assets/Images/chatroom/Photo.svg");
-                background-size: 24px;
-                cursor: pointer;
-                input {
-                    opacity: 0;
-                    box-sizing: border-box;
-                    border: 12px solid #00a;
-                    width: 24px;
-                    height: 24px;
-                    cursor: pointer;
-                    position: relative;
-                    z-index: 1;
-                }
-            }
-        }
-        .photo {
-            display: none;
-            min-width: 24px;
-            height: 24px;
-            margin: 3px 6px 3px 0;
-            background-image: url("~@/assets/Images/chatroom/pic.svg");
-            background-size: 24px;
-            cursor: pointer;
-            input {
-                opacity: 0;
-                box-sizing: border-box;
-                border: 12px solid #00a;
-                width: 24px;
-                height: 24px;
-                cursor: pointer;
-            }
-        }
-        @media (max-width: 768px) {
-            .photo {
-                display: block;
-                min-width: 24px;
-                height: 24px;
-                margin: 3px 6px 3px 0;
-                background-image: url("~@/assets/Images/chatroom/pic.svg");
-                background-size: 24px;
-                cursor: pointer;
-                input {
-                    opacity: 0;
-                    box-sizing: border-box;
-                    border: 12px solid #00a;
-                    width: 24px;
-                    height: 24px;
-                    cursor: pointer;
-                }
-            }
+        .mmsSend {
+            display: block;
+            width: 30px;
+            color: $danger;
+            font-weight: bold;
+            line-height: 1.2;
         }
         .file-folder {
             display: block;

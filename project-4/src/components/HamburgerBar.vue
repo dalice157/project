@@ -16,12 +16,10 @@
         <div class="container">
             <ul class="hamburgerMenu">
                 <li class="moreChatRoom" @click="goMoreChatRoom">
-                    <router-link :to="`/moreChatRoom?chatToken=${chatToken}`">
-                        更多聊天室
-                    </router-link>
+                    <router-link :to="`/moreChatRoom/${eventKey}`"> 更多聊天室 </router-link>
                 </li>
                 <li class="burgerChatHistory" @click="goChatRecord">
-                    <router-link :to="`/chatRecord?chatToken=${chatToken}`">交談紀錄</router-link>
+                    <router-link :to="`/chatRecord/${eventKey}`">交談紀錄</router-link>
                 </li>
                 <li class="burgerKnow">
                     <a href="http://global.every8d.com.tw/" target="_blank">我們是誰？來認識吧</a>
@@ -36,7 +34,7 @@
                 </li>
             </ul>
             <div class="title_container">
-                <h2 class="title">溝通雲</h2>
+                <h2 class="title">talkOD</h2>
             </div>
         </div>
         <!-- NavBar 標題 -->
@@ -77,7 +75,7 @@ export default defineComponent({
         //router
         const router = useRouter();
         const route = useRoute();
-        const chatToken = computed(() => route.query.chatToken);
+        const eventKey = computed(() => route.params.eventKey);
 
         //前往更多聊天室
         const goMoreChatRoom = () => {
@@ -101,7 +99,7 @@ export default defineComponent({
             goMoreChatRoom,
             closeSearchBar,
             goChatRecord,
-            chatToken,
+            eventKey,
         };
     },
 });

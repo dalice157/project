@@ -79,9 +79,7 @@
                     />
                 </div>
                 <div class="commonMsgFunctionBar">
-                    <div class="commonMsgDel" @click="deleteCommonMsgPopUp = !deleteCommonMsgPopUp">
-                        刪除
-                    </div>
+                    <div class="commonMsgDel" @click="removeHint">刪除</div>
                     <div class="commonMsgAdd" @click="addCommonMsg">新增</div>
                     <div
                         class="commonMsgConfirm"
@@ -236,7 +234,7 @@ export default {
 </script>
 
 <script lang="ts" setup>
-import { onMounted, ref, watchEffect, computed, h, reactive } from "vue";
+import { onMounted, ref, watch, computed, h, reactive } from "vue";
 import { NConfigProvider, NInput, NSpace, NDivider, NSelect, NDataTable, NRadio } from "naive-ui";
 import { useRouter, useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
@@ -246,7 +244,13 @@ import OptionSetting from "@/components/backend/OptionSetting.vue";
 import { useSmsStore } from "@/store/smsStore";
 import { useApiStore } from "@/store/api";
 import editIcon from "@/assets/Images/manage/edit-round.svg";
-import { nanoid } from "nanoid";
+import { pointCalculation } from "@/util/commonUtil";
+import config from "@/config/config";
+
+//router 設置
+const route = useRoute();
+const params = route.params;
+
 //api store
 const apiStore = useApiStore();
 const { eventList, uploadRef: getUploadFile, commonMsgList } = storeToRefs(apiStore);
@@ -286,86 +290,30 @@ const commonBlurJudge = (e: any) => {
     content.value = content.value === "" ? demoContent : e.target.value;
 };
 const commonWordCount = () => {
-    const hasCh = editsend_hasChinese(content.value);
-    let tempCharge = 0;
-    let remainder = 0;
-    word.value = content.value.length;
-    if (content.value === demoContent) {
+    if (content.value === demoContent || !content.value) {
         content.value = "";
+        word.value = 0;
+        point.value = 0;
+        count.value = 0;
+        return;
     }
-    const hasChFun = () => {
-        if (word.value <= 0) {
-            point.value = 0;
-            count.value = 0;
-        }
-        //有中文字判斷點數
-        if (word.value > 333) {
-            tempCharge = Math.floor(word.value / 333);
-            remainder = word.value - tempCharge * 333;
-            if (remainder <= 70) {
-                point.value = tempCharge * 5 + 1;
-            } else {
-                point.value = tempCharge * 5 + Math.ceil(remainder / 67);
-            }
-        } else if (word.value <= 333 && word.value > 70) {
-            point.value = Math.ceil(word.value / 67);
-        } else if (word.value <= 70 && word.value > 0) {
-            point.value = 1;
-        }
-        //有中文字判斷則數
-        if (word.value > 333) {
-            if (word.value <= 656) {
-                count.value = 2;
-            } else {
-                var length = word.value - 656;
-                count.value = 2 + Math.ceil(length / 328);
-            }
-        } else if (word.value <= 333 && word.value > 0) {
-            count.value = 1;
-        }
-    };
-    const onlyPureEnglishCheck = () => {
-        errorMsg.value = "純英文發送內容時不可有`^";
-        // console.log("純英文發送內容時不可有`^");
-        //純英數判斷點數
-        if (word.value > 765) {
-            tempCharge = Math.floor(word.value / 765);
-            remainder = word.value - tempCharge * 765;
-            if (remainder <= 160) {
-                point.value = tempCharge * 5 + 1;
-            } else {
-                point.value = tempCharge * 5 + Math.ceil(remainder / 153);
-            }
-        } else if (word.value <= 765 && word.value > 160) {
-            point.value = Math.ceil(word.value / 153);
-            console.log("smsPoint.value", word.value);
-        } else if (word.value <= 160 && word.value > 0) {
-            point.value = 1;
-        } else {
-            point.value = 0;
-        }
-
-        //純英數計算長簡訊的發送則數
-        if (word.value > 765) {
-            if (word.value <= 1520) {
-                count.value = 2;
-            } else {
-                let length: number = word.value - 1520;
-                count.value = 2 + Math.ceil(length / 760);
-            }
-        } else if (word.value <= 765 && word.value > 0) {
-            count.value = 1;
-        } else {
-            count.value = 0;
-        }
-    };
-    hasCh && hasChFun();
-    isPureEnglishCheck(content.value) && onlyPureEnglishCheck();
+    count.value = pointCalculation(content.value).smsCount;
+    point.value = pointCalculation(content.value).point;
+    word.value = content.value.length + config.wordLimit;
 };
+
 //關閉常用訊息
 const closeCommonMsg = () => {
     commonMsgPopUp.value = !commonMsgPopUp.value;
     checkedVal.value = null;
+};
+//刪除提示
+const removeHint = () => {
+    if (checkedVal.value === null) {
+        alert("您尚未選擇要刪除之訊息!!!");
+    } else {
+        deleteCommonMsgPopUp.value = !deleteCommonMsgPopUp.value;
+    }
 };
 //刪除常用訊息
 const removeCommonMsg = () => {
@@ -425,6 +373,7 @@ const editCommonMsg = (data) => {
     editCommonMsgPopUp.value = !editCommonMsgPopUp.value;
     commonMsgPopUp.value = !commonMsgPopUp.value;
     subject.value = data.subject;
+    content.value = "";
     content.value = data.content;
     dataID.value = data.smsID;
     checkedVal.value = null;
@@ -444,16 +393,20 @@ const closeEditCommonMsg = () => {
 };
 //送出編輯訊息
 const submitEditCommonMsg = () => {
-    editCommonMsgPopUp.value = !editCommonMsgPopUp.value;
-    commonMsgPopUp.value = !commonMsgPopUp.value;
-    editCommonMsgObj(dataID.value, subject.value, content.value);
-    subject.value = "";
-    content.value = demoContent;
-    dataID.value = "";
-    checkedVal.value = null;
-    word.value = 0;
-    point.value = 0;
-    count.value = 0;
+    if (content.value === demoContent) {
+        alert("請填寫編輯內容!!!!");
+    } else {
+        editCommonMsgObj(dataID.value, subject.value, content.value);
+        subject.value = "";
+        content.value = demoContent;
+        dataID.value = "";
+        checkedVal.value = null;
+        word.value = 0;
+        point.value = 0;
+        count.value = 0;
+        editCommonMsgPopUp.value = !editCommonMsgPopUp.value;
+        commonMsgPopUp.value = !commonMsgPopUp.value;
+    }
 };
 //取得常用訊息列表
 const getCommonList = () => {
@@ -574,6 +527,15 @@ onMounted(() => {
     }
 });
 
+watch(
+    () => route.path,
+    () => {
+        if (smsContent.value === "") {
+            smsContent.value = demoContent;
+        }
+    }
+);
+
 // textarea 預設文字
 const focusType = (e: any) => {
     smsContent.value =
@@ -584,132 +546,22 @@ const focusType = (e: any) => {
 const blurJudge = (e: any) => {
     smsContent.value = smsContent.value === "" ? demoContent : e.target.value;
 };
-// == 檢查是否有中文 ....
-const editsend_hasChinese = (str: string) => {
-    if (str.length > 0) {
-        for (var i = 0; i < str.length; i++) {
-            // console.log("str:", str.charCodeAt(i) > 127);
-
-            if (str.charCodeAt(i) > 127) {
-                return true;
-            }
-        }
-    }
-    return false;
-};
-
-/*檢查發送內容是否有無法輸入字元*/
-const isPureEnglishCheck = (str: string) => {
-    /*
-                含全形字元時
-                這是發送測試~`^{}[]|\\
-                純英文時候 ~=- `=@ ^=  {=(
-                }=)
-                [=<
-                ]=>
-                |=/
-                /=/
-	        */
-    var isOk = true;
-    var checkCharArray = ["`", "^"];
-    var checkCharArrayLength = checkCharArray.length;
-    var strLength = str.length;
-    for (var i = 0; i < checkCharArrayLength; i++) {
-        for (var j = 0; j < strLength; j++) {
-            console.log("is:", checkCharArray[i] == str.charAt(j));
-
-            if (checkCharArray[i] == str.charAt(j)) {
-                isOk = false;
-            }
-        }
-    }
-    return isOk;
-};
 
 const wordCount = () => {
-    const hasCh = editsend_hasChinese(smsContent.value);
-    let tempCharge = 0;
-    let remainder = 0;
-    smsWord.value = smsContent.value.length;
-    if (smsContent.value === demoContent) {
+    if (smsContent.value === demoContent || !smsContent.value) {
         smsContent.value = "";
         smsWord.value = 0;
         smsPoint.value = 0;
         smsCount.value = 0;
+        return;
     }
-    const hasChFun = () => {
-        if (smsWord.value <= 0) {
-            smsPoint.value = 0;
-            smsCount.value = 0;
-        }
-        //有中文字判斷點數
-        if (smsWord.value > 333) {
-            tempCharge = Math.floor(smsWord.value / 333);
-            remainder = smsWord.value - tempCharge * 333;
-            if (remainder <= 70) {
-                smsPoint.value = tempCharge * 5 + 1;
-            } else {
-                smsPoint.value = tempCharge * 5 + Math.ceil(remainder / 67);
-            }
-        } else if (smsWord.value <= 333 && smsWord.value > 70) {
-            smsPoint.value = Math.ceil(smsWord.value / 67);
-        } else if (smsWord.value <= 70 && smsWord.value > 0) {
-            smsPoint.value = 1;
-        }
-        //有中文字判斷則數
-        if (smsWord.value > 333) {
-            if (smsWord.value <= 656) {
-                smsCount.value = 2;
-            } else {
-                var length = smsWord.value - 656;
-                smsCount.value = 2 + Math.ceil(length / 328);
-            }
-        } else if (smsWord.value <= 333 && smsWord.value > 0) {
-            smsCount.value = 1;
-        }
-    };
-    const onlyPureEnglishCheck = () => {
-        errorMsg.value = "純英文發送內容時不可有`^";
-        // console.log("純英文發送內容時不可有`^");
-        //純英數判斷點數
-        if (smsWord.value > 765) {
-            tempCharge = Math.floor(smsWord.value / 765);
-            remainder = smsWord.value - tempCharge * 765;
-            if (remainder <= 160) {
-                smsPoint.value = tempCharge * 5 + 1;
-            } else {
-                smsPoint.value = tempCharge * 5 + Math.ceil(remainder / 153);
-            }
-        } else if (smsWord.value <= 765 && smsWord.value > 160) {
-            smsPoint.value = Math.ceil(smsWord.value / 153);
-            console.log("smsPoint.value", smsWord.value);
-        } else if (smsWord.value <= 160 && smsWord.value > 0) {
-            smsPoint.value = 1;
-        } else {
-            smsPoint.value = 0;
-        }
-
-        //純英數計算長簡訊的發送則數
-        if (smsWord.value > 765) {
-            if (smsWord.value <= 1520) {
-                smsCount.value = 2;
-            } else {
-                let length: number = smsWord.value - 1520;
-                smsCount.value = 2 + Math.ceil(length / 760);
-            }
-        } else if (smsWord.value <= 765 && smsWord.value > 0) {
-            smsCount.value = 1;
-        } else {
-            smsCount.value = 0;
-        }
-    };
-    hasCh && hasChFun();
-    isPureEnglishCheck(smsContent.value) && onlyPureEnglishCheck();
+    smsCount.value = pointCalculation(smsContent.value).smsCount;
+    smsPoint.value = pointCalculation(smsContent.value).point;
+    smsWord.value = smsContent.value.length + config.wordLimit;
+    console.log("smsContent.value.length", smsContent.value.length);
+    console.log("config.wordLimit", config.wordLimit);
 };
 
-//router 設置
-const route = useRoute();
-const params = route.params;
 const uploadRef = computed({
     get() {
         return getUploadFile.value;
@@ -725,7 +577,7 @@ onMounted(() => {
 const filterChannelList = computed(() => {
     return eventList.value
         .filter((event: any) => {
-            return event.status === 0;
+            return event.status === 1;
         })
         .map((item) => ({
             label: `${item.name}`,

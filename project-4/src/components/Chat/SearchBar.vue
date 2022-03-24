@@ -29,9 +29,9 @@
         <ul class="list" v-if="searcMessages.length > 0">
             <li
                 class="item"
-                :key="msg.janusMsg.format.id"
+                :key="msg.janusMsg.config.id"
                 v-for="msg in searcMessages"
-                @click.prevent="onClickGoto(msg.janusMsg.format.id, route.query.chatToken)"
+                @click.prevent="onClickGoto(msg.janusMsg.config.id, route.params.eventKey)"
             >
                 <n-avatar
                     class="avatar"
@@ -51,8 +51,8 @@
                     }}</span>
                     <n-ellipsis
                         class="msg"
-                        v-if="msg.tagMsg"
-                        v-html="msg.tagMsg"
+                        v-if="msg.janusMsg.tagMsg"
+                        v-html="msg.janusMsg.tagMsg"
                         :line-clamp="2"
                         style="width: 95%"
                         :tooltip="false"
@@ -63,14 +63,14 @@
                     >
                         <img
                             v-if="msg.janusMsg.msgType === 6"
-                            :src="`${config.fileUrl}/fls/${msg.janusMsg.format.Fileid}${msg.ext}`"
+                            :src="`${config.fileUrl}/fls/${msg.janusMsg.format.Fileid}${msg.janusMsg.format.ExtensionName}`"
                         />
                         <span v-if="msg.janusMsg.msgType === 7">
                             {{ msg.janusMsg.format.ShowName }}
                         </span>
                     </div>
                 </div>
-                <div class="time">{{ msg.time }}</div>
+                <div class="time">{{ currentTime(msg.janusMsg.time / 1000000) }}</div>
             </li>
         </ul>
         <p class="empty" v-else>查無資料</p>
@@ -85,6 +85,7 @@ import { NConfigProvider, NInput, NIcon, NAvatar, NEllipsis } from "naive-ui";
 import { useSearchStore } from "@/store/search";
 import { useApiStore } from "@/store/api";
 import { getFileExtension } from "@/util/commonUtil";
+import { currentTime } from "@/util/dateUtil";
 import config from "@/config/config";
 
 // api store
@@ -276,11 +277,7 @@ const themeOverrides = {
                 color: $gray-3;
                 font-family: $font-family;
             }
-            .time {
-                font-size: $font-size-16;
-                font-weight: 500;
-                color: $gray-3;
-            }
+           
         }
     }
 }

@@ -4,7 +4,7 @@ import { useRoute } from "vue-router";
 import { nanoid } from "nanoid";
 import { storeToRefs } from "pinia";
 
-import { currentTime, currentDate, currentMonth } from "@/util/dateUtil";
+import { currentTime, currentDate, currentMonth, unixTime } from "@/util/dateUtil";
 import { chatroomID } from "@/util/commonUtil";
 import { useChatStore } from "@/store/chat";
 import { localStorageMsg } from "@/util/commonUtil";
@@ -95,44 +95,46 @@ export const usePhoneCallStore = defineStore({
             console.log("掛掉電話", type);
             this.yourUsername = null;
             const chatstore = useChatStore();
-            const { messages, participantList, textPlugin } = storeToRefs(chatstore);
+            const { messages, participantList, textPlugin, isOnline } = storeToRefs(chatstore);
             const phoneObj = {
                 janusMsg: {
-                    chatroomID: chatroomID(this.route.query.chatToken),
-                    sender: 1, // 1 為自己傳送的訊息
-                    type: 2,
+                    chatroomID: chatroomID(this.route.params.eventKey),
                     msgType: 9,
-                    message: "",
+                    sender: 1, // 0:客服, 1:使用者
+                    msgContent: "",
+                    time: unixTime(),
+                    type: 2, //1:簡訊 2: 文字
                     format: {
-                        id: nanoid(),
-                        isReplay: false,
-                        replyObj: "",
                         phoneType: type,
-                        phoneTypeOther: type === 2 ? 4 : null,
+                        phoneTypeOther: type === 2 && this.isAccepted ? 4 : null,
                         phoneTime: this.phoneTime,
                     },
+                    config: {
+                        id: nanoid(),
+                        isReply: false,
+                        replyObj: "",
+                        currentDate: currentDate(),
+                        isExpire: false,
+                        isPlay: false,
+                        isRead: isOnline.value ? true : false,
+                        msgFunctionStatus: false,
+                        msgMoreStatus: false,
+                        recallPopUp: false,
+                        recallStatus: false,
+                    },
                 },
-                currentDate: currentDate(),
-                time: currentTime(),
-                msgMoreStatus: false,
-                msgFunctionStatus: false,
-                recallStatus: false,
-                recallPopUp: false,
-                isExpire: false,
-                isRead: false,
-                isPlay: false,
             };
-            console.log("phoneObj", phoneObj);
+            // console.log("phoneObj", phoneObj);
             messages.value.push(phoneObj);
             const sendMsgObj = {
                 msg: phoneObj,
                 textPlugin: textPlugin.value,
-                chatToken: this.route.query.chatToken,
+                eventKey: this.route.params.eventKey,
                 msgParticipantList: participantList.value,
                 eventID: eventID,
             };
             sendPrivateMsg(sendMsgObj);
-            localStorageMsg(messages.value, this.route.query.chatToken);
+            localStorageMsg(messages.value, this.route.params.eventKey);
 
             // Hangup a call
             const hangup = { request: "hangup" };

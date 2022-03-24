@@ -8,38 +8,31 @@ import ChatRecord from "@/views/ChatRecord.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
-        path: "/:chatToken",
-        redirect: (to) => ({
-            name: "Chat",
-            query: { chatToken: to.params.chatToken },
-        }),
-    },
-    {
-        path: "/",
+        path: "/:eventKey",
         name: "Chat",
         component: ChatRoom,
         meta: { show: true, home: false },
     },
     {
-        path: "/gallery",
+        path: "/gallery/:eventKey",
         name: "Gallery",
         component: Gallery,
         meta: { show: true, home: false },
     },
     {
-        path: "/phone",
+        path: "/phone/:eventKey",
         name: "Phone",
         component: Phone,
         meta: { show: true, home: false },
     },
     {
-        path: "/moreChatRoom",
+        path: "/moreChatRoom/:eventKey",
         name: "MoreChatRoom",
         component: MoreChatRoom,
         meta: { show: false, home: true },
     },
     {
-        path: "/chatRecord",
+        path: "/chatRecord/:eventKey",
         name: "ChatRecord",
         component: ChatRecord,
         meta: { show: false, home: true },

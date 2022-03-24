@@ -17,31 +17,42 @@
                     <div class="picture" v-if="date">
                         <div
                             class="picture-inner"
-                            :class="{ hide: date !== dayjs.unix(picture.time).format('YYYY/MM') }"
+                            :class="{
+                                hide:
+                                    date !==
+                                    dayjs(picture.janusMsg.config.currtentDate).format('YYYY/MM'),
+                            }"
                             v-for="picture in pictures"
                             :key="picture.id"
                         >
+                            <!-- {{ picture.janusMsg.config }} -->
                             <div
                                 class="imgEnable"
                                 v-if="
-                                    picture.msgType === 6 &&
-                                    !picture.isExpire &&
-                                    date === dayjs.unix(picture.time).format('YYYY/MM')
+                                    picture.janusMsg.msgType === 6 &&
+                                    !picture.janusMsg.config.isExpire &&
+                                    date ===
+                                        dayjs(picture.janusMsg.config.currtentDate).format(
+                                            'YYYY/MM'
+                                        )
                                 "
-                                @click="previewURL(picture.format.Fileid)"
+                                @click="previewURL(picture.janusMsg.format.Fileid)"
                             >
                                 <img
                                     :src="`${config.fileUrl}/fls/${
-                                        picture.format.Fileid
-                                    }.${picture.format.ShowName.split('.').pop()}`"
+                                        picture.janusMsg.format.Fileid
+                                    }.${picture.janusMsg.format.ShowName.split('.').pop()}`"
                                 />
                             </div>
                             <div
                                 class="imgDisable"
                                 v-if="
-                                    picture.msgType === 6 &&
-                                    picture.isExpire &&
-                                    date === dayjs.unix(picture.time).format('YYYY/MM')
+                                    picture.janusMsg.msgType === 6 &&
+                                    picture.janusMsg.config.isExpire &&
+                                    date ===
+                                        dayjs(picture.janusMsg.config.currtentDate).format(
+                                            'YYYY/MM'
+                                        )
                                 "
                             >
                                 <img src="../assets/Images/gallery/pic-disabled.svg" />
@@ -49,14 +60,17 @@
                             <div
                                 class="picture-file-enable"
                                 v-if="
-                                    picture.msgType === 7 &&
-                                    !picture.isExpire &&
-                                    date === dayjs.unix(picture.time).format('YYYY/MM')
+                                    picture.janusMsg.msgType === 7 &&
+                                    !picture.janusMsg.config.isExpire &&
+                                    date ===
+                                        dayjs(picture.janusMsg.config.currtentDate).format(
+                                            'YYYY/MM'
+                                        )
                                 "
                             >
                                 <a
                                     target="_blank"
-                                    :href="`${config.serverUrl}/v1/file/${route.params.id}/${picture.format.Fileid}`"
+                                    :href="`${config.serverUrl}/v1/file/${route.params.id}/${picture.janusMsg.format.Fileid}`"
                                 >
                                     <img src="../assets/Images/chatroom/file-fill.svg" />
                                     <n-ellipsis
@@ -65,16 +79,19 @@
                                         :tooltip="false"
                                         class="showName"
                                     >
-                                        <p>{{ picture.format.ShowName }}</p>
+                                        <p>{{ picture.janusMsg.format.ShowName }}</p>
                                     </n-ellipsis>
                                 </a>
                             </div>
                             <div
                                 class="picture-file-disable"
                                 v-if="
-                                    picture.msgType === 7 &&
-                                    picture.isExpire &&
-                                    date === dayjs.unix(picture.time).format('YYYY/MM')
+                                    picture.janusMsg.msgType === 7 &&
+                                    picture.janusMsg.config.isExpire &&
+                                    date ===
+                                        dayjs(picture.janusMsg.config.currtentDate).format(
+                                            'YYYY/MM'
+                                        )
                                 "
                             >
                                 <div>
@@ -84,7 +101,7 @@
                                         :line-clamp="4"
                                         :tooltip="false"
                                     >
-                                        <p>{{ picture.format.ShowName }}</p>
+                                        <p>{{ picture.janusMsg.format.ShowName }}</p>
                                     </n-ellipsis>
                                 </div>
                             </div>
@@ -116,38 +133,41 @@ const route = useRoute();
 //api store
 const apiStore = useApiStore();
 const { getHistoryApi } = apiStore;
-const { chatroomMsg } = storeToRefs(apiStore);
+const { messageList } = storeToRefs(apiStore);
 
-if (route.query) {
+if (Object.keys(route.query).length > 0) {
     getHistoryApi(route.query.chatroomID);
 }
 const pictures: any = computed(() => {
     const set = new Set();
-    return chatroomMsg.value.messageList.filter((item: any) => {
-        return !set.has(item.format.Fileid) && (item.msgType === 6 || item.msgType === 7)
-            ? set.add(item.format.Fileid)
+    return messageList.value.filter((item: any) => {
+        return !set.has(item.janusMsg.format.Fileid) &&
+            (item.janusMsg.msgType === 6 || item.janusMsg.msgType === 7)
+            ? set.add(item.janusMsg.format.Fileid)
             : false;
     });
 });
+console.log("pictures", pictures);
 
 const result: any = computed(() => {
     return pictures.value.map((pic: any, index: any) => {
-        if (dayjs().isAfter(dayjs.unix(pic.format.expirationDate))) {
+        if (dayjs().isAfter(dayjs(pic.janusMsg.format.expirationDate))) {
             // 判斷是否到失效日期
-            pic.isExpire = true;
+            pic.janusMsg.config.isExpire = true;
         } else {
-            pic.isExpire = false;
+            pic.janusMsg.config.isExpire = false;
         }
         if (
             index === 0 ||
             (index > 0 &&
-                dayjs.unix(pic.time).format("YYYY/MM") !==
-                    dayjs.unix(pictures.value[index - 1].time).format("YYYY/MM"))
+                dayjs(pic.janusMsg.format.expirationDate) !==
+                    dayjs(pictures.value[index - 1].janusMsg.format.expirationDate))
         ) {
-            return dayjs.unix(pic.time).format("YYYY/MM");
+            return dayjs(pic.janusMsg.format.expirationDate).format("YYYY/MM");
         }
     });
 });
+console.log("result", result);
 
 const dateArr: any = computed(() => {
     return result.value
@@ -155,6 +175,7 @@ const dateArr: any = computed(() => {
         .sort()
         .reverse();
 });
+console.log("dateArr", dateArr);
 
 // 圖片展示
 const viewImgs: any = ref([]);
@@ -164,13 +185,17 @@ const previewURL = (fileid: string): void => {
     pictures.value.forEach((img: any) => {
         if (
             !viewImgs.value.includes(
-                `${config.fileUrl}/fls/${img.format.Fileid}.${img.format.ShowName.split(".").pop()}`
+                `${config.fileUrl}/fls/${
+                    img.janusMsg.format.Fileid
+                }.${img.janusMsg.format.ShowName.split(".").pop()}`
             ) &&
-            img.msgType === 6 &&
-            !img.isExpire
+            img.janusMsg.msgType === 6 &&
+            !img.janusMsg.config.isExpire
         ) {
             viewImgs.value.push(
-                `${config.fileUrl}/fls/${img.format.Fileid}.${img.format.ShowName.split(".").pop()}`
+                `${config.fileUrl}/fls/${
+                    img.janusMsg.format.Fileid
+                }.${img.janusMsg.format.ShowName.split(".").pop()}`
             );
         }
     });

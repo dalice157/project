@@ -18,6 +18,8 @@ export const useMmsStore = defineStore({
         mmsPhoneArray: <any>[],
         mmsPhoneString:<any>"",
         mmsTabsType: <string>"automatic",
+        mmsCacheComponent:<any>[]
+
     }),
     getters: {},
     actions: {},

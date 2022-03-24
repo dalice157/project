@@ -28,9 +28,9 @@
                 <p>麥克風</p>
             </div>
             <div class="phoneClose">
-                <router-link :to="`/?chatToken=${chatToken}`">
+                <router-link :to="`/${eventKey}`">
                     <img
-                        @click="doHangup(!isAccepted ? 2 : 3, eventID(route.query.chatToken))"
+                        @click="doHangup(!isAccepted ? 2 : 3, eventID(route.params.eventKey))"
                         src="../assets/Images/chatroom/close-round-red.svg"
                         alt="掛斷"
                     />
@@ -66,6 +66,7 @@ import ScaleLoader from "vue-spinner/src/ScaleLoader.vue";
 
 import { useApiStore } from "@/store/api";
 import { usePhoneCallStore } from "@/store/phoneCall";
+import { useChatStore } from "@/store/chat";
 import config from "@/config/config";
 import { eventID } from "@/util/commonUtil";
 
@@ -81,11 +82,11 @@ const { isAccepted, phoneTime } = storeToRefs(phoneCallStore);
 
 //router
 const route = useRoute();
-const chatToken = computed(() => route.query.chatToken);
+const eventKey = computed(() => route.params.eventKey);
 //擴音boolean
 const speakerBoolean = ref(false);
 //拿取後端api
-getBackendApi(chatToken.value);
+getBackendApi(eventKey.value);
 </script>
 
 <style lang="scss" scoped>

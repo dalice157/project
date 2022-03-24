@@ -1,4 +1,5 @@
 import { defineStore, storeToRefs } from "pinia";
+import { useRouter } from "vue-router";
 
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { DO_CALL_NAME } from "@/util/commonUtil";
@@ -12,6 +13,7 @@ export const useModelStore = defineStore({
         showModal: <boolean>false,
         phoneCallModal: <boolean>false,
         info: <any>"",
+        router: <any>useRouter(),
     }),
     getters: {},
     actions: {
@@ -25,16 +27,11 @@ export const useModelStore = defineStore({
         closeModal() {
             this.showModal = false;
         },
-        gotoChat(token: string | null) {
-            location.href = `/?chatToken=${token}`;
+        gotoChat(eventKey: string | null) {
+            location.href = `/${eventKey}`;
         },
-        gotoPhone(token: string | null) {
-            location.href = `/phone?chatToken=${token}`;
-
-            // const phoneCallStore = usePhoneCallStore()
-            // const { doCall } = phoneCallStore
-            // this.phoneCallModal = true
-            // doCall(DO_CALL_NAME);
+        gotoPhone(eventKey: string | null) {
+            this.router.push(`/phone/${eventKey}`);
         },
         closeAll() {
             const chatStore = useChatStore();

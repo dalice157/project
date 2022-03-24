@@ -37,7 +37,7 @@
                 </div>
                 <div class="phoneClose">
                     <img
-                        @click="doHangup(!isAccepted ? 2 : 3, eventID(chatToken))"
+                        @click="doHangup(!isAccepted ? 2 : 3, eventID(eventKey))"
                         src="../assets/Images/chatroom/close-round-red.svg"
                         alt="掛斷"
                     />
@@ -62,7 +62,7 @@ import { eventID } from "@/util/commonUtil";
 
 //route
 const route = useRoute();
-const chatToken = computed(() => route.query.chatToken);
+const eventKey = computed(() => route.params.eventKey);
 
 // api store
 const apiStore = useApiStore();

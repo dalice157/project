@@ -7,23 +7,20 @@ import { useChatStore } from "@/store/chat";
 import { useSmsStore } from "@/store/smsStore";
 import { useMmsStore } from "@/store/mmsStore";
 import { currentTime, currentDate } from "@/util/dateUtil";
+import dayjs from "dayjs";
 
 export const useApiStore = defineStore({
     id: "api",
     state: () => ({
         eventInfo: <any>{
             name: "test",
-            callable: true,
+            callable: 0,
+            status: 1,
+            jid: 1,
             description: "hi",
             homeurl: "http://e8d.tw/",
             icon: "logo.png",
-            messagelist: [
-                {
-                    format: {},
-                    MsgContent: "歡迎進入我們的聊天室！需要任何協助都可以告訴我們喔:>",
-                    MsgType: 0,
-                },
-            ],
+            messagelist: [],
         },
         eventList: <any>[],
         stickerList: <any>[],
@@ -58,13 +55,17 @@ export const useApiStore = defineStore({
         isInput: <boolean>false,
         isUserMsg: <boolean>false,
         isJanusinit: false,
+        messageList: <any>[],
+        isDisabled: <boolean>false,
     }),
     getters: {},
     actions: {
         // 聊天室簡訊發送
         async sendMMSMsg(data) {
             console.log("sendMMSMsg:", data);
-
+            // chat store
+            const chatStore = useChatStore();
+            const { isMmsSend } = storeToRefs(chatStore);
             const getToken = localStorage.getItem("access_token");
             const newsletterDepartmentToken = localStorage.getItem("newsletterDepartmentToken");
             const bodyFormData = new FormData();
@@ -78,10 +79,13 @@ export const useApiStore = defineStore({
                 headers: { Authorization: `Bearer ${getToken}` },
             })
                 .then((res: any) => {
+                    isMmsSend.value = false;
                     console.log("sendMMSMsg res:", res.data);
+                    this.point = res.data.point;
                 })
                 .catch((err: any) => {
-                    console.error(err);
+                    isMmsSend.value = false;
+                    console.error("sendMMSMsg error:", err.response);
                 });
         },
         //取得使用者資訊
@@ -114,6 +118,7 @@ export const useApiStore = defineStore({
             bodyFormData.append("icon", data.icon);
             bodyFormData.append("tag", JSON.stringify(data.tag));
             bodyFormData.append("description", data.description);
+            bodyFormData.append("pinTop", data.pinTop);
 
             await axios({
                 method: "patch",
@@ -123,6 +128,7 @@ export const useApiStore = defineStore({
             })
                 .then((res: any) => {
                     console.log("sendUserInfo res:", res.data);
+                    this.getChatroomlistApi(data.eventID);
                 })
                 .catch((err: any) => {
                     console.error(err);
@@ -145,49 +151,25 @@ export const useApiStore = defineStore({
             })
                 .then((res: any) => {
                     console.log("isInput:", this.isInput);
-
-                    const list = res.data.messageList
-                        ? res.data.messageList
-                              .map((item) => {
-                                  return {
-                                      ...item,
-                                      format: {
-                                          id: item.format.id || nanoid(),
-                                          isReplay: item.format.isReplay || false,
-                                          replyObj: item.format.replyObj || "",
-                                          isMMS: item.format.isMMS || false,
-                                          ...item.format,
-                                      },
-                                      currentDate: currentDate(),
-                                      msgMoreStatus: false,
-                                      msgFunctionStatus: false,
-                                      recallStatus: false,
-                                      recallPopUp: false,
-                                      isExpire: false,
-                                      isRead: this.isUserMsg ? true : false,
-                                      isPlay: false,
-                                  };
-                              })
-                              .reverse()
-                        : [];
-                    let getList = this.isInput ? list : list.concat(this.chatroomMsg.messageList);
-                    getList = getList.reduce((unique, o) => {
+                    this.messageList = res.data.messageList ? res.data.messageList : [];
+                    this.messageList = this.isInput
+                        ? this.messageList
+                        : this.messageList.concat(this.messageList);
+                    this.messageList = this.messageList.reduce((unique, o) => {
                         const hasRepeatId = unique.some((obj) => {
-                            return obj.format.id === o.format.id;
+                            return obj.janusMsg.config.id === o.janusMsg.config.id;
                         });
                         if (!hasRepeatId) {
                             unique.push(o);
                         }
                         unique.sort((a, b) => {
-                            return a.time > b.time ? 1 : -1;
+                            return a.janusMsg.time / 1000000 - b.janusMsg.time / 1000000;
                         });
                         return unique;
                     }, []);
-                    console.log("getList:", getList);
-                    this.chatroomMsg = {
-                        ...res.data,
-                        messageList: getList,
-                    };
+
+                    console.log("messageList:", this.messageList);
+
                     this.isInput = false;
                     this.isUserMsg = false;
                 })
@@ -205,7 +187,9 @@ export const useApiStore = defineStore({
                     },
                 })
                 .then((res: any) => {
-                    this.chatroomList = res.data.chatroomList;
+                    this.chatroomList = res.data.chatroomList.sort((a, b) => {
+                        return b.pinTop - a.pinTop;
+                    });
                 })
                 .catch((err: any) => {
                     console.error(err);
@@ -247,7 +231,7 @@ export const useApiStore = defineStore({
         },
         //拿貼圖api
         async getSticker() {
-            // api store
+            // chat store
             const chatStore = useChatStore();
             const { handleStickckerGroup } = chatStore;
             const { stickerItems } = storeToRefs(chatStore);
@@ -339,6 +323,7 @@ export const useApiStore = defineStore({
             bodyFormData.append("description", data.description);
             bodyFormData.append("cslist", data.cslist);
             bodyFormData.append("message", data.message);
+            this.isDisabled = true;
 
             await axios({
                 method: "patch",
@@ -348,9 +333,11 @@ export const useApiStore = defineStore({
             })
                 .then((res: any) => {
                     // console.log("channel edit res:", res.data);
+                    this.isDisabled = false;
                     router.push(`/manage/${route.params.id}/activitySetting`);
                 })
                 .catch((err: any) => {
+                    this.isDisabled = false;
                     console.error(err);
                 });
         },
@@ -361,29 +348,13 @@ export const useApiStore = defineStore({
             fd.append("status", "2");
             await axios({
                 method: "patch",
-                url: `${config.serverUrl}/v1/chartroom/${route.query.eventID}`,
+                url: `${config.serverUrl}/v1/chatroom/${route.query.eventID}`,
                 data: fd,
                 headers: { Authorization: `Bearer ${getToken}` },
             })
                 .then((res: any) => {
                     // console.log("channel delete res:", res.data);
                     router.push(`/manage/${route.params.id}/activitySetting`);
-                })
-                .catch((err: any) => {
-                    console.error(err);
-                });
-        },
-        // 登入時發送 與簡訊部連線
-        async connectionWithNewsletterDepartment(id: any) {
-            const fd = new FormData();
-            fd.append("uid", "COMMTEST");
-            fd.append("pwd", "g7rabgtz");
-            await axios
-                .post(`${config.serverUrl}/v1/connection`, fd)
-                .then((res: any) => {
-                    // console.log("connection res:", res);
-                    localStorage.setItem("newsletterDepartmentToken", res.data.msg);
-                    location.href = `/chat/${id}`;
                 })
                 .catch((err: any) => {
                     console.error(err);

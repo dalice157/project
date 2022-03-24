@@ -17,8 +17,8 @@ export const JANUS_URL: any = `${config.janusUrl}/janus`;
 // }
 
 // chatroomID
-export const chatroomID = (chatToken: any) => chatToken?.slice(-7);
-export const eventID = (chatToken: any) => chatToken?.slice(0, -7);
+export const chatroomID = (eventKey: any) => eventKey?.slice(-7);
+export const eventID = (eventKey: any) => eventKey?.slice(0, -7);
 
 // 回覆點擊功能
 export const scrollPageTo = (replyId: string | null) => {
@@ -26,7 +26,6 @@ export const scrollPageTo = (replyId: string | null) => {
 
     if (!replyId) return;
     const element: any = document.getElementById(`${replyId}`);
-
     element.scrollIntoView({ behavior: "smooth", block: "center", nearest: "center" });
 
     const getAnimateClassName = element.childNodes[6].childNodes[0];
@@ -38,8 +37,8 @@ export const scrollPageTo = (replyId: string | null) => {
 };
 
 // 存取 localStorage
-export const localStorageMsg = (messageList: any, chatToken: any = "") => {
-    localStorage.setItem(`${chatToken}`, JSON.stringify(messageList));
+export const localStorageMsg = (messageList: any, eventKey: any = "") => {
+    localStorage.setItem(`${eventKey}`, JSON.stringify(messageList));
 };
 const MIMEMap: any = {
     "image/jpeg": "IMAGE",

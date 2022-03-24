@@ -14,7 +14,7 @@
                     {{ eventInfo.name }}
                 </h1>
 
-                <router-link :to="`/?chatToken=${chatToken}`">
+                <router-link :to="`/${eventKey}`">
                     <img src="../assets/Images/chatroom/close-round.svg" />
                 </router-link>
             </div>
@@ -23,28 +23,32 @@
             <div v-for="(date, index) in dateArr" :key="index">
                 <div class="date">{{ date }}</div>
                 <div class="picture">
-                    <div class="picture-inner" v-for="picture in pictures" :key="picture.id">
+                    <div
+                        class="picture-inner"
+                        v-for="picture in pictures"
+                        :key="picture.janusMsg.config.id"
+                    >
                         <div
                             class="imgEnable"
                             v-if="
                                 picture.janusMsg.msgType === 6 &&
-                                !picture.isExpire &&
-                                date === dayjs(picture.currentDate).format('YYYY/MM')
+                                !picture.janusMsg.config.isExpire &&
+                                date ===
+                                    dayjs(picture.janusMsg.config.currentDate).format('YYYY/MM')
                             "
                             @click="previewURL(picture.janusMsg.format.Fileid)"
                         >
                             <img
-                                :src="`${config.fileUrl}/fls/${
-                                    picture.janusMsg.format.Fileid
-                                }.${picture.janusMsg.format.ShowName.split('.').pop()}`"
+                                :src="`${config.fileUrl}/fls/${picture.janusMsg.format.Fileid}${picture.janusMsg.format.ExtensionName}`"
                             />
                         </div>
                         <div
                             class="imgDisable"
                             v-else-if="
                                 picture.janusMsg.msgType === 6 &&
-                                picture.isExpire &&
-                                date === dayjs(picture.currentDate).format('YYYY/MM')
+                                picture.janusMsg.config.isExpire &&
+                                date ===
+                                    dayjs(picture.janusMsg.config.currentDate).format('YYYY/MM')
                             "
                         >
                             <img src="../assets/Images/gallery/pic-disabled.svg" />
@@ -54,12 +58,13 @@
                             class="picture-file-enable"
                             v-else-if="
                                 picture.janusMsg.msgType === 7 &&
-                                !picture.isExpire &&
-                                date === dayjs(picture.currentDate).format('YYYY/MM')
+                                !picture.janusMsg.config.isExpire &&
+                                date ===
+                                    dayjs(picture.janusMsg.config.currentDate).format('YYYY/MM')
                             "
                         >
                             <a
-                                :href="`${config.serverUrl}/file/${route.query.chatToken}/${picture.janusMsg.format.Fileid}`"
+                                :href="`${config.serverUrl}/file/${route.params.eventKey}/${picture.janusMsg.format.Fileid}`"
                             >
                                 <img src="../assets/Images/chatroom/file-fill.svg" />
                                 <n-ellipsis
@@ -76,8 +81,9 @@
                             class="picture-file-disable"
                             v-else-if="
                                 picture.janusMsg.msgType === 7 &&
-                                picture.isExpire &&
-                                date === dayjs(picture.currentDate).format('YYYY/MM')
+                                picture.janusMsg.config.isExpire &&
+                                date ===
+                                    dayjs(picture.janusMsg.config.currentDate).format('YYYY/MM')
                             "
                         >
                             <div>
@@ -125,40 +131,40 @@ const { eventInfo } = storeToRefs(apiStore);
 
 //router
 const route = useRoute();
-const chatToken = computed(() => route.query.chatToken);
+const eventKey = computed(() => route.params.eventKey);
 
 const result: any = ref([]);
 const dateArr: any = ref([]);
 
 //拿取後端api
-getBackendApi(route.query.chatToken);
+getBackendApi(route.params.eventKey);
 
 //獲取當天日期 判斷圖片及檔案是否失效
 watchEffect(() => {
-    pictures.value = JSON.parse(localStorage.getItem(`${chatToken.value}-pictures`) || "[]");
+    pictures.value = JSON.parse(localStorage.getItem(`${eventKey.value}-pictures`) || "[]");
     console.log("pictures.value", pictures.value);
     pictures.value.forEach((pic: any, index: any) => {
         if (dayjs().isAfter(dayjs(pic.janusMsg.format.expirationDate))) {
-            pic.isExpire = true;
+            pic.janusMsg.config.isExpire = true;
             localStorage.setItem(
-                `${route.query.chatToken}-pictures`,
+                `${route.params.eventKey}-pictures`,
                 JSON.stringify(pictures.value)
             );
         } else {
-            pic.isExpire = false;
+            pic.janusMsg.config.isExpire = false;
             localStorage.setItem(
-                `${route.query.chatToken}-pictures`,
+                `${route.params.eventKey}-pictures`,
                 JSON.stringify(pictures.value)
             );
         }
         if (
             index === 0 ||
             (index > 0 &&
-                dayjs(pic.currentDate).format("YYYY/MM") !==
-                    dayjs(pictures.value[index - 1].currentDate).format("YYYY/MM"))
+                dayjs(pic.janusMsg.config.currentDate).format("YYYY/MM") !==
+                    dayjs(pictures.value[index - 1].janusMsg.config.currentDate).format("YYYY/MM"))
             // index === 0 || (index > 0 && dayjs(arr[index].currentDate).format("YYYY/MM") !== dayjs(arr[index-1].currentDate).format("YYYY/MM"))
         ) {
-            result.value.push(dayjs(pic.currentDate).format("YYYY/MM"));
+            result.value.push(dayjs(pic.janusMsg.config.currentDate).format("YYYY/MM"));
         }
     });
     dateArr.value = result.value
@@ -175,17 +181,13 @@ const previewURL = (fileid: string): void => {
     pictures.value.forEach((img: any) => {
         if (
             !viewImgs.value.includes(
-                `${config.fileUrl}/fls/${
-                    img.janusMsg.format.Fileid
-                }.${img.janusMsg.format.ShowName.split(".").pop()}`
+                `${config.fileUrl}/fls/${img.janusMsg.format.Fileid}${img.janusMsg.format.ExtensionName}`
             ) &&
             img.janusMsg.msgType === 6 &&
-            !img.isExpire
+            !img.janusMsg.config.isExpire
         ) {
             viewImgs.value.push(
-                `${config.fileUrl}/fls/${
-                    img.janusMsg.format.Fileid
-                }.${img.janusMsg.format.ShowName.split(".").pop()}`
+                `${config.fileUrl}/fls/${img.janusMsg.format.Fileid}${img.janusMsg.format.ExtensionName}`
             );
         }
     });
@@ -204,7 +206,7 @@ const previewURL = (fileid: string): void => {
                 const wrap = document.getElementsByClassName("v-wrap");
                 const div = document.createElement("div");
                 const a = document.createElement("a");
-                a.href = `${config.serverUrl}/file/${fileId}`;
+                a.href = `${config.serverUrl}/file/${route.params.eventKey}/${fileid}`;
                 a.target = "_blank";
                 a.download = fileName;
                 a.className = "download";

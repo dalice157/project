@@ -34,7 +34,7 @@ const { onSearchMoreImResult, clearMoreKeyWord } = searchStore;
 const { moreKeyWord } = storeToRefs(searchStore);
 
 const route = useRoute();
-getEventListApi(route.query.chatToken);
+getEventListApi(route.params.eventKey);
 </script>
 <style lang="scss" scoped>
 @import "~@/assets/scss/var";

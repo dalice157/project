@@ -11,11 +11,11 @@ import { MY_ROOM, YOU_USER_NAME, ME_USER_NAME } from "@/util/commonUtil";
 export const sendPrivateMsg = ({
     msg = <any>"",
     textPlugin = <any>"",
-    chatToken = <any>"",
+    eventKey = <any>"",
     msgParticipantList = <any>[],
     eventID = <any>"",
 }) => {
-    console.log("msgParticipantList:", msgParticipantList);
+    console.log("現在參加的人是誰???:", msgParticipantList);
 
     const display = msgParticipantList;
     if (!display) return;
@@ -44,17 +44,17 @@ export const sendPrivateMsg = ({
                 display: display,
                 text: JSON.stringify(msg),
             };
-            processDataEvent(data, chatToken);
+            processDataEvent(data, eventKey);
         },
     });
     return;
 };
 
 /*textPlugin ondata 接收到的事件處理方法 */
-export const processDataEvent = (data: any, chatToken: any) => {
+export const processDataEvent = (data: any, eventKey: any) => {
     const chatStore = useChatStore();
     const { getCompanyMsg } = chatStore;
-    const { chatRoomMsg, messages, replyMsg } = storeToRefs(chatStore);
+    const { chatRoomMsg, isOnline, participantList } = storeToRefs(chatStore);
 
     interface whatType {
         [key: string]: any;
@@ -64,9 +64,8 @@ export const processDataEvent = (data: any, chatToken: any) => {
         message: () => {
             if (whisper === true) {
                 console.log("Private message->", data);
-                getCompanyMsg(data, chatToken);
                 notifyMe(data);
-
+                getCompanyMsg(data, eventKey);
                 return;
             }
             console.log("Public message->", data);
@@ -77,16 +76,17 @@ export const processDataEvent = (data: any, chatToken: any) => {
         },
         join: () => {
             console.log("有人加入房間->", data);
-            if ("tony" == data.username) {
-                messages.value = JSON.parse(localStorage.getItem(`${chatToken}`) || "[]");
-                messages.value.forEach((element) => {
-                    element.isRead = true;
-                });
-                localStorage.setItem(`${chatToken}`, JSON.stringify(messages.value));
+            if (participantList.value.length > 0) {
+                isOnline.value = true;
             }
         },
         leave: () => {
             console.log("有人離開房間->", data);
+            console.log("有人離開房間 participantList->", participantList.value.length);
+
+            if (participantList.value.length === 0) {
+                isOnline.value = false;
+            }
         },
         kicked: () => {
             console.log("有人被踢出房間->", data);

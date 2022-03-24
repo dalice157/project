@@ -1,22 +1,20 @@
 <template>
     <!-- 回覆視窗 -->
-    <div class="reply" v-if="isReplyBox" @click.prevent="scrollPageTo(replyMsg.janusMsg.format.id)">
+    <div class="reply" v-if="isReplyBox" @click.prevent="scrollPageTo(replyMsg.janusMsg.config.id)">
         <div class="usertext">
             <div class="replyText" v-if="replyMsg && replyMsg.janusMsg.msgType === 6">[照片]</div>
             <div class="replyText" v-if="replyMsg && replyMsg.janusMsg.msgType === 3">[貼圖]</div>
             <n-ellipsis
-                v-if="replyMsg && replyMsg.janusMsg.message"
+                v-if="replyMsg && replyMsg.janusMsg.msgContent"
                 style="width: 80%"
                 class="replyText"
                 :tooltip="false"
             >
-                {{ replyMsg.janusMsg.message }}
+                {{ replyMsg.janusMsg.msgContent }}
             </n-ellipsis>
             <div class="img" v-if="replyMsg && replyMsg.janusMsg.msgType === 6">
                 <img
-                    :src="`${config.fileUrl}/fls/${replyMsg.janusMsg.format.Fileid}${String(
-                        replyMsg.janusMsg.format.ShowName
-                    ).slice(-4)}`"
+                    :src="`${config.fileUrl}/fls/${replyMsg.janusMsg.format.Fileid}${replyMsg.janusMsg.format.ExtensionName}`"
                 />
             </div>
             <div class="img" v-if="replyMsg && replyMsg.janusMsg.msgType === 3">
@@ -281,7 +279,7 @@ import dayjs from "dayjs";
 import { txt } from "@/util/interfaceUtil";
 import { sendPrivateMsg } from "@/util/chatUtil";
 import { scrollPageTo, localStorageMsg, eventID, chatroomID, convertTime } from "@/util/commonUtil";
-import { currentTime, currentDate, currentMonth } from "@/util/dateUtil";
+import { currentTime, currentDate, unixTime } from "@/util/dateUtil";
 import { useApiStore } from "@/store/api";
 import { useChatStore } from "@/store/chat";
 import { useModelStore } from "@/store/model";
@@ -319,6 +317,7 @@ const {
     stickerGroup,
     stickerItems,
     participantList,
+    isOnline,
 } = storeToRefs(chatStore);
 //router
 const route = useRoute();
@@ -337,7 +336,6 @@ const showMapModal = ref(false);
 const latitude = ref();
 const longitude = ref();
 const handleFindMe = () => {
-    showMapModal.value = !showMapModal.value;
     inputFunctionBoolean.value = false;
     gettingPosition();
 };
@@ -359,7 +357,7 @@ const gettingPosition: any = () => {
 const successCallback = (position: any) => {
     latitude.value = position.coords.latitude;
     longitude.value = position.coords.longitude;
-
+    showMapModal.value = true;
     console.log("Your current position is:");
     console.log("position : ", position);
     console.log("Latitude : " + position.coords.latitude);
@@ -376,47 +374,50 @@ const successCallback = (position: any) => {
 };
 const errorCallback = (error: any) => {
     console.log("error", error.message);
+    showMapModal.value = false;
 };
 
 const shareMap = () => {
     showMapModal.value = false;
     let mapObj: any = {
         janusMsg: {
-            chatroomID: chatroomID(route.query.chatToken),
-            sender: 1, // 1 為自己傳送的訊息
-            type: 2,
+            chatroomID: chatroomID(route.params.eventKey),
             msgType: 8,
-            message: "",
+            sender: 1, // 0:客服, 1:使用者
+            msgContent: "",
+            time: unixTime(),
+            type: 2, //1:簡訊 2: 文字
             format: {
-                id: nanoid(),
-                isReplay: false,
-                replyObj: "",
                 Longitude: longitude.value,
                 Latitude: latitude.value,
                 LocateTime: new Date(),
                 LocateSource: 0,
             },
+            config: {
+                id: nanoid(),
+                isReply: false,
+                replyObj: "",
+                currentDate: currentDate(),
+                isExpire: false,
+                isPlay: false,
+                isRead: isOnline.value ? true : false,
+                msgFunctionStatus: false,
+                msgMoreStatus: false,
+                recallPopUp: false,
+                recallStatus: false,
+            },
         },
-        currentDate: currentDate(),
-        time: currentTime(),
-        msgMoreStatus: false,
-        msgFunctionStatus: false,
-        recallStatus: false,
-        recallPopUp: false,
-        isExpire: false,
-        isRead: false,
-        isPlay: false,
     };
     messages.value.push(mapObj);
     const sendMsgObj = {
         msg: mapObj,
         textPlugin: textPlugin.value,
-        chatToken: route.query.chatToken,
+        eventKey: route.params.eventKey,
         msgParticipantList: participantList.value,
-        eventID: eventID(route.query.chatToken),
+        eventID: eventID(route.params.eventKey),
     };
     sendPrivateMsg(sendMsgObj);
-    localStorageMsg(messages.value, route.query.chatToken);
+    localStorageMsg(messages.value, route.params.eventKey);
 };
 
 // 錄音
@@ -540,7 +541,7 @@ const stopRecorder = (e: any) => {
 
     axios({
         method: "post",
-        url: `${config.serverUrl}/file/${route.query.chatToken}`,
+        url: `${config.serverUrl}/file/${route.params.eventKey}`,
         data: fd,
     })
         .then((res) => {
@@ -548,15 +549,13 @@ const stopRecorder = (e: any) => {
             let audioObj: any = {};
             audioObj = {
                 janusMsg: {
-                    chatroomID: chatroomID(route.query.chatToken),
-                    sender: 1,
-                    type: 2,
+                    chatroomID: chatroomID(route.params.eventKey),
                     msgType: 5,
-                    message: "",
+                    sender: 1, // 0:客服, 1:使用者
+                    msgContent: "",
+                    time: unixTime(),
+                    type: 2, //1:簡訊 2: 文字
                     format: {
-                        id: nanoid(),
-                        isReplay: false,
-                        replyObj: "",
                         Fileid: res.data.fileid,
                         ShowName: `record_${audioFile.size}`,
                         Description: "",
@@ -564,27 +563,31 @@ const stopRecorder = (e: any) => {
                         SoundLength: duration.value,
                         expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                     },
+                    config: {
+                        id: nanoid(),
+                        isReply: false,
+                        replyObj: "",
+                        currentDate: currentDate(),
+                        isExpire: false,
+                        isPlay: false,
+                        isRead: isOnline.value ? true : false,
+                        msgFunctionStatus: false,
+                        msgMoreStatus: false,
+                        recallPopUp: false,
+                        recallStatus: false,
+                    },
                 },
-                currentDate: currentDate(),
-                time: currentTime(),
-                msgMoreStatus: false,
-                msgFunctionStatus: false,
-                recallStatus: false,
-                recallPopUp: false,
-                isExpire: false,
-                isRead: false,
-                isPlay: false,
             };
             messages.value.push(audioObj);
             const sendMsgObj = {
                 msg: audioObj,
                 textPlugin: textPlugin.value,
-                chatToken: route.query.chatToken,
+                eventKey: route.params.eventKey,
                 msgParticipantList: participantList.value,
-                eventID: eventID(route.query.chatToken),
+                eventID: eventID(route.params.eventKey),
             };
             sendPrivateMsg(sendMsgObj);
-            localStorageMsg(messages.value, route.query.chatToken);
+            localStorageMsg(messages.value, route.params.eventKey);
         })
         .catch((err) => {
             console.error(err);
@@ -598,29 +601,29 @@ const clearRecorder = () => {
 //發送訊息
 const addMsg = (): void => {
     const str = msg.value.trim();
-
     let textObj: any = {
         janusMsg: {
-            chatroomID: chatroomID(route.query.chatToken),
-            sender: 1, // 1 為自己傳送的訊息
-            type: 2,
+            chatroomID: chatroomID(route.params.eventKey),
             msgType: 1,
-            message: str,
-            format: {
+            sender: 1, // 0:客服, 1:使用者
+            msgContent: str,
+            time: unixTime(),
+            type: 2, //1:簡訊 2: 文字
+            format: {},
+            config: {
                 id: nanoid(),
-                isReplay: replyMsg.value ? true : false,
-                replyObj: replyMsg.value ? { ...replyMsg.value } : "",
+                isReply: replyMsg.value ? true : false,
+                replyObj: replyMsg.value || "",
+                currentDate: currentDate(),
+                isExpire: false,
+                isPlay: false,
+                isRead: isOnline.value ? true : false,
+                msgFunctionStatus: false,
+                msgMoreStatus: false,
+                recallPopUp: false,
+                recallStatus: false,
             },
         },
-        currentDate: currentDate(),
-        time: currentTime(),
-        msgMoreStatus: false,
-        msgFunctionStatus: false,
-        recallStatus: false,
-        recallPopUp: false,
-        isExpire: false,
-        isRead: false,
-        isPlay: false,
     };
 
     if (str !== "") {
@@ -628,13 +631,13 @@ const addMsg = (): void => {
         const sendMsgObj = {
             msg: textObj,
             textPlugin: textPlugin.value,
-            chatToken: route.query.chatToken,
+            eventKey: route.params.eventKey,
             msgParticipantList: participantList.value,
-            eventID: eventID(route.query.chatToken),
+            eventID: eventID(route.params.eventKey),
         };
         sendPrivateMsg(sendMsgObj);
     }
-    localStorageMsg(messages.value, route.query.chatToken);
+    localStorageMsg(messages.value, route.params.eventKey);
     // 送出後清除 msg 及 replyMsg
     msg.value = "";
     replyHide();
@@ -658,7 +661,7 @@ const uploadImage = (e: any) => {
             fd.append("file", new File([result], file.name, { type: "image/*" }));
             axios({
                 method: "post",
-                url: `${config.serverUrl}/file/${route.query.chatToken}`,
+                url: `${config.serverUrl}/file/${route.params.eventKey}`,
                 data: fd,
             })
                 .then((res) => {
@@ -670,46 +673,49 @@ const uploadImage = (e: any) => {
                         image.value = e.target.result;
                         const imageObj: any = {
                             janusMsg: {
-                                chatroomID: chatroomID(route.query.chatToken),
-                                sender: 1, // 1 為自己傳送的訊息
-                                type: 2,
+                                chatroomID: chatroomID(route.params.eventKey),
                                 msgType: 6,
-                                message: "",
+                                sender: 1, // 0:客服, 1:使用者
+                                msgContent: "",
+                                time: unixTime(),
+                                type: 2, //1:簡訊 2: 文字
                                 format: {
-                                    id: nanoid(),
-                                    isReplay: replyMsg.value ? true : false,
-                                    replyObj: replyMsg.value ? { ...replyMsg.value } : "",
                                     Fileid: res.data.fileid,
                                     ShowName: fileName,
+                                    ExtensionName: res.data.ext,
                                     FileSize: file.size,
                                     expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                                 },
+                                config: {
+                                    id: nanoid(),
+                                    isReply: replyMsg.value ? true : false,
+                                    replyObj: replyMsg.value || "",
+                                    currentDate: currentDate(),
+                                    isExpire: false,
+                                    isPlay: false,
+                                    isRead: isOnline.value ? true : false,
+                                    msgFunctionStatus: false,
+                                    msgMoreStatus: false,
+                                    recallPopUp: false,
+                                    recallStatus: false,
+                                },
                             },
-                            currentDate: currentDate(),
-                            time: currentTime(),
-                            msgMoreStatus: false,
-                            msgFunctionStatus: false,
-                            recallStatus: false,
-                            recallPopUp: false,
-                            isExpire: false,
-                            isRead: false,
-                            isPlay: false,
                         };
 
                         messages.value.push(imageObj);
                         const sendMsgObj = {
                             msg: imageObj,
                             textPlugin: textPlugin.value,
-                            chatToken: route.query.chatToken,
+                            eventKey: route.params.eventKey,
                             msgParticipantList: participantList.value,
-                            eventID: eventID(route.query.chatToken),
+                            eventID: eventID(route.params.eventKey),
                         };
                         sendPrivateMsg(sendMsgObj);
-                        localStorageMsg(messages.value, route.query.chatToken);
+                        localStorageMsg(messages.value, route.params.eventKey);
 
                         pictures.value.push(imageObj);
                         localStorage.setItem(
-                            `${route.query.chatToken}-pictures`,
+                            `${route.params.eventKey}-pictures`,
                             JSON.stringify(pictures.value)
                         );
                     };
@@ -745,7 +751,7 @@ const onUploadFilePC = (e: any) => {
                 fd.append("file", new File([result], fileArr.name, { type: "image/*" }));
                 axios({
                     method: "post",
-                    url: `${config.serverUrl}/file/${route.query.chatToken}`,
+                    url: `${config.serverUrl}/file/${route.params.eventKey}`,
                     data: fd,
                 })
                     .then((res) => {
@@ -757,48 +763,51 @@ const onUploadFilePC = (e: any) => {
                             image.value = e.target.result;
                             const imageObj: any = {
                                 janusMsg: {
-                                    chatroomID: chatroomID(route.query.chatToken),
-                                    sender: 1, // 1 為自己傳送的訊息
-                                    type: 2,
+                                    chatroomID: chatroomID(route.params.eventKey),
                                     msgType: 6,
-                                    message: "",
+                                    sender: 1, // 0:客服, 1:使用者
+                                    msgContent: "",
+                                    time: unixTime(),
+                                    type: 2, //1:簡訊 2: 文字
                                     format: {
-                                        id: nanoid(),
-                                        isReplay: replyMsg.value ? true : false,
-                                        replyObj: replyMsg.value ? { ...replyMsg.value } : "",
                                         Fileid: res.data.fileid,
                                         ShowName: fileName,
+                                        ExtensionName: res.data.ext,
                                         FileSize: fileArr.size,
                                         expirationDate: dayjs
                                             .unix(res.data.exp)
                                             .format("YYYY-MM-DD"),
                                     },
+                                    config: {
+                                        id: nanoid(),
+                                        isReply: replyMsg.value ? true : false,
+                                        replyObj: replyMsg.value || "",
+                                        currentDate: currentDate(),
+                                        isExpire: false,
+                                        isPlay: false,
+                                        isRead: isOnline.value ? true : false,
+                                        msgFunctionStatus: false,
+                                        msgMoreStatus: false,
+                                        recallPopUp: false,
+                                        recallStatus: false,
+                                    },
                                 },
-                                currentDate: currentDate(),
-                                time: currentTime(),
-                                msgMoreStatus: false,
-                                msgFunctionStatus: false,
-                                recallStatus: false,
-                                recallPopUp: false,
-                                isExpire: false,
-                                isRead: false,
-                                isPlay: false,
                             };
 
                             messages.value.push(imageObj);
                             const sendMsgObj = {
                                 msg: imageObj,
                                 textPlugin: textPlugin.value,
-                                chatToken: route.query.chatToken,
+                                eventKey: route.params.eventKey,
                                 msgParticipantList: participantList.value,
-                                eventID: eventID(route.query.chatToken),
+                                eventID: eventID(route.params.eventKey),
                             };
                             sendPrivateMsg(sendMsgObj);
-                            localStorageMsg(messages.value, route.query.chatToken);
+                            localStorageMsg(messages.value, route.params.eventKey);
 
                             pictures.value.push(imageObj);
                             localStorage.setItem(
-                                `${route.query.chatToken}-pictures`,
+                                `${route.params.eventKey}-pictures`,
                                 JSON.stringify(pictures.value)
                             );
                         };
@@ -817,7 +826,7 @@ const onUploadFilePC = (e: any) => {
 
         axios({
             method: "post",
-            url: `${config.serverUrl}/file/${route.query.chatToken}`,
+            url: `${config.serverUrl}/file/${route.params.eventKey}`,
             data: fd,
         })
             .then((res) => {
@@ -830,45 +839,47 @@ const onUploadFilePC = (e: any) => {
                     let fileObj: any = {};
                     fileObj = {
                         janusMsg: {
-                            chatroomID: chatroomID(route.query.chatToken),
-                            sender: 1, // 1 為自己傳送的訊息
-                            type: 2,
+                            chatroomID: chatroomID(route.params.eventKey),
                             msgType: 7,
-                            message: "",
+                            sender: 1, // 0:客服, 1:使用者
+                            msgContent: "",
+                            time: unixTime(),
+                            type: 2, //1:簡訊 2: 文字
                             format: {
-                                id: nanoid(),
-                                isReplay: false,
-                                replyObj: "",
                                 Fileid: res.data.fileid,
                                 ShowName: fileArr.name,
                                 ExtensionName: res.data.ext,
                                 FileSize: fileArr.size,
                                 expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                             },
+                            config: {
+                                id: nanoid(),
+                                isReply: false,
+                                replyObj: "",
+                                currentDate: currentDate(),
+                                isExpire: false,
+                                isPlay: false,
+                                isRead: isOnline.value ? true : false,
+                                msgFunctionStatus: false,
+                                msgMoreStatus: false,
+                                recallPopUp: false,
+                                recallStatus: false,
+                            },
                         },
-                        currentDate: currentDate(),
-                        time: currentTime(),
-                        msgMoreStatus: false,
-                        msgFunctionStatus: false,
-                        recallStatus: false,
-                        recallPopUp: false,
-                        isExpire: false,
-                        isRead: false,
-                        isPlay: false,
                     };
                     messages.value.push(fileObj);
                     const sendMsgObj = {
                         msg: fileObj,
                         textPlugin: textPlugin.value,
-                        chatToken: route.query.chatToken,
+                        eventKey: route.params.eventKey,
                         msgParticipantList: participantList.value,
-                        eventID: eventID(route.query.chatToken),
+                        eventID: eventID(route.params.eventKey),
                     };
                     sendPrivateMsg(sendMsgObj);
-                    localStorageMsg(messages.value, route.query.chatToken);
+                    localStorageMsg(messages.value, route.params.eventKey);
                     pictures.value.push(fileObj);
                     localStorage.setItem(
-                        `${route.query.chatToken}-pictures`,
+                        `${route.params.eventKey}-pictures`,
                         JSON.stringify(pictures.value)
                     );
                 };
@@ -891,7 +902,7 @@ const onUploadFileMP = (e: any) => {
 
     axios({
         method: "post",
-        url: `${config.serverUrl}/file/${route.query.chatToken}`,
+        url: `${config.serverUrl}/file/${route.params.eventKey}`,
         data: fd,
     })
         .then((res) => {
@@ -904,45 +915,47 @@ const onUploadFileMP = (e: any) => {
                 let fileObj: any = {};
                 fileObj = {
                     janusMsg: {
-                        chatroomID: chatroomID(route.query.chatToken),
-                        sender: 1, // 1 為自己傳送的訊息
-                        type: 2,
+                        chatroomID: chatroomID(route.params.eventKey),
                         msgType: 7,
-                        message: "",
+                        sender: 1, // 0:客服, 1:使用者
+                        msgContent: "",
+                        time: unixTime(),
+                        type: 2, //1:簡訊 2: 文字
                         format: {
-                            id: nanoid(),
-                            isReplay: false,
-                            replyObj: "",
                             Fileid: res.data.fileid,
                             ShowName: fileArr.name,
                             ExtensionName: res.data.ext,
                             FileSize: fileArr.size,
                             expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
                         },
+                        config: {
+                            id: nanoid(),
+                            isReply: false,
+                            replyObj: "",
+                            currentDate: currentDate(),
+                            isExpire: false,
+                            isPlay: false,
+                            isRead: isOnline.value ? true : false,
+                            msgFunctionStatus: false,
+                            msgMoreStatus: false,
+                            recallPopUp: false,
+                            recallStatus: false,
+                        },
                     },
-                    currentDate: currentDate(),
-                    time: currentTime(),
-                    msgMoreStatus: false,
-                    msgFunctionStatus: false,
-                    recallStatus: false,
-                    recallPopUp: false,
-                    isExpire: false,
-                    isRead: false,
-                    isPlay: false,
                 };
                 messages.value.push(fileObj);
                 const sendMsgObj = {
                     msg: fileObj,
                     textPlugin: textPlugin.value,
-                    chatToken: route.query.chatToken,
+                    eventKey: route.params.eventKey,
                     msgParticipantList: participantList.value,
-                    eventID: eventID(route.query.chatToken),
+                    eventID: eventID(route.params.eventKey),
                 };
                 sendPrivateMsg(sendMsgObj);
-                localStorageMsg(messages.value, route.query.chatToken);
+                localStorageMsg(messages.value, route.params.eventKey);
                 pictures.value.push(fileObj);
                 localStorage.setItem(
-                    `${route.query.chatToken}-pictures`,
+                    `${route.params.eventKey}-pictures`,
                     JSON.stringify(pictures.value)
                 );
             };
@@ -967,31 +980,33 @@ const closeStickerBox = () => {
 const addSticker = (sticker, id) => {
     let stickerObj: any = {
         janusMsg: {
-            chatroomID: chatroomID(route.query.chatToken),
-            sender: 1, // 1 為自己傳送的訊息
-            type: 2,
+            chatroomID: chatroomID(route.params.eventKey),
             msgType: 3,
-            message: "",
+            sender: 1, // 0:客服, 1:使用者
+            msgContent: "",
+            time: unixTime(),
+            type: 2, //1:簡訊 2: 文字
             format: {
-                id: nanoid(),
-                isReplay: replyMsg.value ? true : false,
-                replyObj: replyMsg.value ? { ...replyMsg.value } : "",
                 stickerPackID: sticker.stickerPackID,
                 stickerUrl: stickerUrl.value,
                 ext: sticker.ext,
                 stickerFileID: id,
                 title: `貼圖${sticker.stickerPackID}-${id}`,
             },
+            config: {
+                id: nanoid(),
+                isReply: replyMsg.value ? true : false,
+                replyObj: replyMsg.value || "",
+                currentDate: currentDate(),
+                isExpire: false,
+                isPlay: false,
+                isRead: isOnline.value ? true : false,
+                msgFunctionStatus: false,
+                msgMoreStatus: false,
+                recallPopUp: false,
+                recallStatus: false,
+            },
         },
-        currentDate: currentDate(),
-        time: currentTime(),
-        msgMoreStatus: false,
-        msgFunctionStatus: false,
-        recallStatus: false,
-        recallPopUp: false,
-        isExpire: false,
-        isRead: false,
-        isPlay: false,
     };
     const stickers = {
         stickerPackID: sticker.stickerPackID,
@@ -1004,9 +1019,9 @@ const addSticker = (sticker, id) => {
     const sendMsgObj = {
         msg: stickerObj,
         textPlugin: textPlugin.value,
-        chatToken: route.query.chatToken,
+        eventKey: route.params.eventKey,
         msgParticipantList: participantList.value,
-        eventID: eventID(route.query.chatToken),
+        eventID: eventID(route.params.eventKey),
     };
     const isStickerPush = stickerItems.value.some((item) => {
         return item.title === stickers.title;
@@ -1017,7 +1032,7 @@ const addSticker = (sticker, id) => {
 
     window.localStorage.setItem("sticker", JSON.stringify(stickerItems.value));
     sendPrivateMsg(sendMsgObj);
-    localStorageMsg(messages.value, route.query.chatToken);
+    localStorageMsg(messages.value, route.params.eventKey);
     showStickerModal.value = false;
 };
 

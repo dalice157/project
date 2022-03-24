@@ -4,7 +4,7 @@
             class="chatRoomBox"
             v-for="item in eventList"
             :key="item.chatToken"
-            :href="`/?chatToken=${item.chatToken}`"
+            :href="`/${item.chatToken}`"
         >
             <div class="chatRoomList">
                 <div class="avatar">
@@ -26,7 +26,7 @@
             class="chatRoomBox"
             v-for="item in searcMoreMessages"
             :key="item.chatToken"
-            :href="`/?chatToken=${item.chatToken}`"
+            :href="`/${item.chatToken}`"
         >
             <div class="chatRoomList">
                 <div class="avatar">

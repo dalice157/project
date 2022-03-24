@@ -2,7 +2,7 @@
     <div class="moreChatRoom" :class="{ menuToggle: hamburgerBoolean }">
         <HamburgerBar @menuToggle="menuToggle" />
         <div class="main">
-            <h1 v-if="!isResult || keyWord === ''" class="logo">溝通雲</h1>
+            <h1 v-if="!isResult || keyWord === ''" class="logo">talkOD</h1>
             <SeachBar />
             <ChatRoomList />
         </div>
@@ -29,7 +29,7 @@ const { getEventListApi } = apiStore;
 const searchStore = useSearchStore();
 const { isResult, keyWord } = storeToRefs(searchStore);
 
-getEventListApi(route.query.chatToken);
+getEventListApi(route.params.eventKey);
 //漢堡選單
 const hamburgerBoolean = ref();
 const menuToggle = (menuBoolean: boolean) => {

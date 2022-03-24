@@ -45,7 +45,7 @@ export const useSearchStore = defineStore({
         //交談室搜尋功能
         onSearchResult(val: any) {
             const apiStore = useApiStore();
-            const { chatroomMsg } = storeToRefs(apiStore);
+            const { messageList } = storeToRefs(apiStore);
             this.isResult = true;
             if (val) {
                 this.searcMessages = [];
@@ -58,16 +58,15 @@ export const useSearchStore = defineStore({
                 console.log("regStr:", regStr);
 
                 const reg = new RegExp(regStr);
-                chatroomMsg.value.messageList.forEach((msg: any) => {
+                messageList.value.forEach((msg: any) => {
                     console.log("msg:", msg);
-
                     const message =
-                        ((msg.msgType === 6 || msg.msgType === 7) && msg.format.ShowName) ||
-                        msg.msgContent;
+                        ((msg.janusMsg.msgType === 6 || msg.janusMsg.msgType === 7) && msg.janusMsg.config.ShowName) ||
+                        msg.janusMsg.msgContent;
                     const regMatch = message.match(reg);
 
                     if (regMatch) {
-                        msg.tagMsg = msg.msgContent.replace(
+                        msg.janusMsg.tagMsg = msg.janusMsg.msgContent.replace(
                             reg,
                             `<span style="color: #FFB400; font-weight: bold;">${regStr}</span>`
                         );

@@ -19,7 +19,7 @@
                 </div>
             </div>
             <h1 class="title">
-                ({{ String(filterUserInfo.mobile).slice(0, 3) }})
+                {{ "+" + String(filterUserInfo.mobile).slice(0, 3) }}
                 {{ String(filterUserInfo.mobile).slice(-9) }}
             </h1>
             <div v-if="!isAccepted" class="phoneStatus">

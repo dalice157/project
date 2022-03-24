@@ -70,7 +70,7 @@ const { eventInfo } = storeToRefs(apiStore);
 
 //router
 const route = useRoute();
-const chatToken = computed(() => route.query.chatToken);
+const eventKey = computed(() => route.params.eventKey);
 //search store
 const searchStore = useSearchStore();
 const { closeSearchBar } = searchStore;
@@ -185,6 +185,7 @@ const handleSelect = (key: any) => {
 .log-content {
     border-top-left-radius: 30px;
     border-top-right-radius: 30px;
+    height: 100%;
 }
 .userInfo {
     border-top-left-radius: 30px;

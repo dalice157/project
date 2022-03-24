@@ -14,19 +14,19 @@
                                     <img
                                         class="avatarDefault"
                                         src="../../assets/Images/manage/Photo.svg"
-                                        alt="#"
+                                        alt="預設圖"
                                         v-if="!channelEvent.icon"
                                     />
                                     <img
                                         class="avatarUpload"
                                         :src="`${config.fileUrl}/fls/${avatar.fileid}${avatar.ext}`"
-                                        alt="#"
+                                        :alt="avatar.fileName"
                                         v-if="avatarStatus === 1"
                                     />
                                     <img
                                         class="avatarUpload"
                                         :src="`${config.fileUrl}/fls/${channelEvent.icon}`"
-                                        alt="#"
+                                        alt="頻道大頭照"
                                         v-else
                                     />
                                 </div>
@@ -53,7 +53,7 @@
                         </div>
                     </div>
                     <div class="activityTitle">
-                        <h3>活動名稱</h3>
+                        <h3><span class="required">*</span>活動名稱</h3>
                         <n-input
                             placeholder="請輸入活動名稱"
                             maxlength="25"
@@ -99,35 +99,35 @@
                 </div>
                 <div class="welcomeStatus">
                     <div class="welcomeTitle">
-                        <h2>歡迎訊息</h2>
-                        <p>(最多三則)</p>
+                        <h2><span class="required">*</span>歡迎訊息</h2>
+                        <p>(至少一則，最多三則)</p>
                     </div>
                     <div
                         class="welcomeInput"
                         v-for="(item, index) in welcomeMsgCount"
                         :key="item.id"
                     >
-                        <div v-if="item.MsgType === 1">
+                        <div v-if="item.janusMsg.msgType === 1">
                             <n-input
                                 type="textarea"
                                 placeholder="請輸入歡迎訊息"
                                 :autosize="{
                                     minRows: 3,
                                 }"
-                                v-model:value="item.MsgContent"
+                                v-model:value="item.janusMsg.msgContent"
                             ></n-input>
                         </div>
-                        <div class="welcomeImg" v-else-if="item.MsgType === 6">
+                        <div class="welcomeImg" v-else-if="item.janusMsg.msgType === 6">
                             <img
-                                :src="`${config.fileUrl}/fls/${item.Format.Fileid}${item.Format.ext}`"
-                                alt="#"
+                                :src="`${config.fileUrl}/fls/${item.janusMsg.format.Fileid}${item.janusMsg.format.ExtensionName}`"
+                                :alt="item.janusMsg.format.ShowName"
                             />
                         </div>
-                        <div class="welcomeFile" v-else-if="item.MsgType === 7">
+                        <div class="welcomeFile" v-else-if="item.janusMsg.msgType === 7">
                             <div>
                                 <div>
                                     <img src="@/assets/Images/common/file.svg" />
-                                    <p>{{ item.Format.fileName }}</p>
+                                    <p>{{ item.janusMsg.format.ShowName }}</p>
                                 </div>
                             </div>
                         </div>
@@ -135,13 +135,13 @@
                             <img
                                 src="../../assets/Images/manage/delete.svg"
                                 alt=""
-                                @click="deleteWelcomeMsg(item.id)"
+                                @click="deleteWelcomeMsg(item.janusMsg.config.id)"
                             />
                             <div class="welcomeFunctionBarUpload">
                                 <span
                                     src="../../assets/Images/common/file.svg"
                                     alt=""
-                                    v-show="item.MsgContent === ''"
+                                    v-show="item.janusMsg.msgContent === ''"
                                 >
                                     <input
                                         type="file"
@@ -152,7 +152,7 @@
                                 <span
                                     src="../../assets/Images/chatroom/pic.svg"
                                     alt=""
-                                    v-show="item.MsgContent === ''"
+                                    v-show="item.janusMsg.msgContent === ''"
                                 >
                                     <input
                                         type="file"
@@ -177,7 +177,8 @@
                 </router-link>
                 <div class="channelDel" @click="showDelModal = true">刪除</div>
                 <div class="channelPreview">預覽</div>
-                <div class="channelStore" @click="goActivity">確認儲存</div>
+                <div v-if="!isDisabled" class="channelStore" @click="goActivity">確認儲存</div>
+                <div v-else class="channelStore disabled">確認儲存</div>
             </div>
         </div>
     </div>
@@ -222,8 +223,10 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, computed, watchEffect } from "vue";
+import { ref, reactive, computed, watchEffect, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
+import { nanoid } from "nanoid";
 import {
     NInput,
     NConfigProvider,
@@ -234,13 +237,12 @@ import {
     NSwitch,
     NModal,
 } from "naive-ui";
-import { nanoid } from "nanoid";
-import config from "@/config/config";
-import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
-
 import Compressor from "compressorjs";
-import { filterOptions } from "naive-ui/lib/select/src/utils";
+import dayjs from "dayjs";
+
+import { unixTime, currentDate } from "@/util/dateUtil";
+import config from "@/config/config";
 import { useApiStore } from "@/store/api";
 
 //router
@@ -256,11 +258,24 @@ const {
     sendChannelEventInfo,
     deleteChannelEventInfo,
 } = apiStore;
-const { staffList, channelEvent, activetyCsList, checkedCsList } = storeToRefs(apiStore);
+const { staffList, channelEvent, activetyCsList, checkedCsList, isDisabled } =
+    storeToRefs(apiStore);
 
 getChannelEvent(route.query.eventID);
 getCustomServiceStaffList();
 getActivetyCsList(route.query.eventID);
+
+watch(
+    () => route.query,
+    () => {
+        if (Object.keys(route.query).length > 0) {
+            getChannelEvent(route.query.eventID);
+            getCustomServiceStaffList();
+            getActivetyCsList(route.query.eventID);
+        }
+    }
+);
+console.log("channelEvent:", channelEvent.value);
 
 const callable: any = computed({
     // 0:關閉 1:開啟通話
@@ -355,12 +370,11 @@ const deleteStaff = (id: any) => {
     tagList.value = list;
 };
 
-let welcomeMsg = reactive({});
 const showDelModal = ref(false);
 
 //頭像上傳功能
 const avatarStatus = ref(0);
-let avatar = ref({ exp: "", ext: "", fileid: "" });
+let avatar = ref({ exp: "", ext: "", fileid: "", fileName: "" });
 const uploadAvatar = (e: any) => {
     const file = e.file.file;
     // console.log(e.file.file);
@@ -392,6 +406,7 @@ const uploadAvatar = (e: any) => {
                             exp: res.data.exp,
                             ext: res.data.ext,
                             fileid: res.data.fileid,
+                            fileName: file.name,
                         };
                         avatarStatus.value = 1;
                         console.log(avatar.value);
@@ -408,23 +423,50 @@ const uploadAvatar = (e: any) => {
 };
 
 //歡迎訊息數量
+let welcomeMsg = reactive({});
 const addWelcomeMsg = () => {
     welcomeMsg = {
-        id: nanoid(),
-        MsgContent: "",
-        Format: {},
-        MsgType: 1, //文字類型
+        janusMsg: {
+            msgType: 1,
+            sender: 0, // 0:客服, 1:使用者
+            msgContent: "",
+            time: unixTime(),
+            type: 2, //1:簡訊 2: 文字
+            format: {},
+            config: {
+                chatroomID: "",
+                id: nanoid(),
+                isReply: false,
+                replyObj: "",
+                currentDate: currentDate(),
+                isExpire: false,
+                isPlay: false,
+                isRead: false,
+                msgFunctionStatus: false,
+                msgMoreStatus: false,
+                recallPopUp: false,
+                recallStatus: false,
+            },
+        },
     };
-
     if (welcomeMsgCount.value.length < 3) {
         welcomeMsgCount.value.push(welcomeMsg);
     }
 };
 
+//刪除歡迎訊息
+const deleteWelcomeMsg = (id: any) => {
+    welcomeMsgCount.value.forEach((item, index) => {
+        if (item.janusMsg.config.id === id) {
+            welcomeMsgCount.value.splice(index, 1);
+        }
+    });
+};
+
 const onShowPop = () => {
     popUp.value = true;
 };
-
+//確認按鈕
 const onPopUp = () => {
     popUp.value = false;
     let list = staffList.value
@@ -437,15 +479,6 @@ const onPopUp = () => {
         name: item.name,
     }));
     tagList.value = list;
-};
-
-//刪除歡迎訊息
-const deleteWelcomeMsg = (id: any) => {
-    welcomeMsgCount.value.forEach((item, index) => {
-        if (item.id === id) {
-            welcomeMsgCount.value.splice(index, 1);
-        }
-    });
 };
 
 //上傳圖片
@@ -463,7 +496,7 @@ const welcomePicture = (e: any, index: any) => {
         success(result) {
             //呼叫api
             const fd = new FormData();
-            console.log("result:", result);
+            // console.log("file.name:", file);
             fd.append("file", new File([result], file.name, { type: "image/*" }));
             const getToken = localStorage.getItem("access_token");
             axios({
@@ -479,16 +512,21 @@ const welcomePicture = (e: any, index: any) => {
                     reader.onload = (e: any) => {
                         image.value = e.target.result;
                         welcomeMsg = {
-                            ...welcomeMsg,
-                            MsgType: 6, //圖片類型
-                            Format: {
-                                exp: res.data.exp,
-                                ext: res.data.ext,
-                                Fileid: res.data.fileid,
-                                ShowName: fileName,
-                                FileSize: file.size,
+                            janusMsg: {
+                                //@ts-ignore
+                                ...welcomeMsg.janusMsg,
+                                msgType: 6, //圖片類型
+                                format: {
+                                    Fileid: res.data.fileid,
+                                    ShowName: fileName,
+                                    ExtensionName: res.data.ext,
+                                    FileSize: file.size,
+                                    expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
+                                },
                             },
                         };
+                        console.log("welcomeMsg pic:", welcomeMsg);
+
                         welcomeMsgCount.value.splice(index, 1, welcomeMsg);
                     };
                 })
@@ -506,16 +544,52 @@ const welcomePicture = (e: any, index: any) => {
 const fileAccept =
     "text/*, video/*, audio/*, application/*, application/rtf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.wordprocessingml.templat, application/vnd.ms-word.document.macroEnabled.12, application/vnd.ms-word.template.macroEnabled.12";
 //上傳檔案
+const files = ref();
 const welcomeFile = (e: any, index: any) => {
-    console.log(e.target.files[0]);
-    welcomeMsg = {
-        ...welcomeMsg,
-        MsgType: 7, //檔案類型
-        Format: {
-            fileName: e.target.files[0].name,
-            fileSize: e.target.files[0].size,
-        },
-    };
+    console.log(e);
+    const file = e.target.files[0];
+    const fileName = file.name;
+    if (!file) {
+        return;
+    }
+    //呼叫api
+    const fd = new FormData();
+    // console.log("file.name:", file);
+    fd.append("file", new File([file], fileName, { type: file.type }));
+    const getToken = localStorage.getItem("access_token");
+    axios({
+        method: "post",
+        url: `${config.serverUrl}/v1/file`,
+        data: fd,
+        headers: { Authorization: `Bearer ${getToken}` },
+    })
+        .then((res) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (e: any) => {
+                files.value = e.target.result;
+                welcomeMsg = {
+                    janusMsg: {
+                        //@ts-ignore
+                        ...welcomeMsg.janusMsg,
+                        msgType: 7, //圖片類型
+                        format: {
+                            Fileid: res.data.fileid,
+                            ShowName: fileName,
+                            ExtensionName: res.data.ext,
+                            FileSize: file.size,
+                            expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
+                        },
+                    },
+                };
+                console.log("welcomeMsg file:", welcomeMsg);
+
+                welcomeMsgCount.value.splice(index, 1, welcomeMsg);
+            };
+        })
+        .catch((err) => {
+            console.error(err);
+        });
     welcomeMsgCount.value.splice(index, 1, welcomeMsg);
 };
 
@@ -531,22 +605,34 @@ const goActivity = () => {
         }
     });
     console.log("welcomeMsgCount.value:", welcomeMsgCount.value);
-
-    const bodyData = {
-        icon:
-            avatarStatus.value === 0
-                ? channelEvent.value.icon
-                : `${avatar.value.fileid}${avatar.value.ext}`,
-        callable: parseInt(callable.value),
-        name: name.value,
-        status: parseInt(status.value),
-        homeurl: url.value,
-        description: description.value,
-        cslist: JSON.stringify(cslist.value),
-        message: JSON.stringify(welcomeMsgCount.value),
-    };
-    console.log("更新活動資料", bodyData);
-    sendChannelEventInfo(route, bodyData, router);
+    const inValid = ref(false);
+    if (welcomeMsgCount.value.length === 0) {
+        inValid.value = true;
+    }
+    welcomeMsgCount.value.forEach((msg) => {
+        if (msg.janusMsg.msgType === 1 && msg.janusMsg.msgContent === "") {
+            inValid.value = true;
+        }
+    });
+    if (name.value === "" || inValid.value === true) {
+        alert("尚有必填欄位未填寫!!");
+    } else {
+        const bodyData = {
+            icon:
+                avatarStatus.value === 0
+                    ? channelEvent.value.icon
+                    : `${avatar.value.fileid}${avatar.value.ext}`,
+            callable: parseInt(callable.value),
+            name: name.value,
+            status: parseInt(status.value),
+            homeurl: url.value,
+            description: description.value,
+            cslist: JSON.stringify(cslist.value),
+            message: JSON.stringify(welcomeMsgCount.value),
+        };
+        console.log("更新活動資料", bodyData);
+        sendChannelEventInfo(route, bodyData, router);
+    }
 };
 //刪除活動頻道
 const deleteChannel = () => {
@@ -561,6 +647,11 @@ const deleteChannel = () => {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
+
+.required {
+    color: $danger;
+    margin-right: 4px;
+}
 .mask {
     position: absolute;
     top: 0;
@@ -1021,6 +1112,11 @@ const deleteChannel = () => {
                 background-color: $gray-1;
                 margin: 0 15px;
                 cursor: pointer;
+                &.disabled {
+                    background-color: $gray-4;
+                    border: 1px solid $gray-4;
+                    cursor: default;
+                }
             }
         }
     }

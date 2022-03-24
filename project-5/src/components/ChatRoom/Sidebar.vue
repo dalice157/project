@@ -1,7 +1,7 @@
 <template>
     <div class="logo">
         <div class="logoImg"></div>
-        <h1>溝通雲</h1>
+        <h1>talkOD</h1>
     </div>
     <div class="search">
         <ChatRecordSearch />
