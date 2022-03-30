@@ -254,10 +254,9 @@ const themeOverrides = {
             }
         }
         .mememberList {
+            max-height: calc(100vh - 250px);
             ul {
                 padding: 0 20px;
-                max-height: calc(100vh - 250px);
-                overflow-y: auto;
                 li {
                     display: flex;
                     justify-content: flex-start;

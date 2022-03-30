@@ -31,4 +31,19 @@
     color: #ffb400;
 }
 //datapicker 統一樣式
-
+.n-button.n-button--primary-type.n-button--tiny-type {
+    --color-hover: #ffb400 !important;
+    --color-pressed: #ffb400 !important;
+    --color-focus: #ffb400 !important;
+    --border-hover: 1px solid #ffb400 !important;
+    --border-pressed: 1px solid #ffb400 !important;
+    --border-focus: 1px solid #ffb400 !important;
+}
+.n-button.n-button--default-type.n-button--tiny-type {
+    --text-color-hover: #ffb400 !important;
+    --text-color-pressed: #ffb400 !important;
+    --text-color-focus: #ffb400 !important;
+    --border-hover: 1px solid #ffb400 !important;
+    --border-pressed: 1px solid #ffb400 !important;
+    --border-focus: 1px solid #ffb400 !important;
+}

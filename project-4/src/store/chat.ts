@@ -27,6 +27,7 @@ export const useChatStore = defineStore({
         participantList: <any>[],
         msgParticipantList: <any>[],
         isOnline: <boolean>false,
+        isOpenGallery: <boolean>false,
     }),
     getters: {},
     actions: {

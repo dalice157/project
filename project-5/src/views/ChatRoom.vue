@@ -95,7 +95,7 @@ const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime
 
 //chat store
 const chatStore = useChatStore();
-const { showStickerModal } = storeToRefs(chatStore);
+const { showStickerModal, isOnline } = storeToRefs(chatStore);
 
 const chatRoomID: any = computed(() => route.query.chatroomID);
 const mobile: any = computed(() => route.query.mobile);
@@ -158,7 +158,7 @@ const closeChatBubble = (): void => {
         text.janusMsg.config.msgFunctionStatus = false;
         return text;
     });
-    showStickerModal.value = false;
+    
 };
 </script>
 

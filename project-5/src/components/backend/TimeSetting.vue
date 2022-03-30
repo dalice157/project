@@ -14,6 +14,7 @@
                         <h3>預約發送</h3>
                     </n-radio>
                     <n-date-picker
+                        placeholder="請選擇日期與時間"
                         v-model:value="date"
                         type="datetime"
                         clearable
@@ -27,7 +28,7 @@
 </template>
 <script lang="ts" setup>
 import { ref, watchEffect, watch } from "vue";
-import { NRadioGroup, NRadio, NDatePicker, NDivider, NConfigProvider } from "naive-ui";
+import { NRadioGroup, NRadio, NDatePicker, NDivider } from "naive-ui";
 import { useSmsStore } from "@/store/smsStore";
 import { useMmsStore } from "@/store/mmsStore";
 import { storeToRefs } from "pinia";
@@ -94,16 +95,6 @@ watchEffect(() => {
     }
     // console.log("mmsSendTime.value", mmsSendTime.value);
 });
-
-//更改naive-ui 套件主題
-const themeOverrides = {
-    Card: {
-        titleTextColor: "#fff",
-        closeColor: "#fff",
-        closeColorHover: "#fff",
-        titleFontSize: "24px",
-    },
-};
 </script>
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";

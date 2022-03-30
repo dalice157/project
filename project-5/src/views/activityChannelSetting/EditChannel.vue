@@ -176,7 +176,7 @@
                     取消
                 </router-link>
                 <div class="channelDel" @click="showDelModal = true">刪除</div>
-                <div class="channelPreview">預覽</div>
+                <PreviewModel :welcomeMsgCount="welcomeMsgCount" />
                 <div v-if="!isDisabled" class="channelStore" @click="goActivity">確認儲存</div>
                 <div v-else class="channelStore disabled">確認儲存</div>
             </div>
@@ -235,7 +235,6 @@ import {
     NUpload,
     NSpin,
     NSwitch,
-    NModal,
 } from "naive-ui";
 import axios from "axios";
 import Compressor from "compressorjs";
@@ -244,6 +243,7 @@ import dayjs from "dayjs";
 import { unixTime, currentDate } from "@/util/dateUtil";
 import config from "@/config/config";
 import { useApiStore } from "@/store/api";
+import PreviewModel from "@/components/PreviewModel";
 
 //router
 const router = useRouter();
@@ -1084,22 +1084,11 @@ const deleteChannel = () => {
                 padding: 10px 15px;
                 border: 1px solid $danger;
                 color: $danger;
+                margin-right: 15px;
                 cursor: pointer;
                 &:hover {
                     opacity: 0.7;
                 }
-            }
-            .channelPreview {
-                width: 100px;
-                height: 36px;
-                line-height: 36px;
-                border: 1px solid $gray-1;
-                border-radius: 18px;
-                text-align: center;
-                color: $white;
-                background-color: $gray-1;
-                margin: 0 15px;
-                cursor: pointer;
             }
             .channelStore {
                 width: 200px;

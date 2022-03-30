@@ -24,15 +24,11 @@
             </div>
             <div class="selectTime">
                 <div class="startTime">
-                    <n-time-picker
-                        placeholder=" Start Time"
-                        format="h:mm"
-                        clearable
-                    ></n-time-picker>
+                    <n-time-picker placeholder="開始時間" format="h:mm" clearable></n-time-picker>
                 </div>
                 <p>至</p>
                 <div class="endTime">
-                    <n-time-picker placeholder=" End Time" format="h:mm" clearable></n-time-picker>
+                    <n-time-picker placeholder="結束時間" format="h:mm" clearable></n-time-picker>
                 </div>
             </div>
         </div>

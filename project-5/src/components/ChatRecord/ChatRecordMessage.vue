@@ -19,10 +19,11 @@
                     />
                 </div>
                 <div class="chatRoomInfo">
-                    <h2 class="info_title">
+                    <h2 class="info_title" v-if="!num.name">
                         {{ "+" + String(num.mobile).slice(0, 3) }}
                         {{ String(num.mobile).slice(-9) }}
                     </h2>
+                    <h2 class="info_title" v-else>{{ num.name }}</h2>
                     <n-ellipsis
                         style="max-width: 600px"
                         :line-clamp="1"
@@ -42,12 +43,11 @@
                             : dayjs(num.time / 1000000).format("MM/DD")
                     }}
                 </div>
-                <!-- <div class="badge" v-if="num.unread === 1">
+                <div class="badge" v-if="num.unread === 0">
                     <div class="badgeBg">
                         <span class="badgeSup">未讀</span>
-                        <span class="badgeSup">{{ num.sup > 999 ? "999+" : num.sup }}</span>
                     </div>
-                </div> -->
+                </div>
             </div>
         </div>
     </div>
@@ -68,12 +68,17 @@
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
                 <div class="avatar" @click.stop="showCompanyInfo(num)">
-                    <n-avatar v-if="num.icon == 0" round :size="48" :src="user_pic_defaul" />
+                    <n-avatar
+                        v-if="num.icon == 0"
+                        round
+                        :size="48"
+                        :src="`${config.fileUrl}/fls/icon/default.svg`"
+                    />
                     <n-avatar
                         v-if="num.icon !== 0"
                         round
                         :size="48"
-                        :src="`${config.fileUrl}/fls/${num.icon}`"
+                        :src="`${config.fileUrl}/fls/icon/${num.icon}.png`"
                     />
                     <img
                         class="img"
@@ -83,10 +88,11 @@
                     />
                 </div>
                 <div class="chatRoomInfo">
-                    <h2 class="info_title">
+                    <h2 class="info_title" v-if="!num.name">
                         {{ "+" + String(num.mobile).slice(0, 3) }}
                         {{ String(num.mobile).slice(-9) }}
                     </h2>
+                    <h2 class="info_title" v-else>{{ num.name }}</h2>
                     <n-ellipsis class="messageEllipsis" :line-clamp="1" :tooltip="false">
                         <p v-if="num.msgType === 1 && num.msg != ''">
                             {{ num.msg }}
@@ -110,7 +116,7 @@
                         }}
                     </div>
 
-                    <div class="functionBoxMore">
+                    <div class="functionBoxMore" :class="{ show: num.isfunctionPopUp }">
                         <img
                             @click.stop="openFunctionPopUp(num)"
                             src="@/assets/Images/chatRecord/more.svg"
@@ -125,12 +131,11 @@
                             </ul>
                         </div>
                     </div>
-                    <!-- <div class="badge" v-if="num.unread === 1">
+                    <div class="badge" v-if="num.unread === 0">
                         <div class="badgeBg">
                             <span class="badgeSup">未讀</span>
-                            <span class="badgeSup">{{ num.sup > 999 ? "999+" : num.sup }}</span>
                         </div>
-                    </div> -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -162,7 +167,7 @@ import { useChatRecordStore } from "@/store/chatRecord";
 import { useModelStore } from "@/store/model";
 import UserInfoModel from "@/components/UserInfoModel.vue";
 import config from "@/config/config";
-import user_pic_defaul from "@/assets/Images/chatroom/User-round.svg";
+import user_pic_defaul from "@/assets/Images/mugShot/User-round.svg";
 
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
@@ -174,7 +179,7 @@ const searchStore = useSearchStore();
 const { isResult, searcRecordMessages, recordKeyWord } = storeToRefs(searchStore);
 
 const apiStore = useApiStore();
-const { sendUserInfo, getChatroomlistApi } = apiStore;
+const { sendPinTop, getChatroomlistApi } = apiStore;
 const { chatroomList, userInfo } = storeToRefs(apiStore);
 
 const chatRecordStore = useChatRecordStore();
@@ -216,19 +221,14 @@ let changeList: any = computed({
         recordMessages.value = val;
     },
 });
-watchEffect(() => {
-    // console.log("changeList", changeList.value);
-});
 
 let i = ref(0);
-watchEffect(() => {
+watch(chatroomList, (newVal, oldVal) => {
+    console.log("newVal:", newVal);
+    console.log("oldVal:", oldVal);
+
     if (chatroomList.value.length > 0) {
-        recordMessages.value = chatroomList.value.map((item) => {
-            return {
-                ...item,
-                key: i.value++,
-            };
-        });
+        recordMessages.value = chatroomList.value;
     }
 });
 //開啟功能列表
@@ -255,45 +255,25 @@ const deletechatRoomBox = (item: any): void => {
 
 //置頂功能
 const pin = (item: any, idx: any): void => {
-    console.log("item:", userInfo.value);
+    console.log("item:", item);
 
     const infoObj = {
         chatroomID: item.chatroomID,
-        name: userInfo.value.name,
-        mobile: item.mobile,
-        icon: item.icon,
-        tag: userInfo.value.tag,
-        description: userInfo.value.description,
         pinTop: 1,
         eventID: route.params.id,
     };
-    sendUserInfo(infoObj);
+    sendPinTop(infoObj);
 };
 
 // 取消置頂功能
 const unpin = (item: any, index: any): void => {
     const infoObj = {
         chatroomID: item.chatroomID,
-        name: userInfo.value.name,
-        mobile: item.mobile,
-        icon: item.icon,
-        tag: userInfo.value.tag,
-        description: userInfo.value.description,
         pinTop: 0,
         eventID: route.params.id,
     };
-    sendUserInfo(infoObj);
+    sendPinTop(infoObj);
 };
-
-// //隱藏功能
-// const hideChatRoomBox = (item: any) => {
-//     recordMessages.value.forEach((num: any) => {
-//         if (num.chatToken === item.chatToken) {
-//             num.show = false;
-//         }
-//     });
-//     isfunctionPopUp.value = false;
-// };
 </script>
 
 <style lang="scss" scoped>
@@ -503,6 +483,9 @@ const unpin = (item: any, index: any): void => {
                 display: none;
                 justify-content: flex-end;
                 align-items: center;
+                &.show {
+                    display: flex;
+                }
                 img {
                     width: 25px;
                 }

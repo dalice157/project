@@ -64,7 +64,7 @@ export const processDataEvent = (data: any, eventKey: any) => {
         message: () => {
             if (whisper === true) {
                 console.log("Private message->", data);
-                notifyMe(data);
+                // notifyMe(data);
                 getCompanyMsg(data, eventKey);
                 return;
             }

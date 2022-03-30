@@ -43,7 +43,7 @@
                     class="avatar"
                     :size="48"
                     v-else-if="msg.sender === 0"
-                    src="../../assets/Images/chatroom/User-round.svg"
+                    src="../../assets/Images/mugShot/User-round.svg"
                 />
                 <div class="info">
                     <span class="name">{{ msg.sender === 0 ? eventInfo.name : "自己" }}</span>

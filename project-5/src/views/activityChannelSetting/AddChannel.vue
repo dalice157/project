@@ -160,7 +160,7 @@
                     :to="`/manage/${route.params.id}/activitySetting`"
                     >取消</router-link
                 >
-                <div class="channelPreview">預覽</div>
+                <PreviewModel :welcomeMsgCount="welcomeMsgCount" />
                 <div v-if="!isDisabled" class="channelStore" @click="goActivityStore">確認儲存</div>
                 <div v-else class="channelStore disabled">確認儲存</div>
             </div>
@@ -192,7 +192,7 @@
 
 <script lang="ts" setup>
 import { ref, reactive, onMounted, onUpdated, watchEffect } from "vue";
-import { NInput, NConfigProvider, NCheckbox, NCheckboxGroup, NUpload } from "naive-ui";
+import { NInput, NCheckbox, NCheckboxGroup, NUpload, NIcon } from "naive-ui";
 import { nanoid } from "nanoid";
 import config from "@/config/config";
 import { useRoute, useRouter } from "vue-router";
@@ -204,6 +204,7 @@ import dayjs from "dayjs";
 import { useApiStore } from "@/store/api";
 import { useChatStore } from "@/store/chat";
 import { unixTime, currentDate } from "@/util/dateUtil";
+import PreviewModel from "@/components/PreviewModel";
 
 //router 資訊
 const router = useRouter();
@@ -215,6 +216,14 @@ const apiStore = useApiStore();
 const { getCustomServiceStaffList } = apiStore;
 const { staffList } = storeToRefs(apiStore);
 getCustomServiceStaffList();
+
+const isPreview = ref(false);
+const onOpenPreview = () => {
+    isPreview.value = true;
+};
+const onClosePreview = () => {
+    isPreview.value = false;
+};
 
 //v-model
 const callable = ref("0");
@@ -559,6 +568,7 @@ const goActivityStore = () => {
     display: flex;
     justify-content: center;
     align-items: center;
+
     .customService {
         width: 590px;
         height: 665px;
@@ -906,18 +916,7 @@ const goActivityStore = () => {
                 text-decoration: none;
                 color: $gray-1;
             }
-            .channelPreview {
-                width: 100px;
-                height: 36px;
-                line-height: 36px;
-                border: 1px solid $gray-1;
-                border-radius: 18px;
-                text-align: center;
-                color: $white;
-                background-color: $gray-1;
-                margin: 0 15px;
-                cursor: pointer;
-            }
+
             .channelStore {
                 width: 200px;
                 height: 36px;

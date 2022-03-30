@@ -67,7 +67,6 @@ export const useChatStore = defineStore({
             const apiStore = useApiStore();
             const { isInput, messageList } = storeToRefs(apiStore);
             isInput.value = true;
-            
         },
         // 開啟錄音視窗
         openRecorder() {

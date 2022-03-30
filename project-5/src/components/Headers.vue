@@ -32,7 +32,7 @@
                     :options="options"
                     @select="handleSelect"
                 >
-                    <span @click="handleClick">我的聊天室</span>
+                    <span @click.stop="handleClick">我的聊天室</span>
                 </n-dropdown>
             </li>
             <li v-if="!access_token">
@@ -71,7 +71,7 @@ const path = ref();
 
 //modal store
 const modelStore = useModelStore();
-const { phoneCallModal } = storeToRefs(modelStore);
+const { phoneCallModal, showDropdown } = storeToRefs(modelStore);
 
 //Chat store
 const chatStore = useChatStore();
@@ -85,8 +85,8 @@ const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime
 
 // api store
 const apiStore = useApiStore();
-const { getPoint, getEventApi, getChatroomlistApi, getEventListApi } = apiStore;
-const { eventInfo, point, isJanusinit, eventList } = storeToRefs(apiStore);
+const { getPoint, getEventApi, getChatroomlistApi, getEvents, getEventListApi } = apiStore;
+const { eventInfo, point, isJanusinit, eventList, staffEvents } = storeToRefs(apiStore);
 const access_token = localStorage.getItem("access_token");
 
 const chatRoomID: any = computed(() => route.query.chatroomID);
@@ -95,10 +95,16 @@ const eventID = computed(() => route.params.id);
 
 // adminStatus: 0-客服, 1-管理者,
 const isAdmin: number | null = Number(localStorage.getItem("adminStatus"));
-
+const adminStatus = localStorage.getItem("adminStatus");
+const accountID = localStorage.getItem("accountID");
 onMounted(() => {
     getEventApi(eventID.value);
     getPoint(eventID.value);
+    if (adminStatus === "0") {
+        getEvents(accountID);
+    } else {
+        getEventListApi();
+    }
 });
 
 const showTitle = () => {
@@ -147,9 +153,7 @@ let participants: any = {};
 let yourusername: any = null;
 let simulcastStarted: any = false;
 
-const showDropdown = ref(false);
 const options: any = ref([]);
-getEventListApi();
 
 const handleSelect = (key: string | number) => {
     console.log("key:", key);
@@ -157,15 +161,60 @@ const handleSelect = (key: string | number) => {
 };
 
 const handleClick = () => {
-    options.value = eventList.value.map((item) => {
-        return {
-            label: item.name,
-            key: item.eventID,
-        };
-    });
+    // console.log("staffEvents", staffEvents.value);
+    if (adminStatus === "0") {
+        options.value = staffEvents.value.events.map((item) => {
+            return {
+                label: item.name,
+                key: item.eventID,
+            };
+        });
+    } else {
+        options.value = eventList.value.map((item) => {
+            return {
+                label: item.name,
+                key: item.eventID,
+            };
+        });
+    }
 
     showDropdown.value = !showDropdown.value;
 };
+
+var iOS = ["iPad", "iPhone", "iPod"].indexOf(navigator.platform) >= 0;
+var eventName = iOS ? "pagehide" : "beforeunload";
+var oldOBF = window["on" + eventName];
+window.addEventListener("visibilitychange", (event) => {
+    if (document.visibilityState === "hidden") {
+        for (var s in Janus.sessions) {
+            if (Janus.sessions[s] && Janus.sessions[s].destroyOnUnload) {
+                console.log("Room Destroying session " + s);
+
+                Janus.sessions[s].destroy({ unload: true, notifyDestroyed: false });
+            }
+        }
+        if (oldOBF && typeof oldOBF == "function") {
+            oldOBF();
+        }
+        return;
+    }
+    if (document.visibilityState === "visible") {
+        Janus.init({
+            debug: "all",
+            dependencies: Janus.useDefaultDependencies({
+                adapter: adapter,
+            }),
+            callback: () => {
+                if (!Janus.isWebrtcSupported()) {
+                    console.log("No WebRTC support... ");
+                    return;
+                }
+                connect();
+            },
+        });
+        return;
+    }
+});
 
 // 連線
 const connect = () => {
@@ -177,8 +226,8 @@ const connect = () => {
         },
         error: (error: any) => {
             onError("Failed to connect to janus server", error);
-            // alert("連線中斷,按下確認重新連線");
-            // window.location.reload();
+            alert("連線中斷,按下確認重新連線");
+            window.location.reload();
         },
         destroyed: () => {
             window.location.reload();
@@ -187,9 +236,13 @@ const connect = () => {
 };
 watchEffect(() => {
     const chatRoomIDArr = Object.keys(onlineList.value);
+    console.log("chatRoomIDincludes", chatRoomIDArr.includes(chatRoomID.value));
+
     if (chatRoomIDArr.includes(chatRoomID.value)) {
         isOnline.value = true;
+        return;
     }
+    isOnline.value = false;
 });
 
 //janus 初始值
@@ -500,8 +553,6 @@ const attachVideocallPlugin = () => {
             // @ts-ignore
             Janus.debug("call-> ::: Got a message :::", msg);
             let result = msg["result"];
-            console.log("result:", result);
-
             if (result) {
                 if (result["list"]) {
                     let list = result["list"];
@@ -676,6 +727,9 @@ const attachVideocallPlugin = () => {
 };
 </script>
 <style lang="scss">
+.n-dropdown-menu.dropdown.n-popover.n-dropdown {
+    margin-top: 13px !important;
+}
 .dropdown.n-popover {
     width: 100%;
 }

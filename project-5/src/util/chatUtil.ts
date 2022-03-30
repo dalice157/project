@@ -5,8 +5,6 @@ import { nanoid } from "nanoid";
 import { useChatStore } from "@/store/chat";
 import { useApiStore } from "@/store/api";
 import { usePhoneCallStore } from "@/store/phoneCall";
-import { IProcessData } from "@/util/interfaceUtil";
-import { MY_ROOM, YOU_USER_NAME } from "@/util/commonUtil";
 
 //發送私人訊息
 export const sendPrivateMsg = ({
@@ -75,7 +73,7 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
     // api store
     const apiStore = useApiStore();
     const { getHistoryApi, getChatroomlistApi } = apiStore;
-    const { isInput, messageList } = storeToRefs(apiStore);
+    const { isInput, messageList, chatroomList } = storeToRefs(apiStore);
     interface whatType {
         [key: string]: any;
     }
@@ -91,7 +89,7 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
                 }, 500);
                 console.log("getFrom:", getFrom);
                 console.log("chatroomID:", chatroomID);
-                notifyMe(data);
+                // notifyMe(data);
                 if (chatroomID == getFrom && data.from) {
                     isInput.value = true;
                     messageList.value.push(msg);
@@ -102,7 +100,9 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
                         return obj.janusMsg.config.id === o.janusMsg.config.id;
                     });
                     if (!hasRepeatId) {
-                        o.janusMsg.config.isRead = true;
+                        if (isOnline.value) {
+                            o.janusMsg.config.isRead = true;
+                        }
                         unique.push(o);
                     }
                     return unique;

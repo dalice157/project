@@ -185,7 +185,10 @@
                         <div
                             class="avatar"
                             @click="
-                                showCompanyInfo({ ...eventInfo, eventKey: route.params.eventKey })
+                                showCompanyInfo({
+                                    ...eventInfo,
+                                    eventKey: route.params.eventKey,
+                                })
                             "
                             v-if="text.janusMsg.sender === 0 && !deleteBoolean"
                         >
@@ -345,6 +348,7 @@
                                 :src="`${config.fileUrl}/fls/${text.janusMsg.format.Fileid}${text.janusMsg.format.ExtensionName}`"
                             />
                         </div>
+
                         <!-- 文件訊息 -->
                         <div
                             class="content icon"
@@ -485,7 +489,7 @@ import { nanoid } from "nanoid";
 import dayjs from "dayjs";
 import Compressor from "compressorjs";
 import { PlayCircleSharp, PauseCircleSharp, ArrowDownCircle } from "@vicons/ionicons5";
-import { NConfigProvider, NEllipsis, NCheckboxGroup, NCheckbox, NAvatar, NIcon } from "naive-ui";
+import { NConfigProvider, NEllipsis, NAvatar, NIcon } from "naive-ui";
 import { useRoute } from "vue-router";
 
 import { useApiStore } from "@/store/api";
@@ -543,6 +547,7 @@ let {
     participantList,
     showStickerModal,
     isOnline,
+    isOpenGallery,
 } = storeToRefs(chatStore);
 
 const onPhoneCallModal = () => {
@@ -840,6 +845,7 @@ onMounted(() => {
 
 onUpdated(() => {
     scrollHeight.value = findScrollHeight.value.scrollHeight;
+    console.log("scrollHeight:", scrollHeight.value);
 });
 
 const chatroomScrolltop = ref(0);
@@ -1281,7 +1287,6 @@ const themeOverrides = {
                         }
                     }
                     .content {
-                        max-width: 200px;
                         border-radius: 5px 20px 20px 20px;
                         margin-left: 0px;
                         margin-right: 10px;
@@ -1467,24 +1472,25 @@ const themeOverrides = {
                     }
                 }
                 .content {
-                    max-width: 240px;
+                    max-width: 1000px;
                     word-wrap: break-word;
                     word-break: break-all;
                     white-space: pre-wrap;
-                    background-color: $primary-1;
+                    background-color: $primary-2;
                     border-radius: 20px 5px 20px 20px;
                     padding: 10px;
                     text-align: left;
                     align-items: center;
                     flex-direction: column;
                     line-height: 1.5;
-                    margin-left: 10px;
+                    margin-left: 5px;
                     -webkit-touch-callout: none;
                     -webkit-user-select: none;
                     -khtml-user-select: none;
                     -moz-user-select: none;
                     -ms-user-select: none;
                     user-select: none;
+
                     &.reply {
                         min-width: 70px;
                     }
@@ -1603,10 +1609,11 @@ const themeOverrides = {
                 }
                 .originalMsg {
                     font-size: $font-size-16;
-                    font-weight: 500;
+                    font-weight: normal;
                     color: $gray-1;
                     display: flex;
                     justify-content: flex-start;
+                    line-height: 1.3;
                 }
 
                 .replyMsg {
@@ -1739,6 +1746,12 @@ const themeOverrides = {
                         width: 100%;
                         object-fit: contain;
                     }
+                }
+            }
+
+            @media (max-width: 768px) {
+                .content {
+                    max-width: 310px;
                 }
             }
             .timestamp {

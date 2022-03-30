@@ -1146,7 +1146,7 @@ function Janus(gatewayCallbacks) {
             } else {
                 navigator.sendBeacon(server + "/" + sessionId, JSON.stringify(request));
             }
-            Janus.log("Destroyed session:");
+            Janus.log("Destroyed session unload:");
             sessionId = null;
             connected = false;
             callbacks.success();
@@ -1201,7 +1201,7 @@ function Janus(gatewayCallbacks) {
             withCredentials: withCredentials,
             body: request,
             success: function (json) {
-                Janus.log("Destroyed session:");
+                Janus.log("Destroyed session POST:");
                 Janus.debug(json);
                 sessionId = null;
                 connected = false;

@@ -1,110 +1,112 @@
 <template>
-    <div class="gallery">
-        <div class="galleryHeader">
-            <div class="galleryTitle">
-                <h1 class="name">
-                    <n-avatar
-                        round
-                        class="avatar"
-                        :size="42"
-                        object-fit="cover"
-                        fallback-src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-                        :src="`${config.fileUrl}/fls/${eventInfo.icon}`"
-                    />
-                    {{ eventInfo.name }}
-                </h1>
+    <teleport to="body" v-if="isOpenGallery">
+        <div class="gallery">
+            <div class="galleryHeader">
+                <div class="galleryTitle">
+                    <h1 class="name">
+                        <n-avatar
+                            round
+                            class="avatar"
+                            :size="42"
+                            object-fit="cover"
+                            fallback-src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
+                            :src="`${config.fileUrl}/fls/${eventInfo.icon}`"
+                        />
+                        {{ eventInfo.name }}
+                    </h1>
 
-                <router-link :to="`/${eventKey}`">
-                    <img src="../assets/Images/chatroom/close-round.svg" />
-                </router-link>
+                    <a @click="goToChat">
+                        <img src="../assets/Images/chatroom/close-round.svg" />
+                    </a>
+                </div>
             </div>
-        </div>
-        <div class="picture-box" v-if="pictures.length > 0">
-            <div v-for="(date, index) in dateArr" :key="index">
-                <div class="date">{{ date }}</div>
-                <div class="picture">
-                    <div
-                        class="picture-inner"
-                        v-for="picture in pictures"
-                        :key="picture.janusMsg.config.id"
-                    >
+            <div class="picture-box" v-if="pictures.length > 0">
+                <div v-for="(date, index) in dateArr" :key="index">
+                    <div class="date">{{ date }}</div>
+                    <div class="picture">
                         <div
-                            class="imgEnable"
-                            v-if="
-                                picture.janusMsg.msgType === 6 &&
-                                !picture.janusMsg.config.isExpire &&
-                                date ===
-                                    dayjs(picture.janusMsg.config.currentDate).format('YYYY/MM')
-                            "
-                            @click="previewURL(picture.janusMsg.format.Fileid)"
+                            class="picture-inner"
+                            v-for="picture in pictures"
+                            :key="picture.janusMsg.config.id"
                         >
-                            <img
-                                :src="`${config.fileUrl}/fls/${picture.janusMsg.format.Fileid}${picture.janusMsg.format.ExtensionName}`"
-                            />
-                        </div>
-                        <div
-                            class="imgDisable"
-                            v-else-if="
-                                picture.janusMsg.msgType === 6 &&
-                                picture.janusMsg.config.isExpire &&
-                                date ===
-                                    dayjs(picture.janusMsg.config.currentDate).format('YYYY/MM')
-                            "
-                        >
-                            <img src="../assets/Images/gallery/pic-disabled.svg" />
-                        </div>
-
-                        <div
-                            class="picture-file-enable"
-                            v-else-if="
-                                picture.janusMsg.msgType === 7 &&
-                                !picture.janusMsg.config.isExpire &&
-                                date ===
-                                    dayjs(picture.janusMsg.config.currentDate).format('YYYY/MM')
-                            "
-                        >
-                            <a
-                                :href="`${config.serverUrl}/file/${route.params.eventKey}/${picture.janusMsg.format.Fileid}`"
+                            <div
+                                class="imgEnable"
+                                v-if="
+                                    picture.janusMsg.msgType === 6 &&
+                                    !picture.janusMsg.config.isExpire &&
+                                    date ===
+                                        dayjs(picture.janusMsg.config.currentDate).format('YYYY/MM')
+                                "
+                                @click="previewURL(picture.janusMsg.format.Fileid)"
                             >
-                                <img src="../assets/Images/chatroom/file-fill.svg" />
-                                <n-ellipsis
-                                    style="width: 90%; max-height: 80px"
-                                    :line-clamp="4"
-                                    :tooltip="false"
-                                    class="showName"
+                                <img
+                                    :src="`${config.fileUrl}/fls/${picture.janusMsg.format.Fileid}${picture.janusMsg.format.ExtensionName}`"
+                                />
+                            </div>
+                            <div
+                                class="imgDisable"
+                                v-else-if="
+                                    picture.janusMsg.msgType === 6 &&
+                                    picture.janusMsg.config.isExpire &&
+                                    date ===
+                                        dayjs(picture.janusMsg.config.currentDate).format('YYYY/MM')
+                                "
+                            >
+                                <img src="../assets/Images/gallery/pic-disabled.svg" />
+                            </div>
+
+                            <div
+                                class="picture-file-enable"
+                                v-else-if="
+                                    picture.janusMsg.msgType === 7 &&
+                                    !picture.janusMsg.config.isExpire &&
+                                    date ===
+                                        dayjs(picture.janusMsg.config.currentDate).format('YYYY/MM')
+                                "
+                            >
+                                <a
+                                    :href="`${config.serverUrl}/file/${route.params.eventKey}/${picture.janusMsg.format.Fileid}`"
                                 >
-                                    <p>{{ picture.janusMsg.format.ShowName }}</p>
-                                </n-ellipsis>
-                            </a>
-                        </div>
-                        <div
-                            class="picture-file-disable"
-                            v-else-if="
-                                picture.janusMsg.msgType === 7 &&
-                                picture.janusMsg.config.isExpire &&
-                                date ===
-                                    dayjs(picture.janusMsg.config.currentDate).format('YYYY/MM')
-                            "
-                        >
-                            <div>
-                                <img src="../assets/Images/chatroom/file-fill.svg" />
-                                <n-ellipsis
-                                    style="width: 90%; max-height: 80px"
-                                    :line-clamp="4"
-                                    :tooltip="false"
-                                >
-                                    <p>{{ picture.janusMsg.format.ShowName }}</p>
-                                </n-ellipsis>
+                                    <img src="../assets/Images/chatroom/file-fill.svg" />
+                                    <n-ellipsis
+                                        style="width: 90%; max-height: 80px"
+                                        :line-clamp="4"
+                                        :tooltip="false"
+                                        class="showName"
+                                    >
+                                        <p>{{ picture.janusMsg.format.ShowName }}</p>
+                                    </n-ellipsis>
+                                </a>
+                            </div>
+                            <div
+                                class="picture-file-disable"
+                                v-else-if="
+                                    picture.janusMsg.msgType === 7 &&
+                                    picture.janusMsg.config.isExpire &&
+                                    date ===
+                                        dayjs(picture.janusMsg.config.currentDate).format('YYYY/MM')
+                                "
+                            >
+                                <div>
+                                    <img src="../assets/Images/chatroom/file-fill.svg" />
+                                    <n-ellipsis
+                                        style="width: 90%; max-height: 80px"
+                                        :line-clamp="4"
+                                        :tooltip="false"
+                                    >
+                                        <p>{{ picture.janusMsg.format.ShowName }}</p>
+                                    </n-ellipsis>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+            <div class="noPicture" v-if="pictures.length === 0">
+                <p>尚未有任何相片!!!</p>
+            </div>
         </div>
-        <div class="noPicture" v-if="pictures.length === 0">
-            <p>尚未有任何相片!!!</p>
-        </div>
-    </div>
+    </teleport>
 </template>
 
 <script setup lang="ts">
@@ -122,7 +124,7 @@ import { localStorageMsg } from "@/util/commonUtil";
 import { currentDate, currentMonth } from "@/util/dateUtil";
 //chat store
 const chatStore = useChatStore();
-const { pictures } = storeToRefs(chatStore);
+const { pictures, isOpenGallery } = storeToRefs(chatStore);
 
 //api store
 const apiStore = useApiStore();
@@ -141,38 +143,41 @@ getBackendApi(route.params.eventKey);
 
 //獲取當天日期 判斷圖片及檔案是否失效
 watchEffect(() => {
-    pictures.value = JSON.parse(localStorage.getItem(`${eventKey.value}-pictures`) || "[]");
-    console.log("pictures.value", pictures.value);
-    pictures.value.forEach((pic: any, index: any) => {
-        if (dayjs().isAfter(dayjs(pic.janusMsg.format.expirationDate))) {
-            pic.janusMsg.config.isExpire = true;
-            localStorage.setItem(
-                `${route.params.eventKey}-pictures`,
-                JSON.stringify(pictures.value)
-            );
-        } else {
-            pic.janusMsg.config.isExpire = false;
-            localStorage.setItem(
-                `${route.params.eventKey}-pictures`,
-                JSON.stringify(pictures.value)
-            );
-        }
-        if (
-            index === 0 ||
-            (index > 0 &&
-                dayjs(pic.janusMsg.config.currentDate).format("YYYY/MM") !==
-                    dayjs(pictures.value[index - 1].janusMsg.config.currentDate).format("YYYY/MM"))
-            // index === 0 || (index > 0 && dayjs(arr[index].currentDate).format("YYYY/MM") !== dayjs(arr[index-1].currentDate).format("YYYY/MM"))
-        ) {
-            result.value.push(dayjs(pic.janusMsg.config.currentDate).format("YYYY/MM"));
-        }
-    });
-    dateArr.value = result.value
-        .filter((element: any, index: any, arr: any) => {
-            return arr.indexOf(element) === index;
-        })
-        .sort()
-        .reverse();
+    if (isOpenGallery.value) {
+        pictures.value = JSON.parse(localStorage.getItem(`${eventKey.value}-pictures`) || "[]");
+        pictures.value.forEach((pic: any, index: any) => {
+            if (dayjs().isAfter(dayjs(pic.janusMsg.format.expirationDate))) {
+                pic.janusMsg.config.isExpire = true;
+                localStorage.setItem(
+                    `${route.params.eventKey}-pictures`,
+                    JSON.stringify(pictures.value)
+                );
+            } else {
+                pic.janusMsg.config.isExpire = false;
+                localStorage.setItem(
+                    `${route.params.eventKey}-pictures`,
+                    JSON.stringify(pictures.value)
+                );
+            }
+            if (
+                index === 0 ||
+                (index > 0 &&
+                    dayjs(pic.janusMsg.config.currentDate).format("YYYY/MM") !==
+                        dayjs(pictures.value[index - 1].janusMsg.config.currentDate).format(
+                            "YYYY/MM"
+                        ))
+                // index === 0 || (index > 0 && dayjs(arr[index].currentDate).format("YYYY/MM") !== dayjs(arr[index-1].currentDate).format("YYYY/MM"))
+            ) {
+                result.value.push(dayjs(pic.janusMsg.config.currentDate).format("YYYY/MM"));
+            }
+        });
+        dateArr.value = result.value
+            .filter((element: any, index: any, arr: any) => {
+                return arr.indexOf(element) === index;
+            })
+            .sort()
+            .reverse();
+    }
     // console.log("dateArr.value:", dateArr.value);
 });
 //圖片展示
@@ -217,17 +222,23 @@ const previewURL = (fileid: string): void => {
         images: viewImgs.value,
     });
 };
+const goToChat = () => {
+    isOpenGallery.value = false;
+};
 </script>
 <style lang="scss" scoped>
 @import "~@/assets/scss/var";
 @import "~@/assets/scss/extend";
 .gallery {
     grid-area: body;
-    width: 100%;
+    width: calc(100% - 300px);
     height: 100%;
     background-color: $white;
     overflow-y: auto;
-
+    position: absolute;
+    top: 0;
+    left: 300px;
+    z-index: 1000;
     .galleryHeader {
         width: calc(100% - 300px);
         // width: 100%;
@@ -399,6 +410,8 @@ const previewURL = (fileid: string): void => {
 @media (max-width: 768px) {
     .gallery {
         height: 100%;
+        width: 100%;
+        left: 0;
         .date {
             font-size: $font-size-16;
         }

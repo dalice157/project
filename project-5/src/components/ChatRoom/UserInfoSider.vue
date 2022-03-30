@@ -5,13 +5,13 @@
             size="small"
             class="save-button"
             text-color="#3e3e3e"
-            @click="onSaveEdited"
+            @click.stop="onSaveEdited"
             v-show="isEdited && !isUserIcon"
         >
             儲存
         </n-button>
         <img
-            @click="handleEdited"
+            @click.stop="handleEdited"
             v-show="!isEdited"
             class="editIcon"
             src="../../assets/Images/chatroom/edit-round.svg"
@@ -27,10 +27,20 @@
                 :src="img"
             />
         </div>
-        <p v-show="isEdited" class="change-title" @click="onChangeAvatar">更換大頭照</p>
+        <p v-show="isEdited" class="change-title" @click.stop="onChangeAvatar">更換大頭照</p>
         <div v-show="isEdited && !isUserIcon">
-            <n-input class="input" v-model:value="userInfo.name" type="text" />
-            <n-input class="input" v-model:value="userInfo.mobile" type="text" />
+            <n-input
+                class="input"
+                v-model:value="userInfo.name"
+                type="text"
+                placeholder="請輸入暱稱"
+            />
+            <n-input
+                class="input"
+                v-model:value="userInfo.mobile"
+                type="text"
+                placeholder="請輸入電話"
+            />
             <div class="tags-group" v-if="userInfo.tag.length > 0">
                 <n-tag
                     v-for="tag in userInfo.tag"
@@ -50,7 +60,7 @@
                             size="small"
                             class="add-tag-button"
                             text-color="#fff"
-                            @click="addTag"
+                            @click.stop="addTag"
                         >
                             新增
                         </n-button>
@@ -59,7 +69,11 @@
             </div>
             <h4 class="service-log">客服紀錄</h4>
             <div class="service-content">
-                <n-input v-model:value="userInfo.description" type="textarea" />
+                <n-input
+                    v-model:value="userInfo.description"
+                    type="textarea"
+                    placeholder="請輸入..."
+                />
             </div>
         </div>
         <div v-show="!isEdited">
@@ -82,8 +96,8 @@
                 <n-grid-item v-for="icon in imgList" :key="icon">
                     <n-avatar
                         class="iconImg"
-                        :class="{ active: icon.split('/')[3] == img.split('/')[5] }"
-                        @click="onClickChoose"
+                        :class="{ active: String(icon).split('/')[5] == String(img).split('/')[5] }"
+                        @click.stop="onClickChoose"
                         round
                         :size="56"
                         object-fit="cover"
@@ -97,7 +111,7 @@
                     size="small"
                     class="save-button"
                     text-color="#3e3e3e"
-                    @click="onSaveAvatar"
+                    @click.stop="onSaveAvatar"
                 >
                     儲存
                 </n-button>
@@ -107,40 +121,29 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, reactive, onMounted, watchEffect } from "vue";
+import { computed, ref, reactive, watch, watchEffect } from "vue";
 import { storeToRefs } from "pinia";
 import { NAvatar, NInput, NButton, NPopover, NGrid, NGridItem, NTag } from "naive-ui";
 import { useRouter, useRoute } from "vue-router";
 
 import { useApiStore } from "@/store/api";
 import { useSearchStore } from "@/store/search";
-import user_pic_defaul from "@/assets/Images/chatroom/User-round.svg";
-import user_pic_default_b from "@/assets/Images/user_pic_default_b.png";
-import inuserimg_select3 from "@/assets/Images/inuserimg_select3.png";
-import inuserimg_select4 from "@/assets/Images/inuserimg_select4.png";
-import inuserimg_select5 from "@/assets/Images/inuserimg_select5.png";
-import inuserimg_select6 from "@/assets/Images/inuserimg_select6.png";
-import inuserimg_select7 from "@/assets/Images/inuserimg_select7.png";
-import inuserimg_select8 from "@/assets/Images/inuserimg_select8.png";
-import inuserimg_select9 from "@/assets/Images/inuserimg_select9.png";
-import inuserimg_select10 from "@/assets/Images/inuserimg_select10.png";
-import inuserimg_select11 from "@/assets/Images/inuserimg_select11.png";
-import inuserimg_select12 from "@/assets/Images/inuserimg_select12.png";
 import config from "@/config/config";
 
 const imgList = [
-    user_pic_defaul,
-    user_pic_default_b,
-    inuserimg_select3,
-    inuserimg_select4,
-    inuserimg_select5,
-    inuserimg_select6,
-    inuserimg_select7,
-    inuserimg_select8,
-    inuserimg_select9,
-    inuserimg_select10,
-    inuserimg_select11,
-    inuserimg_select12,
+    `${config.fileUrl}/fls/icon/default.svg`,
+    `${config.fileUrl}/fls/icon/1.png`,
+    `${config.fileUrl}/fls/icon/2.png`,
+    `${config.fileUrl}/fls/icon/3.png`,
+    `${config.fileUrl}/fls/icon/4.png`,
+    `${config.fileUrl}/fls/icon/5.png`,
+    `${config.fileUrl}/fls/icon/6.png`,
+    `${config.fileUrl}/fls/icon/7.png`,
+    `${config.fileUrl}/fls/icon/8.png`,
+    `${config.fileUrl}/fls/icon/9.png`,
+    `${config.fileUrl}/fls/icon/10.png`,
+    `${config.fileUrl}/fls/icon/11.png`,
+    `${config.fileUrl}/fls/icon/12.png`,
 ];
 
 const tags = ref([
@@ -164,7 +167,7 @@ const searchStore = useSearchStore();
 const { searchSwitch } = searchStore;
 
 const isEdited = ref(false);
-const img = ref(user_pic_defaul);
+const img = ref(null);
 const showPopover = ref(false);
 const tag = ref("");
 const isUserIcon = ref(false);
@@ -176,6 +179,22 @@ const handleEdited = () => {
     isEdited.value = true;
 };
 
+watchEffect(() => {
+    img.value = imgList.find((item) => {
+        const icon = item.split("/")[5] === "default.svg" ? 0 : item.split("/")[5].split(".")[0];
+        return icon == userInfo.value.icon;
+    });
+});
+
+watch(
+    () => route.query,
+    () => {
+        console.log("userInfo.value.pinTop", userInfo.value);
+        isEdited.value = false;
+        isUserIcon.value = false;
+    }
+);
+
 const onDescriptionInput = (e) => {
     userInfo.value.description = e.target.innerText;
 };
@@ -186,10 +205,9 @@ const onSaveEdited = () => {
         chatroomID: chatroomID.value,
         name: userInfo.value.name,
         mobile: Number(userInfo.value.mobile),
-        icon: userInfo.value.icon,
+        icon: img.value.split("/")[5] === "default.svg" ? 0 : img.value.split("/")[5].split(".")[0],
         tag: userInfo.value.tag,
         description: userInfo.value.description,
-        pinTop: userInfo.value.pinTop || 0,
         eventID: route.params.id,
     };
     sendUserInfo(infoObj);
@@ -198,7 +216,7 @@ const onSaveEdited = () => {
 
 // 選擇圖像
 const onClickChoose = (e: any) => {
-    console.log("e:", e.target.src.split("/").slice(4));
+    console.log("src:", e.target.src);
 
     img.value = e.target.src;
     showPopover.value = false;

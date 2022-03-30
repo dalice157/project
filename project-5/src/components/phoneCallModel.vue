@@ -59,7 +59,7 @@ import { useModelStore } from "@/store/model";
 import { useApiStore } from "@/store/api";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import config from "@/config/config";
-import user_pic_defaul from "@/assets/Images/chatroom/User-round.svg";
+import user_pic_defaul from "@/assets/Images/mugShot/User-round.svg";
 
 //route
 const route = useRoute();

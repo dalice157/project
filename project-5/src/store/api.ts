@@ -44,8 +44,8 @@ export const useApiStore = defineStore({
         },
         userInfo: <any>{
             description: "",
-            icon: "0",
-            mobile: "無",
+            icon: 0,
+            mobile: "0",
             name: "訪客",
             tag: [],
         },
@@ -90,6 +90,7 @@ export const useApiStore = defineStore({
         },
         //取得使用者資訊
         async getChatroomUserInfoApi(chatroomID) {
+            console.log("chatroomid", chatroomID);
             const getToken = localStorage.getItem("access_token");
             await axios
                 .get(`${config.serverUrl}/v1/chatroom/${chatroomID}`, {
@@ -118,6 +119,28 @@ export const useApiStore = defineStore({
             bodyFormData.append("icon", data.icon);
             bodyFormData.append("tag", JSON.stringify(data.tag));
             bodyFormData.append("description", data.description);
+
+            await axios({
+                method: "patch",
+                url: `${config.serverUrl}/v1/chatroom`,
+                data: bodyFormData,
+                headers: { Authorization: `Bearer ${getToken}` },
+            })
+                .then((res: any) => {
+                    console.log("sendUserInfo res:", res.data);
+                    this.getChatroomlistApi(data.eventID);
+                })
+                .catch((err: any) => {
+                    console.error(err);
+                });
+        },
+        // 置頂
+        async sendPinTop(data) {
+            console.log("sendUserInfo:", data);
+
+            const getToken = localStorage.getItem("access_token");
+            const bodyFormData = new FormData();
+            bodyFormData.append("chatroomID", data.chatroomID);
             bodyFormData.append("pinTop", data.pinTop);
 
             await axios({
@@ -261,7 +284,7 @@ export const useApiStore = defineStore({
                     },
                 })
                 .then((res: any) => {
-                    // console.log("csList", res.data);
+                    console.log("csList", res.data);
                     this.staffList = res.data.cslist;
                 })
                 .catch((err: any) => {

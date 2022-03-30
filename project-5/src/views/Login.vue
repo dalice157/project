@@ -70,7 +70,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted, onBeforeMount, reactive } from "vue";
+import { ref, onMounted, onBeforeMount, reactive, watchEffect } from "vue";
 import { NConfigProvider } from "naive-ui";
 import { NInput, NCheckbox, NForm, NFormItem } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
@@ -165,6 +165,9 @@ const rules = {
         trigger: ["input", "blur"],
     },
 };
+watchEffect(() => {
+    console.log("rules", rules);
+});
 
 //登入發送api
 const router = useRouter();
@@ -225,6 +228,7 @@ const login = () => {
             .catch((err) => {
                 console.error("err", err);
                 varificationError.value = true;
+                changeCode();
             });
     } else {
         varificationCodeError.value = true;

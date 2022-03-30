@@ -1,5 +1,10 @@
 <template>
-    <n-config-provider class="all" :theme-overrides="themeOverrides">
+    <n-config-provider
+        class="all"
+        :theme-overrides="themeOverrides"
+        :locale="zhTW"
+        :date-locale="dateZhCN"
+    >
         <router-view name="login"></router-view>
         <!--監聽route query change寫法 1 <router-view name="container":key="route.query"></router-view> -->
         <router-view name="container"></router-view>
@@ -10,10 +15,10 @@
 import { defineComponent, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
-import { NConfigProvider, GlobalThemeOverrides } from "naive-ui";
+import { NConfigProvider, GlobalThemeOverrides, dateZhCN } from "naive-ui";
 
 import { useApiStore } from "@/store/api";
-import { txt } from "@/util/interfaceUtil";
+import zhTW from "@/assets/js/zhTW";
 import config from "@/config/config";
 
 const apiStore = useApiStore();

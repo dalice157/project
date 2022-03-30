@@ -25,9 +25,9 @@
                     />
                 </a>
                 <phoneCallModel />
-                <router-link class="gallery" :to="`/gallery/${eventKey}`">
+                <a class="gallery" @click="goToGallery">
                     <img src="../../assets/Images/chatroom/list.svg" alt="進入相本" />
-                </router-link>
+                </a>
                 <router-link class="search" :to="`/${eventKey}`" @click.stop="searchSwitch">
                     <img src="../../assets/Images/chatroom/search.svg" alt="搜尋" />
                 </router-link>
@@ -57,7 +57,7 @@ const { eventInfo } = storeToRefs(apiStore);
 
 // chat store
 const chatStore = useChatStore();
-const { participantList } = storeToRefs(chatStore);
+const { participantList, isOpenGallery } = storeToRefs(chatStore);
 
 //search store
 const searchStore = useSearchStore();
@@ -89,6 +89,9 @@ const phoneCall = () => {
     const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
     console.log("getCutomer", getCutomer);
     doCall(getCutomer);
+};
+const goToGallery = () => {
+    isOpenGallery.value = true;
 };
 </script>
 

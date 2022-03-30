@@ -3,6 +3,7 @@
         <h2 class="title">
             {{ "+" + String(mobile).slice(0, 3) }}
             {{ String(mobile).slice(-9) }}
+            <span class="lastTime">{{ lastTime }}</span>
             <n-badge :color="isOnline ? 'green' : 'grey'" dot> </n-badge>
             <!-- <span class="time"> 30分鐘前上線 </span> -->
         </h2>
@@ -46,17 +47,18 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, watchEffect, computed, onMounted } from "vue";
+import { ref, watch, watchEffect, computed, onMounted, onUnmounted } from "vue";
 import { storeToRefs } from "pinia";
 import { NBadge } from "naive-ui";
 import { useRouter, useRoute } from "vue-router";
+import dayjs from "dayjs";
 
 import { useApiStore } from "@/store/api";
 import { useSearchStore } from "@/store/search";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { useChatStore } from "@/store/chat";
 import { useModelStore } from "@/store/model";
-import { DO_CALL_NAME } from "@/util/commonUtil";
+import { dateFormat } from "@/util/dateUtil";
 import config from "@/config/config";
 import phoneCallModel from "@/components/phoneCallModel.vue";
 
@@ -67,7 +69,8 @@ const eventID = computed(() => route.params.id);
 
 // api store
 const apiStore = useApiStore();
-const { chatroomList: getChatroomList, eventInfo, messageList } = storeToRefs(apiStore);
+const { getChatroomUserInfoApi } = apiStore;
+const { chatroomList: getChatroomList, eventInfo, messageList, userInfo } = storeToRefs(apiStore);
 
 const chatroomList: any = computed(() => getChatroomList.value);
 const mobile: any = computed(() => route.query.mobile);
@@ -117,15 +120,25 @@ const filterOnLine = computed(() => {
         .map((id) => id[0]);
 });
 
+const lastTime: any = ref(null);
+const timer: any = ref("");
+const lastTimeStart: any = () => {
+    timer.value = setInterval(() => {
+        lastTime.value = `${dayjs(userInfo.value.lastVisit / 1000000).fromNow()}上線`;
+    }, 1000);
+};
 watchEffect(() => {
-    if (isOnline.value) {
+    if (isOnline.value && route.path.split("/")[1] === "chat" && route.query) {
         messageList.value = messageList.value.map((item) => {
             item.janusMsg.config.isRead = true;
             return item;
         });
-
-        console.log("messageList watchEffect:", messageList.value);
+        clearInterval(timer.value);
+        lastTime.value = "使用者在線中";
+    } else {
+        lastTimeStart();
     }
+    getChatroomUserInfoApi(chatroomID.value);
 });
 </script>
 
@@ -148,6 +161,13 @@ watchEffect(() => {
         color: $gray-1;
         @extend %h2;
         margin-left: 30px;
+        .lastTime {
+            font-size: $font-size-12;
+            font-weight: normal;
+            color: $white;
+            margin-left: 20px;
+            margin-right: 10px;
+        }
         .time {
             font-size: $font-size-12;
             color: $white;

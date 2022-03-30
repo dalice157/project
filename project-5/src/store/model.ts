@@ -12,6 +12,7 @@ export const useModelStore = defineStore({
         showModal: <boolean>false,
         phoneCallModal: <boolean>false,
         info: <any>"",
+        showDropdown: <boolean>false,
     }),
     getters: {},
     actions: {
@@ -30,14 +31,18 @@ export const useModelStore = defineStore({
         gotoPhone(eventID: any, chatroomID: any, mobile: any) {
             location.href = `/phone/${eventID}?chatroomID=${chatroomID}&mobile=${mobile}`;
         },
-        closeAll() {
+        closeAll(isInput?) {
             const chatStore = useChatStore();
             const { closeRecorder } = chatStore;
+            const { showStickerModal } = storeToRefs(chatStore);
             const searchStore = useSearchStore();
             const { closeSearchBar } = searchStore;
-
+            if (isInput) {
+                showStickerModal.value = false;
+            }
             closeRecorder();
             closeSearchBar();
+            
         },
     },
 });

@@ -5,6 +5,7 @@
         <SearchBar />
         <!-- 聊天室主畫面 -->
         <MessageBox />
+        <Gallery />
         <!-- 使用者輸入框 -->
         <Input />
     </div>
@@ -35,7 +36,9 @@
             <div class="popUp">
                 您已在其他設備使用, 請關閉其他設備後點選重整按鈕
                 <div class="btnWrap">
-                    <n-button type="primary" @click="onReload"> 重整 </n-button>
+                    <n-button color="#ffb400" text-color="#fff" type="primary" @click="onReload">
+                        重整
+                    </n-button>
                 </div>
             </div>
         </div>
@@ -83,8 +86,8 @@ import SearchBar from "@/components/Chat/SearchBar.vue";
 import Input from "@/components/Chat/Input";
 import UserInfo from "@/components/UserInfo.vue";
 import hangUpIcon from "@/assets/Images/common/close-round-red.svg";
-import incomingIcon from "@/assets/Images/common/connect-round.svg";
-import UserInfoModel from "@/components/UserInfoModel.vue";
+
+import Gallery from "./Gallery.vue";
 
 let janus: any = null;
 let myid: any = null;
@@ -124,7 +127,60 @@ const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime
 getEventListApi(route.params.eventKey);
 getBackendApi(route.params.eventKey);
 
-console.log("dayjs", dayjs(new Date()).format("A hh:mm"));
+var iOS = ["iPad", "iPhone", "iPod"].indexOf(navigator.platform) >= 0;
+var eventName = iOS ? "pagehide" : "beforeunload";
+var oldOBF = window["on" + eventName];
+window.addEventListener("visibilitychange", (event) => {
+    if (document.visibilityState === "hidden") {
+        for (var s in Janus.sessions) {
+            if (Janus.sessions[s] && Janus.sessions[s].destroyOnUnload) {
+                console.log("Room Destroying session " + s);
+
+                Janus.sessions[s].destroy({ unload: true, notifyDestroyed: false });
+            }
+        }
+        if (oldOBF && typeof oldOBF == "function") {
+            oldOBF();
+        }
+        return;
+    }
+    if (document.visibilityState === "visible") {
+        Janus.init({
+            debug: "all",
+            dependencies: Janus.useDefaultDependencies({
+                adapter: adapter,
+            }),
+            callback: () => {
+                if (!Janus.isWebrtcSupported()) {
+                    console.log("No WebRTC support... ");
+                    return;
+                }
+                connect();
+                getEventListApi(route.params.eventKey);
+                getBackendApi(route.params.eventKey);
+            },
+        });
+        return;
+    }
+});
+
+watch(
+    () => route.path,
+    (newVal, oldVal) => {
+        if (oldVal !== newVal) {
+            for (var s in Janus.sessions) {
+                if (Janus.sessions[s] && Janus.sessions[s].destroyOnUnload) {
+                    console.log("Room Destroying session " + s);
+
+                    Janus.sessions[s].destroy({ unload: true, notifyDestroyed: false });
+                }
+            }
+            if (oldOBF && typeof oldOBF == "function") {
+                oldOBF();
+            }
+        }
+    }
+);
 
 watchEffect(() => {
     messages.value = JSON.parse(localStorage.getItem(`${route.params.eventKey}`) || "[]");
@@ -223,8 +279,8 @@ const connect = () => {
         },
         error: (error: any) => {
             onError("Failed to connect to janus server", error);
-            // alert("連線中斷,按下確認重新連線");
-            // window.location.reload();
+            alert("連線中斷,按下確認重新連線");
+            window.location.reload();
         },
         destroyed: () => {
             window.location.reload();
@@ -479,6 +535,7 @@ const attachTextroomPlugin = () => {
                 participantList.value = participantList.value.map((display) => {
                     return Object.keys(display)[0];
                 });
+                console.log("離開後剩餘的:", participantList.value);
             } else if (what === "kicked") {
                 // Somebody was kicked
                 let username = json["username"];

@@ -1,10 +1,5 @@
 <template>
-    <div
-        class="chatroom-inner notMsg"
-        ref="findScrollHeight"
-        @click="closeAll"
-        v-if="messageArray.length === 0"
-    >
+    <div class="chatroom-inner notMsg" ref="findScrollHeight" v-if="messageArray.length === 0">
         尚無聊天訊息!!
     </div>
     <div
@@ -55,7 +50,6 @@
                         }}
                     </div>
                 </div>
-
                 <!-- <n-checkbox-group
                     v-model:value="deleteGroup"
                     v-if="deleteBoolean && !text.recallStatus"
@@ -288,7 +282,7 @@
                             </audio>
                             <n-icon @click="toggleAudio(text)" size="24">
                                 <pause-circle-sharp v-show="text.janusMsg.config.isPlay" />
-                                <play-circle-sharp v-show="text.janusMsg.config.isPlay" />
+                                <play-circle-sharp v-show="!text.janusMsg.config.isPlay" />
                             </n-icon>
                             <span v-show="text.janusMsg.config.isPlay">{{ newTime }}</span>
                             <span v-show="!text.janusMsg.config.isPlay" class="totalTime">
@@ -314,6 +308,7 @@
                                 :src="`${config.fileUrl}/fls/${text.janusMsg.format.Fileid}${text.janusMsg.format.ExtensionName}`"
                             />
                         </div>
+
                         <!-- 文件訊息 -->
                         <div
                             class="content icon"
@@ -464,7 +459,7 @@ import { nanoid } from "nanoid";
 import dayjs from "dayjs";
 import Compressor from "compressorjs";
 import { PlayCircleSharp, PauseCircleSharp, ArrowDownCircle } from "@vicons/ionicons5";
-import { NConfigProvider, NEllipsis, NCheckboxGroup, NCheckbox, NAvatar, NIcon } from "naive-ui";
+import { NEllipsis, NCheckboxGroup, NCheckbox, NAvatar, NIcon } from "naive-ui";
 import { useRoute } from "vue-router";
 
 import { useApiStore } from "@/store/api";
@@ -474,8 +469,8 @@ import { usePhoneCallStore } from "@/store/phoneCall";
 import { useSearchStore } from "@/store/search";
 import { txt } from "@/util/interfaceUtil";
 import { sendPrivateMsg } from "@/util/chatUtil";
-import user_pic_defaul from "@/assets/Images/chatroom/User-round.svg";
-import { scrollPageTo, convertTime, DO_CALL_NAME } from "@/util/commonUtil";
+import user_pic_defaul from "@/assets/Images/mugShot/User-round.svg";
+import { scrollPageTo, convertTime } from "@/util/commonUtil";
 import { unixTime, currentDate, dateFormat, currentTime } from "@/util/dateUtil";
 import UserInfoModel from "@/components/UserInfoModel.vue";
 import config from "@/config/config";
@@ -815,6 +810,7 @@ onMounted(() => {
 
 onUpdated(() => {
     scrollHeight.value = findScrollHeight.value.scrollHeight;
+    console.log("scrollHeight", scrollHeight.value);
 });
 
 const chatroomScrolltop = ref(0);
@@ -849,7 +845,6 @@ watch(scrollHeight, (newValue, oldValue) => {
 //聊天室滾動條置底
 const scrollToBottom = (): void => {
     findScrollHeight.value.scrollTop = scrollHeight.value;
-    console.log("findScorllHeight:", findScrollHeight.value.scrollTop);
 };
 
 const handleScroll = (e) => {
@@ -930,7 +925,6 @@ const confirmRecallPopup = (text: txt): void => {
         // }
     });
 };
-
 // 圖片展示
 const previewURL = (fileid: string): void => {
     pictures.value.forEach((img: any) => {
@@ -978,6 +972,22 @@ const previewURL = (fileid: string): void => {
 </script>
 <style lang="scss">
 @import "~@/assets/scss/var";
+.closeView {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 40px;
+    height: 40px;
+    outline: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.8);
+    .closeImg {
+        width: 80%;
+        height: 80%;
+    }
+}
 // 圖片預覽套件下載按鈕
 .download {
     position: fixed;
@@ -1450,11 +1460,11 @@ const previewURL = (fileid: string): void => {
                     }
                 }
                 .content {
-                    max-width: 240px;
+                    max-width: 1000px;
                     word-wrap: break-word;
                     word-break: break-all;
                     white-space: pre-wrap;
-                    background-color: $primary-1;
+                    background-color: $primary-4;
                     border-radius: 20px 5px 20px 20px;
                     padding: 10px;
                     text-align: left;

@@ -56,10 +56,11 @@
 <script lang="ts" setup>
 import { ref, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { useSmsStore } from "@/store/smsStore";
-import { useApiStore } from "@/store/api";
 import { storeToRefs } from "pinia";
 import axios from "axios";
+
+import { useSmsStore } from "@/store/smsStore";
+import { useApiStore } from "@/store/api";
 import config from "@/config/config";
 
 const route = useRoute();

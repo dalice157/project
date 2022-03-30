@@ -48,7 +48,19 @@
             </div>
             <div class="messageCount">
                 <div class="messageInfo">
-                    <div class="wordCount">{{ smsWord }} 字</div>
+                    <div class="wordCount">
+                        {{ smsWord }} 字 &ensp;
+                        <n-popover trigger="hover" placement="bottom">
+                            <template #trigger>
+                                <n-icon size="20">
+                                    <help-circle />
+                                </n-icon>
+                            </template>
+                            <span class="pop"
+                                >系統會在收到與關鍵字完全一致的訊息時自動回傳訊息，未輸入則在不符合其他關鍵字時自動回傳訊息。</span
+                            >
+                        </n-popover>
+                    </div>
                     <div class="numOfMessage">{{ smsCount }} 則</div>
                     <div class="point">{{ smsPoint }} 點</div>
                 </div>
@@ -235,7 +247,17 @@ export default {
 
 <script lang="ts" setup>
 import { onMounted, ref, watch, computed, h, reactive } from "vue";
-import { NConfigProvider, NInput, NSpace, NDivider, NSelect, NDataTable, NRadio } from "naive-ui";
+import {
+    NConfigProvider,
+    NInput,
+    NSpace,
+    NDivider,
+    NSelect,
+    NDataTable,
+    NRadio,
+    NIcon,
+    NPopover,
+} from "naive-ui";
 import { useRouter, useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
 
@@ -246,6 +268,7 @@ import { useApiStore } from "@/store/api";
 import editIcon from "@/assets/Images/manage/edit-round.svg";
 import { pointCalculation } from "@/util/commonUtil";
 import config from "@/config/config";
+import { HelpCircle } from "@vicons/ionicons5";
 
 //router 設置
 const route = useRoute();
@@ -299,7 +322,7 @@ const commonWordCount = () => {
     }
     count.value = pointCalculation(content.value).smsCount;
     point.value = pointCalculation(content.value).point;
-    word.value = content.value.length + config.wordLimit;
+    word.value = content.value.length;
 };
 
 //關閉常用訊息
@@ -557,9 +580,7 @@ const wordCount = () => {
     }
     smsCount.value = pointCalculation(smsContent.value).smsCount;
     smsPoint.value = pointCalculation(smsContent.value).point;
-    smsWord.value = smsContent.value.length + config.wordLimit;
-    console.log("smsContent.value.length", smsContent.value.length);
-    console.log("config.wordLimit", config.wordLimit);
+    smsWord.value = smsContent.value.length;
 };
 
 const uploadRef = computed({

@@ -1,5 +1,5 @@
 import config from "@/config/config";
-import { randomString } from "@/util/chatUtil";
+import btn_close_popup_w from "@/assets/Images/btn_close_popup_w.png";
 // 預設值
 // export const ME_USER_NAME = randomString(3); // 自己
 export const ME_USER_NAME = "admin1"; // 自己
@@ -241,3 +241,20 @@ function editsend_isPureEnglishCheck(str) {
     }
     return isOk;
 }
+
+// 圖片展示
+export const previewURL = (file: any): void => {
+    console.log("file:", file);
+
+    const fileName = file.ShowName;
+    const fileID = file.Fileid;
+    const wrap = document.getElementsByClassName("n-image-preview-container");
+    const div = document.createElement("div");
+    const a = document.createElement("a");
+    a.href = `${config.serverUrl}/v1/file/${fileID}`;
+    a.target = "_blank";
+    a.download = fileName;
+    a.className = "download";
+    a.innerHTML = `<span class="downloadImg"></span>`;
+    wrap[0].appendChild(a);
+};

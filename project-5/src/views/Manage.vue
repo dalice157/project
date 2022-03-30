@@ -1,5 +1,5 @@
 <template>
-    <n-layout class="manage" has-sider>
+    <n-layout class="manage" has-sider @click="closeChatRoomBubble">
         <n-layout-sider bordered content-style="padding: 20px 0;">
             <div class="logo">
                 <div class="logoImg"></div>
@@ -80,12 +80,16 @@ import { NLayout, NLayoutSider, NMenu } from "naive-ui";
 import { RouterLink, useRoute, onBeforeRouteUpdate } from "vue-router";
 
 import Headers from "@/components/Headers.vue";
+import { useModelStore } from "@/store/model";
 import { useApiStore } from "@/store/api";
 import { useSmsStore } from "@/store/smsStore";
 import { useMmsStore } from "@/store/mmsStore";
 import { storeToRefs } from "pinia";
 
 //store
+
+const modelStore = useModelStore();
+const { showDropdown } = storeToRefs(modelStore);
 const smsStore = useSmsStore();
 const onSmsReset = () => {
     smsStore.$reset();
@@ -123,6 +127,10 @@ const adminStatus: string | null = localStorage.getItem("adminStatus");
 //     console.log(to);
 //     console.log(from);
 // });
+// 全局關閉聊天室清單
+const closeChatRoomBubble = () => {
+    showDropdown.value = false;
+};
 </script>
 
 <style lang="scss">
