@@ -27,6 +27,11 @@
     justify-content: center;
     font-size: calc(10px + 2vmin);
     color: white;
+    h2 {
+        display: flex;
+        justify-content: flex-start;
+        text-align: left;
+    }
 }
 
 .App-link {
@@ -47,7 +52,7 @@
         cursor: pointer;
         &.active {
             background-color: white;
-            border-radius: 15px;
+            border-radius: 5px;
             color: #282c34;
         }
     }
