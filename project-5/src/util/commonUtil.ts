@@ -1,5 +1,4 @@
 import config from "@/config/config";
-import btn_close_popup_w from "@/assets/Images/btn_close_popup_w.png";
 // 預設值
 // export const ME_USER_NAME = randomString(3); // 自己
 export const ME_USER_NAME = "admin1"; // 自己
@@ -15,22 +14,20 @@ export const JANUS_URL: any = `${config.janusUrl}/janus`;
 // } else {
 //     JANUS_URL = "https://" + window.location.hostname + ":8089/janus";
 // }
-
 // 回覆點擊功能
 export const scrollPageTo = (replyId: string | null) => {
     console.log("replyId:", replyId);
-
     if (!replyId) return;
+
     const element: any = document.getElementById(`${replyId}`);
-
     element.scrollIntoView({ behavior: "smooth", block: "center", nearest: "center" });
-
     const getAnimateClassName = element.childNodes[6].childNodes[0];
-
-    getAnimateClassName.classList.add("animate__shakeX");
+    setTimeout(() => {
+        getAnimateClassName.classList.add("animate__shakeX");
+    }, 600);
     setTimeout(() => {
         getAnimateClassName.classList.remove("animate__shakeX");
-    }, 1000);
+    }, 1600);
 };
 
 const MIMEMap: any = {
@@ -258,3 +255,35 @@ export const previewURL = (file: any): void => {
     a.innerHTML = `<span class="downloadImg"></span>`;
     wrap[0].appendChild(a);
 };
+
+// sms、mms罐頭訊息
+export const options = [
+    {
+        label: "請選擇罐頭片語",
+        value: null,
+    },
+    {
+        label: "線上交談",
+        value: "線上交談",
+    },
+    {
+        label: "詢問客服",
+        value: "詢問客服",
+    },
+    {
+        label: "了解詳情",
+        value: "了解詳情",
+    },
+    {
+        label: "線上詢問",
+        value: "線上詢問",
+    },
+    {
+        label: "線上互動",
+        value: "線上互動",
+    },
+    {
+        label: "詳洽",
+        value: "詳洽",
+    },
+];

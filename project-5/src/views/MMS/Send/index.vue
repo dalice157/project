@@ -42,7 +42,7 @@
                     <p>
                         {{ mmsUploadImgRef.name }}
                     </p>
-                    <img src="@/assets/Images/manage/delete.svg" @click="clearFile" />
+                    <img :src="deleteIcon" @click="clearFile" />
                 </div>
                 <div v-else class="notUpload">檔案名稱</div>
             </div>
@@ -50,20 +50,23 @@
                 <div class="contentTitle">
                     <h3>發送內容</h3>
                 </div>
-                <n-input
-                    ref="inputInstRef"
-                    id="textarea"
-                    v-model:value.trim="mmsContent"
-                    type="textarea"
-                    placeholder="請輸入簡訊內容..."
-                    :autosize="{
-                        minRows: 7,
-                        maxRows: 7,
-                    }"
-                    @focus="focusType"
-                    @blur="blurJudge"
-                    @input="KBCount"
-                />
+                <div class="inputWrap">
+                    <n-input
+                        ref="inputInstRef"
+                        id="textarea"
+                        v-model:value.trim="mmsContent"
+                        type="textarea"
+                        placeholder="請輸入簡訊內容..."
+                        :autosize="{
+                            minRows: 7,
+                            maxRows: 7,
+                        }"
+                        @focus="focusType"
+                        @blur="blurJudge"
+                        @input="KBCount"
+                    />
+                    <div class="lazyText">{{ lazyText }}</div>
+                </div>
             </div>
             <div class="messageCount">
                 <div class="messageInfo">
@@ -76,6 +79,24 @@
                     <div class="point">
                         <p>{{ mmsPoint }} 點</p>
                     </div>
+                </div>
+                <div class="lazyWrap">
+                    <n-popover trigger="hover" placement="bottom">
+                        <template #trigger>
+                            <n-icon :depth="3" size="22">
+                                <help-circle-outline />
+                            </n-icon>
+                        </template>
+                        <span class="pop"
+                            >系統會在收到與關鍵字完全一致的訊息時自動回傳訊息，未輸入則在不符合其他關鍵字時自動回傳訊息。</span
+                        >
+                    </n-popover>
+                    <n-select
+                        placeholder="請選擇罐頭片語"
+                        v-model:value="lazyText"
+                        :options="options"
+                        @update:value="KBCount"
+                    />
                 </div>
             </div>
             <TimeSetting optionType="mms"></TimeSetting>
@@ -98,13 +119,17 @@ export default {
 </script>
 <script lang="ts" setup>
 import { onMounted, ref, watchEffect, computed, watch } from "vue";
-import { NConfigProvider, NInput, NUpload, NDivider, NSelect } from "naive-ui";
+import { NIcon, NInput, NUpload, NDivider, NSelect, NPopover } from "naive-ui";
 import { useRouter, useRoute } from "vue-router";
-import TimeSetting from "../../../components/backend/TimeSetting.vue";
+import { storeToRefs } from "pinia";
+import { HelpCircleOutline } from "@vicons/ionicons5";
+
+import TimeSetting from "@/components/backend/TimeSetting.vue";
 import OptionSetting from "@/components/backend/OptionSetting.vue";
 import { useApiStore } from "@/store/api";
 import { useMmsStore } from "@/store/mmsStore";
-import { storeToRefs } from "pinia";
+import deleteIcon from "@/assets/Images/manage/delete.svg";
+import { options } from "@/util/commonUtil";
 
 const router = useRouter();
 const route = useRoute();
@@ -114,18 +139,8 @@ const { eventList, uploadRef: getUploadFile } = storeToRefs(apiStore);
 
 //mmsStore
 const mmsStore = useMmsStore();
-const {
-    mmsChannel,
-    mmsSubject,
-    mmsUploadImgRef,
-    mmsContent,
-    mmsKB,
-    mmsPoint,
-    mmsSendOption,
-    mmsSendTimeStamp,
-    mmsSendTime,
-    mmsExcelFile,
-} = storeToRefs(mmsStore);
+const { mmsChannel, mmsSubject, mmsUploadImgRef, mmsContent, mmsKB, mmsPoint } =
+    storeToRefs(mmsStore);
 
 const filterChannelList = computed(() => {
     return eventList.value
@@ -140,7 +155,7 @@ const filterChannelList = computed(() => {
 
 //textarea dom元素
 const inputInstRef = ref(null);
-const errorMsg = ref("");
+const lazyText = ref(null);
 
 //簡訊主旨,內容v-model
 const demoContent =
@@ -205,7 +220,11 @@ const RoundUp = (input, num) => {
 //計算主旨+內容大小(KB)
 const mmsContentLen = ref(0);
 const mmsSubjectLen = ref(0);
+const mmsLazyTextLen = ref(0);
+
 const KBCount = () => {
+    console.log("mms lazyText", lazyText.value);
+
     if (mmsContent.value !== demoContent) {
         mmsContentLen.value = lengthInUtf8Bytes(mmsContent.value) / 1024;
     } else {
@@ -217,14 +236,26 @@ const KBCount = () => {
     } else {
         mmsSubjectLen.value = 0;
     }
+    if (lazyText.value) {
+        mmsLazyTextLen.value = lengthInUtf8Bytes(lazyText.value) / 1024;
+    } else {
+        mmsLazyTextLen.value = 0;
+    }
+
     if (
         !mmsSubject.value &&
         (mmsContent.value === demoContent || mmsContent.value === "") &&
-        uploadFileSize.value === 0
+        uploadFileSize.value === 0 &&
+        mmsLazyTextLen.value === 0
     ) {
         mmsKB.value = 0;
     } else {
-        mmsKB.value = mmsSubjectLen.value + mmsContentLen.value + uploadFileSize.value + 2;
+        mmsKB.value =
+            mmsSubjectLen.value +
+            mmsContentLen.value +
+            uploadFileSize.value +
+            mmsLazyTextLen.value +
+            2;
         mmsKB.value = Number(
             mmsKB.value.toString().substring(0, mmsKB.value.toString().lastIndexOf(".") + 3)
         );
@@ -232,7 +263,7 @@ const KBCount = () => {
 };
 
 //下一頁按鈕
-const nextPageRouter = `/manage/${params.id}/MMSSendPage2`;
+const nextPageRouter = params.id ? `/manage/${params.id}/MMSSendPage2` : `/manage/MMSSendPage2`;
 watchEffect(() => {
     //點數判斷
     if (mmsKB.value < 50 && mmsKB.value > 0) {
@@ -248,7 +279,8 @@ const uploadFileSize = ref(0);
 const handleChange = ({ fileList }) => {
     mmsUploadImgRef.value = fileList[fileList.length - 1];
     uploadFileSize.value = Math.round((mmsUploadImgRef.value.file.size / 1024) * 100) / 100;
-    mmsKB.value = mmsSubjectLen.value + mmsContentLen.value + uploadFileSize.value + 2;
+    mmsKB.value =
+        mmsSubjectLen.value + mmsContentLen.value + uploadFileSize.value + mmsLazyTextLen.value + 2;
     mmsKB.value = Number(
         mmsKB.value.toString().substring(0, mmsKB.value.toString().lastIndexOf(".") + 3)
     );
@@ -256,7 +288,8 @@ const handleChange = ({ fileList }) => {
 const clearFile = () => {
     mmsUploadImgRef.value = null;
     uploadFileSize.value = 0;
-    mmsKB.value = mmsSubjectLen.value + mmsContentLen.value + uploadFileSize.value;
+    mmsKB.value =
+        mmsSubjectLen.value + mmsContentLen.value + uploadFileSize.value + mmsLazyTextLen.value;
     mmsKB.value = Number(
         mmsKB.value.toString().substring(0, mmsKB.value.toString().lastIndexOf(".") + 3)
     );
@@ -268,6 +301,25 @@ const clearFile = () => {
 @import "~@/assets/scss/var";
 .selectChannel {
     .n-base-selection {
+        --border: 1px solid #8b8b8b !important;
+        --border-active: 1px solid #8b8b8b !important;
+        --border-focus: 1px solid #8b8b8b !important;
+        --border-hover: 1px solid #e4e4e4 !important;
+        --border-radius: 4px !important;
+        --box-shadow-active: none !important;
+        --box-shadow-focus: none !important;
+        --caret-color: #3e3e3e !important;
+        --option-text-color-active: #ffb400 !important;
+    }
+}
+.inputWrap {
+    .n-input {
+        --border: none !important;
+    }
+}
+.lazyWrap {
+    .n-base-selection {
+        margin-left: 10px;
         --border: 1px solid #8b8b8b !important;
         --border-active: 1px solid #8b8b8b !important;
         --border-focus: 1px solid #8b8b8b !important;
@@ -333,10 +385,22 @@ const clearFile = () => {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
+.inputWrap {
+    border: 1px solid $gray-3;
+    border-radius: 5px;
+    .lazyText {
+        padding: 0 10px 10px;
+    }
+}
+.lazyWrap {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+}
 .MMSSend {
     position: relative;
     display: flex;
-    height: calc(100% - 80px);
+    height: calc(100vh - 80px);
     background-color: $bg;
     padding: 15px;
     .mmsContent {
@@ -352,7 +416,7 @@ const clearFile = () => {
         }
         .mmsChannel {
             h3 {
-                font-size: 14px;
+                font-size: $font-size-14;
                 font-weight: 400;
                 color: $gray-1;
                 font-family: $font-family;
@@ -366,7 +430,7 @@ const clearFile = () => {
                 display: flex;
                 margin-bottom: 15px;
                 h3 {
-                    font-size: 14px;
+                    font-size: $font-size-14;
                     font-weight: 400;
                     color: $gray-1;
                     font-family: $font-family;
@@ -376,7 +440,7 @@ const clearFile = () => {
                     min-width: 56px;
                 }
                 p {
-                    font-size: 12px;
+                    font-size: $font-size-12;
                     font-weight: 400;
                     color: $gray-3;
                     font-family: $font-family;
@@ -386,7 +450,7 @@ const clearFile = () => {
         }
         .mmsImageInfo {
             display: flex;
-            justify-mmscontent: flex-start;
+            justify-content: flex-start;
             align-items: center;
             margin-bottom: 30px;
         }
@@ -397,7 +461,7 @@ const clearFile = () => {
                 justify-content: space-between;
                 align-items: center;
                 h3 {
-                    font-size: 14px;
+                    font-size: $font-size-14;
                     font-weight: 400;
                     color: $gray-1;
                     font-family: $font-family;
@@ -409,7 +473,7 @@ const clearFile = () => {
                     background-color: $primary-1;
                     border-radius: 12.5px;
                     color: $white;
-                    font-size: 12px;
+                    font-size: $font-size-12;
                     font-weight: 400;
                     font-family: $font-family;
                     text-align: center;
@@ -423,11 +487,15 @@ const clearFile = () => {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            .lazyWrap {
+                display: flex;
+                justify-content: flex-start;
+                width: 200px;
+            }
 
             .messageInfo {
                 display: flex;
                 justify-content: flex-start;
-                width: 330px;
                 .messageKB {
                     width: 100px;
                     padding: 10px 0;
@@ -474,7 +542,7 @@ const clearFile = () => {
                 cursor: pointer;
                 p {
                     color: $white;
-                    font-size: 12px;
+                    font-size: $font-size-12;
                     font-weight: 400;
                     font-family: $font-family;
                 }
@@ -498,7 +566,7 @@ const clearFile = () => {
             cursor: pointer;
             p {
                 display: inline;
-                font-size: 14px;
+                font-size: $font-size-14;
                 font-weight: 400;
                 font-family: $font-family;
                 color: #fff;

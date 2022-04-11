@@ -6,20 +6,20 @@
                     <div class="setting">
                         <div class="iconSetting">
                             <div class="iconTitle">
-                                <h1>頭像設定</h1>
+                                <h1><span>*</span>&ensp;頭像設定</h1>
                                 <p>(請上傳商標或形象圖以供辨識)</p>
                             </div>
                             <n-upload @change="uploadAvatar($event)" accept="image/*" type="file">
                                 <div class="addChannelUploadImg">
                                     <img
                                         class="avatarDefault"
-                                        src="../../assets/Images/manage/Photo.svg"
+                                        :src="photoIcon"
                                         alt="預設圖"
                                         v-if="avatarStatus === 0"
                                     />
                                     <img
                                         class="avatarUpload"
-                                        :src="`${config.fileUrl}/fls/${avatar.fileid}${avatar.ext}`"
+                                        :src="`${config.fileUrl}${avatar.fileid}${avatar.ext}`"
                                         :alt="avatar.fileName"
                                         v-else
                                     />
@@ -58,6 +58,7 @@
                             placeholder="當使用者點及頭像即可看到聊天室簡介"
                             maxlength="100"
                             show-count
+                            size="small"
                             :autosize="{
                                 minRows: 3,
                                 maxRows: 3,
@@ -78,11 +79,7 @@
                                 :key="item.acountID"
                             >
                                 <p>{{ item.name }}</p>
-                                <img
-                                    src="@/assets/Images/manage/round-fill_close.svg"
-                                    alt=""
-                                    @click="deleteStaff(index)"
-                                />
+                                <img :src="closeIcon" alt="close" @click="deleteStaff(index)" />
                             </div>
                         </div>
                     </div>
@@ -105,28 +102,28 @@
                         </div>
                         <div class="welcomeImg" v-else-if="item.janusMsg.msgType === 6">
                             <img
-                                :src="`${config.fileUrl}/fls/${item.janusMsg.format.Fileid}${item.janusMsg.format.ExtensionName}`"
+                                :src="`${config.fileUrl}${item.janusMsg.format.Fileid}${item.janusMsg.format.ExtensionName}`"
                                 :alt="item.janusMsg.format.ShowName"
                             />
                         </div>
                         <div class="welcomeFile" v-else-if="item.janusMsg.msgType === 7">
                             <div>
                                 <div>
-                                    <img src="@/assets/Images/common/file.svg" />
+                                    <img :src="fileIcon" />
                                     <p>{{ item.janusMsg.format.ShowName }}</p>
                                 </div>
                             </div>
                         </div>
                         <div class="welcomeFunctionBar">
                             <img
-                                src="../../assets/Images/manage/delete.svg"
-                                alt=""
+                                :src="delIcon"
+                                alt="del"
                                 @click="deleteWelcomeMsg(item.janusMsg.config.id)"
                             />
                             <div class="welcomeFunctionBarUpload">
                                 <span
-                                    src="../../assets/Images/common/file.svg"
-                                    alt=""
+                                    :src="fileIcon"
+                                    alt="file"
                                     v-show="item.janusMsg.msgContent === ''"
                                 >
                                     <input
@@ -136,8 +133,8 @@
                                     />
                                 </span>
                                 <span
-                                    src="../../assets/Images/chatroom/pic.svg"
-                                    alt=""
+                                    :src="picIcon"
+                                    alt="pic"
                                     v-show="item.janusMsg.msgContent === ''"
                                 >
                                     <input
@@ -157,10 +154,18 @@
             <div class="channelButtonGroup">
                 <router-link
                     class="channelCancel"
-                    :to="`/manage/${route.params.id}/activitySetting`"
+                    :to="
+                        `${route.params.id}`
+                            ? `/manage/${route.params.id}/activitySetting`
+                            : `/manage/activitySetting`
+                    "
                     >取消</router-link
                 >
-                <PreviewModel :welcomeMsgCount="welcomeMsgCount" />
+                <PreviewModel
+                    :welcomeMsgCount="welcomeMsgCount"
+                    :name="name"
+                    :avatar="avatarStatus === 1 && `${avatar.fileid}${avatar.ext}`"
+                />
                 <div v-if="!isDisabled" class="channelStore" @click="goActivityStore">確認儲存</div>
                 <div v-else class="channelStore disabled">確認儲存</div>
             </div>
@@ -172,18 +177,15 @@
                 <div class="customServiceTitle">
                     <h2>客服人員列表</h2>
                 </div>
-                <div class="staffList">
+                <n-checkbox-group v-model:value="addList" class="staffList">
                     <ul>
                         <li v-for="(staff, index) in staffList" :key="index">
-                            <n-checkbox-group v-model:value="addList">
-                                <div class="staffData">
-                                    <p>{{ staff.name }}</p>
-                                    <n-checkbox :value="staff"></n-checkbox>
-                                </div>
-                            </n-checkbox-group>
+                            <div class="staffData">
+                                <n-checkbox class="staff" :value="staff" :label="staff.name" />
+                            </div>
                         </li>
                     </ul>
-                </div>
+                </n-checkbox-group>
                 <div class="staffConfirm" @click="popUp = !popUp">確認</div>
             </div>
         </div>
@@ -192,7 +194,7 @@
 
 <script lang="ts" setup>
 import { ref, reactive, onMounted, onUpdated, watchEffect } from "vue";
-import { NInput, NCheckbox, NCheckboxGroup, NUpload, NIcon } from "naive-ui";
+import { NInput, NCheckbox, NCheckboxGroup, NUpload } from "naive-ui";
 import { nanoid } from "nanoid";
 import config from "@/config/config";
 import { useRoute, useRouter } from "vue-router";
@@ -205,6 +207,11 @@ import { useApiStore } from "@/store/api";
 import { useChatStore } from "@/store/chat";
 import { unixTime, currentDate } from "@/util/dateUtil";
 import PreviewModel from "@/components/PreviewModel";
+import photoIcon from "@/assets/Images/manage/Photo.svg";
+import closeIcon from "@/assets/Images/manage/round-fill_close.svg";
+import fileIcon from "@/assets/Images/common/file.svg";
+import delIcon from "@/assets/Images/manage/delete.svg";
+import picIcon from "@/assets/Images/chatroom/pic.svg";
 
 //router 資訊
 const router = useRouter();
@@ -268,7 +275,6 @@ const uploadAvatar = (e: any) => {
                             fileName: file.name,
                         };
                         avatarStatus.value = 1;
-                        console.log(avatar.value);
                     };
                 })
                 .catch((err) => {
@@ -334,33 +340,33 @@ const addWelcomeMsg = () => {
     }
 };
 //歡迎訊息預設值
-onMounted(() => {
-    welcomeMsg = {
-        janusMsg: {
-            msgType: 1,
-            sender: 0, // 0:客服, 1:使用者
-            msgContent: "",
-            time: unixTime(),
-            type: 2, //1:簡訊 2: 文字
-            format: {},
-            config: {
-                chatroomID: "",
-                id: nanoid(),
-                isReply: false,
-                replyObj: "",
-                currentDate: currentDate(),
-                isExpire: false,
-                isPlay: false,
-                isRead: false,
-                msgFunctionStatus: false,
-                msgMoreStatus: false,
-                recallPopUp: false,
-                recallStatus: false,
-            },
-        },
-    };
-    welcomeMsgCount.value.push(welcomeMsg);
-});
+// onMounted(() => {
+//     welcomeMsg = {
+//         janusMsg: {
+//             msgType: 1,
+//             sender: 0, // 0:客服, 1:使用者
+//             msgContent: "",
+//             time: unixTime(),
+//             type: 2, //1:簡訊 2: 文字
+//             format: {},
+//             config: {
+//                 chatroomID: "",
+//                 id: nanoid(),
+//                 isReply: false,
+//                 replyObj: "",
+//                 currentDate: currentDate(),
+//                 isExpire: false,
+//                 isPlay: false,
+//                 isRead: false,
+//                 msgFunctionStatus: false,
+//                 msgMoreStatus: false,
+//                 recallPopUp: false,
+//                 recallStatus: false,
+//             },
+//         },
+//     };
+//     welcomeMsgCount.value.push(welcomeMsg);
+// });
 
 //刪除歡迎訊息
 const deleteWelcomeMsg = (id: any) => {
@@ -499,8 +505,11 @@ const goActivityStore = () => {
             inValid.value = true;
         }
     });
-    if (name.value === "" || inValid.value === true) {
-        alert("尚有必填欄位未填寫!!");
+    if (name.value === "" || inValid.value === true || avatarStatus.value !== 1) {
+        const channelName = name.value === "" ? "活動名稱、" : "";
+        const avatar = avatarStatus.value !== 1 ? "頭像、" : "";
+        const welcomeMsg = inValid.value ? "歡迎訊息" : "";
+        alert(`尚有 ${channelName}${avatar}${welcomeMsg} 欄位未填寫!!`);
     } else {
         const accountID = localStorage.getItem("accountID") || "[]";
         const channelDataObj = {
@@ -540,7 +549,9 @@ const goActivityStore = () => {
                 };
                 textPlugin.value.send({ message: msg });
                 isDisabled.value = false;
-                router.push(`/manage/${params.id}/activitySetting`);
+                params.id
+                    ? router.push(`/manage/${params.id}/activitySetting`)
+                    : router.push(`/manage/activitySetting`);
             })
             .catch((err) => {
                 isDisabled.value = false;
@@ -550,13 +561,38 @@ const goActivityStore = () => {
 };
 </script>
 <style lang="scss">
+@import "~@/assets/scss/var";
+.staff {
+    &.n-checkbox .n-checkbox-box .n-checkbox-box__border {
+        border: 1px solid #aaa;
+    }
+}
+.staffData {
+    .n-ellipsis {
+        color: $gray-1;
+    }
+}
 .n-upload-file-list {
     display: none;
+}
+.introduction .n-input {
+    max-width: 100%;
+}
+.introduction .n-input .n-input-wrapper {
+    padding-right: 0px;
+}
+.introduction .n-input.n-input--textarea .n-input-word-count {
+    right: 30px;
 }
 </style>
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
+
+.staff {
+    margin-right: 10px;
+}
+
 .mask {
     position: absolute;
     top: 0;
@@ -570,40 +606,31 @@ const goActivityStore = () => {
     align-items: center;
 
     .customService {
-        width: 590px;
-        height: 665px;
+        width: 400px;
         background-color: $white;
-        padding: 25px 0px;
+        border-radius: 5px;
+        padding: 25px 0px 10px;
         .customServiceTitle {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding: 0 20px;
+            padding: 0 20px 10px;
             h2 {
                 font-family: $font-family;
-                font-size: 16px;
-                font-weight: 500;
+                font-size: $font-size-16;
+                font-weight: 600;
                 color: $gray-1;
-            }
-            img {
-                width: 27px;
-                height: 27px;
-                cursor: pointer;
             }
         }
         .staffList {
             overflow-y: auto;
-            height: 500px;
+            min-height: 200px;
+            max-height: 350px;
             ul {
                 li {
-                    height: 60px;
-                    line-height: 60px;
-                    padding: 0 20px;
+                    padding: 20px;
                     position: relative;
                     .staffData {
                         display: flex;
-                        justify-content: space-between;
                         align-items: center;
                     }
 
@@ -653,25 +680,27 @@ const goActivityStore = () => {
 
                 .setting {
                     display: flex;
+                    justify-content: space-between;
                     margin-bottom: 30px;
                     .iconSetting {
-                        margin-right: 100px;
                         .iconTitle {
-                            display: flex;
-                            align-items: center;
                             margin-bottom: 15px;
                             h1 {
                                 font-family: $font-family;
-                                font-size: 16px;
+                                font-size: $font-size-16;
                                 font-weight: 400;
                                 color: $gray-1;
                                 margin-right: 10px;
+                                span {
+                                    color: red;
+                                }
                             }
                             p {
                                 font-family: $font-family;
-                                font-size: 14px;
+                                font-size: $font-size-14;
                                 font-weight: 400;
                                 color: $gray-3;
+                                margin-top: 8px;
                             }
                         }
                         .n-upload {
@@ -704,7 +733,7 @@ const goActivityStore = () => {
                     .functionSetting {
                         h1 {
                             font-family: $font-family;
-                            font-size: 16px;
+                            font-size: $font-size-16;
                             font-weight: 400;
                             color: $gray-1;
                             margin-right: 10px;
@@ -716,7 +745,7 @@ const goActivityStore = () => {
                             p {
                                 margin-left: 15px;
                                 font-family: $font-family;
-                                font-size: 14px;
+                                font-size: $font-size-14;
                                 font-weight: 400;
                                 color: $gray-3;
                             }
@@ -792,12 +821,12 @@ const goActivityStore = () => {
             }
             .welcomeStatus {
                 margin-left: 100px;
-                width: 360px;
+                width: 45%;
                 .welcomeTitle {
                     display: flex;
                     h1 {
                         font-family: $font-family;
-                        font-size: 16px;
+                        font-size: $font-size-16;
                         font-weight: 400;
                         color: $gray-1;
                         margin-right: 10px;
@@ -809,7 +838,7 @@ const goActivityStore = () => {
                     p {
                         margin-left: 15px;
                         font-family: $font-family;
-                        font-size: 14px;
+                        font-size: $font-size-14;
                         font-weight: 400;
                         color: $gray-3;
                     }
@@ -864,7 +893,7 @@ const goActivityStore = () => {
                                 display: block;
                                 width: 24px;
                                 height: 24px;
-                                background-image: url("../../assets/Images/common/file.svg");
+                                background-image: url("~@/assets/Images/common/file.svg");
                                 background-size: 24px;
 
                                 input {
@@ -879,7 +908,7 @@ const goActivityStore = () => {
                                 display: block;
                                 width: 24px;
                                 height: 24px;
-                                background-image: url("../../assets/Images/chatroom/pic.svg");
+                                background-image: url("~@/assets/Images/chatroom/pic.svg");
                                 background-size: 24px;
                                 margin: 0 5px;
 

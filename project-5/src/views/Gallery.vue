@@ -6,73 +6,58 @@
                 class="close"
                 :to="`/chat/${route.params.id}?chatroomID=${route.query.chatroomID}&mobile=${route.query.mobile}`"
             >
-                <img src="../assets/Images/chatroom/close-round.svg" />
+                <img :src="closeIcon" alt="關閉" />
             </router-link>
             <div class="noPicture" v-if="pictures.length === 0">
                 <p>尚未有任何相片!!!</p>
             </div>
             <div class="picture-box" v-if="pictures.length > 0 && dateArr.length > 0">
-                <div v-for="(date, index) in dateArr" :key="index">
-                    <div v-if="date" class="date">{{ date }}</div>
-                    <div class="picture" v-if="date">
+                <div v-for="(pics, index) in picArr" :key="index">
+                    <div class="date">
+                        {{ dayjs(pics[0].janusMsg.config.currentDate).format("YYYY/MM") }}
+                    </div>
+                    <div class="picture">
                         <div
                             class="picture-inner"
-                            :class="{
-                                hide:
-                                    date !==
-                                    dayjs(picture.janusMsg.config.currtentDate).format('YYYY/MM'),
-                            }"
-                            v-for="picture in pictures"
-                            :key="picture.id"
+                            v-for="picture in pics"
+                            :key="picture.janusMsg.config.id"
                         >
-                            <!-- {{ picture.janusMsg.config }} -->
                             <div
                                 class="imgEnable"
                                 v-if="
                                     picture.janusMsg.msgType === 6 &&
-                                    !picture.janusMsg.config.isExpire &&
-                                    date ===
-                                        dayjs(picture.janusMsg.config.currtentDate).format(
-                                            'YYYY/MM'
-                                        )
+                                    !picture.janusMsg.config.isExpire
                                 "
                                 @click="previewURL(picture.janusMsg.format.Fileid)"
                             >
                                 <img
-                                    :src="`${config.fileUrl}/fls/${
+                                    :src="`${config.fileUrl}${
                                         picture.janusMsg.format.Fileid
                                     }.${picture.janusMsg.format.ShowName.split('.').pop()}`"
                                 />
                             </div>
+
                             <div
                                 class="imgDisable"
                                 v-if="
                                     picture.janusMsg.msgType === 6 &&
-                                    picture.janusMsg.config.isExpire &&
-                                    date ===
-                                        dayjs(picture.janusMsg.config.currtentDate).format(
-                                            'YYYY/MM'
-                                        )
+                                    picture.janusMsg.config.isExpire
                                 "
                             >
-                                <img src="../assets/Images/gallery/pic-disabled.svg" />
+                                <img :src="picDisabled" />
                             </div>
                             <div
                                 class="picture-file-enable"
                                 v-if="
                                     picture.janusMsg.msgType === 7 &&
-                                    !picture.janusMsg.config.isExpire &&
-                                    date ===
-                                        dayjs(picture.janusMsg.config.currtentDate).format(
-                                            'YYYY/MM'
-                                        )
+                                    !picture.janusMsg.config.isExpire
                                 "
                             >
                                 <a
                                     target="_blank"
                                     :href="`${config.serverUrl}/v1/file/${route.params.id}/${picture.janusMsg.format.Fileid}`"
                                 >
-                                    <img src="../assets/Images/chatroom/file-fill.svg" />
+                                    <img :src="fileIcon" />
                                     <n-ellipsis
                                         style="width: 90%; max-height: 80px"
                                         :line-clamp="4"
@@ -87,15 +72,11 @@
                                 class="picture-file-disable"
                                 v-if="
                                     picture.janusMsg.msgType === 7 &&
-                                    picture.janusMsg.config.isExpire &&
-                                    date ===
-                                        dayjs(picture.janusMsg.config.currtentDate).format(
-                                            'YYYY/MM'
-                                        )
+                                    picture.janusMsg.config.isExpire
                                 "
                             >
                                 <div>
-                                    <img src="../assets/Images/chatroom/file-fill.svg" />
+                                    <img :src="fileIcon" />
                                     <n-ellipsis
                                         style="width: 90%; max-height: 80px"
                                         :line-clamp="4"
@@ -126,6 +107,9 @@ import { useChatStore } from "@/store/chat";
 import config from "@/config/config";
 import { currentDate, currentMonth } from "@/util/dateUtil";
 import Headers from "@/components/Headers.vue";
+import closeIcon from "@/assets/Images/chatroom/close-round.svg";
+import picDisabled from "@/assets/Images/gallery/pic-disabled.svg";
+import fileIcon from "@/assets/Images/chatroom/file-fill.svg";
 
 //router
 const route = useRoute();
@@ -138,16 +122,26 @@ const { messageList } = storeToRefs(apiStore);
 if (Object.keys(route.query).length > 0) {
     getHistoryApi(route.query.chatroomID);
 }
-const pictures: any = computed(() => {
-    const set = new Set();
-    return messageList.value.filter((item: any) => {
-        return !set.has(item.janusMsg.format.Fileid) &&
-            (item.janusMsg.msgType === 6 || item.janusMsg.msgType === 7)
-            ? set.add(item.janusMsg.format.Fileid)
-            : false;
-    });
+const pictures: any = computed({
+    get() {
+        const set = new Set();
+        return messageList.value.filter((item: any) => {
+            return !set.has(item.janusMsg.format.Fileid) &&
+                (item.janusMsg.msgType === 6 || item.janusMsg.msgType === 7)
+                ? set.add(item.janusMsg.format.Fileid)
+                : false;
+        });
+    },
+    set(val) {
+        messageList.value = val;
+    },
 });
-console.log("pictures", pictures);
+// watchEffect(() => {
+//     console.log("pictures", pictures.value);
+//     console.log("result", result?.value);
+//     console.log("dateArr", dateArr?.value);
+//     console.log("picArr", picArr?.value);
+// });
 
 const result: any = computed(() => {
     return pictures.value.map((pic: any, index: any) => {
@@ -157,25 +151,41 @@ const result: any = computed(() => {
         } else {
             pic.janusMsg.config.isExpire = false;
         }
-        if (
-            index === 0 ||
-            (index > 0 &&
-                dayjs(pic.janusMsg.format.expirationDate) !==
-                    dayjs(pictures.value[index - 1].janusMsg.format.expirationDate))
-        ) {
-            return dayjs(pic.janusMsg.format.expirationDate).format("YYYY/MM");
-        }
+        return pic;
     });
 });
-console.log("result", result);
 
 const dateArr: any = computed(() => {
-    return result.value
-        .filter((element: any, index: any, arr: any) => arr.indexOf(element) === index)
+    const set = new Set();
+    const arr = result.value.filter((item) =>
+        !set.has(item.janusMsg.config.currentDate)
+            ? set.add(item.janusMsg.config.currentDate)
+            : false
+    );
+    return arr
+        .map((pic) => {
+            return { month: dayjs(pic.janusMsg.config.currentDate).format("YYYY/MM") };
+        })
         .sort()
-        .reverse();
+        .reverse()
+        .map((date) => {
+            return [date];
+        });
 });
-console.log("dateArr", dateArr);
+
+const picArr: any = computed(() => {
+    result.value.forEach((item) => {
+        dateArr.value.forEach((date) => {
+            if (dayjs(item.janusMsg.config.currentDate).format("YYYY/MM") === date[0].month) {
+                date.push(item);
+            }
+        });
+    });
+    dateArr.value.forEach((item) => {
+        item.shift();
+    });
+    return dateArr.value;
+});
 
 // 圖片展示
 const viewImgs: any = ref([]);
@@ -185,7 +195,7 @@ const previewURL = (fileid: string): void => {
     pictures.value.forEach((img: any) => {
         if (
             !viewImgs.value.includes(
-                `${config.fileUrl}/fls/${
+                `${config.fileUrl}${
                     img.janusMsg.format.Fileid
                 }.${img.janusMsg.format.ShowName.split(".").pop()}`
             ) &&
@@ -193,7 +203,7 @@ const previewURL = (fileid: string): void => {
             !img.janusMsg.config.isExpire
         ) {
             viewImgs.value.push(
-                `${config.fileUrl}/fls/${
+                `${config.fileUrl}${
                     img.janusMsg.format.Fileid
                 }.${img.janusMsg.format.ShowName.split(".").pop()}`
             );
@@ -231,7 +241,7 @@ const previewURL = (fileid: string): void => {
 @import "~@/assets/scss/extend";
 
 .bg {
-    height: calc(100% - 80px);
+    height: calc(100% - 90px);
 }
 .date {
     font-size: $font-size-18;
@@ -241,7 +251,7 @@ const previewURL = (fileid: string): void => {
 }
 .picture-box {
     width: 95%;
-    height: calc(100% - 80px);
+    height: calc(100% - 90px);
     display: block;
     margin: 0px auto 0;
     overflow-y: auto;
@@ -362,7 +372,7 @@ const previewURL = (fileid: string): void => {
     }
 }
 .noPicture {
-    height: calc(100vh - 60px);
+    height: calc(100vh - 80px);
     p {
         padding-top: 15%;
         font-size: $font-size-20;

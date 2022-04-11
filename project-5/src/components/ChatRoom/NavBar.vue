@@ -16,31 +16,17 @@
                 切換發送文字
             </button>
             <a class="phone-web" v-if="eventInfo.callable === 1">
-                <img
-                    src="../../assets/Images/chatroom/phone.svg"
-                    alt="#"
-                    @click="onPhoneCallModal(chatroomID)"
-                />
+                <img :src="phoneIcon" alt="撥打電話" @click="onPhoneCallModal(chatroomID)" />
             </a>
             <phoneCallModel />
-            <!-- <router-link
-                class="phone"
-                :to="`/phone/${route.params.id}?chatroomID=${chatroomID}&mobile=${mobile}`"
-            >
-                <img
-                    src="../../assets/Images/chatroom/phone.svg"
-                    alt="#"
-                    @touchend="doCall(DO_CALL_NAME)"
-                />
-            </router-link> -->
             <router-link
                 class="gallery"
                 :to="`/gallery/${route.params.id}?chatroomID=${chatroomID}&mobile=${mobile}`"
             >
-                <img src="../../assets/Images/chatroom/list.svg" alt="#" />
+                <img :src="galleryIcon" alt="進入相本" />
             </router-link>
             <div class="search" @click.stop="searchSwitch">
-                <img src="../../assets/Images/chatroom/search.svg" alt="#" />
+                <img :src="searchIcon" alt="搜尋" />
             </div>
         </div>
     </div>
@@ -61,6 +47,9 @@ import { useModelStore } from "@/store/model";
 import { dateFormat } from "@/util/dateUtil";
 import config from "@/config/config";
 import phoneCallModel from "@/components/phoneCallModel.vue";
+import phoneIcon from "@/assets/Images/chatroom/phone.svg";
+import galleryIcon from "@/assets/Images/chatroom/list.svg";
+import searchIcon from "@/assets/Images/chatroom/search.svg";
 
 //router
 const router = useRouter();
@@ -127,6 +116,7 @@ const lastTimeStart: any = () => {
         lastTime.value = `${dayjs(userInfo.value.lastVisit / 1000000).fromNow()}上線`;
     }, 1000);
 };
+getChatroomUserInfoApi(chatroomID.value);
 watchEffect(() => {
     if (isOnline.value && route.path.split("/")[1] === "chat" && route.query) {
         messageList.value = messageList.value.map((item) => {
@@ -138,7 +128,6 @@ watchEffect(() => {
     } else {
         lastTimeStart();
     }
-    getChatroomUserInfoApi(chatroomID.value);
 });
 </script>
 

@@ -8,7 +8,7 @@
                     <div class="downloadList">
                         <div class="downloadArea">
                             <img
-                                src="../../assets/Images/manage/delete.svg"
+                                :src="delIcon"
                                 alt=""
                                 v-if="uploadRef !== null"
                                 @click="uploadRef = null"
@@ -16,14 +16,14 @@
                             <div class="downloadFile">
                                 <n-upload ref="upload" @change="handleChange" accept=".xlsx,xls">
                                     <div class="downloadImg">
-                                        <img src="../../assets/Images/common/file.svg" alt="#" />
+                                        <img :src="fileIcon" alt="檔案" />
                                     </div>
                                 </n-upload>
                                 <div class="downloadText">
                                     <a
                                         v-if="uploadRef === null"
                                         target="_blank"
-                                        :href="`${config.fileUrl}/fls/一般大量發送範例檔.xlsx`"
+                                        :href="`${config.fileUrl}一般大量發送範例檔.xlsx`"
                                     >
                                         <h2>下載一般大量發送範例檔</h2>
                                     </a>
@@ -79,10 +79,7 @@
                                     >&ensp;筆
                                 </p>
                             </div>
-                            <img
-                                src="../../assets/Images/manage/edit-round.svg"
-                                @click="invalidPopUp = !invalidPopUp"
-                            />
+                            <img :src="editIcon" @click="invalidPopUp = !invalidPopUp" alt="編輯" />
                         </div>
                         <div class="nextPage" @click="nextPageList" v-show="uploadRef !== null">
                             <p>下一步</p>
@@ -129,11 +126,7 @@
             <div class="popUp">
                 <div class="popUpTitle">
                     <h2>簡訊服務條款</h2>
-                    <img
-                        src="../../assets/Images/chatroom/close-round.svg"
-                        alt="#"
-                        @click="termsPopUp = !termsPopUp"
-                    />
+                    <img :src="closeIcon" alt="關閉" @click="termsPopUp = !termsPopUp" />
                 </div>
                 <p>
                     1.&emsp;
@@ -170,11 +163,7 @@
             <div class="invalidList">
                 <div class="popUpTitle">
                     <h2>無效名單</h2>
-                    <img
-                        src="../../assets/Images/chatroom/close-round.svg"
-                        alt="#"
-                        @click="invalidPopUp = !invalidPopUp"
-                    />
+                    <img :src="closeIcon" alt="關閉" @click="invalidPopUp = !invalidPopUp" />
                 </div>
                 <div class="invalidFunctionBar">
                     <n-input
@@ -184,7 +173,7 @@
                         placeholder="搜尋"
                     >
                         <template #prefix>
-                            <img src="@/assets/Images/manage/search.svg" />
+                            <img :src="searchIcon" alt="搜尋" />
                         </template>
                     </n-input>
                     <!-- <div class="invalidCancel">匯出</div> -->
@@ -217,6 +206,11 @@ import { useMmsStore } from "@/store/mmsStore";
 import { useApiStore } from "@/store/api";
 import config from "@/config/config";
 import { isphone } from "@/util/commonUtil";
+import delIcon from "@/assets/Images/manage/delete.svg";
+import fileIcon from "@/assets/Images/common/file.svg";
+import editIcon from "@/assets/Images/manage/edit-round.svg";
+import closeIcon from "@/assets/Images/chatroom/close-round.svg";
+import searchIcon from "@/assets/Images/manage/search.svg";
 
 //smsStore
 const smsStore = useSmsStore();
@@ -470,6 +464,7 @@ const themeOverrides = {
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
     .popUp {
+        border-radius: 5px;
         width: 900px;
         height: 658px;
         padding: 30px;
@@ -483,7 +478,7 @@ const themeOverrides = {
             h2 {
                 text-align: center;
                 margin-bottom: 60px;
-                font-size: 16px;
+                font-size: $font-size-16;
                 font-weight: 500;
                 color: $gray-1;
             }
@@ -497,7 +492,7 @@ const themeOverrides = {
         p {
             line-height: 1.4;
             font-family: $font-family;
-            font-size: 14px;
+            font-size: $font-size-14;
             font-weight: 400;
             color: $gray-1;
             margin-bottom: 60px;
@@ -531,7 +526,7 @@ const themeOverrides = {
         h2 {
             text-align: center;
             margin-bottom: 60px;
-            font-size: 16px;
+            font-size: $font-size-16;
             font-weight: 500;
             color: $gray-1;
         }
@@ -636,7 +631,7 @@ const themeOverrides = {
             margin-top: 50px;
             p {
                 display: inline;
-                font-size: 14px;
+                font-size: $font-size-14;
                 font-weight: 400;
                 font-family: $font-family;
                 color: #fff;
@@ -708,7 +703,7 @@ const themeOverrides = {
                                     text-decoration: none;
 
                                     h2 {
-                                        font-size: 16px;
+                                        font-size: $font-size-16;
                                         font-weight: 400;
                                         font-family: $font-family;
                                         color: $danger;
@@ -719,7 +714,7 @@ const themeOverrides = {
                                     }
                                 }
                                 h2 {
-                                    font-size: 16px;
+                                    font-size: $font-size-16;
                                     font-weight: 400;
                                     font-family: $font-family;
                                     color: $danger;
@@ -752,7 +747,7 @@ const themeOverrides = {
 
                         p {
                             color: $gray-1;
-                            font-size: 14px;
+                            font-size: $font-size-14;
                             font-weight: 400;
                             font-family: $font-family;
                             line-height: 1.4;
@@ -811,7 +806,7 @@ const themeOverrides = {
                     .manualDirections {
                         h4 {
                             color: $gray-1;
-                            font-size: 14px;
+                            font-size: $font-size-14;
                             font-weight: 400;
                             margin-top: 5px;
                             margin-bottom: 15px;
@@ -845,7 +840,7 @@ const themeOverrides = {
         margin-top: 50px;
         p {
             display: inline;
-            font-size: 14px;
+            font-size: $font-size-14;
             font-weight: 400;
             font-family: $font-family;
             color: #fff;

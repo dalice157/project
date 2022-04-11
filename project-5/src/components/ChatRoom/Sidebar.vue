@@ -55,7 +55,7 @@ const { closeSearchBar } = searchStore;
         color: $primary-1;
         font-size: $font-family;
         font-weight: 400;
-        font-size: 18px;
+        font-size: $font-size-18;
         margin-left: 15px;
     }
 }

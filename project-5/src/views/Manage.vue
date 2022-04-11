@@ -8,7 +8,7 @@
             <div class="sms">
                 <h1>SMS</h1>
                 <router-link
-                    :to="`/manage/${params.id}/SMSSend`"
+                    :to="`${params.id}` ? `/manage/${params.id}/SMSSend` : `/manage/SMSSend`"
                     :class="
                         $route.name === 'SMSSend' || $route.name === 'SMSSendPage2' ? 'active' : ''
                     "
@@ -16,7 +16,7 @@
                     >SMS發送</router-link
                 >
                 <router-link
-                    :to="`/manage/${params.id}/SMSInquire`"
+                    :to="`${params.id}` ? `/manage/${params.id}/SMSInquire` : `/manage/SMSInquire`"
                     :class="$route.name === 'SMSInquire' ? 'active' : ''"
                     @click="storeReset"
                     >SMS發送查詢</router-link
@@ -26,7 +26,7 @@
             <div class="mms">
                 <h1>MMS</h1>
                 <router-link
-                    :to="`/manage/${params.id}/MMSSend`"
+                    :to="`${params.id}` ? `/manage/${params.id}/MMSSend` : `/manage/MMSSend`"
                     :class="
                         $route.name === 'MMSSend' || $route.name === 'MMSSendPage2' ? 'active' : ''
                     "
@@ -34,7 +34,7 @@
                     >MMS發送</router-link
                 >
                 <router-link
-                    :to="`/manage/${params.id}/MMSInquire`"
+                    :to="`${params.id}` ? `/manage/${params.id}/MMSInquire` : `/manage/MMSInquire`"
                     :active-class="$route.name === 'MMSInquire' ? 'active' : ''"
                     @click="storeReset"
                     >MMS發送查詢</router-link
@@ -42,7 +42,11 @@
             </div>
             <div class="manageSetting">
                 <router-link
-                    :to="`/manage/${params.id}/activitySetting`"
+                    :to="
+                        `${params.id}`
+                            ? `/manage/${params.id}/activitySetting`
+                            : `/manage/activitySetting`
+                    "
                     :class="
                         $route.name === 'ActivitySetting' ||
                         $route.name === 'AddChannel' ||
@@ -56,14 +60,18 @@
                 >
                 <router-link
                     v-if="adminStatus == '2'"
-                    :to="`/manage/${params.id}/manageSetting`"
+                    :to="
+                        `${params.id}`
+                            ? `/manage/${params.id}/manageSetting`
+                            : `/manage/manageSetting`
+                    "
                     :active-class="$route.name === 'ManageSetting' ? 'active' : ''"
                     @click="storeReset"
                     >管理者設定</router-link
                 >
             </div>
         </n-layout-sider>
-        <n-layout>
+        <n-layout class="content">
             <Headers />
             <router-view name="manage" v-slot="{ Component }">
                 <keep-alive :include="cacheComponent">
@@ -161,7 +169,7 @@ const closeChatRoomBubble = () => {
                     color: $primary-1;
                     font-size: $font-family;
                     font-weight: 400;
-                    font-size: 18px;
+                    font-size: $font-size-18;
                     margin-left: 15px;
                 }
             }
@@ -248,5 +256,8 @@ const closeChatRoomBubble = () => {
             }
         }
     }
+}
+.content {
+    height: 100%;
 }
 </style>

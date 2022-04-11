@@ -3,9 +3,10 @@
         <h1
             class="logo"
             v-if="
-                route.path == `/chat/${route.params.id}` ||
-                route.path == `/gallery/${route.params.id}` ||
-                route.path == `/phone/${route.params.id}`
+                route.path == `/chat` ||
+                route.path == `/chat/${eventID}` ||
+                route.path == `/gallery/${eventID}` ||
+                route.path == `/phone/${eventID}`
             "
         >
             {{ eventInfo.name }}
@@ -23,7 +24,9 @@
                 >)
             </li>
             <li class="btnBg" v-if="isAdmin >= 1">
-                <router-link :to="`/manage/${params.id}/SMSSend`">管理功能</router-link>
+                <router-link :to="`${eventID}` ? `/manage/${eventID}/SMSSend` : `/manage/SMSSend`"
+                    >管理功能</router-link
+                >
             </li>
             <li class="btnBg myChatRoom">
                 <n-dropdown
@@ -36,23 +39,23 @@
                 </n-dropdown>
             </li>
             <li v-if="!access_token">
-                <a :href="`/${params.id}`">登入</a>
+                <a href="/">登入</a>
             </li>
             <li class="chevron" v-if="access_token">
-                <a :href="`/${params.id}`">登出</a>
+                <a href="/">登出</a>
             </li>
         </ul>
     </n-layout-header>
 </template>
 
 <script lang="ts" setup>
-import { computed, watch, onMounted, ref, watchEffect } from "vue";
+import { computed, watch, onMounted, ref, watchEffect, onBeforeMount } from "vue";
 import { useRoute } from "vue-router";
 import { NDropdown, NPopover, NIcon, NLayoutHeader } from "naive-ui";
 import { storeToRefs } from "pinia";
 import adapter from "webrtc-adapter";
 import Janus from "@/assets/js/janus";
-import { nanoid } from "nanoid";
+import axios from "axios";
 import bootbox from "bootbox";
 
 import config from "@/config/config";
@@ -63,7 +66,6 @@ import { ITransactions, IAttachPlugin } from "@/util/interfaceUtil";
 import { useChatStore } from "@/store/chat";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { useModelStore } from "@/store/model";
-import router from "@/router";
 
 const route = useRoute();
 const params = route.params;
@@ -85,30 +87,50 @@ const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime
 
 // api store
 const apiStore = useApiStore();
-const { getPoint, getEventApi, getChatroomlistApi, getEvents, getEventListApi } = apiStore;
+const { getPoint, getEventApi, getChatroomlistApi, getHistoryApi } = apiStore;
 const { eventInfo, point, isJanusinit, eventList, staffEvents } = storeToRefs(apiStore);
 const access_token = localStorage.getItem("access_token");
 
 const chatRoomID: any = computed(() => route.query.chatroomID);
 const mobile: any = computed(() => route.query.mobile);
-const eventID = computed(() => route.params.id);
+const eventID: any = ref("");
+
+//未登入跳回登入頁
+onBeforeMount(() => {
+    if (!access_token) {
+        alert("您尚未登入!!!");
+        location.href = "/";
+    }
+});
 
 // adminStatus: 0-客服, 1-管理者,
 const isAdmin: number | null = Number(localStorage.getItem("adminStatus"));
 const adminStatus = localStorage.getItem("adminStatus");
 const accountID = localStorage.getItem("accountID");
 onMounted(() => {
-    getEventApi(eventID.value);
-    getPoint(eventID.value);
-    if (adminStatus === "0") {
-        getEvents(accountID);
-    } else {
-        getEventListApi();
-    }
+    axios
+        .get(`${config.serverUrl}/v1/eventlist`, {
+            headers: {
+                Authorization: `Bearer ${access_token}`,
+            },
+        })
+        .then((res: any) => {
+            console.log("eventlist res:", res.data.eventList);
+            if (route.params.id) {
+                eventID.value = route.params.id;
+            }
+            eventList.value = res.data.eventList;
+            eventID.value = route.params.id ? route.params.id : eventList.value[0].eventID;
+            getEventApi(eventID.value);
+            getPoint(eventID.value);
+        })
+        .catch((err: any) => {
+            console.error(err);
+        });
 });
 
 const showTitle = () => {
-    const managePath = `/manage/${eventID.value}`;
+    const managePath = eventID.value ? `/manage/${eventID.value}` : `/manage`;
     if (route.path === `${managePath}/SMSSend` || route.path === `${managePath}/SMSSendPage2`) {
         return "SMS發送";
     }
@@ -161,22 +183,12 @@ const handleSelect = (key: string | number) => {
 };
 
 const handleClick = () => {
-    // console.log("staffEvents", staffEvents.value);
-    if (adminStatus === "0") {
-        options.value = staffEvents.value.events.map((item) => {
-            return {
-                label: item.name,
-                key: item.eventID,
-            };
-        });
-    } else {
-        options.value = eventList.value.map((item) => {
-            return {
-                label: item.name,
-                key: item.eventID,
-            };
-        });
-    }
+    options.value = eventList.value.map((item) => {
+        return {
+            label: item.name,
+            key: item.eventID,
+        };
+    });
 
     showDropdown.value = !showDropdown.value;
 };
@@ -200,7 +212,7 @@ window.addEventListener("visibilitychange", (event) => {
     }
     if (document.visibilityState === "visible") {
         Janus.init({
-            debug: "all",
+            debug: "trace",
             dependencies: Janus.useDefaultDependencies({
                 adapter: adapter,
             }),
@@ -210,6 +222,8 @@ window.addEventListener("visibilitychange", (event) => {
                     return;
                 }
                 connect();
+                getChatroomlistApi(route.params.id);
+                getHistoryApi(route.query.chatroomID);
             },
         });
         return;
@@ -226,7 +240,7 @@ const connect = () => {
         },
         error: (error: any) => {
             onError("Failed to connect to janus server", error);
-            alert("連線中斷,按下確認重新連線");
+            // alert("連線中斷,按下確認重新連線");
             window.location.reload();
         },
         destroyed: () => {
@@ -236,7 +250,7 @@ const connect = () => {
 };
 watchEffect(() => {
     const chatRoomIDArr = Object.keys(onlineList.value);
-    console.log("chatRoomIDincludes", chatRoomIDArr.includes(chatRoomID.value));
+    // console.log("chatRoomIDincludes", chatRoomIDArr.includes(chatRoomID.value));
 
     if (chatRoomIDArr.includes(chatRoomID.value)) {
         isOnline.value = true;
@@ -424,7 +438,9 @@ const attachTextroomPlugin = () => {
                 data.date = dateString;
                 data.from = participants[from];
                 data.msg = msg;
-                // getHistoryApi(chatRoomID.value);
+                if (msg === "recall") {
+                    getHistoryApi(chatRoomID.value);
+                }
                 getChatroomlistApi(route.params.id);
             } else if (what === "announcement") {
                 // Room announcement
@@ -454,6 +470,45 @@ const attachTextroomPlugin = () => {
                 if (chatRoomIDArr.includes(chatRoomID.value)) {
                     isOnline.value = true;
                 }
+                console.log("chatRoom join:", chatRoomID.value);
+                console.log("username join:", username);
+                // if (chatRoomID.value === username) {
+                //     const message: any = {
+                //         textroom: "message",
+                //         transaction: randomString(12),
+                //         room: Number(eventID.value),
+                //         // tos: [全部在線客服1,全部在線客服2],
+                //         tos: [chatRoomID.value],
+                //         text: "pin",
+                //     };
+                //     textPlugin.value.data({
+                //         text: JSON.stringify(message),
+                //         error: function (reason: any) {
+                //             console.log("error:", reason);
+                //         },
+                //         success: function () {
+                //             console.log("gotoChat pin");
+                //         },
+                //     });
+                // } else if (chatRoomID.value !== username) {
+                //     const message: any = {
+                //         textroom: "message",
+                //         transaction: randomString(12),
+                //         room: Number(eventID.value),
+                //         // tos: [全部在線客服1,全部在線客服2],
+                //         tos: [chatRoomID.value],
+                //         text: "leave",
+                //     };
+                //     textPlugin.value.data({
+                //         text: JSON.stringify(message),
+                //         error: function (reason: any) {
+                //             console.log("error:", reason);
+                //         },
+                //         success: function () {
+                //             console.log("gotoChat leave");
+                //         },
+                //     });
+                // }
             } else if (what === "leave") {
                 // Somebody left
                 let username = json["username"];
@@ -468,6 +523,25 @@ const attachTextroomPlugin = () => {
                 const chatRoomIDArr = Object.keys(onlineList.value);
                 if (chatRoomIDArr.includes(chatRoomID.value)) {
                     isOnline.value = false;
+                }
+                if (chatRoomID.value == username) {
+                    const message: any = {
+                        textroom: "message",
+                        transaction: randomString(12),
+                        room: Number(eventID.value),
+                        // tos: [全部在線客服1,全部在線客服2],
+                        tos: [chatRoomID.value],
+                        text: "leave",
+                    };
+                    textPlugin.value.data({
+                        text: JSON.stringify(message),
+                        error: function (reason: any) {
+                            console.log("error:", reason);
+                        },
+                        success: function () {
+                            console.log("gotoChat");
+                        },
+                    });
                 }
             } else if (what === "kicked") {
                 // Somebody was kicked
@@ -490,6 +564,7 @@ const attachTextroomPlugin = () => {
                 });
             } else if (what === "success") {
                 console.log("success:", data);
+
                 // getHistoryApi(chatRoomID.value);
                 getChatroomlistApi(route.params.id);
             }
@@ -755,7 +830,7 @@ $headerHeight: 80px;
         margin-bottom: 1em;
     }
     .title {
-        font-size: 12px;
+        font-size: $font-size-12;
         padding-top: 0.5em;
         margin-bottom: 1em;
         font-weight: 900;
@@ -841,7 +916,7 @@ $headerHeight: 80px;
             line-height: normal;
             cursor: pointer;
             .n-icon {
-                font-size: 25px;
+                font-size: $font-size-24;
             }
         }
     }

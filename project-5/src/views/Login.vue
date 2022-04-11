@@ -78,11 +78,9 @@ import axios from "axios";
 import jwt from "jws";
 import { NIcon } from "naive-ui";
 import { RefreshOutline, EyeOutline, EyeOffOutline } from "@vicons/ionicons5";
+
 import config from "@/config/config";
 import identify from "@/components/imageCode.vue";
-import { useApiStore } from "@/store/api";
-const apiStore = useApiStore();
-// const { connectionWithNewsletterDepartment } = apiStore;
 
 //密碼變為文字
 const passwordShow = ref("password");
@@ -191,11 +189,19 @@ const login = () => {
         localStorage.removeItem("account");
     }
     //驗證碼驗證
-    if (modelRef.varificationCode === identifyCode.value) {
+    if (modelRef.varificationCode !== identifyCode.value) {
+        varificationCodeError.value = true;
+        changeCode();
+        //英數驗證
+    } else if (!/^[a-zA-Z0-9]+$/.test(modelRef.account)) {
+        varificationError.value = true;
+        changeCode();
+    } else {
         //登入發送api拿取 JWT token
         const bodyFormData = new FormData();
         bodyFormData.append("account", modelRef.account);
         bodyFormData.append("password", modelRef.password);
+        bodyFormData.append("domain", "0"); // 如果不是COMMTEST把1改成0, 才可登入
         axios
             .post(`${config.serverUrl}/v1/token/`, bodyFormData)
             .then((res) => {
@@ -223,16 +229,13 @@ const login = () => {
                 localStorage.setItem("adminStatus", admin);
                 localStorage.setItem("userName", res.data.name);
                 localStorage.setItem("newsletterDepartmentToken", res.data.token);
-                location.href = `/chat/${route.params.id}`;
+                location.href = `/chat`;
             })
             .catch((err) => {
                 console.error("err", err);
                 varificationError.value = true;
                 changeCode();
             });
-    } else {
-        varificationCodeError.value = true;
-        changeCode();
     }
 };
 </script>
@@ -265,7 +268,7 @@ const login = () => {
             .n-input__input {
                 width: 300px;
                 --height: 40px;
-                font-size: 14px !important;
+                font-size: $font-size-14 !important;
             }
             .n-input__suffix {
                 position: relative;
@@ -304,7 +307,7 @@ const login = () => {
     display: flex;
     justify-content: center;
     align-items: center;
-    background-image: url("../assets/Images/login/login_backgroundImage.png");
+    background-image: url("~@/assets/Images/login/login_backgroundImage.png");
     background-size: cover;
     .loginScreen {
         background-color: #fff;
@@ -327,7 +330,7 @@ const login = () => {
             }
             h1 {
                 color: $primary-1;
-                font-size: 27px;
+                font-size: $font-size-26;
                 font-weight: 400;
                 font-size: $font-family;
                 margin-left: 22px;
@@ -366,7 +369,7 @@ const login = () => {
             background-color: $gray-1;
             text-align: center;
             p {
-                font-size: 14px;
+                font-size: $font-size-14;
                 font-weight: 400;
                 color: #fff;
             }

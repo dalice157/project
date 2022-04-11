@@ -125,20 +125,24 @@ const onSend = () => {
             // console.log("MMS 確認傳送 res", res);
             point.value = res.data.point;
             alert(`資料已成功傳送!\n您剩餘的點數為: ${point.value}`);
-            router.push(`/manage/${params.id}/MMSSend`);
+            params.id
+                ? router.push(`/manage/${params.id}/MMSSend`)
+                : router.push(`/manage/MMSSend`);
             mmsStore.$reset();
             disable.value = false;
         })
         .catch((err) => {
             console.error(err);
             alert("傳送資料有誤, 請重新填寫");
-            router.push(`/manage/${params.id}/MMSSend`);
+            params.id
+                ? router.push(`/manage/${params.id}/MMSSend`)
+                : router.push(`/manage/MMSSend`);
             disable.value = false;
         });
 };
 // 上一頁按鈕
 const goPage1 = () => {
-    router.push(`/manage/${params.id}/MMSSend`);
+    params.id ? router.push(`/manage/${params.id}/MMSSend`) : router.push(`/manage/MMSSend`);
 };
 </script>
 <style lang="scss">
@@ -201,7 +205,7 @@ const goPage1 = () => {
                     color: $gray-3;
                 }
                 p {
-                    font-size: 14px;
+                    font-size: $font-size-14;
                     font-weight: 400;
                     color: $gray-1;
                     font-family: $font-family;
@@ -213,7 +217,7 @@ const goPage1 = () => {
                     color: $gray-3;
                 }
                 p {
-                    font-size: 14px;
+                    font-size: $font-size-14;
                     font-weight: 400;
                     color: $gray-1;
                     font-family: $font-family;
@@ -246,7 +250,7 @@ const goPage1 = () => {
                 font-family: $font-family;
             }
             p {
-                font-size: 14px;
+                font-size: $font-size-14;
                 font-weight: 500;
                 color: $gray-1;
                 font-family: $font-family;
@@ -266,7 +270,7 @@ const goPage1 = () => {
                     color: $gray-3;
                 }
                 p {
-                    font-size: 14px;
+                    font-size: $font-size-14;
                     font-weight: 400;
                     color: $gray-1;
                     font-family: $font-family;
@@ -278,7 +282,7 @@ const goPage1 = () => {
                     color: $gray-3;
                 }
                 p {
-                    font-size: 14px;
+                    font-size: $font-size-14;
                     font-weight: 400;
                     color: $gray-1;
                     font-family: $font-family;

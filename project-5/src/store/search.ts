@@ -61,7 +61,8 @@ export const useSearchStore = defineStore({
                 messageList.value.forEach((msg: any) => {
                     console.log("msg:", msg);
                     const message =
-                        ((msg.janusMsg.msgType === 6 || msg.janusMsg.msgType === 7) && msg.janusMsg.config.ShowName) ||
+                        ((msg.janusMsg.msgType === 6 || msg.janusMsg.msgType === 7) &&
+                            msg.janusMsg.config.ShowName) ||
                         msg.janusMsg.msgContent;
                     const regMatch = message.match(reg);
 

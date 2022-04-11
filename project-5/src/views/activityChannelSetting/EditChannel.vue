@@ -6,26 +6,26 @@
                     <div class="setting">
                         <div class="iconSetting">
                             <div class="iconTitle">
-                                <h2>頭像設定</h2>
+                                <h2><span>*</span>&ensp;頭像設定</h2>
                                 <p>(請上傳商標或形象圖以供辨識)</p>
                             </div>
                             <n-upload @change="uploadAvatar($event)" accept="image/*" type="file">
                                 <div class="addChannelUploadImg">
                                     <img
                                         class="avatarDefault"
-                                        src="../../assets/Images/manage/Photo.svg"
+                                        :src="photoIcon"
                                         alt="預設圖"
                                         v-if="!channelEvent.icon"
                                     />
                                     <img
                                         class="avatarUpload"
-                                        :src="`${config.fileUrl}/fls/${avatar.fileid}${avatar.ext}`"
+                                        :src="`${config.fileUrl}${avatar.fileid}${avatar.ext}`"
                                         :alt="avatar.fileName"
                                         v-if="avatarStatus === 1"
                                     />
                                     <img
                                         class="avatarUpload"
-                                        :src="`${config.fileUrl}/fls/${channelEvent.icon}`"
+                                        :src="`${config.fileUrl}${channelEvent.icon}`"
                                         alt="頻道大頭照"
                                         v-else
                                     />
@@ -53,7 +53,7 @@
                         </div>
                     </div>
                     <div class="activityTitle">
-                        <h3><span class="required">*</span>活動名稱</h3>
+                        <h3><span>*</span>&ensp;活動名稱</h3>
                         <n-input
                             placeholder="請輸入活動名稱"
                             maxlength="25"
@@ -89,7 +89,7 @@
                             <div class="staffTag" v-for="item in tagList" :key="item.accountID">
                                 <p>{{ item.name }}</p>
                                 <img
-                                    src="@/assets/Images/manage/round-fill_close.svg"
+                                    :src="closeIcon"
                                     :alt="item.accountID"
                                     @click="deleteStaff(item.accountID)"
                                 />
@@ -99,7 +99,7 @@
                 </div>
                 <div class="welcomeStatus">
                     <div class="welcomeTitle">
-                        <h2><span class="required">*</span>歡迎訊息</h2>
+                        <h2><span>*</span>&ensp;歡迎訊息</h2>
                         <p>(至少一則，最多三則)</p>
                     </div>
                     <div
@@ -119,28 +119,28 @@
                         </div>
                         <div class="welcomeImg" v-else-if="item.janusMsg.msgType === 6">
                             <img
-                                :src="`${config.fileUrl}/fls/${item.janusMsg.format.Fileid}${item.janusMsg.format.ExtensionName}`"
+                                :src="`${config.fileUrl}${item.janusMsg.format.Fileid}${item.janusMsg.format.ExtensionName}`"
                                 :alt="item.janusMsg.format.ShowName"
                             />
                         </div>
                         <div class="welcomeFile" v-else-if="item.janusMsg.msgType === 7">
                             <div>
                                 <div>
-                                    <img src="@/assets/Images/common/file.svg" />
+                                    <img :src="fileIcon" />
                                     <p>{{ item.janusMsg.format.ShowName }}</p>
                                 </div>
                             </div>
                         </div>
                         <div class="welcomeFunctionBar">
                             <img
-                                src="../../assets/Images/manage/delete.svg"
-                                alt=""
+                                :src="delIcon"
+                                alt="del"
                                 @click="deleteWelcomeMsg(item.janusMsg.config.id)"
                             />
                             <div class="welcomeFunctionBarUpload">
                                 <span
-                                    src="../../assets/Images/common/file.svg"
-                                    alt=""
+                                    :src="fileIcon"
+                                    alt="file"
                                     v-show="item.janusMsg.msgContent === ''"
                                 >
                                     <input
@@ -150,8 +150,8 @@
                                     />
                                 </span>
                                 <span
-                                    src="../../assets/Images/chatroom/pic.svg"
-                                    alt=""
+                                    :src="picIcon"
+                                    alt="pic"
                                     v-show="item.janusMsg.msgContent === ''"
                                 >
                                     <input
@@ -171,12 +171,22 @@
             <div class="channelButtonGroup">
                 <router-link
                     class="channelCancel"
-                    :to="`/manage/${route.params.id}/activitySetting`"
+                    :to="
+                        `${route.params.id}`
+                            ? `/manage/${route.params.id}/activitySetting`
+                            : `/manage/activitySetting`
+                    "
                 >
                     取消
                 </router-link>
                 <div class="channelDel" @click="showDelModal = true">刪除</div>
-                <PreviewModel :welcomeMsgCount="welcomeMsgCount" />
+                <PreviewModel
+                    :welcomeMsgCount="welcomeMsgCount"
+                    :name="name"
+                    :avatar="
+                        avatarStatus === 1 ? `${avatar.fileid}${avatar.ext}` : channelEvent.icon
+                    "
+                />
                 <div v-if="!isDisabled" class="channelStore" @click="goActivity">確認儲存</div>
                 <div v-else class="channelStore disabled">確認儲存</div>
             </div>
@@ -189,7 +199,7 @@
         <div class="mask" v-show="popUp === true">
             <div class="customService">
                 <div class="customServiceTitle">
-                    <h3>客服人員列表</h3>
+                    <h2>客服人員列表</h2>
                 </div>
                 <n-checkbox-group
                     class="staffList"
@@ -199,8 +209,11 @@
                     <ul>
                         <li v-for="staff in staffList" :key="staff.accountID">
                             <div class="staffData">
-                                <p>{{ staff.name }}</p>
-                                <n-checkbox :value="staff.accountID" />
+                                <n-checkbox
+                                    class="staff"
+                                    :value="staff.accountID"
+                                    :label="staff.name"
+                                />
                             </div>
                         </li>
                     </ul>
@@ -223,19 +236,11 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, computed, watchEffect, watch } from "vue";
+import { ref, reactive, computed, onUpdated, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import { nanoid } from "nanoid";
-import {
-    NInput,
-    NConfigProvider,
-    NCheckbox,
-    NCheckboxGroup,
-    NUpload,
-    NSpin,
-    NSwitch,
-} from "naive-ui";
+import { NInput, NEllipsis, NCheckbox, NCheckboxGroup, NUpload, NSpin, NSwitch } from "naive-ui";
 import axios from "axios";
 import Compressor from "compressorjs";
 import dayjs from "dayjs";
@@ -244,6 +249,11 @@ import { unixTime, currentDate } from "@/util/dateUtil";
 import config from "@/config/config";
 import { useApiStore } from "@/store/api";
 import PreviewModel from "@/components/PreviewModel";
+import photoIcon from "@/assets/Images/manage/Photo.svg";
+import closeIcon from "@/assets/Images/manage/round-fill_close.svg";
+import fileIcon from "@/assets/Images/common/file.svg";
+import delIcon from "@/assets/Images/manage/delete.svg";
+import picIcon from "@/assets/Images/chatroom/pic.svg";
 
 //router
 const router = useRouter();
@@ -313,7 +323,7 @@ const url: any = computed({
 });
 const description: any = computed({
     get() {
-        return channelEvent.value.description;
+        return channelEvent.value.description.slice(0, 100);
     },
     set(val) {
         channelEvent.value.description = val;
@@ -409,7 +419,7 @@ const uploadAvatar = (e: any) => {
                             fileName: file.name,
                         };
                         avatarStatus.value = 1;
-                        console.log(avatar.value);
+                        console.log("avatar.value", avatar.value);
                     };
                 })
                 .catch((err) => {
@@ -615,13 +625,12 @@ const goActivity = () => {
         }
     });
     if (name.value === "" || inValid.value === true) {
-        alert("尚有必填欄位未填寫!!");
+        const channelName = name.value === "" ? "活動名稱、" : "";
+        const welcomeMsg = inValid.value ? "歡迎訊息" : "";
+        alert(`尚有 ${channelName}${welcomeMsg} 欄位未填寫!!`);
     } else {
         const bodyData = {
-            icon:
-                avatarStatus.value === 0
-                    ? channelEvent.value.icon
-                    : `${avatar.value.fileid}${avatar.value.ext}`,
+            icon: `${avatar.value.fileid}${avatar.value.ext}`,
             callable: parseInt(callable.value),
             name: name.value,
             status: parseInt(status.value),
@@ -640,6 +649,17 @@ const deleteChannel = () => {
 };
 </script>
 <style lang="scss">
+@import "~@/assets/scss/var";
+.staff {
+    &.n-checkbox .n-checkbox-box .n-checkbox-box__border {
+        border: 1px solid #aaa;
+    }
+}
+.staffData {
+    .n-ellipsis {
+        color: $gray-1;
+    }
+}
 .n-upload-file-list {
     display: none;
 }
@@ -647,6 +667,9 @@ const deleteChannel = () => {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
+.staff {
+    margin-right: 10px;
+}
 
 .required {
     color: $danger;
@@ -664,40 +687,31 @@ const deleteChannel = () => {
     justify-content: center;
     align-items: center;
     .customService {
-        width: 590px;
-        height: 665px;
+        width: 400px;
         background-color: $white;
-        padding: 25px 0px;
+        border-radius: 5px;
+        padding: 25px 0px 10px;
         .customServiceTitle {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding: 0 20px;
-            h3 {
+            padding: 0 20px 10px;
+            h2 {
                 font-family: $font-family;
-                font-size: 16px;
-                font-weight: 500;
+                font-size: $font-size-16;
+                font-weight: 600;
                 color: $gray-1;
-            }
-            img {
-                width: 27px;
-                height: 27px;
-                cursor: pointer;
             }
         }
         .staffList {
             overflow-y: auto;
-            height: 500px;
+            min-height: 200px;
+            max-height: 350px;
             ul {
                 li {
-                    height: 60px;
-                    line-height: 60px;
-                    padding: 0 20px;
+                    padding: 20px;
                     position: relative;
                     .staffData {
                         display: flex;
-                        justify-content: space-between;
                         align-items: center;
                     }
 
@@ -735,7 +749,7 @@ const deleteChannel = () => {
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
     .deleteChannelPopUp {
-        border-radius: 20px;
+        border-radius: 5px;
         width: 342px;
         padding: 15px;
         background-color: $white;
@@ -797,7 +811,7 @@ const deleteChannel = () => {
     min-height: calc(100% - 80px);
     .status {
         h3 {
-            font-size: 16px;
+            font-size: $font-size-16;
             font-weight: 400;
             color: $gray-1;
             margin-right: 10px;
@@ -822,22 +836,23 @@ const deleteChannel = () => {
                     justify-content: space-between;
                     margin-bottom: 30px;
                     .iconSetting {
-                        margin-right: 100px;
                         .iconTitle {
-                            display: flex;
-                            align-items: center;
                             margin-bottom: 15px;
                             h2 {
                                 font-family: $font-family;
                                 @extend %h2;
                                 color: $gray-1;
                                 margin-right: 10px;
+                                span {
+                                    color: $danger;
+                                }
                             }
                             p {
                                 font-family: $font-family;
-                                font-size: 14px;
+                                font-size: $font-size-14;
                                 font-weight: 400;
                                 color: $gray-3;
+                                margin-top: 8px;
                             }
                         }
                         .n-upload {
@@ -870,7 +885,7 @@ const deleteChannel = () => {
                     .functionSetting {
                         h3 {
                             font-family: $font-family;
-                            font-size: 16px;
+                            font-size: $font-size-16;
                             font-weight: 400;
                             color: $gray-1;
                             margin-right: 10px;
@@ -882,7 +897,7 @@ const deleteChannel = () => {
                             p {
                                 margin-left: 15px;
                                 font-family: $font-family;
-                                font-size: 14px;
+                                font-size: $font-size-14;
                                 font-weight: 400;
                                 color: $gray-3;
                             }
@@ -893,6 +908,9 @@ const deleteChannel = () => {
                     margin-bottom: 30px;
                     h3 {
                         margin-bottom: 15px;
+                        span {
+                            color: red;
+                        }
                     }
                 }
                 .homeURL {
@@ -965,11 +983,14 @@ const deleteChannel = () => {
                         color: $gray-1;
                         margin-right: 10px;
                         margin-bottom: 17px;
+                        span {
+                            color: red;
+                        }
                     }
                     p {
                         margin-left: 15px;
                         font-family: $font-family;
-                        font-size: 14px;
+                        font-size: $font-size-14;
                         font-weight: 400;
                         color: $gray-3;
                     }
@@ -1025,7 +1046,7 @@ const deleteChannel = () => {
                                 display: block;
                                 width: 24px;
                                 height: 24px;
-                                background-image: url("../../assets/Images/common/file.svg");
+                                background-image: url("~@/assets/Images/common/file.svg");
                                 background-size: 24px;
 
                                 input {
@@ -1040,7 +1061,7 @@ const deleteChannel = () => {
                                 display: block;
                                 width: 24px;
                                 height: 24px;
-                                background-image: url("../../assets/Images/chatroom/pic.svg");
+                                background-image: url("~@/assets/Images/chatroom/pic.svg");
                                 background-size: 24px;
                                 margin: 0 5px;
 

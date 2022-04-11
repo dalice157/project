@@ -1,7 +1,7 @@
 <template>
     <n-layout has-sider class="chatroom" @click="closeChatBubble">
         <n-layout-sider width="330px" bordered>
-            <Sidebar />
+            <Sidebar eventId="eventID" />
         </n-layout-sider>
         <n-layout class="content">
             <Headers />
@@ -85,7 +85,7 @@ const router = useRouter();
 // api store
 const apiStore = useApiStore();
 const { getChatroomlistApi, getHistoryApi, getChatroomUserInfoApi } = apiStore;
-const { eventInfo, isInput } = storeToRefs(apiStore);
+const { eventInfo, isInput, eventList, staffEvents } = storeToRefs(apiStore);
 
 //phoneCall store
 const phoneCallStore = usePhoneCallStore();
@@ -99,10 +99,14 @@ const { showStickerModal, isOnline } = storeToRefs(chatStore);
 
 const chatRoomID: any = computed(() => route.query.chatroomID);
 const mobile: any = computed(() => route.query.mobile);
-const eventID = computed(() => route.params.id);
+const eventID: any = ref("");
+const adminStatus = localStorage.getItem("adminStatus");
 
 onMounted(() => {
-    getChatroomlistApi(route.params.id);
+    watch(eventList, () => {
+        eventID.value = route.params.id ? route.params.id : eventList.value[0].eventID;
+        getChatroomlistApi(eventID.value);
+    });
 });
 
 // 監聽route query change寫法 2
@@ -131,17 +135,13 @@ const messageListLength = computed(() => {
     return messageList.value.length;
 });
 //監聽 messageList 打chatroomlist api
-watch(
-    messageListLength,
-    (newVal, oldVal) => {
-        if (newVal !== oldVal) {
-            setTimeout(() => {
-                getChatroomlistApi(route.params.id);
-            }, 500);
-        }
-    },
-    { immediate: true }
-);
+watch(messageListLength, (newVal, oldVal) => {
+    if (newVal !== oldVal) {
+        setTimeout(() => {
+            getChatroomlistApi(route.params.id);
+        }, 500);
+    }
+});
 
 const messages: any = computed({
     get() {
@@ -158,7 +158,6 @@ const closeChatBubble = (): void => {
         text.janusMsg.config.msgFunctionStatus = false;
         return text;
     });
-    
 };
 </script>
 
@@ -230,7 +229,7 @@ const closeChatBubble = (): void => {
     position: relative;
     box-sizing: border-box;
     width: 100%;
-    height: 100%;
+    height: 100vh;
     background-color: $gray-8;
     .content {
         border-right: 1px solid rgb(239, 239, 245);

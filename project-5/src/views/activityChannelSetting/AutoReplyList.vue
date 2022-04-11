@@ -99,12 +99,16 @@ const data = ref([
 ]);
 
 const gotoAutoReply = () => {
-    router.push(
-        `/manage/${route.params.id}/activitySetting/addAutoReply?eventID=${route.query.eventID}`
-    );
+    route.params.id
+        ? router.push(
+              `/manage/${route.params.id}/activitySetting/addAutoReply?eventID=${route.query.eventID}`
+          )
+        : router.push(`/manage/activitySetting/addAutoReply?eventID=${route.query.eventID}`);
 };
 const gotoChannelList = () => {
-    router.push(`/manage/${route.params.id}/activitySetting`);
+    route.params.id
+        ? router.push(`/manage/${route.params.id}/activitySetting`)
+        : router.push(`/manage/activitySetting`);
 };
 </script>
 <style lang="scss">

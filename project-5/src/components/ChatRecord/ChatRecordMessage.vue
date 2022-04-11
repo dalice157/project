@@ -5,17 +5,22 @@
             class="chatRoomBox"
             v-for="num in searcRecordMessages"
             :key="num.chatroomID"
-            @click.stop="gotoChat(route.params.id, num.chatroomID, num.mobile, router)"
+            @click.stop="
+                route.query.chatroomID !== num.chatroomID
+                    ? gotoChat(eventID, num.chatroomID, num.mobile)
+                    : ''
+            "
         >
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
-                <div class="avatar" @click.stop="showCompanyInfo(num)">
+                <!-- @click.stop="showCompanyInfo(num)" -->
+                <div class="avatar">
                     <n-avatar v-if="num.icon == 0" round :size="48" :src="user_pic_defaul" />
                     <n-avatar
                         v-if="num.icon !== 0"
                         round
                         :size="48"
-                        :src="`${config.fileUrl}/fls/${num.icon}`"
+                        :src="`${config.fileUrl}${num.icon}`"
                     />
                 </div>
                 <div class="chatRoomInfo">
@@ -43,7 +48,7 @@
                             : dayjs(num.time / 1000000).format("MM/DD")
                     }}
                 </div>
-                <div class="badge" v-if="num.unread === 0">
+                <div class="badge" v-if="num.unread === 1">
                     <div class="badgeBg">
                         <span class="badgeSup">未讀</span>
                     </div>
@@ -62,30 +67,28 @@
             class="chatRoomBox"
             v-for="(num, index) in changeList"
             :key="num.chatroomID"
-            @click.stop="gotoChat(route.params.id, num.chatroomID, num.mobile, router)"
+            @click.stop="
+                route.query.chatroomID !== num.chatroomID
+                    ? gotoChat(eventID, num.chatroomID, num.mobile, index)
+                    : ''
+            "
         >
-            <!-- {{num.msg}} -->
-            <!-- v-show="num.show" -->
             <div class="chatRoomList">
-                <div class="avatar" @click.stop="showCompanyInfo(num)">
+                <!-- @click.stop="showCompanyInfo(num)" -->
+                <div class="avatar">
                     <n-avatar
                         v-if="num.icon == 0"
                         round
                         :size="48"
-                        :src="`${config.fileUrl}/fls/icon/default.svg`"
+                        :src="`${config.fileUrl}icon/default.svg`"
                     />
                     <n-avatar
                         v-if="num.icon !== 0"
                         round
                         :size="48"
-                        :src="`${config.fileUrl}/fls/icon/${num.icon}.png`"
+                        :src="`${config.fileUrl}icon/${num.icon}.png`"
                     />
-                    <img
-                        class="img"
-                        src="../../assets/Images/chatRecord/pushpin-round.svg"
-                        alt="置頂"
-                        v-if="num.pinTop"
-                    />
+                    <img class="img" :src="pinIcon" alt="置頂" v-if="num.pinTop" />
                 </div>
                 <div class="chatRoomInfo">
                     <h2 class="info_title" v-if="!num.name">
@@ -94,7 +97,7 @@
                     </h2>
                     <h2 class="info_title" v-else>{{ num.name }}</h2>
                     <n-ellipsis class="messageEllipsis" :line-clamp="1" :tooltip="false">
-                        <p v-if="num.msgType === 1 && num.msg != ''">
+                        <p v-if="num.msgType === 1 && num.msg !== ''">
                             {{ num.msg }}
                         </p>
                         <p v-if="[3, 5, 6, 7, 8, 9].includes(num.msgType)">
@@ -117,11 +120,7 @@
                     </div>
 
                     <div class="functionBoxMore" :class="{ show: num.isfunctionPopUp }">
-                        <img
-                            @click.stop="openFunctionPopUp(num)"
-                            src="@/assets/Images/chatRecord/more.svg"
-                            alt="#"
-                        />
+                        <img @click.stop="openFunctionPopUp(num)" :src="moreIcon" alt="more" />
 
                         <div class="functionPopUp" v-show="num.isfunctionPopUp">
                             <ul class="ulList">
@@ -131,7 +130,8 @@
                             </ul>
                         </div>
                     </div>
-                    <div class="badge" v-if="num.unread === 0">
+                    <div class="badge" v-if="num.unread === 1">
+                        <!-- 1為未讀--->
                         <div class="badgeBg">
                             <span class="badgeSup">未讀</span>
                         </div>
@@ -151,7 +151,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watchEffect, watch, onUpdated } from "vue";
+import { ref, computed, onMounted, watch, onUpdated } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { NAvatar, NEllipsis, NModal, NCard } from "naive-ui";
 import { nanoid } from "nanoid";
@@ -168,6 +168,8 @@ import { useModelStore } from "@/store/model";
 import UserInfoModel from "@/components/UserInfoModel.vue";
 import config from "@/config/config";
 import user_pic_defaul from "@/assets/Images/mugShot/User-round.svg";
+import pinIcon from "@/assets/Images/chatRecord/pushpin-round.svg";
+import moreIcon from "@/assets/Images/chatRecord/more.svg";
 
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
@@ -180,7 +182,7 @@ const { isResult, searcRecordMessages, recordKeyWord } = storeToRefs(searchStore
 
 const apiStore = useApiStore();
 const { sendPinTop, getChatroomlistApi } = apiStore;
-const { chatroomList, userInfo } = storeToRefs(apiStore);
+const { chatroomList, eventList, staffEvents } = storeToRefs(apiStore);
 
 const chatRecordStore = useChatRecordStore();
 const { recordMessages } = storeToRefs(chatRecordStore);
@@ -188,8 +190,20 @@ const { recordMessages } = storeToRefs(chatRecordStore);
 const modelStore = useModelStore();
 const { showCompanyInfo, gotoChat } = modelStore;
 const { isInfoPop, info } = storeToRefs(modelStore);
+const eventID: any = ref("");
+const adminStatus = localStorage.getItem("adminStatus");
 
-let list = ref([]);
+onMounted(() => {
+    if (adminStatus === "0") {
+        watch(staffEvents, () => {
+            eventID.value = route.params.id ? route.params.id : staffEvents.value.events[0].eventID;
+        });
+    } else {
+        watch(eventList, () => {
+            eventID.value = route.params.id ? route.params.id : eventList.value[0].eventID;
+        });
+    }
+});
 
 interface IObj {
     [propName: string]: any;
@@ -224,9 +238,6 @@ let changeList: any = computed({
 
 let i = ref(0);
 watch(chatroomList, (newVal, oldVal) => {
-    console.log("newVal:", newVal);
-    console.log("oldVal:", oldVal);
-
     if (chatroomList.value.length > 0) {
         recordMessages.value = chatroomList.value;
     }

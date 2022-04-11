@@ -32,14 +32,14 @@
             </div>
             <div class="phoneCallModelFunctionBar">
                 <div class="phoneMicrophone">
-                    <img src="../assets/Images/chatroom/voice-fill-disabled.svg" alt="#" />
+                    <img :src="voiceDisabled" alt="#" />
                     <p>關閉</p>
                     <p>麥克風</p>
                 </div>
                 <div class="phoneClose">
                     <img
                         @click="doHangup(!isAccepted ? 2 : 3, chatRoomID, route.params.id)"
-                        src="../assets/Images/chatroom/close-round-red.svg"
+                        :src="closeIcon"
                         alt="掛斷"
                     />
                 </div>
@@ -60,6 +60,8 @@ import { useApiStore } from "@/store/api";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import config from "@/config/config";
 import user_pic_defaul from "@/assets/Images/mugShot/User-round.svg";
+import voiceDisabled from "@/assets/Images/chatroom/voice-fill-disabled.svg";
+import closeIcon from "@/assets/Images/chatroom/close-round-red.svg";
 
 //route
 const route = useRoute();

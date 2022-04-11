@@ -90,7 +90,7 @@ const {
 
 // 上一頁按鈕
 const goPage1 = () => {
-    router.push(`/manage/${params.id}/SMSSend`);
+    params.id ? router.push(`/manage/${params.id}/SMSSend`) : router.push(`/manage/SMSSend`);
 };
 const getPhones: any = ref(null);
 if (smsTabsType.value === "automatic") {
@@ -132,14 +132,18 @@ const onSend = () => {
             console.log("SMS 確認傳送 res", res);
             point.value = res.data.point;
             alert(`資料已成功傳送!\n您剩餘的點數為: ${point.value}`);
-            router.push(`/manage/${params.id}/SMSSend`);
+            params.id
+                ? router.push(`/manage/${params.id}/SMSSend`)
+                : router.push(`/manage/SMSSend`);
             smsStore.$reset();
             disable.value = false;
         })
         .catch((err) => {
             console.error(err);
             alert("傳送失敗, 請重新填寫");
-            router.push(`/manage/${params.id}/SMSSend`);
+            params.id
+                ? router.push(`/manage/${params.id}/SMSSend`)
+                : router.push(`/manage/SMSSend`);
             disable.value = false;
         });
 };
@@ -150,7 +154,7 @@ const onSend = () => {
 .SMSSendPage2 {
     position: relative;
     display: flex;
-    height: calc(100% - 80px);
+    height: calc(100vh - 80px);
     background-color: $bg;
     padding: 15px;
     .smsPage2Content {
@@ -214,7 +218,7 @@ const onSend = () => {
                     color: $gray-3;
                 }
                 p {
-                    font-size: 14px;
+                    font-size: $font-size-14;
                     font-weight: 400;
                     color: $gray-1;
                     font-family: $font-family;
@@ -227,7 +231,7 @@ const onSend = () => {
                     color: $gray-3;
                 }
                 p {
-                    font-size: 14px;
+                    font-size: $font-size-14;
                     font-weight: 400;
                     color: $gray-1;
                     font-family: $font-family;
@@ -261,7 +265,7 @@ const onSend = () => {
                 font-family: $font-family;
             }
             p {
-                font-size: 14px;
+                font-size: $font-size-14;
                 font-weight: 500;
                 color: $gray-1;
                 font-family: $font-family;
@@ -281,7 +285,7 @@ const onSend = () => {
                     color: $gray-3;
                 }
                 p {
-                    font-size: 14px;
+                    font-size: $font-size-14;
                     font-weight: 400;
                     color: $gray-1;
                     font-family: $font-family;
@@ -293,7 +297,7 @@ const onSend = () => {
                     color: $gray-3;
                 }
                 p {
-                    font-size: 14px;
+                    font-size: $font-size-14;
                     font-weight: 400;
                     color: $gray-1;
                     font-family: $font-family;

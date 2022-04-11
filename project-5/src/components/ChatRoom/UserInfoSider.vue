@@ -14,7 +14,7 @@
             @click.stop="handleEdited"
             v-show="!isEdited"
             class="editIcon"
-            src="../../assets/Images/chatroom/edit-round.svg"
+            :src="editIcon"
             alt="編輯"
         />
         <div class="userPhoto">
@@ -41,31 +41,8 @@
                 type="text"
                 placeholder="請輸入電話"
             />
-            <div class="tags-group" v-if="userInfo.tag.length > 0">
-                <n-tag
-                    v-for="tag in userInfo.tag"
-                    :key="tag"
-                    round
-                    closable
-                    @close="handleClose(tag)"
-                >
-                    #{{ tag }}
-                </n-tag>
-            </div>
-            <div class="add-input-wrap">
-                <n-input class="add-input" v-model:value="tag" type="text" placeholder="新增標籤">
-                    <template #suffix>
-                        <n-button
-                            round
-                            size="small"
-                            class="add-tag-button"
-                            text-color="#fff"
-                            @click.stop="addTag"
-                        >
-                            新增
-                        </n-button>
-                    </template>
-                </n-input>
+            <div class="tags-group edit">
+                <n-dynamic-tags round v-model:value="tags" />
             </div>
             <h4 class="service-log">客服紀錄</h4>
             <div class="service-content">
@@ -82,8 +59,8 @@
                 {{ "+" + String(userInfo.mobile).slice(0, 3) }}
                 {{ String(userInfo.mobile).slice(-9) }}
             </p>
-            <div class="tags-group" v-if="userInfo.tag.length > 0">
-                <n-tag v-for="tag in userInfo.tag" round :key="tag"> #{{ tag }} </n-tag>
+            <div class="tags-group view" v-if="tags.length > 0">
+                <n-dynamic-tags round v-model:value="tags" :closable="false" />
             </div>
             <h4 class="service-log">客服紀錄</h4>
             <p class="service-content">
@@ -113,7 +90,7 @@
                     text-color="#3e3e3e"
                     @click.stop="onSaveAvatar"
                 >
-                    儲存
+                    確定
                 </n-button>
             </div>
         </div>
@@ -121,39 +98,31 @@
 </template>
 
 <script lang="ts" setup>
-import { computed, ref, reactive, watch, watchEffect } from "vue";
+import { computed, ref, onMounted, watch, watchEffect } from "vue";
 import { storeToRefs } from "pinia";
-import { NAvatar, NInput, NButton, NPopover, NGrid, NGridItem, NTag } from "naive-ui";
+import { NAvatar, NInput, NButton, NDynamicTags, NGrid, NGridItem, NTag } from "naive-ui";
 import { useRouter, useRoute } from "vue-router";
 
 import { useApiStore } from "@/store/api";
 import { useSearchStore } from "@/store/search";
 import config from "@/config/config";
+import editIcon from "@/assets/Images/chatroom/edit-round.svg";
 
 const imgList = [
-    `${config.fileUrl}/fls/icon/default.svg`,
-    `${config.fileUrl}/fls/icon/1.png`,
-    `${config.fileUrl}/fls/icon/2.png`,
-    `${config.fileUrl}/fls/icon/3.png`,
-    `${config.fileUrl}/fls/icon/4.png`,
-    `${config.fileUrl}/fls/icon/5.png`,
-    `${config.fileUrl}/fls/icon/6.png`,
-    `${config.fileUrl}/fls/icon/7.png`,
-    `${config.fileUrl}/fls/icon/8.png`,
-    `${config.fileUrl}/fls/icon/9.png`,
-    `${config.fileUrl}/fls/icon/10.png`,
-    `${config.fileUrl}/fls/icon/11.png`,
-    `${config.fileUrl}/fls/icon/12.png`,
+    `${config.fileUrl}icon/default.svg`,
+    `${config.fileUrl}icon/1.png`,
+    `${config.fileUrl}icon/2.png`,
+    `${config.fileUrl}icon/3.png`,
+    `${config.fileUrl}icon/4.png`,
+    `${config.fileUrl}icon/5.png`,
+    `${config.fileUrl}icon/6.png`,
+    `${config.fileUrl}icon/7.png`,
+    `${config.fileUrl}icon/8.png`,
+    `${config.fileUrl}icon/9.png`,
+    `${config.fileUrl}icon/10.png`,
+    `${config.fileUrl}icon/11.png`,
+    `${config.fileUrl}icon/12.png`,
 ];
-
-const tags = ref([
-    { id: 1, text: "VIP" },
-    { id: 2, text: "女性" },
-    { id: 3, text: "優質顧客" },
-    { id: 4, text: "精選會員" },
-    { id: 5, text: "每月消費" },
-    { id: 6, text: "等級" },
-]);
 
 const route = useRoute();
 
@@ -169,7 +138,7 @@ const { searchSwitch } = searchStore;
 const isEdited = ref(false);
 const img = ref(null);
 const showPopover = ref(false);
-const tag = ref("");
+const tags = ref([]);
 const isUserIcon = ref(false);
 
 const chatroomID = computed(() => route.query.chatroomID);
@@ -178,6 +147,12 @@ const chatroomID = computed(() => route.query.chatroomID);
 const handleEdited = () => {
     isEdited.value = true;
 };
+onMounted(() => {
+    tags.value = userInfo.value.tag;
+});
+watch(userInfo, () => {
+    tags.value = userInfo.value.tag;
+});
 
 watchEffect(() => {
     img.value = imgList.find((item) => {
@@ -189,29 +164,31 @@ watchEffect(() => {
 watch(
     () => route.query,
     () => {
-        console.log("userInfo.value.pinTop", userInfo.value);
         isEdited.value = false;
         isUserIcon.value = false;
     }
 );
 
-const onDescriptionInput = (e) => {
-    userInfo.value.description = e.target.innerText;
-};
-
 // 儲存
 const onSaveEdited = () => {
-    const infoObj = {
-        chatroomID: chatroomID.value,
-        name: userInfo.value.name,
-        mobile: Number(userInfo.value.mobile),
-        icon: img.value.split("/")[5] === "default.svg" ? 0 : img.value.split("/")[5].split(".")[0],
-        tag: userInfo.value.tag,
-        description: userInfo.value.description,
-        eventID: route.params.id,
-    };
-    sendUserInfo(infoObj);
-    isEdited.value = false;
+    if (userInfo.value.name === "") {
+        alert("暱稱不能為空!!!");
+    } else {
+        const infoObj = {
+            chatroomID: chatroomID.value,
+            name: userInfo.value.name,
+            mobile: Number(userInfo.value.mobile),
+            icon:
+                img.value.split("/")[5] === "default.svg"
+                    ? 0
+                    : img.value.split("/")[5].split(".")[0],
+            tag: tags.value.length === 0 ? userInfo.value.tag : tags.value,
+            description: userInfo.value.description,
+            eventID: route.params.id,
+        };
+        sendUserInfo(infoObj);
+        isEdited.value = false;
+    }
 };
 
 // 選擇圖像
@@ -220,18 +197,6 @@ const onClickChoose = (e: any) => {
 
     img.value = e.target.src;
     showPopover.value = false;
-};
-
-// 標籤刪除
-const handleClose = (removedTag: any) => {
-    const tagsChange = userInfo.value.tag.filter((tag) => tag !== removedTag);
-    userInfo.value.tag = tagsChange;
-};
-
-// 新增標籤
-const addTag = () => {
-    userInfo.value.tag.push(tag.value);
-    tag.value = "";
 };
 
 // 開啟變更大頭照
@@ -287,6 +252,52 @@ const onSaveAvatar = () => {
         .n-base-icon svg {
             width: 10px;
             height: 10px;
+        }
+    }
+    &.view {
+        .n-dynamic-tags {
+            > div {
+                &:last-child {
+                    display: none !important;
+                }
+            }
+        }
+    }
+    &.edit {
+        .n-dynamic-tags {
+            > div {
+                &:last-child {
+                    padding-top: 5px !important;
+                    padding-bottom: 5px !important;
+                    display: block !important;
+                    width: 100% !important;
+                    .n-button {
+                        width: 100%;
+                        justify-content: flex-start;
+                        &::after {
+                            content: "新增標籤";
+                            color: $gray-2;
+                            margin-left: 5px;
+                        }
+                    }
+                    &:hover {
+                        .n-button {
+                            &::after {
+                                color: $primary-1;
+                            }
+                        }
+                        .n-button .n-button__border {
+                            border-color: $primary-1;
+                        }
+                        .n-button .n-button__state-border {
+                            border-color: $primary-1;
+                        }
+                        .n-button .n-button__icon {
+                            color: $primary-1;
+                        }
+                    }
+                }
+            }
         }
     }
 }

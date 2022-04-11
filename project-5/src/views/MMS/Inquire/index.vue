@@ -11,7 +11,7 @@
                         placeholder="搜尋"
                     >
                         <template #prefix>
-                            <img src="../../../assets/Images/manage/search.svg" alt="#" />
+                            <img :src="searchIcon" alt="search" />
                         </template>
                     </n-input>
                 </div>
@@ -80,6 +80,8 @@ import {
     NConfigProvider,
     NSpace,
 } from "naive-ui";
+
+import searchIcon from "@/assets/Images/manage/search.svg";
 
 const search = ref("");
 
@@ -515,7 +517,7 @@ const pagination = {
     position: relative;
     display: flex;
     flex-direction: column;
-    min-height: calc(100% - 80px);
+    min-height: calc(100vh - 80px);
     padding: 15px 15px 0px 15px;
     background-color: $bg;
     .mms_inquire {

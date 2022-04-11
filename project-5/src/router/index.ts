@@ -21,7 +21,7 @@ import AutoReplyList from "@/views/activityChannelSetting/AutoReplyList.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
-        path: "/:id",
+        path: "/",
         name: "Login",
         components: {
             login: Login,
@@ -29,7 +29,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: { show: true, home: false },
     },
     {
-        path: "/chat/:id",
+        path: "/chat/:id?",
         name: "Chat",
         components: {
             container: ChatRoom,
@@ -45,14 +45,14 @@ const routes: Array<RouteRecordRaw> = [
         meta: { show: true, home: false },
     },
     {
-        path: "/manage/:id",
+        path: "/manage/:id?",
         name: "Manage",
         components: {
             container: Manage,
         },
         children: [
             {
-                path: "/manage/:id/SMSSend",
+                path: "/manage/:id?/SMSSend",
                 name: "SMSSend",
                 components: {
                     manage: SMSSend,
@@ -60,21 +60,21 @@ const routes: Array<RouteRecordRaw> = [
                 meta: { keepAlive: true },
             },
             {
-                path: "/manage/:id/SMSSendPage2",
+                path: "/manage/:id?/SMSSendPage2",
                 name: "SMSSendPage2",
                 components: {
                     manage: SMSSendPage2,
                 },
             },
             {
-                path: "/manage/:id/SMSInquire",
+                path: "/manage/:id?/SMSInquire",
                 name: "SMSInquire",
                 components: {
                     manage: SMSInquire,
                 },
             },
             {
-                path: "/manage/:id/MMSSend",
+                path: "/manage/:id?/MMSSend",
                 name: "MMSSend",
                 components: {
                     manage: MMSSend,
@@ -82,63 +82,63 @@ const routes: Array<RouteRecordRaw> = [
                 meta: { keepAlive: true },
             },
             {
-                path: "/manage/:id/MMSSendPage2",
+                path: "/manage/:id?/MMSSendPage2",
                 name: "MMSSendPage2",
                 components: {
                     manage: MMSSendPage2,
                 },
             },
             {
-                path: "/manage/:id/MMSInquire",
+                path: "/manage/:id?/MMSInquire",
                 name: "MMSInquire",
                 components: {
                     manage: MMSInquire,
                 },
             },
             {
-                path: "/manage/:id/activitySetting",
+                path: "/manage/:id?/activitySetting",
                 name: "ActivitySetting",
                 components: {
                     manage: ActivitySetting,
                 },
             },
             {
-                path: "/manage/:id/activitySetting/addChannel",
+                path: "/manage/:id?/activitySetting/addChannel",
                 name: "AddChannel",
                 components: {
                     manage: AddChannel,
                 },
             },
             {
-                path: "/manage/:id/activitySetting/addCustomService",
+                path: "/manage/:id?/activitySetting/addCustomService",
                 name: "AddCustomService",
                 components: {
                     manage: AddCustomService,
                 },
             },
             {
-                path: "/manage/:id/activitySetting/editChannel",
+                path: "/manage/:id?/activitySetting/editChannel",
                 name: "EditChannel",
                 components: {
                     manage: EditChannel,
                 },
             },
             {
-                path: "/manage/:id/activitySetting/addAutoReply",
+                path: "/manage/:id?/activitySetting/addAutoReply",
                 name: "AddAutoReply",
                 components: {
                     manage: AddAutoReply,
                 },
             },
             {
-                path: "/manage/:id/activitySetting/autoReplyList",
+                path: "/manage/:id?/activitySetting/autoReplyList",
                 name: "AutoReplyList",
                 components: {
                     manage: AutoReplyList,
                 },
             },
             {
-                path: "/manage/:id/manageSetting",
+                path: "/manage/:id?/manageSetting",
                 name: "ManageSetting",
                 components: {
                     manage: ManageSetting,

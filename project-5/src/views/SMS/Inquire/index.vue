@@ -11,7 +11,7 @@
                         placeholder="搜尋"
                     >
                         <template #prefix>
-                            <img src="../../../assets/Images/manage/search.svg" alt="#" />
+                            <img :src="searchIcon" alt="search" />
                         </template>
                     </n-input>
                 </div>
@@ -101,12 +101,9 @@ import {
     NDivider,
     NConfigProvider,
 } from "naive-ui";
-// import { useApiStore } from "@/store/api";
-// const apiStore = useApiStore();
-// const { getSmsMessageTable } = apiStore;
-// getSmsMessageTable()
 
-import { filterOptions } from "naive-ui/lib/select/src/utils";
+import searchIcon from "@/assets/Images/manage/search.svg";
+
 //v-model
 const search = ref("");
 const formRef = ref(null);
@@ -599,7 +596,7 @@ const pagination = {
     position: relative;
     display: flex;
     flex-direction: column;
-    min-height: calc(100% - 80px);
+    min-height: calc(100vh - 80px);
     padding: 15px 15px 0px 15px;
     background-color: $bg;
     .sms_inquire {

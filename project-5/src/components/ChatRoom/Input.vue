@@ -18,7 +18,7 @@
             </n-ellipsis>
             <div class="img" v-if="replyMsg && replyMsg.janusMsg.msgType === 6">
                 <img
-                    :src="`${config.fileUrl}/fls/${
+                    :src="`${config.fileUrl}${
                         replyMsg.janusMsg.format.Fileid
                     }.${replyMsg.janusMsg.format.ShowName.split('.').pop()}`"
                 />
@@ -29,16 +29,12 @@
                 />
             </div>
             <div @click.stop="replyHide" class="closeBtn">
-                <img src="../../assets/Images/chatroom/round-fill_close.svg" alt="#" />
+                <img :src="closeIcon" alt="關閉" />
             </div>
         </div>
     </div>
     <!-- 功能欄視窗 -->
     <div class="inputFunctionBar" v-if="inputFunctionBoolean">
-        <!-- <div class="audio">
-            <img src="../../assets/Images/m_fa_recording.png" alt="#" />
-            <p>語音輸入</p>
-        </div> -->
         <div class="file">
             <label class="upload_cover">
                 <input
@@ -50,10 +46,6 @@
                 />
                 <span class="upload_icon">文件</span>
             </label>
-        </div>
-        <div class="position" @click="handleFindMe()">
-            <img src="../../assets/Images/chatroom/location.svg" alt="#" />
-            <p>位置</p>
         </div>
     </div>
     <!-- 使用者輸入框 -->
@@ -88,33 +80,27 @@
                 <img
                     @click.stop="closeStickerBox"
                     v-if="showStickerModal && !isMmsSend"
-                    src="../../assets/Images/chatroom/emoji-enabled.svg"
+                    :src="emojiEnabled"
                     alt="表情貼圖"
                 />
                 <img
                     @click.stop="openStickerBox"
                     v-if="!showStickerModal && !isMmsSend"
-                    src="../../assets/Images/chatroom/emoji.svg"
+                    :src="emojiIcon"
                     alt="表情貼圖"
                 />
             </div>
-            <img
-                class="send"
-                src="../../assets/Images/chatroom/send.svg"
-                alt="傳送訊息"
-                @click.prevent="addMsg"
-                v-show="msg"
-            />
+            <img class="send" :src="sendIcon" alt="傳送訊息" @click.prevent="addMsg" v-show="msg" />
             <img
                 class="recorder"
-                src="../../assets/Images/chatroom/voice.svg"
+                :src="voiceIcon"
                 alt="開啟錄音"
                 v-show="!msg && !showRecorderModal"
                 @click="openRecorder()"
             />
             <img
                 class="recorder"
-                src="../../assets/Images/chatroom/voice-enabled.svg"
+                :src="voiceEnabled"
                 alt="關閉錄音"
                 v-show="!msg && showRecorderModal"
                 @click="closeRecorder()"
@@ -132,12 +118,8 @@
                             active: stickerGroupID == 0,
                         }"
                     >
-                        <img
-                            v-if="stickerGroupID == 0"
-                            src="../../assets/Images/chatroom/reload-time-enabled.svg"
-                            alt="小圖"
-                        />
-                        <img v-else src="../../assets/Images/chatroom/reload-time.svg" alt="小圖" />
+                        <img v-if="stickerGroupID == 0" :src="reloadTimeEnabled" alt="小圖" />
+                        <img v-else :src="reloadTimeIcon" alt="小圖" />
                     </li>
                     <li
                         v-for="tab in stickerList"
@@ -216,8 +198,14 @@ import { currentTime, currentDate, unixTime } from "@/util/dateUtil";
 import { useApiStore } from "@/store/api";
 import { useChatStore } from "@/store/chat";
 import { useModelStore } from "@/store/model";
-import mapIcon from "@/assets/Images/m_fa_mappin.png";
-import sendIcon from "@/assets/Images/btn_send.png";
+import sendIcon from "@/assets/Images/chatroom/send.svg";
+import closeIcon from "@/assets/Images/chatroom/round-fill_close.svg";
+import emojiEnabled from "@/assets/Images/chatroom/emoji-enabled.svg";
+import emojiIcon from "@/assets/Images/chatroom/emoji.svg";
+import voiceIcon from "@/assets/Images/chatroom/voice.svg";
+import voiceEnabled from "@/assets/Images/chatroom/voice-enabled.svg";
+import reloadTimeEnabled from "@/assets/Images/chatroom/reload-time-enabled.svg";
+import reloadTimeIcon from "@/assets/Images/chatroom/reload-time.svg";
 import { convertTime } from "@/util/commonUtil";
 import config from "@/config/config";
 

@@ -7,7 +7,7 @@
     >
         <n-card :bordered="false" size="huge" class="container">
             <div class="closeBtn" @click.prevent="closeModal">
-                <img src="../assets/Images/common/close-round.svg" alt="關閉" />
+                <img :src="closeIcon" alt="關閉" />
             </div>
             <UserInfo :info="info" />
             {{ info }}
@@ -19,7 +19,7 @@
                 </li>
                 <li
                     v-if="route.path !== '/'"
-                    @touchend.prevent="gotoChat(info.eventID, info.chatroomID, info.mobile, router)"
+                    @touchend.prevent="gotoChat(info.eventID, info.chatroomID, info.mobile)"
                 >
                     <span class="icon"><img :src="messageIcon" alt="傳送訊息" /></span>
                     <p class="text">傳送訊息</p>
@@ -40,6 +40,7 @@ import { useModelStore } from "@/store/model";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { DO_CALL_NAME } from "@/util/commonUtil";
 import UserInfo from "@/components/UserInfo.vue";
+import closeIcon from "@/assets/Images/common/close-round.svg";
 
 const route = useRoute();
 const router = useRouter();

@@ -90,7 +90,7 @@ export const useApiStore = defineStore({
         },
         //取得使用者資訊
         async getChatroomUserInfoApi(chatroomID) {
-            console.log("chatroomid", chatroomID);
+            // console.log("chatroomid", chatroomID);
             const getToken = localStorage.getItem("access_token");
             await axios
                 .get(`${config.serverUrl}/v1/chatroom/${chatroomID}`, {
@@ -99,7 +99,7 @@ export const useApiStore = defineStore({
                     },
                 })
                 .then((res: any) => {
-                    console.log("userInfo:", res.data);
+                    // console.log("userInfo:", res.data);
                     this.userInfo = res.data;
                 })
                 .catch((err: any) => {
@@ -108,7 +108,7 @@ export const useApiStore = defineStore({
         },
         // 編輯使用者資訊
         async sendUserInfo(data) {
-            console.log("sendUserInfo:", data);
+            // console.log("sendUserInfo:", data);
 
             const getToken = localStorage.getItem("access_token");
             const bodyFormData = new FormData();
@@ -127,7 +127,7 @@ export const useApiStore = defineStore({
                 headers: { Authorization: `Bearer ${getToken}` },
             })
                 .then((res: any) => {
-                    console.log("sendUserInfo res:", res.data);
+                    // console.log("sendUserInfo res:", res.data);
                     this.getChatroomlistApi(data.eventID);
                 })
                 .catch((err: any) => {
@@ -150,7 +150,7 @@ export const useApiStore = defineStore({
                 headers: { Authorization: `Bearer ${getToken}` },
             })
                 .then((res: any) => {
-                    console.log("sendUserInfo res:", res.data);
+                    // console.log("sendUserInfo res:", res.data);
                     this.getChatroomlistApi(data.eventID);
                 })
                 .catch((err: any) => {
@@ -159,6 +159,7 @@ export const useApiStore = defineStore({
         },
         // 聊天室歷史內容
         async getHistoryApi(chatRoomID) {
+            console.log("1 isInput:", this.isInput);
             const getToken = localStorage.getItem("access_token");
             const bodyFormData = new FormData();
             this.msgStart = this.isInput ? 0 : this.msgStart;
@@ -173,11 +174,13 @@ export const useApiStore = defineStore({
                 headers: { Authorization: `Bearer ${getToken}` },
             })
                 .then((res: any) => {
-                    console.log("isInput:", this.isInput);
-                    this.messageList = res.data.messageList ? res.data.messageList : [];
                     this.messageList = this.isInput
-                        ? this.messageList
-                        : this.messageList.concat(this.messageList);
+                        ? res.data.messageList.length > 0
+                            ? res.data.messageList
+                            : []
+                        : this.messageList.concat(
+                              res.data.messageList.length > 0 ? res.data.messageList : []
+                          );
                     this.messageList = this.messageList.reduce((unique, o) => {
                         const hasRepeatId = unique.some((obj) => {
                             return obj.janusMsg.config.id === o.janusMsg.config.id;
@@ -191,8 +194,15 @@ export const useApiStore = defineStore({
                         return unique;
                     }, []);
 
-                    console.log("messageList:", this.messageList);
-
+                    if (
+                        this.userInfo.lastVisit >
+                        this.messageList[this.messageList.length - 1].janusMsg.time
+                    ) {
+                        this.messageList = this.messageList.map((item) => {
+                            item.janusMsg.config.isRead = true;
+                            return item;
+                        });
+                    }
                     this.isInput = false;
                     this.isUserMsg = false;
                 })
@@ -202,6 +212,8 @@ export const useApiStore = defineStore({
         },
         //取得聊天室左側列表
         async getChatroomlistApi(eventID) {
+            console.log("chatroomList eventID", eventID);
+
             const getToken = localStorage.getItem("access_token");
             await axios
                 .get(`${config.serverUrl}/v1/chatroomlist/${eventID}`, {
@@ -284,7 +296,10 @@ export const useApiStore = defineStore({
                     },
                 })
                 .then((res: any) => {
-                    console.log("csList", res.data);
+                    const accountID = Number(localStorage.getItem("accountID"));
+                    res.data.cslist = res.data.cslist.filter((item) => {
+                        return item.accountID !== accountID;
+                    });
                     this.staffList = res.data.cslist;
                 })
                 .catch((err: any) => {
@@ -292,7 +307,7 @@ export const useApiStore = defineStore({
                     // console.log("status", err.response.status);
                     // console.log("headers", err.response.headers);
                     if (err.response && err.response.data.msg === "沒有客服人員") {
-                        this.staffList = [];
+                        this.staffList.events = [];
                         console.error(err);
                     }
                 });
@@ -347,7 +362,6 @@ export const useApiStore = defineStore({
             bodyFormData.append("cslist", data.cslist);
             bodyFormData.append("message", data.message);
             this.isDisabled = true;
-
             await axios({
                 method: "patch",
                 url: `${config.serverUrl}/v1/chatroom/${route.query.eventID}`,
@@ -357,7 +371,9 @@ export const useApiStore = defineStore({
                 .then((res: any) => {
                     // console.log("channel edit res:", res.data);
                     this.isDisabled = false;
-                    router.push(`/manage/${route.params.id}/activitySetting`);
+                    route.params.id
+                        ? router.push(`/manage/${route.params.id}/activitySetting`)
+                        : router.push(`/manage/activitySetting`);
                 })
                 .catch((err: any) => {
                     this.isDisabled = false;
@@ -377,7 +393,9 @@ export const useApiStore = defineStore({
             })
                 .then((res: any) => {
                     // console.log("channel delete res:", res.data);
-                    router.push(`/manage/${route.params.id}/activitySetting`);
+                    route.params.id
+                        ? router.push(`/manage/${route.params.id}/activitySetting`)
+                        : router.push(`/manage/activitySetting`);
                 })
                 .catch((err: any) => {
                     console.error(err);
@@ -416,12 +434,15 @@ export const useApiStore = defineStore({
                 headers: { Authorization: `Bearer ${getToken}` },
             })
                 .then((res: any) => {
-                    // console.log(" point res:", res);
-                    this.point = res.data.point;
+                    // console.log("point res:", res);
+                    this.point = res.data.status === "-302" ? 0 : res.data.point;
                 })
                 .catch((err: any) => {
                     if (err.response && [-1, -2, -3, -4].includes(err.response.data.status)) {
-                        location.href = `/${eventID}`;
+                        location.href = `/`;
+                    }
+                    if (err.response && err.response.data.status == -302) {
+                        this.point = 0;
                     }
                     console.error(err);
                 });
@@ -502,13 +523,8 @@ export const useApiStore = defineStore({
                     // this.channelEvent = res.data.msg;
                 })
                 .catch((err: any) => {
-                    if (err.response) {
-                        // console.log("data", err.response.data);
-                        // console.log("status", err.response.status);
-                        // console.log("headers", err.response.headers);
-                        if (err.response.data.msg === "沒有管理人員") {
-                            this.staffEvents = [];
-                        }
+                    if (err.response && err.response.data.msg === "沒有管理人員") {
+                        this.staffEvents = [];
                     }
                     console.log("events err:", err);
                 });
@@ -528,7 +544,9 @@ export const useApiStore = defineStore({
             })
                 .then((res: any) => {
                     console.log("res:", res);
-                    router.push(`/manage/${accountId}/activitySetting`);
+                    accountId
+                        ? router.push(`/manage/${accountId}/activitySetting`)
+                        : router.push(`/manage/activitySetting`);
                 })
                 .catch((err: any) => {
                     console.error(err);
@@ -537,7 +555,6 @@ export const useApiStore = defineStore({
         //excel電話號碼驗證
         async excelVerification(file) {
             console.log("file:", file);
-
             const getToken = localStorage.getItem("access_token");
             const fileType = file.type;
             const fileName = file.name;
@@ -633,6 +650,28 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err);
+                });
+        },
+        //收回訊息api
+        async recallAPI(msg, chatroomID) {
+            // api store
+            const getToken = localStorage.getItem("access_token");
+            const fd = new FormData();
+            fd.append("chatroomID", chatroomID);
+            fd.append("msgType", msg.janusMsg.msgType);
+            fd.append("id", msg.janusMsg.config.id);
+            fd.append("config", JSON.stringify(msg.janusMsg.config));
+            await axios({
+                method: "patch",
+                url: `${config.serverUrl}/v1/message`,
+                data: fd,
+                headers: { Authorization: `Bearer ${getToken}` },
+            })
+                .then((res: any) => {
+                    console.log("recall API", res);
+                })
+                .catch((err: any) => {
+                    console.error(err.response);
                 });
         },
     },

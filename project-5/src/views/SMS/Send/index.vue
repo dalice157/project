@@ -29,21 +29,29 @@
             <div class="smsSendContent">
                 <div class="contentTitle">
                     <h3>發送內容</h3>
+
+                    <div class="storeCommonMessage" @click="storeToCommonMsg" v-show="storeBoolean">
+                        <p>儲存至常用簡訊</p>
+                    </div>
                     <div class="commonMessage" @click="getCommonList">+常用簡訊</div>
                 </div>
-                <n-input
-                    v-model:value.trim="smsContent"
-                    type="textarea"
-                    placeholder="請輸入簡訊內容..."
-                    :autosize="{
-                        minRows: 7,
-                        maxRows: 7,
-                    }"
-                    @focus="focusType"
-                    @blur="blurJudge"
-                    @input="wordCount"
-                    @keydown="storeBoolean = true"
-                />
+
+                <div class="inputWrap">
+                    <n-input
+                        v-model:value.trim="smsContent"
+                        type="textarea"
+                        placeholder="請輸入簡訊內容..."
+                        :autosize="{
+                            minRows: 7,
+                            maxRows: 7,
+                        }"
+                        @focus="focusType"
+                        @blur="blurJudge"
+                        @input="wordCount"
+                        @keydown="storeBoolean = true"
+                    />
+                    <div class="lazyText">{{ lazyText }}</div>
+                </div>
                 <!-- {{ errorMsg }} -->
             </div>
             <div class="messageCount">
@@ -64,8 +72,23 @@
                     <div class="numOfMessage">{{ smsCount }} 則</div>
                     <div class="point">{{ smsPoint }} 點</div>
                 </div>
-                <div class="storeCommonMessage" @click="storeToCommonMsg" v-show="storeBoolean">
-                    <p>儲存至常用簡訊</p>
+                <div class="lazyWrap">
+                    <n-popover trigger="hover" placement="bottom">
+                        <template #trigger>
+                            <n-icon :depth="3" size="22">
+                                <help-circle-outline />
+                            </n-icon>
+                        </template>
+                        <span class="pop"
+                            >系統會在收到與關鍵字完全一致的訊息時自動回傳訊息，未輸入則在不符合其他關鍵字時自動回傳訊息。</span
+                        >
+                    </n-popover>
+                    <n-select
+                        placeholder="請選擇罐頭片語"
+                        v-model:value="lazyText"
+                        :options="options"
+                        @update:value="wordCount"
+                    />
                 </div>
             </div>
             <TimeSetting optionType="sms"></TimeSetting>
@@ -84,11 +107,7 @@
             <div class="commonMsg">
                 <div class="popUpTitle">
                     <h2>常用簡訊</h2>
-                    <img
-                        src="@/assets/Images/chatroom/close-round.svg"
-                        alt="#"
-                        @click="closeCommonMsg"
-                    />
+                    <img :src="closeIcon" alt="close" @click="closeCommonMsg" />
                 </div>
                 <div class="commonMsgFunctionBar">
                     <div class="commonMsgDel" @click="removeHint">刪除</div>
@@ -122,11 +141,7 @@
             <div class="commonMsg">
                 <div class="popUpTitle">
                     <h2>新增常用簡訊</h2>
-                    <img
-                        src="@/assets/Images/chatroom/close-round.svg"
-                        alt="#"
-                        @click="closeAddCommonMsg"
-                    />
+                    <img :src="closeIcon" alt="close" @click="closeAddCommonMsg" />
                 </div>
                 <div class="commonMsgFunctionBar">
                     <div class="commonMsgConfirm" @click="submitAddCommonMsg">確定</div>
@@ -175,11 +190,7 @@
             <div class="commonMsg">
                 <div class="popUpTitle">
                     <h2>編輯常用簡訊</h2>
-                    <img
-                        src="@/assets/Images/chatroom/close-round.svg"
-                        alt="#"
-                        @click="closeEditCommonMsg"
-                    />
+                    <img :src="closeIcon" alt="close" @click="closeEditCommonMsg" />
                 </div>
                 <div class="commonMsgFunctionBar">
                     <div class="commonMsgConfirm" @click="submitEditCommonMsg">確定</div>
@@ -247,28 +258,20 @@ export default {
 
 <script lang="ts" setup>
 import { onMounted, ref, watch, computed, h, reactive } from "vue";
-import {
-    NConfigProvider,
-    NInput,
-    NSpace,
-    NDivider,
-    NSelect,
-    NDataTable,
-    NRadio,
-    NIcon,
-    NPopover,
-} from "naive-ui";
+import { NInput, NSpace, NDivider, NSelect, NDataTable, NRadio, NIcon, NPopover } from "naive-ui";
 import { useRouter, useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
+import { HelpCircleOutline } from "@vicons/ionicons5";
 
 import TimeSetting from "@/components/backend/TimeSetting.vue";
 import OptionSetting from "@/components/backend/OptionSetting.vue";
 import { useSmsStore } from "@/store/smsStore";
 import { useApiStore } from "@/store/api";
 import editIcon from "@/assets/Images/manage/edit-round.svg";
-import { pointCalculation } from "@/util/commonUtil";
+import { pointCalculation, options } from "@/util/commonUtil";
 import config from "@/config/config";
 import { HelpCircle } from "@vicons/ionicons5";
+import closeIcon from "@/assets/Images/chatroom/close-round.svg";
 
 //router 設置
 const route = useRoute();
@@ -296,6 +299,8 @@ const content = ref("");
 const word = ref(0);
 const count = ref(0);
 const point = ref(0);
+
+const lazyText = ref(null);
 
 //常用簡訊功能
 onMounted(() => {
@@ -571,16 +576,23 @@ const blurJudge = (e: any) => {
 };
 
 const wordCount = () => {
+    let lazyTextLen = !lazyText.value ? 0 : lazyText.value.length;
+
     if (smsContent.value === demoContent || !smsContent.value) {
         smsContent.value = "";
         smsWord.value = 0;
         smsPoint.value = 0;
         smsCount.value = 0;
-        return;
     }
-    smsCount.value = pointCalculation(smsContent.value).smsCount;
-    smsPoint.value = pointCalculation(smsContent.value).point;
-    smsWord.value = smsContent.value.length;
+    smsCount.value =
+        smsContent.value.length === 0 && lazyTextLen === 0
+            ? 0
+            : pointCalculation(smsContent.value + lazyText.value).smsCount;
+    smsPoint.value =
+        smsContent.value.length === 0 && lazyTextLen === 0
+            ? 0
+            : pointCalculation(smsContent.value + lazyText.value).point;
+    smsWord.value = smsContent.value.length + lazyTextLen;
 };
 
 const uploadRef = computed({
@@ -607,7 +619,7 @@ const filterChannelList = computed(() => {
 });
 
 //下一頁按鈕
-const nextPageRouter = `/manage/${params.id}/SMSSendPage2`;
+const nextPageRouter = params.id ? `/manage/${params.id}/SMSSendPage2` : `/manage/SMSSendPage2`;
 //更改naive-ui主題
 const themeOverrides = {
     common: {},
@@ -624,6 +636,20 @@ const themeOverrides = {
 <style lang="scss">
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
+.lazyWrap {
+    .n-base-selection {
+        margin-left: 10px;
+        --border: 1px solid #8b8b8b !important;
+        --border-active: 1px solid #8b8b8b !important;
+        --border-focus: 1px solid #8b8b8b !important;
+        --border-hover: 1px solid #e4e4e4 !important;
+        --border-radius: 4px !important;
+        --box-shadow-active: none !important;
+        --box-shadow-focus: none !important;
+        --caret-color: #3e3e3e !important;
+        --option-text-color-active: #ffb400 !important;
+    }
+}
 .n-radio {
     --box-shadow-active: inset 0 0 0 1px#ffb400 !important;
     --box-shadow-focus: inset 0 0 0 1px #ffb400 !important;
@@ -712,9 +738,24 @@ const themeOverrides = {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
+.inputWrap {
+    border: 1px solid $gray-3;
+    border-radius: 5px;
+    .lazyText {
+        padding: 0 10px 10px;
+    }
+}
+.lazyWrap {
+    display: flex;
+    align-items: center;
+    margin-right: 10px;
+    justify-content: flex-start;
+    width: 200px;
+}
 // 常用簡訊
 .mask {
     .commonMsg {
+        border-radius: 5px;
         width: 900px;
         height: 700px;
         padding: 30px;
@@ -729,7 +770,7 @@ const themeOverrides = {
         h2 {
             text-align: center;
             margin-bottom: 60px;
-            font-size: 16px;
+            font-size: $font-size-16;
             font-weight: 500;
             color: $gray-1;
         }
@@ -782,6 +823,21 @@ const themeOverrides = {
     }
 }
 //新增常用簡訊
+.storeCommonMessage {
+    width: 100px;
+    height: 25px;
+    line-height: 25px;
+    background-color: $primary-1;
+    border-radius: 12.5px;
+    text-align: center;
+    cursor: pointer;
+    p {
+        color: $white;
+        font-size: $font-size-12;
+        font-weight: 400;
+        font-family: $font-family;
+    }
+}
 .mask {
     .commonMsg {
     }
@@ -790,7 +846,7 @@ const themeOverrides = {
         h2 {
             text-align: center;
             margin-bottom: 60px;
-            font-size: 16px;
+            font-size: $font-size-16;
             font-weight: 500;
             color: $gray-1;
         }
@@ -812,7 +868,7 @@ const themeOverrides = {
             display: flex;
             margin-bottom: 15px;
             h3 {
-                font-size: 14px;
+                font-size: $font-size-14;
                 font-weight: 400;
                 color: $gray-1;
                 font-family: $font-family;
@@ -822,7 +878,7 @@ const themeOverrides = {
                 min-width: 56px;
             }
             p {
-                font-size: 12px;
+                font-size: $font-size-12;
                 font-weight: 400;
                 color: $gray-3;
                 font-family: $font-family;
@@ -833,13 +889,18 @@ const themeOverrides = {
     .smsSendContent {
         width: 60%;
         margin: 0 auto;
+        .lazyWrap {
+            display: flex;
+            justify-content: flex-start;
+            width: 200px;
+        }
         .contentTitle {
             margin-bottom: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             h3 {
-                font-size: 14px;
+                font-size: $font-size-14;
                 font-weight: 400;
                 color: $gray-1;
                 font-family: $font-family;
@@ -851,30 +912,27 @@ const themeOverrides = {
                 background-color: $primary-1;
                 border-radius: 12.5px;
                 color: $white;
-                font-size: 12px;
+                font-size: $font-size-12;
                 font-weight: 400;
                 font-family: $font-family;
                 text-align: center;
                 cursor: pointer;
             }
             .n-input {
-                font-size: 12px;
+                font-size: $font-size-12;
             }
         }
     }
+
     .messageCount {
-        width: 60%;
-        margin: 0 auto;
         margin-top: 15px;
         margin-bottom: 15px;
         display: flex;
         justify-content: space-between;
         align-items: center;
-
         .messageInfo {
             display: flex;
-            justify-content: space-around;
-            width: 330px;
+            justify-content: flex-start;
             .wordCount {
                 width: 100px;
                 padding: 10px 0;
@@ -906,21 +964,6 @@ const themeOverrides = {
                 align-items: center;
             }
         }
-        .storeCommonMessage {
-            width: 100px;
-            height: 25px;
-            line-height: 25px;
-            background-color: $primary-1;
-            border-radius: 12.5px;
-            text-align: center;
-            cursor: pointer;
-            p {
-                color: $white;
-                font-size: 12px;
-                font-weight: 400;
-                font-family: $font-family;
-            }
-        }
     }
 }
 // 刪除常用簡訊彈窗
@@ -933,7 +976,7 @@ const themeOverrides = {
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
     .deleteCommonMsgPopUp {
-        border-radius: 20px;
+        border-radius: 5px;
         width: 342px;
         padding: 15px;
         background-color: $white;
@@ -990,7 +1033,7 @@ const themeOverrides = {
 .SMSSend {
     position: relative;
     display: flex;
-    height: calc(100% - 80px);
+    height: calc(100vh - 80px);
     background-color: $bg;
     padding: 15px;
     .smsContent {
@@ -1006,7 +1049,7 @@ const themeOverrides = {
         }
         .smsChannel {
             h3 {
-                font-size: 14px;
+                font-size: $font-size-14;
                 font-weight: 400;
                 color: $gray-1;
                 font-family: $font-family;
@@ -1020,7 +1063,7 @@ const themeOverrides = {
                 display: flex;
                 margin-bottom: 15px;
                 h3 {
-                    font-size: 14px;
+                    font-size: $font-size-14;
                     font-weight: 400;
                     color: $gray-1;
                     font-family: $font-family;
@@ -1030,7 +1073,7 @@ const themeOverrides = {
                     min-width: 56px;
                 }
                 p {
-                    font-size: 12px;
+                    font-size: $font-size-12;
                     font-weight: 400;
                     color: $gray-3;
                     font-family: $font-family;
@@ -1045,7 +1088,7 @@ const themeOverrides = {
                 justify-content: space-between;
                 align-items: center;
                 h3 {
-                    font-size: 14px;
+                    font-size: $font-size-14;
                     font-weight: 400;
                     color: $gray-1;
                     font-family: $font-family;
@@ -1057,14 +1100,14 @@ const themeOverrides = {
                     background-color: $primary-1;
                     border-radius: 12.5px;
                     color: $white;
-                    font-size: 12px;
+                    font-size: $font-size-12;
                     font-weight: 400;
                     font-family: $font-family;
                     text-align: center;
                     cursor: pointer;
                 }
                 .n-input {
-                    font-size: 12px;
+                    font-size: $font-size-12;
                 }
             }
         }
@@ -1120,7 +1163,7 @@ const themeOverrides = {
                 cursor: pointer;
                 p {
                     color: $white;
-                    font-size: 12px;
+                    font-size: $font-size-12;
                     font-weight: 400;
                     font-family: $font-family;
                 }

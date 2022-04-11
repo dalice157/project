@@ -63,41 +63,33 @@
                 </div>
                 <div class="welcomeImg" v-else-if="item.janusMsg.msgType === 6">
                     <img
-                        :src="`${config.fileUrl}/fls/${item.janusMsg.format.Fileid}${item.janusMsg.format.ExtensionName}`"
+                        :src="`${config.fileUrl}${item.janusMsg.format.Fileid}${item.janusMsg.format.ExtensionName}`"
                         :alt="item.janusMsg.format.ShowName"
                     />
                 </div>
                 <div class="welcomeFile" v-else-if="item.janusMsg.msgType === 7">
                     <div>
                         <div>
-                            <img src="@/assets/Images/common/file.svg" />
+                            <img :src="fileIcon" />
                             <p>{{ item.janusMsg.format.ShowName }}</p>
                         </div>
                     </div>
                 </div>
                 <div class="welcomeFunctionBar">
                     <img
-                        src="../../assets/Images/manage/delete.svg"
-                        alt=""
+                        :src="delIcon"
+                        alt="del"
                         @click="deleteAutoReplyMsg(item.janusMsg.config.id)"
                     />
                     <div class="welcomeFunctionBarUpload">
-                        <span
-                            src="../../assets/Images/common/file.svg"
-                            alt=""
-                            v-show="item.janusMsg.msgContent === ''"
-                        >
+                        <span :src="fileIcon" alt="file" v-show="item.janusMsg.msgContent === ''">
                             <input
                                 type="file"
                                 @change="autoReplyMsgFile($event, index)"
                                 :accept="fileAccept"
                             />
                         </span>
-                        <span
-                            src="../../assets/Images/chatroom/pic.svg"
-                            alt=""
-                            v-show="item.janusMsg.msgContent === ''"
-                        >
+                        <span :src="picIcon" alt="圖片" v-show="item.janusMsg.msgContent === ''">
                             <input
                                 type="file"
                                 @change="autoReplyMsgPicture($event, index)"
@@ -110,10 +102,22 @@
             <h2 @click="addAutoReplyMsg">+新增自動回覆訊息</h2>
         </div>
         <div class="channelButtonGroup">
-            <router-link class="channelCancel" :to="`/manage/${route.params.id}/activitySetting`"
+            <router-link
+                class="channelCancel"
+                :to="
+                    `${route.params.id}`
+                        ? `/manage/${route.params.id}/activitySetting`
+                        : `/manage/activitySetting`
+                "
                 >取消</router-link
             >
-            <router-link class="channelStore" :to="`/manage/${route.params.id}/activitySetting`"
+            <router-link
+                class="channelStore"
+                :to="
+                    `${route.params.id}`
+                        ? `/manage/${route.params.id}/activitySetting`
+                        : `/manage/activitySetting`
+                "
                 >確認儲存</router-link
             >
         </div>
@@ -132,13 +136,17 @@ import {
     NPopover,
 } from "naive-ui";
 import { HelpCircle } from "@vicons/ionicons5";
-import config from "@/config/config";
 import { nanoid } from "nanoid";
 import dayjs from "dayjs";
-import { unixTime, currentDate } from "@/util/dateUtil";
 import axios from "axios";
 import Compressor from "compressorjs";
 import { useRoute, useRouter } from "vue-router";
+
+import config from "@/config/config";
+import { unixTime, currentDate } from "@/util/dateUtil";
+import fileIcon from "@/assets/Images/common/file.svg";
+import delIcon from "@/assets/Images/manage/delete.svg";
+import picIcon from "@/assets/Images/chatroom/pic.svg";
 
 //router 設定
 const route = useRoute();
@@ -466,7 +474,7 @@ const autoReplyMsgFile = (e: any, index: any) => {
                         display: block;
                         width: 24px;
                         height: 24px;
-                        background-image: url("../../assets/Images/common/file.svg");
+                        background-image: url("~@/assets/Images/common/file.svg");
                         background-size: 24px;
 
                         input {
@@ -481,7 +489,7 @@ const autoReplyMsgFile = (e: any, index: any) => {
                         display: block;
                         width: 24px;
                         height: 24px;
-                        background-image: url("../../assets/Images/chatroom/pic.svg");
+                        background-image: url("~@/assets/Images/chatroom/pic.svg");
                         background-size: 24px;
                         margin: 0 5px;
 

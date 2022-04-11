@@ -5,15 +5,15 @@
             <n-config-provider :theme-overrides="themeOverrides">
                 <n-input v-model:value="keyWord" type="text" placeholder="訊息">
                     <template #prefix>
-                        <img src="../../assets/Images/chatroom/search.svg" alt="#" />
+                        <img :src="searchIcon" alt="搜索" />
                     </template>
                     <template #suffix>
                         <img
                             class="clearKeyWord"
-                            src="../../assets/Images/chatroom/round-fill_close.svg"
+                            :src="closeIcon"
                             v-if="keyWord"
                             @click="clearResultKeyWord()"
-                            alt="#"
+                            alt="關閉"
                         />
                     </template>
                 </n-input>
@@ -29,46 +29,58 @@
         <ul class="list" v-if="searcMessages.length > 0">
             <li
                 class="item"
-                :key="msg.format.id"
+                :key="msg.janusMsg.config.id"
                 v-for="msg in searcMessages"
-                @click.prevent="onClickGoto(msg.format.id, route.params.id)"
+                @click.prevent="onClickGoto(msg.janusMsg.config.id, route.params.id)"
             >
                 <n-avatar
                     class="avatar"
-                    v-if="msg.sender === 1"
+                    v-if="msg.janusMsg.sender === 0"
                     :size="48"
-                    :src="`${config.serverUrl}/image/${eventInfo.icon}`"
+                    :src="`${config.fileUrl}${eventInfo.icon}`"
                 />
+
                 <img
                     class="avatar"
                     :size="48"
-                    v-else-if="msg.sender === 0"
-                    src="../../assets/Images/mugShot/User-round.svg"
+                    v-else-if="msg.janusMsg.sender === 1"
+                    :src="userIcon"
                 />
                 <div class="info">
-                    <span class="name">{{ msg.sender === 0 ? eventInfo.name : "自己" }}</span>
+                    <span class="name">{{
+                        msg.janusMsg.sender === 1
+                            ? `${"+" + String(mobile).slice(0, 3) + String(mobile).slice(-9)}`
+                            : `${eventInfo.name}`
+                    }}</span>
                     <n-ellipsis
                         class="msg"
-                        v-if="msg.tagMsg"
-                        v-html="msg.tagMsg"
+                        v-if="msg.janusMsg.tagMsg"
+                        v-html="msg.janusMsg.tagMsg"
                         :line-clamp="2"
                         style="width: 95%"
                         :tooltip="false"
                     />
-                    <div class="picture" v-else-if="msg.msgType === 6 || msg.msgType === 7">
-                        <div v-if="msg.msgType === 6">{{ msg.format.ShowName }}</div>
-                        <span v-if="msg.msgType === 7">
-                            {{ msg.format.ShowName }}
+                    <div
+                        class="picture"
+                        v-else-if="msg.janusMsg.msgType === 6 || msg.janusMsg.msgType === 7"
+                    >
+                        <div v-if="msg.janusMsg.msgType === 6">
+                            {{ msg.janusMsg.format.ShowName }}
+                        </div>
+                        <span v-if="msg.janusMsg.msgType === 7">
+                            {{ msg.janusMsg.format.ShowName }}
                         </span>
                     </div>
                 </div>
                 <div class="time">
                     {{
-                        dayjs.unix(msg.time).isToday()
-                            ? dayjs.unix(msg.time).format("A hh:mm")
-                            : dayjs.unix(msg.time).isYesterday()
-                            ? "昨天"
-                            : dayjs.unix(msg.time).format("YYYY/MM/DD A hh:mm")
+                        dayjs.unix(msg.janusMsg.time / 1000000000).isToday()
+                            ? dayjs.unix(msg.janusMsg.time / 1000000000).format("A hh:mm")
+                            : dayjs.unix(msg.janusMsg.time / 1000000000).isYesterday()
+                            ? "昨天" + dayjs.unix(msg.janusMsg.time / 1000000000).format("A hh:mm")
+                            : dayjs
+                                  .unix(msg.janusMsg.time / 1000000000)
+                                  .format("YYYY/MM/DD A hh:mm")
                     }}
                 </div>
             </li>
@@ -77,11 +89,12 @@
     </div>
 </template>
 <script setup lang="ts">
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent, ref, watch, computed, watchEffect } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute } from "vue-router";
 import { NConfigProvider, NInput, NIcon, NAvatar, NEllipsis } from "naive-ui";
 import dayjs from "dayjs";
+import { currentDate, currentTime } from "@/util/dateUtil";
 import isYesterday from "dayjs/plugin/isYesterday";
 import isToday from "dayjs/plugin/isToday";
 
@@ -89,10 +102,14 @@ import { useSearchStore } from "@/store/search";
 import { useApiStore } from "@/store/api";
 import { getFileExtension } from "@/util/commonUtil";
 import config from "@/config/config";
+import searchIcon from "@/assets/Images/chatroom/search.svg";
+import closeIcon from "@/assets/Images/chatroom/round-fill_close.svg";
+import userIcon from "@/assets/Images/mugShot/User-round.svg";
 
 // api store
 const apiStore = useApiStore();
-const { eventInfo } = storeToRefs(apiStore);
+const { getEventListApi } = apiStore;
+const { eventInfo, eventList } = storeToRefs(apiStore);
 
 const searchStore = useSearchStore();
 const { searchSwitch, onSearchResult, onClickGoto, clearResultKeyWord, closeSearchBar } =
@@ -100,6 +117,8 @@ const { searchSwitch, onSearchResult, onClickGoto, clearResultKeyWord, closeSear
 const { searchBoolean, isResult, searcMessages, keyWord } = storeToRefs(searchStore);
 
 const route = useRoute();
+const mobile: any = computed(() => route.query.mobile);
+
 const themeOverrides = {
     common: {},
     Input: {
@@ -210,7 +229,7 @@ const themeOverrides = {
             }
             .info {
                 flex-direction: column;
-                width: calc(100% - 127px);
+                width: calc(100% - 200px);
                 .name + .msg,
                 .name + .picture {
                     margin-top: 6px;

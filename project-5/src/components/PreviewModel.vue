@@ -16,15 +16,37 @@
                 <n-icon size="28" class="previewClose" color="#fff" @click="onClosePreview">
                     <CloseCircleOutline />
                 </n-icon>
-                <div v-if="welcomeMsgs.length === 0">尚無訊息</div>
-                <div v-if="welcomeMsgs.length > 0">
+                <header class="header">
+                    <div class="titleWrap">
+                        <img :src="arrowLeft" alt="回交談紀錄" />
+                        <!-- NavBar 大頭貼 -->
+                        <n-avatar
+                            round
+                            :size="42"
+                            :src="avatarImg ? `${config.fileUrl}${avatarImg}` : user_pic_defaul"
+                        />
+                        <!-- NavBar 標題 -->
+                        <h1 class="title">{{ activeName }}</h1>
+                    </div>
+                    <div class="iconWrap">
+                        <img :src="phoneIcon" alt="打電話" />
+                        <img :src="galleryIcon" alt="圖片瀏覽" />
+                        <img :src="searchIcon" alt="搜索" />
+                    </div>
+                </header>
+                <div class="wrap noMsg" v-if="welcomeMsgs.length === 0">尚無訊息</div>
+                <div class="wrap" v-if="welcomeMsgs.length > 0">
                     <div class="date">
                         <span>{{ currentDate() }}</span>
                     </div>
                     <div class="inner" v-for="(msg, index) in welcomeMsgs" :key="index">
                         <!-- 對方頭像 -->
                         <div class="avatar">
-                            <n-avatar round :size="42" :src="user_pic_defaul" />
+                            <n-avatar
+                                round
+                                :size="42"
+                                :src="avatarImg ? `${config.fileUrl}${avatarImg}` : user_pic_defaul"
+                            />
                         </div>
                         <!-- 文字訊息 -->
                         <div class="content" v-if="msg.janusMsg.msgType === 1">
@@ -35,7 +57,7 @@
                         <!-- 圖片訊息 -->
                         <div class="picture" v-if="msg.janusMsg.msgType === 6">
                             <img
-                                :src="`${config.fileUrl}/fls/${msg.janusMsg.format.Fileid}${msg.janusMsg.format.ExtensionName}`"
+                                :src="`${config.fileUrl}${msg.janusMsg.format.Fileid}${msg.janusMsg.format.ExtensionName}`"
                             />
                         </div>
                         <!-- 文件訊息 -->
@@ -63,13 +85,20 @@
                         </div>
                     </div>
                 </div>
+                <footer class="inputWrap">
+                    <img :src="addIcon" alt="開啟文件" />
+                    <img :src="cameraIcon" alt="拍照" />
+                    <img :src="photoIcon" alt="開啟圖檔" />
+                    <div class="textArea">Aa</div>
+                    <img :src="voiceIcon" alt="錄音" />
+                </footer>
             </div>
         </div>
     </teleport>
 </template>
 <script lang="ts" setup>
 import { ref, toRef } from "vue";
-import { NButton, NIcon, NAvatar } from "naive-ui";
+import { NButton, NIcon, NAvatar, NEllipsis } from "naive-ui";
 import { CloseCircleOutline } from "@vicons/ionicons5";
 import dayjs from "dayjs";
 
@@ -77,6 +106,14 @@ import { currentDate, currentTime } from "@/util/dateUtil";
 import user_pic_defaul from "@/assets/Images/mugShot/User-round.svg";
 import config from "@/config/config";
 import fileIcon from "@/assets/Images/chatroom/file-fill.svg";
+import arrowLeft from "@/assets/Images/chatroom/arrow-left.svg";
+import phoneIcon from "@/assets/Images/chatroom/phone.svg";
+import galleryIcon from "@/assets/Images/chatroom/list.svg";
+import searchIcon from "@/assets/Images/chatroom/search.svg";
+import addIcon from "@/assets/Images/chatroom/add-round.svg";
+import cameraIcon from "@/assets/Images/chatroom/Photo.svg";
+import photoIcon from "@/assets/Images/chatroom/pic.svg";
+import voiceIcon from "@/assets/Images/chatroom/voice.svg";
 
 const isPreview = ref(false);
 const onOpenPreview = () => {
@@ -88,9 +125,13 @@ const onClosePreview = () => {
 
 const props = defineProps({
     welcomeMsgCount: Object,
+    name: String,
+    avatar: String,
 });
 
 const welcomeMsgs = toRef(props, "welcomeMsgCount");
+const activeName = toRef(props, "name");
+const avatarImg = toRef(props, "avatar");
 </script>
 <style lang="scss" scoped>
 @import "~@/assets/scss/var";
@@ -106,16 +147,73 @@ const welcomeMsgs = toRef(props, "welcomeMsgCount");
     display: flex;
     justify-content: center;
     align-items: center;
+    .header {
+        padding: 0 15px;
+        height: 60px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        .titleWrap,
+        .iconWrap {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .title {
+            color: $gray-1;
+            @extend %h4;
+            margin-left: 10px;
+        }
+        .iconWrap {
+            width: 25%;
+        }
+    }
     .previewWrap {
         width: 375px;
         height: 572px;
         background-color: $white;
+        background-image: url("~@/assets/Images/common/chatRoom-header.svg");
+        background-repeat: no-repeat;
         position: relative;
         .previewClose {
             position: absolute;
             right: -10%;
             top: -10px;
             cursor: pointer;
+        }
+    }
+    .wrap {
+        height: calc(100% - 120px);
+        overflow-y: auto;
+        &.noMsg {
+            text-align: center;
+            font-size: $font-size-16;
+            padding-top: 3em;
+        }
+    }
+    .inputWrap {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        padding: 0 15px;
+        box-shadow: -1px -1px 4px rgba(227, 227, 227, 0.5);
+        .textArea {
+            border-radius: 20px;
+            background-color: $gray-7;
+            padding: 0 15px;
+            line-height: 40px;
+            height: 40px;
+            color: $gray-3;
+            font-size: $font-size-14;
+            width: 205px;
+        }
+        img {
+            width: 25px;
         }
     }
 }

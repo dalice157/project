@@ -3,7 +3,7 @@
         <div class="managerPermission">
             <div class="managerPermissionTitle">
                 <h2>管理者權限</h2>
-                <img src="../assets/Images/chatroom/add-circle.svg" alt="" @click="getCsList" />
+                <img :src="addIcon" alt="編輯" @click="getCsList" />
             </div>
             <n-config-provider :theme-overrides="themeOverrides">
                 <n-input
@@ -14,11 +14,11 @@
                     clearable
                 >
                     <template #prefix>
-                        <img src="../assets/Images/manage/search.svg" alt="#" />
+                        <img :src="searchIcon" alt="搜尋" />
                     </template>
                 </n-input>
             </n-config-provider>
-            <div class="adminList" v-if="filterPerson.length > 0">
+            <div class="adminList">
                 <ul>
                     <li v-for="p in filterPerson" :key="p.accountID">
                         <p>{{ p.name }}</p>
@@ -27,9 +27,6 @@
                         </n-icon>
                     </li>
                 </ul>
-            </div>
-            <div class="noAdminList" v-else>
-                <p>目前無管理人員!!</p>
             </div>
         </div>
     </div>
@@ -50,20 +47,20 @@
                 <div class="customServiceTitle">
                     <h2>客服人員列表</h2>
                 </div>
-                <div class="staffList" v-if="staffList.length > 0">
+                <div class="staffList">
                     <ul>
                         <li v-for="(staff, index) in staffList" :key="index">
                             <n-checkbox-group v-model:value="addList">
                                 <div class="staffData">
-                                    <p>{{ staff.name }}</p>
-                                    <n-checkbox :value="staff"></n-checkbox>
+                                    <n-checkbox
+                                        class="staff"
+                                        :value="staff"
+                                        :label="staff.name"
+                                    ></n-checkbox>
                                 </div>
                             </n-checkbox-group>
                         </li>
                     </ul>
-                </div>
-                <div class="noStaffList" v-else>
-                    <p>目前尚無客服人員!!</p>
                 </div>
                 <div class="staffConfirm" @click="csToAdmin">確認</div>
             </div>
@@ -73,10 +70,13 @@
 
 <script lang="ts" setup>
 import { ref, computed, watchEffect, onUpdated } from "vue";
-import { NInput, NConfigProvider, NIcon, NCheckbox, NCheckboxGroup } from "naive-ui";
+import { NInput, NConfigProvider, NIcon, NCheckbox, NCheckboxGroup, NEllipsis } from "naive-ui";
 import { CloseCircleSharp } from "@vicons/ionicons5";
-import { useApiStore } from "@/store/api";
 import { storeToRefs } from "pinia";
+
+import { useApiStore } from "@/store/api";
+import addIcon from "@/assets/Images/chatroom/add-circle.svg";
+import searchIcon from "@/assets/Images/manage/search.svg";
 
 //store
 const apiStore = useApiStore();
@@ -93,7 +93,14 @@ const filterPerson: any = computed(() => {
     });
     return arr;
 });
-
+//過濾客服人員出現管理者
+watchEffect(() => {
+    adminList.value.forEach((admin) => {
+        staffList.value = staffList.value.filter((staff) => {
+            return staff.accountID !== admin.accountID;
+        });
+    });
+});
 //新增管理者權限
 const popUp = ref(false);
 const addList = ref([]);
@@ -149,6 +156,16 @@ const themeOverrides = {
 <style lang="scss">
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
+.staff {
+    &.n-checkbox .n-checkbox-box .n-checkbox-box__border {
+        border: 1px solid #aaa;
+    }
+}
+.staffData {
+    .n-ellipsis {
+        color: $gray-1;
+    }
+}
 .settingSearch {
     &.n-input .n-input__input-el {
         height: 36px;
@@ -168,6 +185,9 @@ const themeOverrides = {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
+.staff {
+    margin-right: 10px;
+}
 .mask {
     position: absolute;
     top: 0;
@@ -180,40 +200,32 @@ const themeOverrides = {
     justify-content: center;
     align-items: center;
     .customService {
-        width: 590px;
-        height: 665px;
+        width: 400px;
         background-color: $white;
-        padding: 25px 0px;
+        border-radius: 5px;
+        padding: 25px 0px 10px;
         .customServiceTitle {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-            padding: 0 20px;
+            padding: 0 20px 10px;
             h2 {
                 font-family: $font-family;
-                font-size: 16px;
-                font-weight: 500;
+                font-size: $font-size-16;
+                font-weight: 600;
                 color: $gray-1;
             }
-            img {
-                width: 27px;
-                height: 27px;
-                cursor: pointer;
-            }
         }
+
         .staffList {
             overflow-y: auto;
-            height: 500px;
+            min-height: 200px;
+            max-height: 350px;
             ul {
                 li {
-                    height: 60px;
-                    line-height: 60px;
-                    padding: 0 20px;
+                    padding: 20px;
                     position: relative;
                     .staffData {
                         display: flex;
-                        justify-content: space-between;
                         align-items: center;
                     }
 
@@ -246,7 +258,7 @@ const themeOverrides = {
             color: $white;
             background-color: $gray-1;
             cursor: pointer;
-            margin: 30px auto;
+            margin: 20px auto;
         }
     }
 }
@@ -259,7 +271,7 @@ const themeOverrides = {
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
     .deleteChannelPopUp {
-        border-radius: 20px;
+        border-radius: 5px;
         width: 342px;
         padding: 15px;
         background-color: $white;
@@ -316,12 +328,13 @@ const themeOverrides = {
 .manageSetting {
     background-color: $bg;
     padding-top: 15px;
-    min-height: 89%;
+    min-height: calc(100vh - 80px);
     .managerPermission {
         width: 590px;
         height: 100%;
         background-color: $white;
         margin: 0 auto;
+        border-radius: 5px;
         padding: 25px 20px;
         .managerPermissionTitle {
             display: flex;

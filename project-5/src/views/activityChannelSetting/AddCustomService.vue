@@ -16,7 +16,7 @@
                         :class="{ hoverEffect: channelHoverIndex === channel.eventID }"
                     >
                         <div class="channelTitle">
-                            <img :src="`${config.fileUrl}/fls/${channel.icon}`" alt="" />
+                            <img :src="`${config.fileUrl}${channel.icon}`" alt="" />
                             <p class="channelName">{{ channel.name }}</p>
                         </div>
                         <div class="channelSetting" @click="onDelList(channel)">
@@ -48,7 +48,7 @@
                     placeholder="搜尋"
                 >
                     <template #prefix>
-                        <img src="../../assets/Images/manage/search.svg" alt="#" />
+                        <img :src="searchIcon" alt="search" />
                     </template>
                 </n-input>
             </n-config-provider>
@@ -62,11 +62,11 @@
                         :class="{ hoverEffect: stafflHoverIndex === channel.eventID }"
                     >
                         <div class="channelTitle">
-                            <img :src="`${config.fileUrl}/fls/${channel.icon}`" alt="" />
+                            <img :src="`${config.fileUrl}${channel.icon}`" alt="" />
                             <p class="channelName">{{ channel.name }}</p>
                         </div>
                         <div class="channelSetting" @click="addChannel(channel)">
-                            <img src="../../assets/Images/manage/add-circle.svg" alt="#" />
+                            <img :src="addIcon" alt="add" />
                         </div>
                     </li>
                 </ul>
@@ -87,6 +87,8 @@ import { CloseCircleSharp } from "@vicons/ionicons5";
 
 import config from "@/config/config";
 import { useApiStore } from "@/store/api";
+import searchIcon from "@/assets/Images/manage/search.svg";
+import addIcon from "@/assets/Images/manage/add-circle.svg";
 
 //router
 const router = useRouter();
@@ -148,7 +150,9 @@ const onSendList = () => {
 //前往活動頻道管理
 const params = route.params;
 const goActivity = () => {
-    router.push(`/manage/${params.id}/activitySetting`);
+    params.id
+        ? router.push(`/manage/${params.id}/activitySetting`)
+        : router.push(`/manage/activitySetting`);
 };
 
 const themeOverrides = {
@@ -305,7 +309,7 @@ const themeOverrides = {
             margin: 0 auto;
             .n-input {
                 box-shadow: 1px 2px 4px #e3e3e3;
-                font-size: 12px;
+                font-size: $font-size-12;
                 width: 100%;
                 // margin-left: 30px;
                 margin-bottom: 10px;
