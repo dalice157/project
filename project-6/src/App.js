@@ -19,9 +19,6 @@ function App() {
     const onList2 = (i, num) => {
         let items = value.slice();
         let index = items.indexOf(num);
-        console.log("num:", num);
-        console.log("items:", items);
-        console.log("index:", index);
         index === -1 ? items.push(num) : items.splice(index, 1);
         setList2((tagIndexList) =>
             tagIndexList.includes(i)
@@ -29,6 +26,10 @@ function App() {
                 : [...tagIndexList, i]
         );
         setValue(items);
+        console.log("num:", num);
+        console.log("items:", items);
+        console.log("index:", index);
+        console.log("value:", value);
     };
     return (
         <div className="App">
