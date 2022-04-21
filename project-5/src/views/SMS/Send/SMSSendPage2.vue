@@ -23,13 +23,18 @@
                 <div class="msgContent">
                     <h3>發送內容</h3>
                     <p>{{ smsContent }}</p>
+                    <p>{{ smsPhrases }}</p>
                 </div>
             </div>
         </div>
         <div class="smsRecipient">
             <div class="smsRecipientInfo">
                 <h2>收訊人資訊</h2>
-                <p>將扣除{{ smsPoint }}點/<span>剩餘500點</span></p>
+                <p>
+                    將扣除{{ smsPoint * phoneCount }}點/<span
+                        >剩餘{{ point - smsPoint * phoneCount }}點</span
+                    >
+                </p>
             </div>
             <div class="smsRecipientContent">
                 <div class="deliveryTime">
@@ -39,7 +44,7 @@
                 </div>
                 <div class="deliveryList">
                     <h3>發送名單</h3>
-                    <p>{{ getPhones.length }}筆</p>
+                    <p>{{ phoneCount }}筆</p>
                 </div>
             </div>
             <div class="smsPage2Button">
@@ -54,7 +59,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
 import axios from "axios";
@@ -85,42 +90,44 @@ const {
     smsPhoneString,
     smsPhoneArray,
     smsTabsType,
-    smsExcelFile,
+    smsPhrases,
 } = storeToRefs(smsStore);
 
 // 上一頁按鈕
 const goPage1 = () => {
     params.id ? router.push(`/manage/${params.id}/SMSSend`) : router.push(`/manage/SMSSend`);
 };
+const phoneCount: any = ref(0);
 const getPhones: any = ref(null);
 if (smsTabsType.value === "automatic") {
-    getPhones.value = uploadRef.value.valid.map((file) => `0${file.mobile}`);
+    getPhones.value = uploadRef.value?.valid.map((file) => `0${file.mobile}`);
+    phoneCount.value = getPhones.value.length;
 } else {
     getPhones.value = smsPhoneArray.value;
+    phoneCount.value = getPhones.value.length;
 }
 
 //確認傳送
 const disable = ref(false);
 const onSend = () => {
     disable.value = true;
-    const newsletterDepartmentToken = localStorage.getItem("newsletterDepartmentToken");
     const sendObj = {
-        token: newsletterDepartmentToken,
         text: smsContent.value,
         type: "0",
         subject: smsSubject.value,
         list: getPhones.value.toString(),
         sendTime: smsSendTime.value,
         eventId: smsChannel.value,
+        phrases: smsPhrases.value,
     };
     console.log("SMS 確認傳送", sendObj);
     const fd = new FormData();
-    fd.append("token", sendObj.token);
     fd.append("text", sendObj.text);
     fd.append("type", sendObj.type);
     fd.append("subject", sendObj.subject);
     fd.append("list", sendObj.list);
     fd.append("sendTime", sendObj.sendTime);
+    fd.append("phrases", sendObj.phrases);
     const getToken = localStorage.getItem("access_token");
     axios({
         method: "post",
@@ -238,6 +245,9 @@ const onSend = () => {
                     line-height: 1.6;
                     div {
                         color: $danger;
+                    }
+                    + p {
+                        margin-top: 8px;
                     }
                 }
             }

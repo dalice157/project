@@ -26,7 +26,7 @@
                                 </div>
                             </n-upload>
                         </div>
-                        <div class="functionSetting">
+                        <!-- 暫時隱藏 <div class="functionSetting">
                             <h1>功能設定</h1>
                             <div class="freecall">
                                 <n-checkbox
@@ -36,7 +36,7 @@
                                 ></n-checkbox>
                                 <p>免費通話</p>
                             </div>
-                        </div>
+                        </div> -->
                     </div>
                     <div class="activityTitle">
                         <h1><span>*</span>&ensp;活動名稱</h1>
@@ -76,9 +76,10 @@
                             <div
                                 class="staffTag"
                                 v-for="(item, index) in addList"
-                                :key="item.acountID"
+                                :key="item.accountID"
                             >
-                                <p>{{ item.name }}</p>
+                                <p v-if="item.accountID !== 0">{{ item.name }}</p>
+                                <p v-else>{{ item.account }}</p>
                                 <img :src="closeIcon" alt="close" @click="deleteStaff(index)" />
                             </div>
                         </div>
@@ -86,14 +87,14 @@
                 </div>
                 <div class="welcomeStatus">
                     <div class="welcomeTitle">
-                        <h1><span>*</span>&ensp;歡迎訊息</h1>
+                        <h1><span>*</span>&ensp;預設訊息</h1>
                         <p>(最少一則，最多三則)</p>
                     </div>
                     <div class="welcomeInput" v-for="(item, index) in welcomeMsgCount" :key="index">
                         <div v-if="item.janusMsg.msgType === 1">
                             <n-input
                                 type="textarea"
-                                placeholder="請輸入歡迎訊息"
+                                placeholder="請輸入文字或點擊視窗右下角插入檔案或圖片"
                                 :autosize="{
                                     minRows: 3,
                                 }"
@@ -130,6 +131,7 @@
                                         type="file"
                                         @change="welcomeFile($event, index)"
                                         :accept="fileAccept"
+                                        title="選擇檔案"
                                     />
                                 </span>
                                 <span
@@ -141,6 +143,7 @@
                                         type="file"
                                         @change="welcomePicture($event, index)"
                                         accept="image/*"
+                                        title="選擇圖片"
                                     />
                                 </span>
                             </div>
@@ -177,11 +180,22 @@
                 <div class="customServiceTitle">
                     <h2>客服人員列表</h2>
                 </div>
-                <n-checkbox-group v-model:value="addList" class="staffList">
+                <n-checkbox-group v-model:value="addList" class="accounts">
                     <ul>
-                        <li v-for="(staff, index) in staffList" :key="index">
+                        <li v-for="(staff, index) in accounts" :key="index">
                             <div class="staffData">
-                                <n-checkbox class="staff" :value="staff" :label="staff.name" />
+                                <n-checkbox
+                                    v-if="staff.accountID !== 0"
+                                    class="staff"
+                                    :value="staff"
+                                    :label="staff.name"
+                                />
+                                <n-checkbox
+                                    v-else
+                                    class="staff"
+                                    :value="staff"
+                                    :label="staff.account"
+                                />
                             </div>
                         </li>
                     </ul>
@@ -220,9 +234,9 @@ const params = route.params;
 
 //store 使用
 const apiStore = useApiStore();
-const { getCustomServiceStaffList } = apiStore;
-const { staffList } = storeToRefs(apiStore);
-getCustomServiceStaffList();
+const { getAccounts } = apiStore;
+const { accounts } = storeToRefs(apiStore);
+getAccounts();
 
 const isPreview = ref(false);
 const onOpenPreview = () => {
@@ -293,6 +307,13 @@ const addList = ref([]);
 const csList = ref([]);
 onUpdated(() => {
     csList.value = addList.value.map((item) => {
+        if (item.accountID === 0) {
+            return {
+                accountID: item.accountID,
+                account: item.account,
+                name: item.name,
+            };
+        }
         return {
             accountID: item.accountID,
         };
@@ -340,33 +361,33 @@ const addWelcomeMsg = () => {
     }
 };
 //歡迎訊息預設值
-// onMounted(() => {
-//     welcomeMsg = {
-//         janusMsg: {
-//             msgType: 1,
-//             sender: 0, // 0:客服, 1:使用者
-//             msgContent: "",
-//             time: unixTime(),
-//             type: 2, //1:簡訊 2: 文字
-//             format: {},
-//             config: {
-//                 chatroomID: "",
-//                 id: nanoid(),
-//                 isReply: false,
-//                 replyObj: "",
-//                 currentDate: currentDate(),
-//                 isExpire: false,
-//                 isPlay: false,
-//                 isRead: false,
-//                 msgFunctionStatus: false,
-//                 msgMoreStatus: false,
-//                 recallPopUp: false,
-//                 recallStatus: false,
-//             },
-//         },
-//     };
-//     welcomeMsgCount.value.push(welcomeMsg);
-// });
+onMounted(() => {
+    welcomeMsg = {
+        janusMsg: {
+            msgType: 1,
+            sender: 0, // 0:客服, 1:使用者
+            msgContent: "",
+            time: unixTime(),
+            type: 2, //1:簡訊 2: 文字
+            format: {},
+            config: {
+                chatroomID: "",
+                id: nanoid(),
+                isReply: false,
+                replyObj: "",
+                currentDate: currentDate(),
+                isExpire: false,
+                isPlay: false,
+                isRead: false,
+                msgFunctionStatus: false,
+                msgMoreStatus: false,
+                recallPopUp: false,
+                recallStatus: false,
+            },
+        },
+    };
+    welcomeMsgCount.value.push(welcomeMsg);
+});
 
 //刪除歡迎訊息
 const deleteWelcomeMsg = (id: any) => {
@@ -522,7 +543,7 @@ const goActivityStore = () => {
             cslist: JSON.stringify(csList.value),
             messagelist: JSON.stringify(welcomeMsgCount.value),
         };
-        // console.log("塞api資料", channelDataObj);
+        console.log("塞api資料", channelDataObj);
         const fd = new FormData();
         fd.append("accountID", JSON.stringify(channelDataObj.accountID));
         fd.append("icon", channelDataObj.icon);
@@ -621,7 +642,7 @@ const goActivityStore = () => {
                 color: $gray-1;
             }
         }
-        .staffList {
+        .accounts {
             overflow-y: auto;
             min-height: 200px;
             max-height: 350px;

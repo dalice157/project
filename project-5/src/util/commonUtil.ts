@@ -1,6 +1,6 @@
 import config from "@/config/config";
+
 // 預設值
-// export const ME_USER_NAME = randomString(3); // 自己
 export const ME_USER_NAME = "admin1"; // 自己
 export const DO_CALL_NAME = "123";
 export const YOU_USER_NAME = ["tony1"]; // 對方
@@ -15,13 +15,15 @@ export const JANUS_URL: any = `${config.janusUrl}/janus`;
 //     JANUS_URL = "https://" + window.location.hostname + ":8089/janus";
 // }
 // 回覆點擊功能
-export const scrollPageTo = (replyId: string | null) => {
+export const scrollPageTo = (replyId: string | null, isProduction?) => {
     console.log("replyId:", replyId);
     if (!replyId) return;
 
     const element: any = document.getElementById(`${replyId}`);
     element.scrollIntoView({ behavior: "smooth", block: "center", nearest: "center" });
-    const getAnimateClassName = element.childNodes[6].childNodes[0];
+    const shakeDom = isProduction ? 5 : 7;
+    const getAnimateClassName = element.childNodes[shakeDom].childNodes[0];
+    // console.log("dom", element.childNodes[7].childNodes[0]);
     setTimeout(() => {
         getAnimateClassName.classList.add("animate__shakeX");
     }, 600);
@@ -260,7 +262,7 @@ export const previewURL = (file: any): void => {
 export const options = [
     {
         label: "請選擇罐頭片語",
-        value: null,
+        value: "",
     },
     {
         label: "線上交談",

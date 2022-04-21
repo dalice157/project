@@ -16,8 +16,13 @@ const FILE_SITE = {
 };
 
 const WORD_LIMIT = {
-    develop: 19,
-    production: 17,
+    develop: 20,
+    production: 18,
+};
+const DOMAIN = {
+    development: "1", // 如果不是COMMTEST把1改成0, 才可登入
+    develop: "1",
+    production: "1",
 };
 
 const setting = {
@@ -26,18 +31,21 @@ const setting = {
         janusUrl: JANUS_SITE.develop,
         fileUrl: FILE_SITE.develop,
         wordLimit: WORD_LIMIT.develop,
+        domain: DOMAIN.development,
     },
     develop: {
         serverUrl: SERVER_SITE.develop,
         janusUrl: JANUS_SITE.develop,
         fileUrl: FILE_SITE.develop,
         wordLimit: WORD_LIMIT.develop,
+        domain: DOMAIN.develop,
     },
     production: {
         serverUrl: SERVER_SITE.production,
         janusUrl: JANUS_SITE.production,
         fileUrl: FILE_SITE.production,
         wordLimit: WORD_LIMIT.production,
+        domain: DOMAIN.production,
     },
 };
 

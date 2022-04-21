@@ -146,7 +146,7 @@ export const useSearchStore = defineStore({
             const chatStore = useChatStore();
             const { messages } = storeToRefs(chatStore);
             const route = useRoute();
-            scrollPageTo(id);
+            scrollPageTo(id,);
             messages.value = JSON.parse(localStorage.getItem(`${eventID}-backend`) || "[]");
             this.closeSearchBar();
             this.isResult = false;

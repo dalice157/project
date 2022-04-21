@@ -142,7 +142,9 @@
                                     </li>
                                     <!-- <li @click.stop="deleteQuestion(text)"><span>刪除</span></li> -->
                                     <li
-                                        v-if="text.janusMsg.sender === 0"
+                                        v-if="
+                                            text.janusMsg.sender === 0 && text.janusMsg.type !== 1
+                                        "
                                         @click.stop="confirmRecallPopup(text)"
                                     >
                                         <span>收回</span>
@@ -485,7 +487,7 @@ import phoneIcon from "@/assets/Images/chatroom/phone-fill-round-y.svg";
 //api store
 const apiStore = useApiStore();
 const { getHistoryApi, recallAPI } = apiStore;
-const { messageList, msgStart, isInput } = storeToRefs(apiStore);
+const { messageList, msgStart, totalCount } = storeToRefs(apiStore);
 const timeOutEvent = ref(0);
 
 // 彈窗 store
@@ -514,7 +516,6 @@ let {
     textPlugin,
     isReplyBox,
     inputFunctionBoolean,
-    isMmsSend,
     showStickerModal,
     isOnline,
 } = storeToRefs(chatStore);
@@ -780,6 +781,8 @@ const toggleAudio = (msg: any) => {
 onMounted(() => {
     //拖拽上傳
     let dropArea = document.getElementById("drop-area");
+    console.log("dropArea:", dropArea);
+
     dropArea?.addEventListener("drop", dropEvent, false);
     dropArea?.addEventListener("dragleave", (e: any) => {
         e.stopPropagation();
@@ -847,7 +850,7 @@ const handleScroll = (e) => {
 };
 
 const loadMore = () => {
-    if (messageArray.value.length >= 30) {
+    if (totalCount.value >= 30) {
         msgStart.value = msgStart.value + 30 + 1;
         getHistoryApi(chatRoomID.value);
     }
@@ -938,8 +941,15 @@ const previewURL = (fileid: string): void => {
             );
         }
     });
+    console.log(
+        "viewImgs",
+        viewImgs.value.map((img) => img.split("/"))
+    );
+    // 環境設定
+    const isProduction = process.env.NODE_ENV === "production";
+    const getSplit = isProduction ? 3 : 4;
     const viewIndex = viewImgs.value
-        .map((img: any) => Math.floor(img.split("/")[4].split(".")[0]))
+        .map((img: any) => Math.floor(img.split("/")[getSplit].split(".")[0]))
         .indexOf(fileid);
     viewerApi({
         options: {

@@ -69,12 +69,14 @@ const menuToggle = (menuBoolean: boolean) => {
     .main {
         grid-area: main;
         .logo {
-            margin-top: 20px;
-            margin-bottom: 20px;
-            font-size: $font-size-18;
-            font-weight: 600;
-            color: $primary-1;
-            text-align: center;
+            margin: 20px auto;
+            width: 120px;
+            height: 40px;
+            background: url("~@/assets/Images/talkOD-logo.png") center no-repeat;
+            background-size: 100%;
+            text-indent: -9999px;
+            white-space: nowrap;
+            line-height: 0;
         }
     }
 }

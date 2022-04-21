@@ -17,7 +17,14 @@ import { useApiStore } from "@/store/api";
  * 3:語音來電
  * 4:未接來電
  */
-
+// Helper to parse query string
+function getQueryStringValue(name) {
+    // eslint-disable-next-line no-useless-escape
+    name = name.replace(/[\[]/, "\\[").replace(/[\]]/, "\\]");
+    const regex = new RegExp("[\\?&]" + name + "=([^&#]*)"),
+        results = regex.exec(location.search);
+    return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
+}
 const getUserName = localStorage.getItem("userName");
 export const usePhoneCallStore = defineStore({
     id: "phoneCall",
@@ -30,6 +37,7 @@ export const usePhoneCallStore = defineStore({
         route: <any>useRoute(),
         phoneType: <any>0,
         phoneTime: <any>"0:00",
+        isMuted: <boolean>false,
     }),
     getters: {},
     actions: {
@@ -43,11 +51,13 @@ export const usePhoneCallStore = defineStore({
             // eslint-disable-next-line @typescript-eslint/no-this-alias
             const that = this;
             // Call this user
-            this.callPlugin.createOffer({
-                media: { audio: false, video: false, data: true },
+            that.callPlugin.createOffer({
+                trickle: true,
+                media: { audioRecv: true, audioSend: true, audio: true, keepAudio: true },
                 success: function (jsep: any) {
                     // @ts-ignore
                     Janus.debug("videocall Got SDP!", jsep);
+                    that.localJsep = jsep;
                     const body = { request: "call", username: display };
                     that.callPlugin.send({ message: body, jsep: jsep });
                     console.log("body:", body);
@@ -73,13 +83,13 @@ export const usePhoneCallStore = defineStore({
             this.isIncomingCall = false;
             // eslint-disable-next-line @typescript-eslint/no-this-alias
             const that = this;
-            this.callPlugin.createAnswer({
+            that.callPlugin.createAnswer({
                 jsep: jsep,
-                media: { audio: false, video: false, data: true },
-                simulcast: true,
+                media: { audioRecv: true, audioSend: true, audio: true, keepAudio: true },
                 success: function (jsep: any) {
                     // @ts-ignore
-                    Janus.debug("Got SDP!", jsep);
+                    console.log("有電話進來 Got SDP!", jsep);
+                    that.localJsep = jsep;
                     const body = { request: "accept" };
                     that.callPlugin.send({ message: body, jsep: jsep });
                 },

@@ -5,15 +5,15 @@
             <n-config-provider :theme-overrides="themeOverrides">
                 <n-input v-model:value="keyWord" type="text" placeholder="訊息">
                     <template #prefix>
-                        <img src="../../assets/Images/chatroom/search.svg" alt="#" />
+                        <img :src="searchIcon" alt="search" />
                     </template>
                     <template #suffix>
                         <img
                             class="clearKeyWord"
-                            src="../../assets/Images/chatroom/round-fill_close.svg"
+                            :src="closeIcon"
                             v-if="keyWord"
                             @click="clearResultKeyWord()"
-                            alt="#"
+                            alt="close"
                         />
                     </template>
                 </n-input>
@@ -37,13 +37,13 @@
                     class="avatar"
                     v-if="msg.janusMsg.sender === 0"
                     :size="48"
-                    :src="`${config.fileUrl}/fls/${eventInfo.icon}`"
+                    :src="`${config.fileUrl}${eventInfo.icon}`"
                 />
                 <img
                     class="avatar"
                     :size="48"
                     v-else-if="msg.janusMsg.sender === 1"
-                    src="../../assets/Images/chatroom/User-round.svg"
+                    :src="userIcon"
                 />
                 <div class="info">
                     <span class="name">{{
@@ -63,7 +63,7 @@
                     >
                         <img
                             v-if="msg.janusMsg.msgType === 6"
-                            :src="`${config.fileUrl}/fls/${msg.janusMsg.format.Fileid}${msg.janusMsg.format.ExtensionName}`"
+                            :src="`${config.fileUrl}${msg.janusMsg.format.Fileid}${msg.janusMsg.format.ExtensionName}`"
                         />
                         <span v-if="msg.janusMsg.msgType === 7">
                             {{ msg.janusMsg.format.ShowName }}
@@ -87,6 +87,9 @@ import { useApiStore } from "@/store/api";
 import { getFileExtension } from "@/util/commonUtil";
 import { currentTime } from "@/util/dateUtil";
 import config from "@/config/config";
+import searchIcon from "@/assets/Images/chatroom/search.svg";
+import closeIcon from "@/assets/Images/chatroom/round-fill_close.svg";
+import userIcon from "@/assets/Images/chatroom/User-round.svg";
 
 // api store
 const apiStore = useApiStore();
@@ -174,7 +177,7 @@ const themeOverrides = {
     height: calc(100% - 127px);
     background-color: $gray-8;
     z-index: 100;
-
+    overflow-y: auto;
     .empty {
         height: calc(100% - 165px);
         text-align: center;
@@ -233,13 +236,13 @@ const themeOverrides = {
 @media (max-width: 768px) {
     .searchBar {
         width: 100% !important;
-        top: 65px;
+        top: 45px !important;
         background-color: transparent !important;
     }
     .result {
         width: 100% !important;
-        top: 127px !important;
-        height: calc(100% - 127px) !important;
+        top: 97px !important;
+        height: calc(100% - 97px) !important;
         z-index: 100;
         .numOfsearchMessage {
             margin-left: 15px;
@@ -277,7 +280,6 @@ const themeOverrides = {
                 color: $gray-3;
                 font-family: $font-family;
             }
-           
         }
     }
 }

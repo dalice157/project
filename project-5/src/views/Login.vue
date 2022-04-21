@@ -3,7 +3,6 @@
         <div class="loginScreen">
             <div class="logo">
                 <div class="logoImg"></div>
-                <h1>talkOD</h1>
             </div>
             <n-form class="loginForm" :model="modelRef" ref="formRef" :rules="rules">
                 <n-form-item label="帳號" path="account">
@@ -175,7 +174,6 @@ onMounted(() => {
     localStorage.removeItem("adminStatus");
     localStorage.removeItem("access_token");
     localStorage.removeItem("accountID");
-    localStorage.removeItem("newsletterDepartmentToken");
     localStorage.removeItem("userName");
 });
 
@@ -193,15 +191,12 @@ const login = () => {
         varificationCodeError.value = true;
         changeCode();
         //英數驗證
-    } else if (!/^[a-zA-Z0-9]+$/.test(modelRef.account)) {
-        varificationError.value = true;
-        changeCode();
     } else {
         //登入發送api拿取 JWT token
         const bodyFormData = new FormData();
         bodyFormData.append("account", modelRef.account);
         bodyFormData.append("password", modelRef.password);
-        bodyFormData.append("domain", "0"); // 如果不是COMMTEST把1改成0, 才可登入
+        bodyFormData.append("domain", config.domain);
         axios
             .post(`${config.serverUrl}/v1/token/`, bodyFormData)
             .then((res) => {
@@ -228,7 +223,6 @@ const login = () => {
                 localStorage.setItem("accountID", accountID);
                 localStorage.setItem("adminStatus", admin);
                 localStorage.setItem("userName", res.data.name);
-                localStorage.setItem("newsletterDepartmentToken", res.data.token);
                 location.href = `/chat`;
             })
             .catch((err) => {
@@ -323,17 +317,13 @@ const login = () => {
             display: flex;
             align-items: center;
             .logoImg {
-                width: 60px;
-                height: 60px;
-                background-color: $primary-1;
-                border-radius: 50%;
-            }
-            h1 {
-                color: $primary-1;
-                font-size: $font-size-26;
-                font-weight: 400;
-                font-size: $font-family;
-                margin-left: 22px;
+                width: 180px;
+                height: 80px;
+                background: url("~@/assets/Images/talkOD-logo.png") center no-repeat;
+                background-size: 100%;
+                text-indent: -9999px;
+                white-space: nowrap;
+                line-height: 0;
             }
         }
         .error {

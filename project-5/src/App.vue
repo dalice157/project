@@ -80,7 +80,6 @@ const themeOverrides: GlobalThemeOverrides = {
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
 .all {
-    user-select: none;
     color: $gray-1;
     height: 100%;
 }

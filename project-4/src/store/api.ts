@@ -4,7 +4,8 @@ import dayjs from "dayjs";
 
 import config from "@/config/config";
 import { useChatStore } from "@/store/chat";
-import { localStorageMsg } from "@/util/commonUtil";
+import { localStorageMsg, eventID } from "@/util/commonUtil";
+import { randomString } from "@/util/chatUtil";
 
 export const useApiStore = defineStore({
     id: "api",
@@ -36,22 +37,23 @@ export const useApiStore = defineStore({
                     const chatStore = useChatStore();
                     const { messages } = storeToRefs(chatStore);
                     if (this.eventInfo.unreadList !== null) {
-                        this.eventInfo.unreadList.forEach((unReadMsg) => {
+                        this.eventInfo.unreadList.forEach((unReadMsg, _, arr) => {
                             if (
                                 !messages.value.some((msg) => {
                                     return msg.janusMsg.config.id === unReadMsg.janusMsg.config.id;
                                 })
                             ) {
+                                arr[0].janusMsg.config.isUnread = true;
                                 messages.value.push(unReadMsg);
                                 localStorageMsg(messages.value, token);
                             }
                         });
 
-                        // console.log("this.eventInfo.unreadList", this.eventInfo.unreadList);
+                        console.log("this.eventInfo.unreadList", this.eventInfo.unreadList);
                     }
                 })
                 .catch((err: any) => {
-                    console.error("Event err:", err.response);
+                    console.error("Event err:", err);
                     if (err.response.status === 404) {
                         alert("活動不存在!!");
                         location.href = "https://www.teamplus.tech/";
@@ -69,6 +71,7 @@ export const useApiStore = defineStore({
                     console.error(err);
                 });
         },
+        //拿貼圖
         async getSticker() {
             // api store
             const chatStore = useChatStore();
@@ -85,6 +88,42 @@ export const useApiStore = defineStore({
                     this.stickerList = res.data.stickerList;
                     this.stickerUrl = res.data.prefix;
                     handleStickckerGroup(isReloadTime);
+                })
+                .catch((err: any) => {
+                    console.error(err);
+                });
+        },
+        //收回訊息api
+        async recallAPI(msg, chatToken) {
+            // api store
+            const chatStore = useChatStore();
+            const { textPlugin, participantList } = storeToRefs(chatStore);
+            const fd = new FormData();
+            fd.append("msgType", msg.janusMsg.msgType);
+            fd.append("id", msg.janusMsg.config.id);
+            fd.append("config", JSON.stringify(msg.janusMsg.config));
+            await axios({
+                method: "patch",
+                url: `${config.serverUrl}/message/${chatToken}`,
+                data: fd,
+            })
+                .then((res: any) => {
+                    const message: any = {
+                        textroom: "message",
+                        transaction: randomString(12),
+                        room: Number(eventID(chatToken)),
+                        // tos: [全部在線客服1,全部在線客服2],
+                        tos: participantList.value,
+                        text: "recall",
+                    };
+                    console.log("recallAPI res:", message);
+                    textPlugin.value.data({
+                        text: JSON.stringify(message),
+                        error: function (reason: any) {
+                            console.log("error:", reason);
+                        },
+                        success: function () {},
+                    });
                 })
                 .catch((err: any) => {
                     console.error(err);

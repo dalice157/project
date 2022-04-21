@@ -73,7 +73,11 @@
                 <n-grid-item v-for="icon in imgList" :key="icon">
                     <n-avatar
                         class="iconImg"
-                        :class="{ active: String(icon).split('/')[5] == String(img).split('/')[5] }"
+                        :class="{
+                            active:
+                                String(icon).split('/')[getSplit] ==
+                                String(img).split('/')[getSplit],
+                        }"
                         @click.stop="onClickChoose"
                         round
                         :size="56"
@@ -143,20 +147,29 @@ const isUserIcon = ref(false);
 
 const chatroomID = computed(() => route.query.chatroomID);
 
+// 環境設定
+const isProduction = process.env.NODE_ENV === "production";
+const getSplit = isProduction ? 4 : 5;
+
 // 開啟修改
 const handleEdited = () => {
     isEdited.value = true;
 };
-onMounted(() => {
-    tags.value = userInfo.value.tag;
-});
-watch(userInfo, () => {
-    tags.value = userInfo.value.tag;
-});
+watch(
+    userInfo,
+    () => {
+        tags.value = userInfo.value.tag;
+    },
+    { immediate: true }
+);
 
 watchEffect(() => {
     img.value = imgList.find((item) => {
-        const icon = item.split("/")[5] === "default.svg" ? 0 : item.split("/")[5].split(".")[0];
+        // console.log('save item.split("/"):', item.split("/"));
+        const icon =
+            item.split("/")[getSplit] === "default.svg"
+                ? 0
+                : item.split("/")[getSplit].split(".")[0];
         return icon == userInfo.value.icon;
     });
 });
@@ -168,20 +181,21 @@ watch(
         isUserIcon.value = false;
     }
 );
-
 // 儲存
 const onSaveEdited = () => {
     if (userInfo.value.name === "") {
         alert("暱稱不能為空!!!");
     } else {
+        console.log('save img.split("/"):', img.value.split("/"));
+
         const infoObj = {
             chatroomID: chatroomID.value,
             name: userInfo.value.name,
             mobile: Number(userInfo.value.mobile),
             icon:
-                img.value.split("/")[5] === "default.svg"
+                img.value.split("/")[getSplit] === "default.svg"
                     ? 0
-                    : img.value.split("/")[5].split(".")[0],
+                    : img.value.split("/")[getSplit].split(".")[0],
             tag: tags.value.length === 0 ? userInfo.value.tag : tags.value,
             description: userInfo.value.description,
             eventID: route.params.id,

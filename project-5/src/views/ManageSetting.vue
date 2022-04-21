@@ -47,15 +47,22 @@
                 <div class="customServiceTitle">
                     <h2>客服人員列表</h2>
                 </div>
-                <div class="staffList">
+                <div class="accounts">
                     <ul>
-                        <li v-for="(staff, index) in staffList" :key="index">
+                        <li v-for="(staff, index) in accounts" :key="index">
                             <n-checkbox-group v-model:value="addList">
                                 <div class="staffData">
                                     <n-checkbox
                                         class="staff"
+                                        v-if="staff.accountID !== 0"
                                         :value="staff"
                                         :label="staff.name"
+                                    ></n-checkbox>
+                                    <n-checkbox
+                                        v-else
+                                        class="staff"
+                                        :value="staff"
+                                        :label="staff.account"
                                     ></n-checkbox>
                                 </div>
                             </n-checkbox-group>
@@ -80,8 +87,8 @@ import searchIcon from "@/assets/Images/manage/search.svg";
 
 //store
 const apiStore = useApiStore();
-const { getAdminList, addAdminList, removeAdminList, getCustomServiceStaffList } = apiStore;
-const { adminList, staffList } = storeToRefs(apiStore);
+const { getAdminList, addAdminList, removeAdminList, getAccounts } = apiStore;
+const { adminList, accounts } = storeToRefs(apiStore);
 getAdminList();
 
 //搜尋新陣列
@@ -96,7 +103,7 @@ const filterPerson: any = computed(() => {
 //過濾客服人員出現管理者
 watchEffect(() => {
     adminList.value.forEach((admin) => {
-        staffList.value = staffList.value.filter((staff) => {
+        accounts.value = accounts.value.filter((staff) => {
             return staff.accountID !== admin.accountID;
         });
     });
@@ -109,11 +116,18 @@ const csList = ref([]);
 const getCsList = () => {
     popUp.value = !popUp.value;
     addList.value = [];
-    getCustomServiceStaffList();
+    getAccounts();
 };
 const csToAdmin = () => {
     popUp.value = !popUp.value;
     csList.value = addList.value.map((item) => {
+        if (item.accountID === 0) {
+            return {
+                accountID: item.accountID,
+                account: item.account,
+                name: item.name,
+            };
+        }
         return {
             accountID: item.accountID,
         };
@@ -216,7 +230,7 @@ const themeOverrides = {
             }
         }
 
-        .staffList {
+        .accounts {
             overflow-y: auto;
             min-height: 200px;
             max-height: 350px;
@@ -240,7 +254,7 @@ const themeOverrides = {
                 }
             }
         }
-        .noStaffList {
+        .noAccounts {
             height: 500px;
             display: flex;
             justify-content: center;

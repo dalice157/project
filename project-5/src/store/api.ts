@@ -33,10 +33,7 @@ export const useApiStore = defineStore({
         channelEvent: <any>null,
         point: <any>0,
         adminList: <any>[],
-        chatroomMsg: <any>{
-            totalCount: 0,
-            messageList: [],
-        },
+        totalCount: <any>0,
         msgStart: <any>0,
         staffEvents: {
             accountName: "",
@@ -57,6 +54,9 @@ export const useApiStore = defineStore({
         isJanusinit: false,
         messageList: <any>[],
         isDisabled: <boolean>false,
+        inquireSMSShortMessageList: <any>[],
+        inquireMMSShortMessageList: <any>[],
+        accounts: <any>[],
     }),
     getters: {},
     actions: {
@@ -67,9 +67,7 @@ export const useApiStore = defineStore({
             const chatStore = useChatStore();
             const { isMmsSend } = storeToRefs(chatStore);
             const getToken = localStorage.getItem("access_token");
-            const newsletterDepartmentToken = localStorage.getItem("newsletterDepartmentToken");
             const bodyFormData = new FormData();
-            bodyFormData.append("token", newsletterDepartmentToken);
             bodyFormData.append("text", data.text);
 
             await axios({
@@ -174,12 +172,13 @@ export const useApiStore = defineStore({
                 headers: { Authorization: `Bearer ${getToken}` },
             })
                 .then((res: any) => {
+                    this.totalCount = res.data.totalCount;
                     this.messageList = this.isInput
-                        ? res.data.messageList.length > 0
-                            ? res.data.messageList
-                            : []
+                        ? !res.data.messageList
+                            ? []
+                            : res.data.messageList
                         : this.messageList.concat(
-                              res.data.messageList.length > 0 ? res.data.messageList : []
+                              !res.data.messageList ? [] : res.data.messageList
                           );
                     this.messageList = this.messageList.reduce((unique, o) => {
                         const hasRepeatId = unique.some((obj) => {
@@ -193,10 +192,10 @@ export const useApiStore = defineStore({
                         });
                         return unique;
                     }, []);
-
                     if (
+                        this.messageList.length > 0 &&
                         this.userInfo.lastVisit >
-                        this.messageList[this.messageList.length - 1].janusMsg.time
+                            this.messageList[this.messageList.length - 1].janusMsg.time
                     ) {
                         this.messageList = this.messageList.map((item) => {
                             item.janusMsg.config.isRead = true;
@@ -211,9 +210,7 @@ export const useApiStore = defineStore({
                 });
         },
         //取得聊天室左側列表
-        async getChatroomlistApi(eventID) {
-            console.log("chatroomList eventID", eventID);
-
+        async getChatroomlistApi(eventID, getFrom?, chatroomID?) {
             const getToken = localStorage.getItem("access_token");
             await axios
                 .get(`${config.serverUrl}/v1/chatroomlist/${eventID}`, {
@@ -225,6 +222,16 @@ export const useApiStore = defineStore({
                     this.chatroomList = res.data.chatroomList.sort((a, b) => {
                         return b.pinTop - a.pinTop;
                     });
+                    // this.chatroomList.forEach((item) => {
+                    //     item.unread = 0;
+                    //     // console.log("chat list chatroomID:", item.chatroomID);
+                    //     // console.log("chat list getFrom:", getFrom);
+                    //     // if (item.chatroomID == getFrom) {
+                    //     //     item.unread = 1;
+                    //     // }
+                    // });
+
+                    console.log("chatroomList api:", this.chatroomList);
                 })
                 .catch((err: any) => {
                     console.error(err);
@@ -422,11 +429,9 @@ export const useApiStore = defineStore({
                 });
         },
         //獲取點數
-        async getPoint(eventID) {
+        async getPoint() {
             const getToken = localStorage.getItem("access_token");
             const fd = new FormData();
-            const newsletterDepartmentToken = localStorage.getItem("newsletterDepartmentToken");
-            fd.append("token", newsletterDepartmentToken);
             await axios({
                 method: "post",
                 url: `${config.serverUrl}/v1/credit`,
@@ -672,6 +677,80 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err.response);
+                });
+        },
+        //查詢簡訊api
+        async inquireShortMessage(type, date, mobile, status) {
+            // api store
+            // console.log(type, date[0], date[1], mobile ? mobile : "", status ? status[0] : -1);
+            const getToken = localStorage.getItem("access_token");
+            const fd = new FormData();
+            fd.append("type", type);
+            fd.append("start", date[0]);
+            fd.append("end", date[1]);
+            fd.append("mobile", mobile ? mobile : "");
+            fd.append("status", status ? status[0] : -1);
+            await axios({
+                method: "post",
+                url: `${config.serverUrl}/v1/msg`,
+                data: fd,
+                headers: { Authorization: `Bearer ${getToken}` },
+            })
+                .then((res: any) => {
+                    console.log("inquireShortMessage", res);
+                    type === "0"
+                        ? (this.inquireSMSShortMessageList = res.data.list || [])
+                        : (this.inquireMMSShortMessageList = res.data.list || []);
+                    console.log("inquireSMSShortMessageList", this.inquireSMSShortMessageList);
+                    console.log("inquireMMSShortMessageList", this.inquireMMSShortMessageList);
+                })
+                .catch((err: any) => {
+                    console.error(err.response);
+                });
+        },
+        //取消預約簡訊
+        async deleteReservationShortMsg(type, data) {
+            console.log("type", type);
+            console.log("bid", data.bid);
+            const getToken = localStorage.getItem("access_token");
+            const fd = new FormData();
+            fd.append("type", type);
+            fd.append("bid", data.bid);
+            await axios({
+                method: "post",
+                url: `${config.serverUrl}/v1/cancel`,
+                data: fd,
+                headers: { Authorization: `Bearer ${getToken}` },
+            })
+                .then((res: any) => {
+                    console.log("deleteReservationShortMsg res", res);
+                })
+                .catch((err: any) => {
+                    console.error(err.response);
+                });
+        },
+        // 取得所有子帳號清單
+        async getAccounts() {
+            const getToken = localStorage.getItem("access_token");
+            const accountID = Number(localStorage.getItem("accountID"));
+            await axios
+                .get(`${config.serverUrl}/v1/accounts`, {
+                    headers: {
+                        Authorization: `Bearer ${getToken}`,
+                    },
+                })
+                .then((res: any) => {
+                    this.accounts = res.data.accounts.filter((item) => {
+                        return item.accountID !== accountID;
+                    });
+                    console.log("staffEvents", this.accounts);
+                    // this.channelEvent = res.data.msg;
+                })
+                .catch((err: any) => {
+                    if (err.response && err.response.data.msg === "沒有管理人員") {
+                        this.accounts = [];
+                    }
+                    console.log("events err:", err);
                 });
         },
     },

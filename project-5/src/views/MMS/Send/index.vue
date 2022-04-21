@@ -4,7 +4,19 @@
             <h2>輸入多媒體訊息內容</h2>
             <n-divider></n-divider>
             <div class="mmsChannel">
-                <h3>發送頻道</h3>
+                <div>
+                    <h3><span>*</span>&ensp;發送頻道</h3>
+                    <n-popover trigger="hover" placement="right">
+                        <template #trigger>
+                            <n-icon :depth="3" size="22">
+                                <help-circle-outline />
+                            </n-icon>
+                        </template>
+                        <span class="pop"
+                            >請選擇本次發送MMS所要帶入的「活動頻道」，該活動頻道的聊天室專屬連結，將於「發送內容」自動嵌入簡訊內文。
+                        </span>
+                    </n-popover>
+                </div>
                 <n-select
                     class="selectChannel"
                     v-model:value="mmsChannel"
@@ -14,10 +26,19 @@
             </div>
             <div class="mmsSubject">
                 <div class="subject">
-                    <h3>訊息主旨</h3>
-                    <p>
-                        (「訊息主旨」內容出現於訊息內文最上方，字數限制:純英數為39字、中英數混合為15字)
-                    </p>
+                    <div>
+                        <h3><span>*</span>&ensp;訊息主旨</h3>
+                        <n-popover trigger="hover" placement="right">
+                            <template #trigger>
+                                <n-icon :depth="3" size="22">
+                                    <help-circle-outline />
+                                </n-icon>
+                            </template>
+                            <span class="pop">
+                                「訊息主旨」內容出現於訊息內文最上方，即為MMS訊息標題。字數限制：純英數為39字、中英數混合為15字。
+                            </span>
+                        </n-popover>
+                    </div>
                 </div>
                 <n-input
                     id="input"
@@ -28,7 +49,7 @@
                 />
             </div>
             <div class="mmsImageInfo">
-                <h3>訊息圖檔</h3>
+                <h3><span>*</span>&ensp;訊息圖檔</h3>
                 <n-upload
                     class="mmsImgUpload"
                     :class="{ uploadFile: mmsUploadImgRef != null }"
@@ -48,7 +69,7 @@
             </div>
             <div class="mmsSendContent">
                 <div class="contentTitle">
-                    <h3>發送內容</h3>
+                    <h3><span>*</span>&ensp;發送內容</h3>
                 </div>
                 <div class="inputWrap">
                     <n-input
@@ -65,7 +86,7 @@
                         @blur="blurJudge"
                         @input="KBCount"
                     />
-                    <div class="lazyText">{{ lazyText }}</div>
+                    <div class="phrases">{{ mmsPhrases }}</div>
                 </div>
             </div>
             <div class="messageCount">
@@ -88,12 +109,12 @@
                             </n-icon>
                         </template>
                         <span class="pop"
-                            >系統會在收到與關鍵字完全一致的訊息時自動回傳訊息，未輸入則在不符合其他關鍵字時自動回傳訊息。</span
+                            >選擇罐頭片語後，將自動以文字方式(預設2至4個字)顯示於發送內容最末端，且罐頭片語後方自動嵌入聊天室專屬連結共17字元。</span
                         >
                     </n-popover>
                     <n-select
                         placeholder="請選擇罐頭片語"
-                        v-model:value="lazyText"
+                        v-model:value="mmsPhrases"
                         :options="options"
                         @update:value="KBCount"
                     />
@@ -139,7 +160,7 @@ const { eventList, uploadRef: getUploadFile } = storeToRefs(apiStore);
 
 //mmsStore
 const mmsStore = useMmsStore();
-const { mmsChannel, mmsSubject, mmsUploadImgRef, mmsContent, mmsKB, mmsPoint } =
+const { mmsPhrases, mmsChannel, mmsSubject, mmsUploadImgRef, mmsContent, mmsKB, mmsPoint } =
     storeToRefs(mmsStore);
 
 const filterChannelList = computed(() => {
@@ -155,8 +176,6 @@ const filterChannelList = computed(() => {
 
 //textarea dom元素
 const inputInstRef = ref(null);
-const lazyText = ref(null);
-
 //簡訊主旨,內容v-model
 const demoContent =
     "輸入MMS簡訊內容\n\n說明：\n1.為使簡訊內容正常呈現於手機中,請勿在簡訊内容中填入~·^)I1>等特殊符號。\n2.訊息主旨及發送圖片為必填欄位，圖片格式僅支援 png, jpg, jpeg, gif。\n3.MMS扣點:圖檔+文案<50K→單則扣除點數3點，圖檔+文案50K~300K內→單則扣除點數5點。";
@@ -223,8 +242,6 @@ const mmsSubjectLen = ref(0);
 const mmsLazyTextLen = ref(0);
 
 const KBCount = () => {
-    console.log("mms lazyText", lazyText.value);
-
     if (mmsContent.value !== demoContent) {
         mmsContentLen.value = lengthInUtf8Bytes(mmsContent.value) / 1024;
     } else {
@@ -236,11 +253,12 @@ const KBCount = () => {
     } else {
         mmsSubjectLen.value = 0;
     }
-    if (lazyText.value) {
-        mmsLazyTextLen.value = lengthInUtf8Bytes(lazyText.value) / 1024;
+    if (mmsPhrases.value) {
+        mmsLazyTextLen.value = lengthInUtf8Bytes(mmsPhrases.value) / 1024;
     } else {
         mmsLazyTextLen.value = 0;
     }
+    console.log("mmsLazyTextLen.value:", mmsLazyTextLen.value);
 
     if (
         !mmsSubject.value &&
@@ -388,7 +406,7 @@ const clearFile = () => {
 .inputWrap {
     border: 1px solid $gray-3;
     border-radius: 5px;
-    .lazyText {
+    .phrases {
         padding: 0 10px 10px;
     }
 }
@@ -415,12 +433,21 @@ const clearFile = () => {
             font-family: $font-family;
         }
         .mmsChannel {
-            h3 {
-                font-size: $font-size-14;
-                font-weight: 400;
-                color: $gray-1;
-                font-family: $font-family;
+            > div {
                 margin-bottom: 15px;
+                display: flex;
+                align-items: center;
+
+                h3 {
+                    min-width: 70px;
+                    font-size: $font-size-14;
+                    font-weight: 400;
+                    color: $gray-1;
+                    font-family: $font-family;
+                    span {
+                        color: red;
+                    }
+                }
             }
         }
         .mmsSubject {
@@ -429,22 +456,21 @@ const clearFile = () => {
             .subject {
                 display: flex;
                 margin-bottom: 15px;
-                h3 {
-                    font-size: $font-size-14;
-                    font-weight: 400;
-                    color: $gray-1;
-                    font-family: $font-family;
-                    margin-top: 5px;
-                    margin-right: 10px;
-                    display: inline-block;
-                    min-width: 56px;
-                }
-                p {
-                    font-size: $font-size-12;
-                    font-weight: 400;
-                    color: $gray-3;
-                    font-family: $font-family;
-                    line-height: 1.6;
+                > div {
+                    display: flex;
+                    align-items: center;
+                    h3 {
+                        min-width: 70px;
+                        font-size: $font-size-14;
+                        font-weight: 400;
+                        color: $gray-1;
+                        font-family: $font-family;
+                        display: inline-block;
+                        min-width: 56px;
+                        span {
+                            color: red;
+                        }
+                    }
                 }
             }
         }
@@ -453,6 +479,16 @@ const clearFile = () => {
             justify-content: flex-start;
             align-items: center;
             margin-bottom: 30px;
+            h3 {
+                min-width: 70px;
+                font-size: $font-size-14;
+                font-weight: 400;
+                color: $gray-1;
+                font-family: $font-family;
+                span {
+                    color: red;
+                }
+            }
         }
         .mmsSendContent {
             .contentTitle {
@@ -465,6 +501,9 @@ const clearFile = () => {
                     font-weight: 400;
                     color: $gray-1;
                     font-family: $font-family;
+                    span {
+                        color: red;
+                    }
                 }
                 .commonMessage {
                     width: 72px;

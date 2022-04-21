@@ -17,6 +17,14 @@
             </button>
             <a class="phone-web" v-if="eventInfo.callable === 1">
                 <img :src="phoneIcon" alt="撥打電話" @click="onPhoneCallModal(chatroomID)" />
+                <video
+                    class="hide"
+                    id="remotevideo"
+                    width="320"
+                    height="240"
+                    autoplay
+                    playsinline
+                />
             </a>
             <phoneCallModel />
             <router-link
@@ -75,6 +83,7 @@ const { searchSwitch, closeSearchBar } = searchStore;
 //phone store
 const phoneCallStore = usePhoneCallStore();
 const { doCall } = phoneCallStore;
+const { isAccepted } = storeToRefs(phoneCallStore);
 
 //modal store
 const modelStore = useModelStore();
@@ -139,6 +148,10 @@ watchEffect(() => {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
+
+.hide {
+    display: none;
+}
 
 .navbar {
     height: 46px;

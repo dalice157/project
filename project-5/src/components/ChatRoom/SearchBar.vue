@@ -3,7 +3,12 @@
     <div v-if="searchBoolean" class="searchBar">
         <div class="searchArea">
             <n-config-provider :theme-overrides="themeOverrides">
-                <n-input v-model:value="keyWord" type="text" placeholder="訊息">
+                <n-input
+                    v-model:value="keyWord"
+                    type="text"
+                    placeholder="訊息"
+                    @keydown.enter.exact.prevent="onSearchResult(keyWord)"
+                >
                     <template #prefix>
                         <img :src="searchIcon" alt="搜索" />
                     </template>

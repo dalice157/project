@@ -11,10 +11,9 @@
                     placement="bottom-end"
                     trigger="click"
                     size="small"
-                    @select="handleSelect"
                     :options="options"
                 >
-                    <img src="../assets/Images/common/more.svg" />
+                    <img :src="moreIcon" />
                 </n-dropdown>
             </li>
         </ul>
@@ -26,7 +25,7 @@
                         :size="100"
                         object-fit="cover"
                         fallback-src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-                        :src="`${config.fileUrl}/fls/${eventInfo.icon}`"
+                        :src="`${config.fileUrl}${eventInfo.icon}`"
                     />
                 </a>
             </div>
@@ -48,6 +47,21 @@
             <MoreList />
         </div>
     </div>
+    <teleport to="body" v-if="showQaModal">
+        <div class="mask">
+            <div class="wrap">
+                <h2 class="title">Q1若關掉對話視窗，對話就結束了嗎?</h2>
+                不會。只要連結還有留存，再次點即可進入對話視窗，瀏覽先前的歷史記錄，繼續進行對話。
+                <h2 class="title">Q2若關掉視窗，對話紀錄會消失嗎?</h2>
+                紀錄不會消失。只要在同一個裝置開啟連結，對話紀錄便不會消失！
+                <h2 class="title">Q3可以使用不同裝置開啟視窗連結嗎?</h2>
+                可以。但因應資安考量，之前裝置的聊天紀錄便會消失。
+                <div class="btnWrap">
+                    <button @click="showQaModal = false">關閉</button>
+                </div>
+            </div>
+        </div>
+    </teleport>
 </template>
 
 <script lang="ts" setup>
@@ -63,6 +77,7 @@ import MoreSeachBar from "@/components/MoreChatRoom/SearchBar.vue";
 import MoreList from "@/components/MoreChatRoom/ChatRoomList.vue";
 import ChatRecordSearch from "@/components/ChatRecord/SearchBar.vue";
 import ChatRecordList from "@/components/ChatRecord/ChatRecordMessage.vue";
+import moreIcon from "@/assets/Images/common/more.svg";
 
 //api store
 const apiStore = useApiStore();
@@ -87,6 +102,11 @@ const options = [
     {
         label: "常見問題",
         key: 1,
+        props: {
+            onClick: () => {
+                onQa();
+            },
+        },
     },
     {
         type: "divider",
@@ -95,16 +115,17 @@ const options = [
     {
         label: "服務條款",
         key: 2,
+        props: {
+            onClick: () => {
+                open("https://www.teamplus.tech/every8d-agreement/");
+            },
+        },
     },
 ];
 
-const handleSelect = (key: any) => {
-    console.log("key:", key);
-    const keyObj: any = {
-        1: "https://www.teamplus.tech/product/teamplus-faq/",
-        2: "https://www.teamplus.tech/every8d-agreement/",
-    };
-    open(keyObj[key]);
+const showQaModal: any = ref(false);
+const onQa = () => {
+    showQaModal.value = true;
 };
 </script>
 
@@ -125,6 +146,57 @@ const handleSelect = (key: any) => {
 <style lang="scss" scoped>
 @import "../assets/scss/extend";
 @import "../assets/scss/var";
+.mask {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .wrap {
+        border-radius: 5px;
+        width: 342px;
+        padding: 15px;
+        background-color: $white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        line-height: 1.4;
+        color: rgba(0, 26, 219, 0.8);
+        .title {
+            @extend %h2;
+            color: $black;
+            margin-bottom: 10px;
+            &:not(:first-child) {
+                margin-top: 15px;
+            }
+        }
+    }
+    .btnWrap {
+        text-align: center;
+        margin-top: 20px;
+        button {
+            border: 1px solid $primary-1;
+            background-color: $primary-1;
+            color: $white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: $font-size-16;
+        }
+    }
+}
+@media (max-width: 320px) {
+    .mask {
+        .wrap {
+            width: 280px;
+        }
+    }
+}
 .siderWrap {
     grid-area: sidebar;
     .search {
@@ -151,25 +223,25 @@ const handleSelect = (key: any) => {
         &.active {
             color: $primary-1;
             &.log {
-                background-image: url("../assets/Images/common/log-hover.svg");
+                background-image: url("~@/assets/Images/common/log-hover.svg");
             }
             &.moreChat {
-                background-image: url("../assets/Images/common/more-chat-hover.svg");
+                background-image: url("~@/assets/Images/common/more-chat-hover.svg");
             }
         }
         &.log {
-            background: url("../assets/Images/common/log.svg") no-repeat left center;
+            background: url("~@/assets/Images/common/log.svg") no-repeat left center;
             padding-left: 30px;
             &:hover {
-                background-image: url("../assets/Images/common/log-hover.svg");
+                background-image: url("~@/assets/Images/common/log-hover.svg");
             }
         }
         &.moreChat {
-            background: url("../assets/Images/common/more-chat.svg") no-repeat left center;
+            background: url("~@/assets/Images/common/more-chat.svg") no-repeat left center;
             background-size: 23px 23px;
             padding-left: 30px;
             &:hover {
-                background-image: url("../assets/Images/common/more-chat-hover.svg");
+                background-image: url("~@/assets/Images/common/more-chat-hover.svg");
             }
         }
         &.more {
@@ -191,7 +263,7 @@ const handleSelect = (key: any) => {
     border-top-left-radius: 30px;
     border-top-right-radius: 30px;
     height: calc(100% - 106px);
-    background: url("../assets/Images/common/sider-bg.svg") no-repeat center bottom;
+    background: url("~@/assets/Images/common/sider-bg.svg") no-repeat center bottom;
     .userPhoto {
         display: block;
         padding-top: 50px;
@@ -233,7 +305,7 @@ const handleSelect = (key: any) => {
         }
     }
     .userInfoSiderBackground {
-        background-image: url("../assets/Images/chatroom/leftBlock.svg");
+        background-image: url("~@/assets/Images/chatroom/leftBlock.svg");
         background-repeat: no-repeat;
         width: 300px;
         height: 382px;

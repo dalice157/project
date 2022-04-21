@@ -31,9 +31,14 @@
                 <ScaleLoader class="scale" color="#ffb400" height="20px" width="3px"></ScaleLoader>
             </div>
             <div class="phoneCallModelFunctionBar">
-                <div class="phoneMicrophone">
-                    <img :src="voiceDisabled" alt="#" />
-                    <p>關閉</p>
+                <div class="phoneMicrophone disable" v-if="isDisabled">
+                    <img :src="isMuted ? voiceDisabled : voiceEnabled" alt="#" />
+                    <p>{{ isMuted ? "開啟" : "關閉" }}</p>
+                    <p>麥克風</p>
+                </div>
+                <div class="phoneMicrophone" v-else @click="onVoice">
+                    <img :src="isMuted ? voiceDisabled : voiceEnabled" alt="#" />
+                    <p>{{ isMuted ? "開啟" : "關閉" }}</p>
                     <p>麥克風</p>
                 </div>
                 <div class="phoneClose">
@@ -61,6 +66,7 @@ import { usePhoneCallStore } from "@/store/phoneCall";
 import config from "@/config/config";
 import user_pic_defaul from "@/assets/Images/mugShot/User-round.svg";
 import voiceDisabled from "@/assets/Images/chatroom/voice-fill-disabled.svg";
+import voiceEnabled from "@/assets/Images/chatroom/voice-fill-enabled.svg";
 import closeIcon from "@/assets/Images/chatroom/close-round-red.svg";
 
 //route
@@ -73,7 +79,7 @@ const { chatroomList } = storeToRefs(apiStore);
 //phoneCall store
 const phoneCallStore = usePhoneCallStore();
 const { doHangup } = phoneCallStore;
-const { isAccepted, phoneTime } = storeToRefs(phoneCallStore);
+const { isAccepted, phoneTime, isMuted, callPlugin } = storeToRefs(phoneCallStore);
 
 //modal store
 const modelStore = useModelStore();
@@ -86,6 +92,22 @@ const filterUserInfo = computed(() => {
         return item.chatroomID === chatRoomID.value;
     });
 });
+
+const isDisabled = ref(false);
+const preventReClickFun = () => {
+    if (!isDisabled.value) {
+        isDisabled.value = true;
+        setTimeout(() => {
+            isDisabled.value = false;
+        }, 2000);
+    }
+};
+
+const onVoice = () => {
+    preventReClickFun();
+    isMuted.value = !isMuted.value;
+    callPlugin.value.send({ message: { request: "set", audio: !isMuted.value } });
+};
 </script>
 <style lang="scss">
 @import "~@/assets/scss/var";
@@ -128,6 +150,10 @@ const filterUserInfo = computed(() => {
             justify-content: center;
             align-items: center;
             .phoneMicrophone {
+                &.disable {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
                 display: flex;
                 flex-direction: column;
                 align-items: center;

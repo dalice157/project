@@ -56,7 +56,6 @@ import { storeToRefs } from "pinia";
 import adapter from "webrtc-adapter";
 import Janus from "@/assets/js/janus";
 import axios from "axios";
-import bootbox from "bootbox";
 
 import config from "@/config/config";
 import { useApiStore } from "@/store/api";
@@ -82,7 +81,7 @@ const { textPlugin, participantList, onlineList, isOnline } = storeToRefs(chatSt
 //phoneCall store
 const phoneCallStore = usePhoneCallStore();
 const { doHangup } = phoneCallStore;
-const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime } =
+const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime, isMuted } =
     storeToRefs(phoneCallStore);
 
 // api store
@@ -122,11 +121,21 @@ onMounted(() => {
             eventList.value = res.data.eventList;
             eventID.value = route.params.id ? route.params.id : eventList.value[0].eventID;
             getEventApi(eventID.value);
-            getPoint(eventID.value);
         })
         .catch((err: any) => {
             console.error(err);
+            const admin = localStorage.getItem("adminStatus");
+            if (err.response.status === 404 && admin === "0") {
+                alert(
+                    "請聯絡talkOD系統管理者(與EVERY8D系統管理者為同一人)，將您的帳號加入talkOD活動頻道，才能在「我的聊天室」內進行交談喔！"
+                );
+            }
+            if (err.response && [-4].includes(err.response.data.status)) {
+                alert("您的帳號在其他設備使用, 請重新登入!!");
+                location.href = "/";
+            }
         });
+    getPoint();
 });
 
 const showTitle = () => {
@@ -174,6 +183,7 @@ let transactions: any = {};
 let participants: any = {};
 let yourusername: any = null;
 let simulcastStarted: any = false;
+let audioenabled = false;
 
 const options: any = ref([]);
 
@@ -212,7 +222,7 @@ window.addEventListener("visibilitychange", (event) => {
     }
     if (document.visibilityState === "visible") {
         Janus.init({
-            debug: "trace",
+            debug: "all",
             dependencies: Janus.useDefaultDependencies({
                 adapter: adapter,
             }),
@@ -240,8 +250,8 @@ const connect = () => {
         },
         error: (error: any) => {
             onError("Failed to connect to janus server", error);
-            // alert("連線中斷,按下確認重新連線");
-            window.location.reload();
+            alert("連線中斷,按下確認重新連線");
+            janus.destroy();
         },
         destroyed: () => {
             window.location.reload();
@@ -291,7 +301,7 @@ const registerUsername = (username: undefined | string) => {
     let register = {
         textroom: "join",
         transaction: transaction,
-        room: Number(route.params.id),
+        room: Number(eventID.value),
         username: myid,
         display: "admin",
     };
@@ -302,10 +312,12 @@ const registerUsername = (username: undefined | string) => {
             // Something went wrong
             if (response["error_code"] === 417) {
                 // This is a "no such room" error: give a more meaningful description
-                console.log("No such room : <code>" + route.params.id + "</code>");
+                console.log("No such room : <code>" + eventID.value + "</code>");
             } else {
                 console.log("response[error]", response["error"]);
             }
+
+            console.log("chat error participants:", response.participants);
             return;
         }
 
@@ -313,6 +325,7 @@ const registerUsername = (username: undefined | string) => {
         let register = { request: "register", username: username };
         callPlugin.value.send({ message: register });
 
+        console.log("chat participants:", response.participants);
         // Any participants already in?
         if (response.participants && response.participants.length > 0) {
             for (let i in response.participants) {
@@ -328,15 +341,35 @@ const registerUsername = (username: undefined | string) => {
             });
             onlineList.value = participants;
             const chatRoomIDArr = Object.keys(onlineList.value);
+            // console.log("chat Arr:", chatRoomIDArr);
+            // console.log("chatId:", chatRoomID.value);
+            // console.log("chat eventID:", eventID.value);
             if (chatRoomIDArr.includes(chatRoomID.value)) {
                 isOnline.value = true;
+                const message: any = {
+                    textroom: "message",
+                    transaction: randomString(12),
+                    room: Number(eventID.value),
+                    // tos: [全部在線客服1,全部在線客服2],
+                    tos: [chatRoomID.value],
+                    text: "pin",
+                };
+                textPlugin.value.data({
+                    text: JSON.stringify(message),
+                    error: function (reason: any) {
+                        console.log("error:", reason);
+                    },
+                    success: function () {
+                        console.log("gotoChat pin");
+                    },
+                });
             }
         }
     };
     textPlugin.value.data({
         text: JSON.stringify(register),
         error: function (reason: any) {
-            bootbox.alert(reason);
+            console.log(reason);
             //TODO do something
         },
     });
@@ -348,8 +381,7 @@ const attachTextroomPlugin = () => {
         OPAQUEID: OPAQUEID,
         success: function (pluginHandle: IAttachPlugin) {
             textPlugin.value = pluginHandle;
-            // @ts-ignore
-            Janus.log(
+            console.log(
                 "Plugin attached! (" +
                     textPlugin.value.getPlugin() +
                     ", id=" +
@@ -358,13 +390,11 @@ const attachTextroomPlugin = () => {
             );
             // Setup the DataChannel
             let body = { request: "setup" };
-            // @ts-ignore
-            Janus.debug("Sending message:", body);
+            console.log("Sending message:", body);
             textPlugin.value.send({ message: body });
         },
         error: function (error: any) {
             console.error("text-> Error attaching plugin...", error);
-            bootbox.alert("Error attaching plugin... " + error);
         },
         iceState: function (state: any) {
             // @ts-ignore
@@ -381,10 +411,9 @@ const attachTextroomPlugin = () => {
             );
         },
         onmessage: function (msg: any, jsep: any) {
-            // @ts-ignore
-            Janus.debug("text-> Got a message ", msg);
+            console.log("text-> Got a message ", msg);
             if (msg["error"]) {
-                bootbox.alert(msg["error"]);
+                console.log(msg["error"]);
             }
 
             if (jsep) {
@@ -392,15 +421,12 @@ const attachTextroomPlugin = () => {
                     jsep: jsep,
                     media: { audio: false, video: false, data: true },
                     success: function (jsep: any) {
-                        // @ts-ignore
-                        Janus.debug("text-> Got SDP!", jsep);
+                        console.log("text-> Got SDP!", jsep);
                         let body = { request: "ack" };
                         textPlugin.value.send({ message: body, jsep: jsep });
                     },
-
                     error: function (error: any) {
-                        // @ts-ignore
-                        Janus.error("text-> WebRTC error:", error);
+                        console.error("text-> WebRTC error:", error);
                     },
                 });
             }
@@ -415,6 +441,7 @@ const attachTextroomPlugin = () => {
             console.log("text-> We got data from the DataChannel!", item);
 
             let json = JSON.parse(item);
+            console.log("json", json);
             let transaction = json["transaction"];
             if (transactions[transaction]) {
                 // Someone was waiting for this
@@ -428,20 +455,20 @@ const attachTextroomPlugin = () => {
             if (what === "message") {
                 // Incoming message: public or private?
                 let msg = json["text"];
+                console.log("msg", msg);
                 msg = msg.replace(new RegExp("<", "g"), "&lt");
                 msg = msg.replace(new RegExp(">", "g"), "&gt");
                 let from = json["from"];
                 let dateString = json["date"];
                 let whisper = json["whisper"];
-
                 data.whisper = whisper;
                 data.date = dateString;
                 data.from = participants[from];
                 data.msg = msg;
+                console.log("from", from);
                 if (msg === "recall") {
                     getHistoryApi(chatRoomID.value);
                 }
-                getChatroomlistApi(route.params.id);
             } else if (what === "announcement") {
                 // Room announcement
                 let msg = json["text"];
@@ -470,45 +497,6 @@ const attachTextroomPlugin = () => {
                 if (chatRoomIDArr.includes(chatRoomID.value)) {
                     isOnline.value = true;
                 }
-                console.log("chatRoom join:", chatRoomID.value);
-                console.log("username join:", username);
-                // if (chatRoomID.value === username) {
-                //     const message: any = {
-                //         textroom: "message",
-                //         transaction: randomString(12),
-                //         room: Number(eventID.value),
-                //         // tos: [全部在線客服1,全部在線客服2],
-                //         tos: [chatRoomID.value],
-                //         text: "pin",
-                //     };
-                //     textPlugin.value.data({
-                //         text: JSON.stringify(message),
-                //         error: function (reason: any) {
-                //             console.log("error:", reason);
-                //         },
-                //         success: function () {
-                //             console.log("gotoChat pin");
-                //         },
-                //     });
-                // } else if (chatRoomID.value !== username) {
-                //     const message: any = {
-                //         textroom: "message",
-                //         transaction: randomString(12),
-                //         room: Number(eventID.value),
-                //         // tos: [全部在線客服1,全部在線客服2],
-                //         tos: [chatRoomID.value],
-                //         text: "leave",
-                //     };
-                //     textPlugin.value.data({
-                //         text: JSON.stringify(message),
-                //         error: function (reason: any) {
-                //             console.log("error:", reason);
-                //         },
-                //         success: function () {
-                //             console.log("gotoChat leave");
-                //         },
-                //     });
-                // }
             } else if (what === "leave") {
                 // Somebody left
                 let username = json["username"];
@@ -524,49 +512,26 @@ const attachTextroomPlugin = () => {
                 if (chatRoomIDArr.includes(chatRoomID.value)) {
                     isOnline.value = false;
                 }
-                if (chatRoomID.value == username) {
-                    const message: any = {
-                        textroom: "message",
-                        transaction: randomString(12),
-                        room: Number(eventID.value),
-                        // tos: [全部在線客服1,全部在線客服2],
-                        tos: [chatRoomID.value],
-                        text: "leave",
-                    };
-                    textPlugin.value.data({
-                        text: JSON.stringify(message),
-                        error: function (reason: any) {
-                            console.log("error:", reason);
-                        },
-                        success: function () {
-                            console.log("gotoChat");
-                        },
-                    });
-                }
             } else if (what === "kicked") {
                 // Somebody was kicked
                 let username = json["username"];
                 let when = new Date();
                 delete participants[username];
                 if (username === myid) {
-                    bootbox.alert("You have been kicked from the room", function () {
-                        window.location.reload();
-                    });
+                    console.log("你被踢出房間");
+                    window.location.reload();
                 }
                 data.username = username;
             } else if (what === "destroyed") {
                 if (json["room"] !== route.params.id) return;
                 // Room was destroyed, goodbye!
-                // @ts-ignore
-                Janus.warn("text-> The room has been destroyed!");
-                bootbox.alert("The room has been destroyed", function () {
-                    window.location.reload();
-                });
+                console.log("text-> 房間已銷毀!");
+                window.location.reload();
             } else if (what === "success") {
                 console.log("success:", data);
 
                 // getHistoryApi(chatRoomID.value);
-                getChatroomlistApi(route.params.id);
+                // getChatroomlistApi(route.params.id);
             }
 
             processDataEvent(data, chatRoomID.value, route.params.id);
@@ -581,8 +546,10 @@ const attachTextroomPlugin = () => {
 function updateSimulcastButtons(substream: any, temporal: any) {
     throw new Error("Function not implemented.");
 }
-function addSimulcastButtons(arg0: boolean) {
-    throw new Error("Function not implemented.");
+function addSimulcastButtons(temporal) {
+    if (!temporal)
+        // No temporal layer support
+        return;
 }
 const calling = ref();
 const connecting = ref();
@@ -592,9 +559,9 @@ const attachVideocallPlugin = () => {
         plugin: "janus.plugin.videocall",
         OPAQUEID: OPAQUEID,
         success: function (pluginHandle: IAttachPlugin) {
+            console.log("pluginHandle:", pluginHandle);
             callPlugin.value = pluginHandle;
-            // @ts-ignore
-            Janus.log(
+            console.log(
                 "Plugin attached! (" +
                     callPlugin.value.getPlugin() +
                     ", id=" +
@@ -625,38 +592,30 @@ const attachVideocallPlugin = () => {
             );
         },
         onmessage: function (msg: any, jsep: any) {
-            // @ts-ignore
-            Janus.debug("call-> ::: Got a message :::", msg);
+            console.log("call-> ::: Got a message :::", msg);
             let result = msg["result"];
             if (result) {
                 if (result["list"]) {
                     let list = result["list"];
-                    // @ts-ignore
-                    Janus.debug("call-> Got a list of phone registered peers:", list);
-
+                    console.log("call-> Got a list of phone registered peers:", list);
                     for (let mp in list) {
-                        // @ts-ignore
-                        Janus.debug("call list->  >> [" + list[mp] + "]");
+                        console.log("call list->  >> [" + list[mp] + "]");
                     }
                 } else if (result["event"]) {
                     let event = result["event"];
-                    console.log("event:", event);
-
                     if (event === "registered") {
                         myusername = result["username"];
-                        // @ts-ignore
-                        Janus.log("call-> Successfully registered as " + myusername + "!");
+                        console.log("call-> Successfully registered as " + myusername + "!");
                         // Get a list of available peers, just for fun
                         callPlugin.value.send({ message: { request: "list" } });
-                        registerUsername(myusername);
+                        // registerUsername(myusername);
                     } else if (event === "calling") {
                         // TODO Any ringtone?
                         calling.value = setTimeout(() => {
                             // 撥打超過30秒， 自動掛掉
                             doHangup(1, chatRoomID.value, route.params.id);
                         }, 15000);
-                        // @ts-ignore
-                        Janus.log("call-> Waiting for the peer to answer...");
+                        console.log("call-> Waiting for the peer to answer...");
                     } else if (event === "incomingcall") {
                         // @ts-ignore
                         Janus.log("call-> Incoming call from " + result["username"] + "!");
@@ -664,12 +623,8 @@ const attachVideocallPlugin = () => {
                         yourUsername.value = yourusername;
                         jsepMsg.value = jsep;
                         isIncomingCall.value = true;
-                        console.log("jsep.value:", jsepMsg.value);
                         isAccepted.value = false;
-
                         // Notify user
-                        // bootbox.hideAll();
-
                         //TODO 處理incomingcall event
                     } else if (event === "accepted") {
                         console.log("打電話 accepted");
@@ -681,11 +636,9 @@ const attachVideocallPlugin = () => {
                         }, 1000);
                         let peer = result["username"];
                         if (!peer) {
-                            // @ts-ignore
-                            Janus.log("Call started!");
+                            console.log("Call started!");
                         } else {
-                            // @ts-ignore
-                            Janus.log(peer + " accepted the call!");
+                            console.log(peer + " accepted the call!");
                             yourusername = peer;
                         }
                         // Video call can start
@@ -699,27 +652,21 @@ const attachVideocallPlugin = () => {
                             } else {
                                 callPlugin.value.createAnswer({
                                     jsep: jsep,
-                                    media: { audio: false, video: false, data: true },
+                                    media: { audio: true }, // Let's negotiate data channels as well
                                     success: function (jsep: any) {
-                                        // @ts-ignore
-                                        Janus.debug("call-> Got SDP!", jsep);
+                                        console.log("call-> Got SDP!", jsep);
                                         isAccepted.value = true;
-                                        let body = { request: "set" };
-                                        callPlugin.value.send({
-                                            message: body,
-                                            jsep: jsep,
-                                        });
+                                        let msg = { request: "set" };
+                                        callPlugin.value.send({ message: msg, jsep: jsep });
                                     },
                                     error: function (error: any) {
-                                        // @ts-ignore
-                                        Janus.error("call-> WebRTC error:", error);
+                                        console.error("call-> WebRTC error:", error);
                                     },
                                 });
                             }
                         }
                     } else if (event === "hangup") {
-                        // @ts-ignore
-                        Janus.log(
+                        console.log(
                             "call-> Call hung up by " +
                                 result["username"] +
                                 " (" +
@@ -736,28 +683,30 @@ const attachVideocallPlugin = () => {
                             : `/chat/${eventID.value}`;
                     } else if (event === "simulcast") {
                         // Is simulcast in place?
-                        let substream = result["substream"];
-                        let temporal = result["temporal"];
+                        var substream = result["substream"];
+                        var temporal = result["temporal"];
                         if (
                             (substream !== null && substream !== undefined) ||
                             (temporal !== null && temporal !== undefined)
                         ) {
                             if (!simulcastStarted) {
                                 simulcastStarted = true;
-                                addSimulcastButtons(result["videocodec"] === "vp8");
+                                addSimulcastButtons(
+                                    result["videocodec"] === "vp8" ||
+                                        result["videocodec"] === "h264"
+                                );
                             }
                             // We just received notice that there's been a switch, update the buttons
                             updateSimulcastButtons(substream, temporal);
                         }
                     } else if (event === "set") {
-                        // @ts-ignore
-                        Janus.log("call-> setRecord OK!");
+                        console.log("call-> setRecord OK!" + event);
                     }
                 }
             } else {
                 // FIXME Error?
                 let error = msg["error"];
-                bootbox.alert(error);
+                console.error(error);
                 if (error.indexOf("already taken") > 0) {
                     // FIXME Use status codes...
                 }
@@ -772,12 +721,11 @@ const attachVideocallPlugin = () => {
             }
         },
         onlocalstream: function (stream: any) {
-            // @ts-ignore
-            Janus.debug("call-> ::: Got a local stream :::", stream);
+            console.log("call-> ::: Got a local stream :::", stream);
         },
         onremotestream: function (stream: any) {
-            // @ts-ignore
-            Janus.debug("call-> ::: Got a remote stream :::", stream);
+            console.log("call-> ::: Got a remote stream :::", stream);
+            Janus.attachMediaStream(document.getElementById("remotevideo"), stream);
         },
         ondataopen: function (data: any) {
             // @ts-ignore
@@ -812,7 +760,6 @@ const attachVideocallPlugin = () => {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
-
 $headerHeight: 80px;
 .userInfo {
     margin-top: 0 !important;

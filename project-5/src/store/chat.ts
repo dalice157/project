@@ -27,6 +27,8 @@ export const useChatStore = defineStore({
         participantList: <any>[],
         onlineList: <any>[],
         isOnline: <boolean>false,
+        messageFrom: <any>"",
+        messageForm: <any>"",
     }),
     getters: {},
     actions: {

@@ -1,7 +1,9 @@
 import config from "@/config/config";
 import { randomString } from "@/util/chatUtil";
+
+// 環境設定
+export const isProduction = process.env.NODE_ENV === "production";
 // 預設值
-// export const ME_USER_NAME = randomString(3); // 自己
 export const ME_USER_NAME = "DA_Front"; // 自己
 export const DO_CALL_NAME = "eee";
 export const YOU_USER_NAME = ["DA"]; // 對方
@@ -28,7 +30,8 @@ export const scrollPageTo = (replyId: string | null) => {
     const element: any = document.getElementById(`${replyId}`);
     element.scrollIntoView({ behavior: "smooth", block: "center", nearest: "center" });
 
-    const getAnimateClassName = element.childNodes[6].childNodes[0];
+    const getAnimateClassName = element.childNodes[8].childNodes[0];
+    console.log("element.childNodes", element.childNodes[8].childNodes[0]);
 
     getAnimateClassName.classList.add("animate__shakeX");
     setTimeout(() => {

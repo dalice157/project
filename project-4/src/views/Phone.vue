@@ -7,7 +7,7 @@
                 :size="120"
                 object-fit="cover"
                 fallback-src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-                :src="`${config.fileUrl}/fls/${eventInfo.icon}`"
+                :src="`${config.fileUrl}${eventInfo.icon}`"
             />
             <div class="clientName">
                 <h1>{{ eventInfo.name }}</h1>
@@ -23,7 +23,7 @@
         </div>
         <div class="phoneFunctionbar">
             <div class="phoneMicrophone">
-                <img src="../assets/Images/chatroom/voice-fill-disabled.svg" alt="#" />
+                <img :src="voiceFillDisabled" alt="voiceDisabled" />
                 <p>關閉</p>
                 <p>麥克風</p>
             </div>
@@ -31,24 +31,20 @@
                 <router-link :to="`/${eventKey}`">
                     <img
                         @click="doHangup(!isAccepted ? 2 : 3, eventID(route.params.eventKey))"
-                        src="../assets/Images/chatroom/close-round-red.svg"
+                        :src="closeIcon"
                         alt="掛斷"
                     />
                 </router-link>
             </div>
             <div class="phoneSpeaker" @click="speakerBoolean = !speakerBoolean">
                 <img
-                    src="../assets/Images/chatroom/notification-fill-disabled.svg"
-                    alt="#"
+                    :src="notificationDisabled"
+                    alt="notificationDisabled"
                     v-show="!speakerBoolean"
                 />
                 <p v-show="!speakerBoolean">開啟</p>
                 <p v-show="!speakerBoolean">擴音</p>
-                <img
-                    src="../assets/Images/chatroom/notification-fill-enabled.svg"
-                    alt="#"
-                    v-show="speakerBoolean"
-                />
+                <img :src="notificationEnalbed" alt="notificationEnalbed" v-show="speakerBoolean" />
                 <p v-show="speakerBoolean" style="color: #ffb400">關閉</p>
                 <p v-show="speakerBoolean" style="color: #ffb400">擴音</p>
             </div>
@@ -69,6 +65,10 @@ import { usePhoneCallStore } from "@/store/phoneCall";
 import { useChatStore } from "@/store/chat";
 import config from "@/config/config";
 import { eventID } from "@/util/commonUtil";
+import voiceFillDisabled from "@/assets/Images/chatroom/voice-fill-disabled.svg";
+import closeIcon from "@/assets/Images/chatroom/close-round-red.svg";
+import notificationDisabled from "@/assets/Images/chatroom/notification-fill-disabled.svg";
+import notificationEnalbed from "@/assets/Images/chatroom/notification-fill-enabled.svg";
 
 // api store
 const apiStore = useApiStore();

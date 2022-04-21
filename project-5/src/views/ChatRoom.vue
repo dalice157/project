@@ -59,7 +59,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { watch, ref, onMounted, computed, onUpdated } from "vue";
+import { watch, ref, onMounted, computed, onUnmounted } from "vue";
 import { NModal, NCard, NLayout, NLayoutSider, NLayoutContent } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
 
@@ -135,13 +135,24 @@ const messageListLength = computed(() => {
     return messageList.value.length;
 });
 //監聽 messageList 打chatroomlist api
-watch(messageListLength, (newVal, oldVal) => {
-    if (newVal !== oldVal) {
-        setTimeout(() => {
-            getChatroomlistApi(route.params.id);
-        }, 500);
-    }
-});
+// watch(messageListLength, (newVal, oldVal) => {
+//     if (newVal !== oldVal) {
+//         setTimeout(() => {
+//             getChatroomlistApi(route.params.id);
+//         }, 500);
+//     }
+// });
+
+//每五秒刷新一次 chatroomlist api
+// let timer = ref(null);
+// onMounted(() => {
+//     timer.value = setInterval(() => {
+//         getChatroomlistApi(route.params.id);
+//     }, 5000);
+// });
+// onUnmounted(() => {
+//     clearInterval(timer.value);
+// });
 
 const messages: any = computed({
     get() {

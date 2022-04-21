@@ -8,7 +8,7 @@
         >
             <div class="chatRoomList">
                 <div class="avatar">
-                    <n-avatar round :size="50" :src="`${config.fileUrl}/fls/${item.icon}`" />
+                    <n-avatar round :size="50" :src="`${config.fileUrl}${item.icon}`" />
                 </div>
                 <div class="chatRoomInfo">
                     <h3 class="name">{{ item.name }}</h3>
@@ -30,7 +30,7 @@
         >
             <div class="chatRoomList">
                 <div class="avatar">
-                    <n-avatar round :size="48" :src="`${config.fileUrl}/fls/${item.icon}`" />
+                    <n-avatar round :size="48" :src="`${config.fileUrl}${item.icon}`" />
                 </div>
                 <div class="chatRoomInfo">
                     <h3 class="name" v-html="item.tagName"></h3>

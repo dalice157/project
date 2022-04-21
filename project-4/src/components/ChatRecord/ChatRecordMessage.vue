@@ -3,14 +3,14 @@
     <div v-if="searcRecordMessages?.length > 0 && recordKeyWord !== ''" class="searchRecordMessage">
         <div
             class="chatRoomBox"
-            @click.stop="gotoChat(num.eventKey)"
+            @click.stop="gotoChat(num.chatroomID)"
             v-for="num in searcRecordMessages"
-            :key="num.eventKey"
+            :key="num.chatroomID"
         >
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
                 <div class="avatar" @click.stop="showCompanyInfo(num)">
-                    <n-avatar round :size="48" :src="`${config.fileUrl}/fls/${num.icon}`" />
+                    <n-avatar round :size="48" :src="`${config.fileUrl}${num.icon}`" />
                 </div>
                 <div class="chatRoomInfo">
                     <h2 class="info_title">{{ num.name }}</h2>
@@ -25,7 +25,7 @@
             </div>
             <div class="functionBox">
                 <div class="time">
-                    {{ currentTime(num.time / 1000000) }}
+                    {{ num.time === "昨天" ? num.time : currentTime(num.time / 1000000) }}
                 </div>
                 <!-- <div class="badge">
                     <div class="badgeBg">
@@ -35,7 +35,6 @@
             </div>
         </div>
     </div>
-
     <!-- 交談歷史紀錄 -->
     <div
         v-if="changeList?.length > 0 && searcRecordMessages?.length === 0 && recordKeyWord === ''"
@@ -46,29 +45,24 @@
         <a
             class="chatRoomBox"
             v-for="(num, index) in changeList"
-            :key="num.eventKey"
-            @click.stop="gotoChat(num.eventKey)"
+            :key="num.chatroomID"
+            @click.stop="gotoChat(num.chatroomID)"
         >
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
                 <div class="avatar" @click.stop="showCompanyInfo(num)">
-                    <n-avatar round :size="48" :src="`${config.fileUrl}/fls/${num.icon}`" />
-                    <img
-                        class="img"
-                        src="../../assets/Images/chatRecord/pushpin-round.svg"
-                        alt="置頂"
-                        v-if="num.toTop"
-                    />
+                    <n-avatar round :size="48" :src="`${config.fileUrl}${num.icon}`" />
+                    <img class="img" :src="pinIcon" alt="置頂" v-if="num.toTop" />
                 </div>
                 <div class="chatRoomInfo">
                     <h2 class="info_title">{{ num.name }}</h2>
                     <n-ellipsis class="messageEllipsis" :line-clamp="1" :tooltip="false">
-                        <p v-if="num.msgContent">
-                            {{ num.msgContent }}
+                        <p v-if="num.janusMsg.msgContent">
+                            {{ num.janusMsg.msgContent }}
                         </p>
-                        <p v-if="[3, 5, 6, 7, 8, 9].includes(num.msgType)">
-                            {{ num.sender === 0 ? "對方" : "您" }}傳送了{{
-                                sendMsgTypeObj[num.msgType]
+                        <p v-if="[3, 5, 6, 7, 8, 9].includes(num.janusMsg.msgType)">
+                            {{ num.janusMsg.sender === 0 ? "對方" : "您" }}傳送了{{
+                                sendMsgTypeObj[num.janusMsg.msgType]
                             }}
                         </p>
                     </n-ellipsis>
@@ -77,7 +71,7 @@
             <div class="functionBox">
                 <div class="timeBox">
                     <div class="time">
-                        {{ currentTime(num.time / 1000000) }}
+                        {{ num.time === "昨天" ? num.time : currentTime(num.time / 1000000) }}
                     </div>
                     <!-- <div class="badge">
                         <div class="badgeBg">
@@ -86,16 +80,12 @@
                     </div> -->
                 </div>
                 <div class="functionBoxMore">
-                    <img
-                        src="@/assets/Images/chatRecord/more.svg"
-                        alt="#"
-                        @click.stop="openFunctionPopUp(num)"
-                    />
+                    <img :src="moreIcon" alt="more" @click.stop="openFunctionPopUp(num)" />
                     <div class="functionPopUp" v-show="num.isfunctionPopUp">
                         <ul class="ulList">
                             <li @click.stop="pin(num, index)" v-if="!num.toTop">開啟置頂</li>
                             <li @click.stop="unpin(num, index)" v-if="num.toTop">取消置頂</li>
-                            <li @click.stop="deletechatRoomBox(num)">刪除</li>
+                            <!-- <li @click.stop="deletechatRoomBox(num)">刪除</li> -->
                         </ul>
                     </div>
                 </div>
@@ -113,7 +103,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watchEffect, onMounted, defineEmits } from "vue";
+import { ref, watchEffect, onMounted, defineEmits, computed } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { NAvatar, NEllipsis, NModal, NCard } from "naive-ui";
 import { nanoid } from "nanoid";
@@ -130,6 +120,8 @@ import { useChatRecordStore } from "@/store/chatRecord";
 import { useModelStore } from "@/store/model";
 import UserInfoModel from "@/components/UserInfoModel.vue";
 import config from "@/config/config";
+import pinIcon from "@/assets/Images/chatRecord/pushpin-round.svg";
+import moreIcon from "@/assets/Images/chatRecord/more.svg";
 
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
@@ -182,13 +174,17 @@ const sendMsgTypeObj: ISendMsgTypeObj = {
     8: "地圖",
     9: "語音通話",
 };
+const isDel = ref(false);
 let i = ref(0);
-watchEffect(() => {
+const recordMsgs = computed(() => {
+    return JSON.parse(localStorage.getItem(`${route.params.eventKey}-record`) || "[]");
+});
+const init: any = () => {
     let messages = JSON.parse(localStorage.getItem(route.params.eventKey as any) || "[]");
-
     if (eventList.value.length > 0) {
         eventList.value.forEach((item: any) => {
-            list.value = JSON.parse(localStorage.getItem(item.eventKey) || "[]");
+            list.value = JSON.parse(localStorage.getItem(item.chatToken) || "[]");
+            console.log("list:", list.value);
 
             if (list.value.length > 0) {
                 const infoLen = list.value.length;
@@ -200,23 +196,17 @@ watchEffect(() => {
                 ).isToday();
                 const lastObj: IObj = {
                     ...item,
+                    ...list.value[infoLen - 1],
+                    chatroomID: item.chatToken,
                     toTop: false,
                     show: true,
                     isfunctionPopUp: false,
-                    sender: (list.value[infoLen - 1] as any).janusMsg.sender,
-                    msgType: (list.value[infoLen - 1] as any).janusMsg.msgType,
-                    type: 2,
                     time: isInfoToday
                         ? (list.value[infoLen - 1] as any).janusMsg.time
                         : isInfoYesterday
                         ? "昨天"
                         : (list.value[infoLen - 1] as any).janusMsg.config.currentDate,
-                    msgContent: (list.value[infoLen - 1] as any).janusMsg.msgContent,
-                    format: (list.value[infoLen - 1] as any).janusMsg.format,
                     sup: list.value.length,
-                    config: {
-                        currentDate: (list.value[infoLen - 1] as any).janusMsg.config.currentDate,
-                    },
                 };
                 if (!recordMessages.value.some((msg: any) => msg.eventKey === item.eventKey)) {
                     recordMessages.value.push(lastObj);
@@ -224,13 +214,14 @@ watchEffect(() => {
             }
         });
     }
+
     if (
         messages.length > 0 &&
-        eventInfo.value.name &&
-        !recordMessages.value.some((msg: any) => msg.eventKey === route.params.eventKey)
+        eventInfo.value.messagelist.length > 0 &&
+        !recordMessages.value.some((msg: any) => msg.chatroomID === route.params.eventKey)
     ) {
         let getObj = {
-            eventKey: route.params.eventKey,
+            chatroomID: route.params.eventKey,
             ...messages[messages.length - 1],
         };
         const isInfoYesterday = dayjs(getObj.janusMsg.config.currentDate).isYesterday();
@@ -241,61 +232,85 @@ watchEffect(() => {
             toTop: false,
             show: true,
             isfunctionPopUp: false,
-            sender: getObj.janusMsg.sender,
-            msgType: getObj.janusMsg.msgType,
             time: isInfoToday
                 ? getObj.janusMsg.time
                 : isInfoYesterday
                 ? "昨天"
                 : getObj.janusMsg.config.currentDate,
-            msgContent: getObj.janusMsg.msgContent,
-            format: getObj.janusMsg.format,
             sup: messages.length,
-            config: {
-                currentDate: getObj.janusMsg.config.currentDate,
-            },
         };
         recordMessages.value.push(lastObj);
+    }
+    if (recordMsgs.value.length > 0) {
+        recordMessages.value = [...recordMsgs.value, ...recordMessages.value];
     }
     recordMessages.value.forEach((item: any) => {
         item.key = i.value++;
     });
-
     changeList.value = recordMessages.value;
+    changeList.value = changeList.value.reduce((unique, o) => {
+        const hasRepeatId = unique.some((obj) => {
+            return obj.chatroomID === o.chatroomID;
+        });
+        if (!hasRepeatId) {
+            unique.push(o);
+        }
+        return unique;
+    }, []);
+    localStorage.setItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
+};
+onMounted(() => {
+    init();
 });
+// watchEffect(() => {
+//     console.log("watchEffect");
+//     if (!isDel.value) {
+//         init();
+//     }
+// });
 //開啟功能列表
 const openFunctionPopUp = (num: any) => {
-    console.log(num);
     changeList.value.forEach((item: any) => {
-        if (item.eventKey === num.eventKey) {
+        if (item.chatroomID === num.chatroomID) {
             item.isfunctionPopUp = !item.isfunctionPopUp;
         } else {
             item.isfunctionPopUp = false;
         }
     });
 };
-
-//刪除功能
-const deletechatRoomBox = (item: any): void => {
-    changeList.value = changeList.value.filter((num: any) => {
-        num.isfunctionPopUp = false;
-        return num.eventKey !== item.eventKey;
-    });
-};
+// //刪除功能
+// const deletechatRoomBox = (item: any): void => {
+//     // changeList.value = changeList.value.filter((num: any) => {
+//     //     num.isfunctionPopUp = false;
+//     //     return num.chatroomID !== item.chatroomID;
+//     // });
+//     // if (changeList.value.length <= 0) {
+//     //     alert("只有一筆,所以無法刪除");
+//     // }
+//     changeList.value.forEach((event, index) => {
+//         event.isfunctionPopUp = false;
+//         if (event.chatroomID === item.chatroomID) {
+//             changeList.value.splice(index, 1);
+//         }
+//     });
+//     isDel.value = true;
+//     localStorage.setItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
+// };
 
 //置頂功能
 const pin = (item: any, idx: any): void => {
-    console.log("item:", item);
-
     const lists = changeList.value;
     lists.unshift(lists.splice(idx, 1)[0]);
     lists.forEach((it: any, index: any) => {
-        if (it.eventKey === item.eventKey) {
+        console.log("item pin:", item);
+        console.log("it pin:", it);
+        if (it.chatroomID === item.chatroomID) {
             it.toTop = true;
         }
         it.isfunctionPopUp = false;
     });
     changeList.value = lists;
+    localStorage.setItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
     console.log("新增置頂nums.value:", changeList.value);
 };
 
@@ -305,7 +320,7 @@ const unpin = (item: any, index: any): void => {
     const getItem = lists.splice(index, 1)[0];
     lists.splice(item.key, 0, getItem);
     lists.forEach((it) => {
-        if (it.eventKey === item.eventKey) {
+        if (it.chatroomID === item.chatroomID) {
             it.toTop = false;
         }
         it.isfunctionPopUp = false;
@@ -314,10 +329,13 @@ const unpin = (item: any, index: any): void => {
     const toTopLists = lists.filter((isTop) => {
         return isTop.toTop;
     });
-    const doNotTopLists = lists.filter((isTop) => {
-        return !isTop.toTop;
-    });
+    const doNotTopLists = lists
+        .filter((isTop) => {
+            return !isTop.toTop;
+        })
+        .sort((a, b) => a.key > b.key);
     changeList.value = [...toTopLists, ...doNotTopLists];
+    localStorage.setItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
     console.log("取消nums.value:", changeList.value);
 };
 

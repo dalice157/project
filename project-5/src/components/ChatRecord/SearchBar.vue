@@ -71,8 +71,8 @@ const route = useRoute();
 
 @media (max-width: 768px) {
     .searchBar {
-        width: 93%;
-        margin: -60px auto 0;
+        // width: 93%;
+        // margin: -60px auto 0;
         display: flex;
     }
 }

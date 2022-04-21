@@ -20,6 +20,8 @@
                         clearable
                         :disabled="disabled"
                         size="small"
+                        :default-value="Date.now()"
+                        :is-date-disabled="dateDisabled"
                     />
                 </div>
             </n-radio-group>
@@ -32,6 +34,7 @@ import { NRadioGroup, NRadio, NDatePicker, NDivider } from "naive-ui";
 import { useSmsStore } from "@/store/smsStore";
 import { useMmsStore } from "@/store/mmsStore";
 import { storeToRefs } from "pinia";
+import dayjs from "dayjs";
 
 //store
 const smsStore = useSmsStore();
@@ -52,7 +55,10 @@ watchEffect(() => {
         disabled.value = false;
     }
 });
-
+//限制不能選過去時間
+const dateDisabled = (ts) => {
+    return ts < dayjs().startOf("date").valueOf();
+};
 const props = defineProps({
     optionType: String,
 });

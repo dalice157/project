@@ -28,6 +28,7 @@ export const useChatStore = defineStore({
         msgParticipantList: <any>[],
         isOnline: <boolean>false,
         isOpenGallery: <boolean>false,
+        adminCount: <number>0,
     }),
     getters: {},
     actions: {
@@ -67,21 +68,27 @@ export const useChatStore = defineStore({
 
         //獲取janus訊息
         getCompanyMsg(msgObj: any, eventKey: any) {
-            console.log("janus 訊息:", msgObj);
+            console.log("janus 訊息:", msgObj.msg);
             this.messages = JSON.parse(localStorage.getItem(`${eventKey}`) || "[]");
+            if (msgObj.msg === "pin") {
+                this.messages.forEach((element) => {
+                    element.janusMsg.config.isRead = true;
+                });
+                return;
+            }
             const messagesParse: any = JSON.parse(msgObj.msg);
             if (messagesParse.janusMsg.sender === 0) {
                 this.messages.push(messagesParse);
                 localStorageMsg(this.messages, eventKey);
             }
-            this.messages.forEach((element) => {
-                element.janusMsg.config.isRead = true;
-            });
             if (messagesParse.janusMsg.msgType === 6 || messagesParse.janusMsg.msgType === 7) {
                 this.pictures.push(messagesParse);
                 localStorage.setItem(`${eventKey}-pictures`, JSON.stringify(this.pictures));
             }
             console.log("this.messages:", this.messages);
+            this.messages.forEach((element) => {
+                element.janusMsg.config.isRead = true;
+            });
         },
         // 開啟錄音視窗
         openRecorder() {

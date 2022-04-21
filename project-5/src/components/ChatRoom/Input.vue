@@ -3,7 +3,7 @@
     <div
         class="reply"
         v-show="isReplyBox"
-        @click.prevent="scrollPageTo(replyMsg.janusMsg.config.id)"
+        @click.prevent="scrollPageTo(replyMsg.janusMsg.config.id, isProduction)"
     >
         <div class="usertext">
             <div class="replyText" v-if="replyMsg && replyMsg.janusMsg.msgType === 6">[照片]</div>
@@ -58,6 +58,16 @@
         </div> -->
         <div class="input-inner">
             <span class="mmsSend" v-if="isMmsSend">簡訊發送</span>
+            <n-popover trigger="hover" placement="right" v-if="isMmsSend">
+                <template #trigger>
+                    <n-icon :depth="3" size="22">
+                        <help-circle-outline />
+                    </n-icon>
+                </template>
+                <span class="pop"
+                    >當此處顯示以「簡訊發送」，即文字內容將以SMS簡訊發送給此人；此處SMS以70個字元為一則，每一則將扣除點數一點，依此類推。
+                </span>
+            </n-popover>
             <span class="file-folder" v-if="!isMmsSend">
                 <input type="file" @change="onUploadFilePC" />
             </span>
@@ -182,8 +192,8 @@ import { computed, ref, onMounted } from "vue";
 import { nanoid } from "nanoid";
 import Compressor from "compressorjs";
 import axios from "axios";
-import { NInput, NEllipsis, NIcon, NModal, NCard, NGrid, NGridItem } from "naive-ui";
-import { MicOutline, ArrowRedo } from "@vicons/ionicons5";
+import { NInput, NEllipsis, NIcon, NModal, NCard, NGrid, NGridItem, NPopover } from "naive-ui";
+import { HelpCircleOutline } from "@vicons/ionicons5";
 import { storeToRefs } from "pinia";
 import Recorder from "js-audio-recorder";
 // import {} from "googlemaps";
@@ -209,6 +219,8 @@ import reloadTimeIcon from "@/assets/Images/chatroom/reload-time.svg";
 import { convertTime } from "@/util/commonUtil";
 import config from "@/config/config";
 
+//環境設定
+const isProduction = process.env.NODE_ENV === "production";
 // model sotre
 const modelStore = useModelStore();
 const { closeAll } = modelStore;
@@ -216,7 +228,7 @@ const { closeAll } = modelStore;
 // api store
 const apiStore = useApiStore();
 const { getSticker, sendMMSMsg } = apiStore;
-const { messageList, stickerList, stickerUrl } = storeToRefs(apiStore);
+const { messageList, stickerList, stickerUrl, point } = storeToRefs(apiStore);
 //store
 const chatStore = useChatStore();
 const inputInstRef: any = ref(null);
@@ -994,7 +1006,7 @@ const confirmDeletePopup = () => {
 
         .mmsSend {
             display: block;
-            width: 30px;
+            min-width: 60px;
             color: $danger;
             font-weight: bold;
             line-height: 1.2;

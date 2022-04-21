@@ -14,7 +14,7 @@
             </n-ellipsis>
             <div class="img" v-if="replyMsg && replyMsg.janusMsg.msgType === 6">
                 <img
-                    :src="`${config.fileUrl}/fls/${replyMsg.janusMsg.format.Fileid}${replyMsg.janusMsg.format.ExtensionName}`"
+                    :src="`${config.fileUrl}${replyMsg.janusMsg.format.Fileid}${replyMsg.janusMsg.format.ExtensionName}`"
                 />
             </div>
             <div class="img" v-if="replyMsg && replyMsg.janusMsg.msgType === 3">
@@ -23,16 +23,12 @@
                 />
             </div>
             <div @click.stop="replyHide" class="closeBtn">
-                <img src="../../assets/Images/chatroom/round-fill_close.svg" alt="#" />
+                <img :src="closeIcon" alt="close" />
             </div>
         </div>
     </div>
     <!-- 功能欄視窗 -->
     <div class="inputFunctionBar" v-if="inputFunctionBoolean">
-        <!-- <div class="audio">
-            <img src="../../assets/Images/m_fa_recording.png" alt="#" />
-            <p>語音輸入</p>
-        </div> -->
         <div class="file">
             <label class="upload_cover">
                 <input
@@ -46,7 +42,7 @@
             </label>
         </div>
         <div class="position" @click="handleFindMe()">
-            <img src="../../assets/Images/chatroom/location.svg" alt="#" />
+            <img :src="mapIcon" alt="map" />
             <p>位置</p>
         </div>
     </div>
@@ -100,36 +96,31 @@
                     ref="inputInstRef"
                 >
                 </n-input>
+
                 <img
                     @click.stop="closeStickerBox"
                     v-if="showStickerModal"
-                    src="../../assets/Images/chatroom/emoji-enabled.svg"
+                    :src="emojiEnabled"
                     alt="表情貼圖"
                 />
                 <img
                     @click.stop="openStickerBox"
                     v-if="!showStickerModal"
-                    src="../../assets/Images/chatroom/emoji.svg"
+                    :src="emojiIcon"
                     alt="表情貼圖"
                 />
             </div>
-            <img
-                class="send"
-                src="../../assets/Images/chatroom/send.svg"
-                alt="傳送訊息"
-                @click.prevent="addMsg"
-                v-show="msg"
-            />
+            <img class="send" :src="sendIcon" alt="傳送訊息" @click.prevent="addMsg" v-show="msg" />
             <img
                 class="recorder"
-                src="../../assets/Images/chatroom/voice.svg"
+                :src="voiceIcon"
                 alt="開啟錄音"
                 v-show="!msg && !showRecorderModal"
                 @click="openRecorder()"
             />
             <img
                 class="recorder"
-                src="../../assets/Images/chatroom/voice-enabled.svg"
+                :src="voiceIconEnabled"
                 alt="關閉錄音"
                 v-show="!msg && showRecorderModal"
                 @click="closeRecorder()"
@@ -147,12 +138,8 @@
                             active: stickerGroupID == 0,
                         }"
                     >
-                        <img
-                            v-if="stickerGroupID == 0"
-                            src="../../assets/Images/chatroom/reload-time-enabled.svg"
-                            alt="小圖"
-                        />
-                        <img v-else src="../../assets/Images/chatroom/reload-time.svg" alt="小圖" />
+                        <img v-if="stickerGroupID == 0" :src="reloadTimeEnabled" alt="小圖" />
+                        <img v-else :src="reloadTimeIcon" alt="小圖" />
                     </li>
                     <li
                         v-for="tab in stickerList"
@@ -214,16 +201,12 @@
                 放開即可傳送語音，左右滑動即可取消
             </h1>
             <div id="audio" class="audioMicrophoneDisable" v-show="!isRecording">
-                <img
-                    class="microphone"
-                    src="../../assets/Images/chatroom/voice-fill-disabled.svg"
-                    alt="#"
-                />
+                <img class="microphone" :src="voiceDisabled" alt="closeVoice" />
             </div>
             <!-- 錄音狀態 -->
             <h1 class="recorderTime" v-show="isRecording">{{ recorderTime }}</h1>
             <div class="audioMicrophoneEnable" v-show="isRecording">
-                <img src="../../assets/Images/chatroom/voice-fill-enabled.svg" alt="#" />
+                <img :src="voiceEnabled" alt="open voice" />
             </div>
         </div>
 
@@ -283,9 +266,18 @@ import { currentTime, currentDate, unixTime } from "@/util/dateUtil";
 import { useApiStore } from "@/store/api";
 import { useChatStore } from "@/store/chat";
 import { useModelStore } from "@/store/model";
-import mapIcon from "@/assets/Images/m_fa_mappin.png";
-import sendIcon from "@/assets/Images/btn_send.png";
+import closeIcon from "@/assets/Images/chatroom/round-fill_close.svg";
+import mapIcon from "@/assets/Images/chatroom/location.svg";
+import emojiEnabled from "@/assets/Images/chatroom/emoji-enabled.svg";
+import emojiIcon from "@/assets/Images/chatroom/emoji.svg";
+import sendIcon from "@/assets/Images/chatroom/send.svg";
 import config from "@/config/config";
+import voiceIcon from "@/assets/Images/chatroom/voice.svg";
+import voiceIconEnabled from "@/assets/Images/chatroom/voice-enabled.svg";
+import reloadTimeEnabled from "@/assets/Images/chatroom/reload-time-enabled.svg";
+import reloadTimeIcon from "@/assets/Images/chatroom/reload-time.svg";
+import voiceDisabled from "@/assets/Images/chatroom/voice-fill-disabled.svg";
+import voiceEnabled from "@/assets/Images/chatroom/voice-fill-enabled.svg";
 
 // model sotre
 const modelStore = useModelStore();
@@ -318,6 +310,7 @@ const {
     stickerItems,
     participantList,
     isOnline,
+    adminCount,
 } = storeToRefs(chatStore);
 //router
 const route = useRoute();
@@ -400,7 +393,7 @@ const shareMap = () => {
                 currentDate: currentDate(),
                 isExpire: false,
                 isPlay: false,
-                isRead: isOnline.value ? true : false,
+                isRead: adminCount.value > 0 ? true : false,
                 msgFunctionStatus: false,
                 msgMoreStatus: false,
                 recallPopUp: false,
@@ -570,7 +563,7 @@ const stopRecorder = (e: any) => {
                         currentDate: currentDate(),
                         isExpire: false,
                         isPlay: false,
-                        isRead: isOnline.value ? true : false,
+                        isRead: adminCount.value > 0 ? true : false,
                         msgFunctionStatus: false,
                         msgMoreStatus: false,
                         recallPopUp: false,
@@ -617,7 +610,7 @@ const addMsg = (): void => {
                 currentDate: currentDate(),
                 isExpire: false,
                 isPlay: false,
-                isRead: isOnline.value ? true : false,
+                isRead: adminCount.value > 0 ? true : false,
                 msgFunctionStatus: false,
                 msgMoreStatus: false,
                 recallPopUp: false,
@@ -639,7 +632,7 @@ const addMsg = (): void => {
     }
     localStorageMsg(messages.value, route.params.eventKey);
     // 送出後清除 msg 及 replyMsg
-    msg.value = "";
+    msg.value = null;
     replyHide();
 };
 //發送圖片
@@ -691,9 +684,10 @@ const uploadImage = (e: any) => {
                                     isReply: replyMsg.value ? true : false,
                                     replyObj: replyMsg.value || "",
                                     currentDate: currentDate(),
+                                    // currentDate: "2022-06-04",
                                     isExpire: false,
                                     isPlay: false,
-                                    isRead: isOnline.value ? true : false,
+                                    isRead: adminCount.value > 0 ? true : false,
                                     msgFunctionStatus: false,
                                     msgMoreStatus: false,
                                     recallPopUp: false,
@@ -785,7 +779,7 @@ const onUploadFilePC = (e: any) => {
                                         currentDate: currentDate(),
                                         isExpire: false,
                                         isPlay: false,
-                                        isRead: isOnline.value ? true : false,
+                                        isRead: adminCount.value > 0 ? true : false,
                                         msgFunctionStatus: false,
                                         msgMoreStatus: false,
                                         recallPopUp: false,
@@ -859,7 +853,7 @@ const onUploadFilePC = (e: any) => {
                                 currentDate: currentDate(),
                                 isExpire: false,
                                 isPlay: false,
-                                isRead: isOnline.value ? true : false,
+                                isRead: adminCount.value > 0 ? true : false,
                                 msgFunctionStatus: false,
                                 msgMoreStatus: false,
                                 recallPopUp: false,
@@ -935,7 +929,7 @@ const onUploadFileMP = (e: any) => {
                             currentDate: currentDate(),
                             isExpire: false,
                             isPlay: false,
-                            isRead: isOnline.value ? true : false,
+                            isRead: adminCount.value > 0 ? true : false,
                             msgFunctionStatus: false,
                             msgMoreStatus: false,
                             recallPopUp: false,
@@ -1000,7 +994,7 @@ const addSticker = (sticker, id) => {
                 currentDate: currentDate(),
                 isExpire: false,
                 isPlay: false,
-                isRead: isOnline.value ? true : false,
+                isRead: adminCount.value > 0 ? true : false,
                 msgFunctionStatus: false,
                 msgMoreStatus: false,
                 recallPopUp: false,

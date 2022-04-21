@@ -4,6 +4,7 @@ import ChatRoom from "@/views/ChatRoom.vue";
 import Phone from "@/views/Phone.vue";
 import MoreChatRoom from "@/views/MoreChatRoom.vue";
 import ChatRecord from "@/views/ChatRecord.vue";
+import Gallery from "@/views/Gallery.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -28,6 +29,12 @@ const routes: Array<RouteRecordRaw> = [
         path: "/chatRecord/:eventKey",
         name: "ChatRecord",
         component: ChatRecord,
+        meta: { show: false, home: true },
+    },
+    {
+        path: "/gallery/:eventKey",
+        name: "Gallery",
+        component: Gallery,
         meta: { show: false, home: true },
     },
 ];

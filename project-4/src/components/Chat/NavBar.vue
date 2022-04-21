@@ -3,11 +3,11 @@
         <div class="navbarFuncitonbar">
             <div class="navbartitle">
                 <router-link class="back" :to="`/chatRecord/${eventKey}`">
-                    <img src="../../assets/Images/chatroom/arrow-left.svg" alt="回交談紀錄" />
+                    <img :src="arrowLeft" alt="回交談紀錄" />
                 </router-link>
                 <!-- NavBar 大頭貼 -->
                 <div class="navbarAvatar">
-                    <n-avatar round :size="42" :src="`${config.fileUrl}/fls/${eventInfo.icon}`" />
+                    <n-avatar round :size="42" :src="`${config.fileUrl}${eventInfo.icon}`" />
                 </div>
                 <!-- NavBar 標題 -->
                 <h1 class="title" v-show="route.meta.show">{{ eventInfo.name }}</h1>
@@ -15,21 +15,25 @@
             <!-- 功能欄 -->
             <div class="chatpane">
                 <router-link class="back" :to="`/chatRecord/${eventKey}`">
-                    <img src="../../assets/Images/chatroom/comment.svg" alt="回交談紀錄" />
+                    <img :src="commentIcon" alt="回交談紀錄" />
                 </router-link>
                 <a class="phone" v-if="eventInfo.callable === true">
-                    <img
-                        src="../../assets/Images/chatroom/phone.svg"
-                        alt="撥打電話"
-                        @click="webPhoneCall"
+                    <video
+                        class="hide"
+                        id="remotevideo"
+                        width="320"
+                        height="240"
+                        autoplay
+                        playsinline
                     />
+                    <img :src="phoneIcon" alt="撥打電話" @click="webPhoneCall" />
                 </a>
                 <phoneCallModel />
                 <a class="gallery" @click="goToGallery">
-                    <img src="../../assets/Images/chatroom/list.svg" alt="進入相本" />
+                    <img :src="galleryIcon" alt="進入相本" />
                 </a>
                 <router-link class="search" :to="`/${eventKey}`" @click.stop="searchSwitch">
-                    <img src="../../assets/Images/chatroom/search.svg" alt="搜尋" />
+                    <img :src="searchIcon" alt="搜尋" />
                 </router-link>
             </div>
         </div>
@@ -50,6 +54,11 @@ import { useModelStore } from "@/store/model";
 import { DO_CALL_NAME } from "@/util/commonUtil";
 import config from "@/config/config";
 import phoneCallModel from "@/components/phoneCallModel.vue";
+import arrowLeft from "@/assets/Images/chatroom/arrow-left.svg";
+import commentIcon from "@/assets/Images/chatroom/comment.svg";
+import phoneIcon from "@/assets/Images/chatroom/phone.svg";
+import galleryIcon from "@/assets/Images/chatroom/list.svg";
+import searchIcon from "@/assets/Images/chatroom/search.svg";
 
 // api store
 const apiStore = useApiStore();
@@ -67,6 +76,7 @@ const { searchBoolean } = storeToRefs(searchStore);
 //phone store
 const phoneCallStore = usePhoneCallStore();
 const { doCall } = phoneCallStore;
+const { isAccepted } = storeToRefs(phoneCallStore);
 
 //modal store
 const modelStore = useModelStore();
@@ -91,14 +101,20 @@ const phoneCall = () => {
     doCall(getCutomer);
 };
 const goToGallery = () => {
-    isOpenGallery.value = true;
+    router.push(`/gallery/${eventKey.value}`);
+    // isOpenGallery.value = true;
 };
 </script>
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
-
+.hide {
+    display: none;
+}
+.gallery {
+    cursor: pointer;
+}
 .navbar {
     width: calc(100% - 300px);
     height: 160px;
@@ -213,8 +229,9 @@ const goToGallery = () => {
 }
 @media (max-width: 420px) {
     .navbar {
+        height: 102px;
         background: transparent url("~@/assets/Images/chatroom/header-bg-s.svg") no-repeat center
-            top;
+            center;
         background-size: 100%;
     }
 }

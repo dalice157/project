@@ -55,7 +55,7 @@
                             >
                                 <a
                                     target="_blank"
-                                    :href="`${config.serverUrl}/v1/file/${route.params.id}/${picture.janusMsg.format.Fileid}`"
+                                    :href="`${config.serverUrl}/v1/file/${picture.janusMsg.format.Fileid}`"
                                 >
                                     <img :src="fileIcon" />
                                     <n-ellipsis
@@ -136,12 +136,12 @@ const pictures: any = computed({
         messageList.value = val;
     },
 });
-// watchEffect(() => {
-//     console.log("pictures", pictures.value);
-//     console.log("result", result?.value);
-//     console.log("dateArr", dateArr?.value);
-//     console.log("picArr", picArr?.value);
-// });
+watchEffect(() => {
+    console.log("pictures", pictures.value);
+    console.log("result", result?.value);
+    console.log("dateArr", dateArr?.value);
+    console.log("picArr", picArr?.value);
+});
 
 const result: any = computed(() => {
     return pictures.value.map((pic: any, index: any) => {
@@ -158,8 +158,8 @@ const result: any = computed(() => {
 const dateArr: any = computed(() => {
     const set = new Set();
     const arr = result.value.filter((item) =>
-        !set.has(item.janusMsg.config.currentDate)
-            ? set.add(item.janusMsg.config.currentDate)
+        !set.has(dayjs(item.janusMsg.config.currentDate).format("YYYY/MM"))
+            ? set.add(dayjs(item.janusMsg.config.currentDate).format("YYYY/MM"))
             : false
     );
     return arr
@@ -209,8 +209,11 @@ const previewURL = (fileid: string): void => {
             );
         }
     });
+    // 環境設定
+    const isProduction = process.env.NODE_ENV === "production";
+    const getSplit = isProduction ? 3 : 4;
     const viewIndex = viewImgs.value
-        .map((img: any) => Math.floor(img.split("/")[4].split(".")[0]))
+        .map((img: any) => Math.floor(img.split("/")[getSplit].split(".")[0]))
         .indexOf(fileid);
     viewerApi({
         options: {

@@ -5,7 +5,6 @@
         <SearchBar />
         <!-- 聊天室主畫面 -->
         <MessageBox />
-        <Gallery />
         <!-- 使用者輸入框 -->
         <Input />
     </div>
@@ -50,7 +49,6 @@ import { storeToRefs } from "pinia";
 import adapter from "webrtc-adapter";
 import Janus from "@/assets/js/janus";
 import { nanoid } from "nanoid";
-import bootbox from "bootbox";
 import { defineComponent, ref, onMounted, computed, watchEffect, watch } from "vue";
 import { NModal, NCard, NButton } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
@@ -98,6 +96,7 @@ let participants: any = {};
 let yourusername: any = null;
 let simulcastStarted: any = false;
 let welcomeStatus: any = ref(false);
+let audioenabled = false;
 
 //router
 const router = useRouter();
@@ -115,8 +114,15 @@ const { eventInfo } = storeToRefs(apiStore);
 
 //Chat store
 const chatStore = useChatStore();
-const { msgParticipantList, messages, pictures, textPlugin, participantList, isOnline } =
-    storeToRefs(chatStore);
+const {
+    msgParticipantList,
+    messages,
+    pictures,
+    textPlugin,
+    participantList,
+    isOnline,
+    adminCount,
+} = storeToRefs(chatStore);
 
 //phoneCall store
 const phoneCallStore = usePhoneCallStore();
@@ -193,8 +199,7 @@ watchEffect(() => {
     );
     pictures.value = JSON.parse(localStorage.getItem(`${route.params.eventKey}-pictures`) || "[]");
 });
-
-watchEffect(() => {
+const initWeclomeMsg = () => {
     let otherMsg: any = null;
     if (!welcomeStatus.value) {
         eventInfo.value.messagelist.forEach((item: any) => {
@@ -248,8 +253,13 @@ watchEffect(() => {
         localStorage.getItem(`${route.params.eventKey}-welcomeStatus`) || "false"
     );
     pictures.value = JSON.parse(localStorage.getItem(`${route.params.eventKey}-pictures`) || "[]");
+};
+watchEffect(() => {
+    initWeclomeMsg();
 });
-
+onMounted(() => {
+    initWeclomeMsg();
+});
 //janus 初始值
 onMounted(() => {
     Janus.init({
@@ -280,7 +290,7 @@ const connect = () => {
         error: (error: any) => {
             onError("Failed to connect to janus server", error);
             alert("連線中斷,按下確認重新連線");
-            window.location.reload();
+            janus.destroy();
         },
         destroyed: () => {
             window.location.reload();
@@ -310,9 +320,9 @@ const registerUsername = (username: undefined | string) => {
             // Something went wrong
             if (response["error_code"] === 417) {
                 // This is a "no such room" error: give a more meaningful description
-                bootbox.alert("No such room : <code>" + eventID(route.params.eventKey) + "</code>");
+                console.log("No such room : <code>" + eventID(route.params.eventKey) + "</code>");
             } else {
-                bootbox.alert(response["error"]);
+                console.log(response["error"]);
             }
             return;
         }
@@ -356,7 +366,7 @@ const registerUsername = (username: undefined | string) => {
     textPlugin.value.data({
         text: JSON.stringify(register),
         error: function (reason: any) {
-            alert(reason);
+            console.log(reason);
             //TODO do something
         },
     });
@@ -364,6 +374,7 @@ const registerUsername = (username: undefined | string) => {
 const isAlreadyTaken = ref(false);
 const onReload = () => {
     isAlreadyTaken.value = false;
+
     location.reload();
 };
 // attach textroom plugin
@@ -389,7 +400,6 @@ const attachTextroomPlugin = () => {
         },
         error: function (error: any) {
             console.error("text-> Error attaching plugin...", error);
-            bootbox.alert("Error attaching plugin... " + error);
         },
         iceState: function (state: any) {
             // @ts-ignore
@@ -409,7 +419,7 @@ const attachTextroomPlugin = () => {
             // @ts-ignore
             Janus.debug("text-> Got a message ", msg);
             if (msg["error"]) {
-                bootbox.alert(msg["error"]);
+                console.log(msg["error"]);
             }
 
             if (jsep) {
@@ -542,20 +552,16 @@ const attachTextroomPlugin = () => {
                 let when = new Date();
                 delete participants[username];
                 if (username === myid) {
-                    bootbox.alert("You have been kicked from the room", function () {
-                        window.location.reload();
-                    });
+                    alert("你被踢出房間!");
+                    window.location.reload();
                 }
 
                 data.username = username;
             } else if (what === "destroyed") {
                 if (json["room"] !== MY_ROOM) return;
                 // Room was destroyed, goodbye!
-                // @ts-ignore
-                Janus.warn("text-> The room has been destroyed!");
-                bootbox.alert("The room has been destroyed", function () {
-                    window.location.reload();
-                });
+                console.log("text-> The room has been destroyed!");
+                window.location.reload();
             } else if (what === "success") {
                 console.log("success:", data);
             }
@@ -584,6 +590,7 @@ const attachVideocallPlugin = () => {
         OPAQUEID: OPAQUEID,
         success: function (pluginHandle: IAttachPlugin) {
             callPlugin.value = pluginHandle;
+            callPlugin.value.simulcastStarted = false;
             // @ts-ignore
             Janus.log(
                 "Plugin attached! (" +
@@ -619,7 +626,7 @@ const attachVideocallPlugin = () => {
             // @ts-ignore
             Janus.debug("call-> ::: Got a message :::", msg);
             let result = msg["result"];
-            console.log("result:", result);
+            console.log("call-> result:", result);
 
             if (result) {
                 if (result["list"]) {
@@ -639,7 +646,7 @@ const attachVideocallPlugin = () => {
                         Janus.log("call-> Successfully registered as " + myusername + "!");
                         // Get a list of available peers, just for fun
                         callPlugin.value.send({ message: { request: "list" } });
-                        registerUsername(myusername);
+                        // registerUsername(myusername);
                     } else if (event === "calling") {
                         // TODO Any ringtone?
                         calling.value = setTimeout(() => {
@@ -655,12 +662,9 @@ const attachVideocallPlugin = () => {
                         yourUsername.value = yourusername;
                         jsepMsg.value = jsep;
                         isIncomingCall.value = true;
-                        console.log("jsep.value:", jsepMsg.value);
                         isAccepted.value = false;
-
                         // Notify user
                         // bootbox.hideAll();
-
                         //TODO 處理incomingcall event
                     } else if (event === "accepted") {
                         console.log("打電話 accepted");
@@ -671,13 +675,10 @@ const attachVideocallPlugin = () => {
                             phoneTime.value = convertTime(i++);
                         }, 1000);
                         let peer = result["username"];
-
                         if (!peer) {
-                            // @ts-ignore
-                            Janus.log("Call started!");
+                            console.log("Call started!");
                         } else {
-                            // @ts-ignore
-                            Janus.log(peer + " accepted the call!");
+                            console.log(peer + " accepted the call!");
                             yourusername = peer;
                         }
                         // Video call can start
@@ -691,20 +692,15 @@ const attachVideocallPlugin = () => {
                             } else {
                                 callPlugin.value.createAnswer({
                                     jsep: jsep,
-                                    media: { audio: false, video: false, data: true },
-                                    success: function (jsep: any) {
-                                        // @ts-ignore
-                                        Janus.debug("call-> Got SDP!", jsep);
+                                    media: { audio: true }, // Let's negotiate data channels as well
+                                    success: function (jsep) {
+                                        console.log("call-> Got SDP!", jsep);
                                         isAccepted.value = true;
-                                        let body = { request: "set" };
-                                        callPlugin.value.send({
-                                            message: body,
-                                            jsep: jsep,
-                                        });
+                                        var body = { request: "set" };
+                                        callPlugin.value.send({ message: body, jsep: jsep });
                                     },
-                                    error: function (error: any) {
-                                        // @ts-ignore
-                                        Janus.error("call-> WebRTC error:", error);
+                                    error: function (error) {
+                                        console.error("WebRTC error:", error);
                                     },
                                 });
                             }
@@ -741,13 +737,13 @@ const attachVideocallPlugin = () => {
                         }
                     } else if (event === "set") {
                         // @ts-ignore
-                        Janus.log("call-> setRecord OK!");
+                        console.log("call-> setRecord OK!" + jsep);
                     }
                 }
             } else {
                 // FIXME Error?
                 let error = msg["error"];
-                bootbox.alert(error);
+                console.error(error);
                 if (error.indexOf("already taken") > 0) {
                     // FIXME Use status codes...
                 }
@@ -759,12 +755,12 @@ const attachVideocallPlugin = () => {
             }
         },
         onlocalstream: function (stream: any) {
-            // @ts-ignore
-            Janus.debug("call-> ::: Got a local stream :::", stream);
+            console.log("call-> ::: Got a local stream :::", stream);
         },
         onremotestream: function (stream: any) {
-            // @ts-ignore
-            Janus.debug("call-> ::: Got a remote stream :::", stream);
+            console.log("call-> ::: Got a remote stream :::", stream);
+            //@ts-ignore
+            Janus.attachMediaStream(document.getElementById("remotevideo"), stream);
         },
         ondataopen: function (data: any) {
             // @ts-ignore

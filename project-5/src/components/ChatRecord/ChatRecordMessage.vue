@@ -15,12 +15,12 @@
             <div class="chatRoomList">
                 <!-- @click.stop="showCompanyInfo(num)" -->
                 <div class="avatar">
-                    <n-avatar v-if="num.icon == 0" round :size="48" :src="user_pic_defaul" />
+                    <n-avatar v-if="num.icon == 0" round :size="48" :src="user_pic_default" />
                     <n-avatar
                         v-if="num.icon !== 0"
                         round
                         :size="48"
-                        :src="`${config.fileUrl}${num.icon}`"
+                        :src="`${config.fileUrl}icon/${num.icon}.png`"
                     />
                 </div>
                 <div class="chatRoomInfo">
@@ -67,14 +67,13 @@
             class="chatRoomBox"
             v-for="(num, index) in changeList"
             :key="num.chatroomID"
-            @click.stop="
-                route.query.chatroomID !== num.chatroomID
-                    ? gotoChat(eventID, num.chatroomID, num.mobile, index)
-                    : ''
-            "
+            @click.stop="route.query.chatroomID !== num.chatroomID ? goChat(num, index) : ''"
+            @mousedown="highlightRoom(num.chatroomID)"
+            :class="{ active: num.chatroomID === highlightRoomID }"
         >
             <div class="chatRoomList">
                 <!-- @click.stop="showCompanyInfo(num)" -->
+                <!-- {{ num }} -->
                 <div class="avatar">
                     <n-avatar
                         v-if="num.icon == 0"
@@ -151,7 +150,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, watch, onUpdated } from "vue";
+import { ref, computed, onMounted, watch, watchEffect } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { NAvatar, NEllipsis, NModal, NCard } from "naive-ui";
 import { nanoid } from "nanoid";
@@ -160,16 +159,18 @@ import dayjs from "dayjs";
 import isYesterday from "dayjs/plugin/isYesterday";
 import isToday from "dayjs/plugin/isToday";
 
-import { getFileExtension } from "@/util/commonUtil";
+import { randomString } from "@/util/chatUtil";
 import { useApiStore } from "@/store/api";
 import { useSearchStore } from "@/store/search";
 import { useChatRecordStore } from "@/store/chatRecord";
 import { useModelStore } from "@/store/model";
+import { useChatStore } from "@/store/chat";
 import UserInfoModel from "@/components/UserInfoModel.vue";
 import config from "@/config/config";
-import user_pic_defaul from "@/assets/Images/mugShot/User-round.svg";
+import user_pic_default from "@/assets/Images/mugShot/User-round.svg";
 import pinIcon from "@/assets/Images/chatRecord/pushpin-round.svg";
 import moreIcon from "@/assets/Images/chatRecord/more.svg";
+import { objectExpression } from "@babel/types";
 
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
@@ -187,6 +188,9 @@ const { chatroomList, eventList, staffEvents } = storeToRefs(apiStore);
 const chatRecordStore = useChatRecordStore();
 const { recordMessages } = storeToRefs(chatRecordStore);
 
+const chatStore = useChatStore();
+const { textPlugin, isOnline, messageFrom, messageForm } = storeToRefs(chatStore);
+
 const modelStore = useModelStore();
 const { showCompanyInfo, gotoChat } = modelStore;
 const { isInfoPop, info } = storeToRefs(modelStore);
@@ -194,14 +198,49 @@ const eventID: any = ref("");
 const adminStatus = localStorage.getItem("adminStatus");
 
 onMounted(() => {
-    if (adminStatus === "0") {
-        watch(staffEvents, () => {
-            eventID.value = route.params.id ? route.params.id : staffEvents.value.events[0].eventID;
+    watch(eventList, () => {
+        eventID.value = route.params.id ? route.params.id : eventList.value[0].eventID;
+    });
+});
+let chatRoomArr = ref([]);
+watch(route, () => {
+    if (!route.query) {
+        return;
+    }
+    if (Object.keys(route.query).includes("chatroomID")) {
+        // const chatroomIDArr = JSON.parse(localStorage.getItem("chatroomIDArr") || "[]");
+        // if (chatroomIDArr.includes(route.query.chatroomID)) {
+        // chatroomList.value.forEach((msg) => {
+        //     if (route.query.chatroomID === msg.chatroomID) {
+        //         console.log("route.query log", route.query);
+        //         msg.unread = 0;
+        //     }
+        //     msg.unread = 1;
+        // });
+        // recordMessages.value = chatroomList.value;
+        // }
+        const message: any = {
+            textroom: "message",
+            transaction: randomString(12),
+            room: Number(eventID.value),
+            // tos: [全部在線客服1,全部在線客服2],
+            tos: [route.query.chatroomID],
+            text: "pin",
+        };
+        textPlugin.value.data({
+            text: JSON.stringify(message),
+            error: function (reason: any) {
+                console.log("error:", reason);
+            },
+            success: function () {
+                console.log("gotoChat pin");
+            },
         });
-    } else {
-        watch(eventList, () => {
-            eventID.value = route.params.id ? route.params.id : eventList.value[0].eventID;
-        });
+        // const index = chatRoomArr.value.indexOf(route.query.chatroomID);
+        // index === -1
+        //     ? chatRoomArr.value.push(route.query.chatroomID)
+        //     : chatRoomArr.value.splice(index, 1);
+        // localStorage.setItem("chatroomIDArr", JSON.stringify(chatRoomArr.value));
     }
 });
 
@@ -235,13 +274,47 @@ let changeList: any = computed({
         recordMessages.value = val;
     },
 });
+//進入聊天室
+const goChat = (num, index) => {
+    changeList.value.forEach((msg) => {
+        if (num.chatroomID === msg.chatroomID) {
+            msg.unread = 0;
+        }
+    });
+    gotoChat(eventID.value, num.chatroomID, num.mobile, index);
+};
 
-let i = ref(0);
-watch(chatroomList, (newVal, oldVal) => {
-    if (chatroomList.value.length > 0) {
-        recordMessages.value = chatroomList.value;
-    }
+//highlight所在聊天室
+const highlightRoomID = ref("");
+onMounted(() => {
+    highlightRoomID.value = route.query.chatroomID;
 });
+const highlightRoom = (chatRoomID) => {
+    highlightRoomID.value = chatRoomID;
+};
+//
+let i = ref(0);
+
+//有即時訊息來更新左側聊天紀錄狀態
+watchEffect(() => {
+    recordMessages.value = chatroomList.value;
+    changeList.value.forEach((msg) => {
+        if (messageFrom.value === msg.chatroomID && messageForm.value.janusMsg.msgType === 1) {
+            msg.unread = 1;
+            msg.msg = messageForm.value.janusMsg.msgContent;
+            msg.time = messageForm.value.janusMsg.time;
+        } else if (
+            messageFrom.value === msg.chatroomID &&
+            messageForm.value.janusMsg.msgType !== 1
+        ) {
+            msg.msg = `傳送了${sendMsgTypeObj[messageForm.value.janusMsg.msgType]}`;
+            msg.time = messageForm.value.janusMsg.time;
+            msg.unread = 1;
+        }
+    });
+    changeList.value.sort((a, b) => b.time - a.time);
+});
+
 //開啟功能列表
 const openFunctionPopUp = (num: any) => {
     // console.log("popup:", num);
@@ -266,7 +339,7 @@ const deletechatRoomBox = (item: any): void => {
 
 //置頂功能
 const pin = (item: any, idx: any): void => {
-    console.log("item:", item);
+    // console.log("item:", item);
 
     const infoObj = {
         chatroomID: item.chatroomID,
@@ -311,6 +384,9 @@ const unpin = (item: any, index: any): void => {
     @extend %h2;
     margin-top: 120px;
     text-align: center;
+}
+.active {
+    background-color: $primary-4;
 }
 .searchRecordMessage {
     height: calc(100% - 160px);

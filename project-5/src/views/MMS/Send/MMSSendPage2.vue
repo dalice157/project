@@ -20,6 +20,7 @@
                 <div class="msgContent">
                     <h3>發送內容</h3>
                     <p>{{ mmsContent }}</p>
+                    <p>{{ mmsPhrases }}</p>
                 </div>
             </div>
         </div>
@@ -82,7 +83,7 @@ const {
     mmsExcelFile,
     mmsSendTime,
     mmsUploadImgRef,
-    mmsSendTimeStamp,
+    mmsPhrases,
 } = storeToRefs(mmsStore);
 const getPhones: any = ref(null);
 if (mmsTabsType.value === "automatic") {
@@ -94,10 +95,8 @@ if (mmsTabsType.value === "automatic") {
 const disable = ref(false);
 const onSend = () => {
     disable.value = true;
-    const newsletterDepartmentToken = localStorage.getItem("newsletterDepartmentToken");
     const getToken = localStorage.getItem("access_token");
     const sendObj = {
-        token: newsletterDepartmentToken,
         text: mmsContent.value,
         type: "1",
         subject: mmsSubject.value,
@@ -105,16 +104,17 @@ const onSend = () => {
         sendTime: mmsSendTime.value,
         image: mmsUploadImgRef.value.file,
         eventId: mmsChannel.value,
+        phrases: mmsPhrases.value,
     };
     console.log("MMS 確認傳送", sendObj);
     const fd = new FormData();
-    fd.append("token", sendObj.token);
     fd.append("text", sendObj.text);
     fd.append("type", sendObj.type);
     fd.append("subject", sendObj.subject);
     fd.append("list", sendObj.list);
     fd.append("sendTime", sendObj.sendTime);
     fd.append("image", sendObj.image);
+    fd.append("phrases", sendObj.phrases);
     axios({
         method: "post",
         url: `${config.serverUrl}/v1/msgs/${sendObj.eventId}`,
@@ -223,6 +223,9 @@ const goPage1 = () => {
                     font-family: $font-family;
                     div {
                         color: $danger;
+                    }
+                    + p {
+                        margin-top: 8px;
                     }
                 }
             }

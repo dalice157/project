@@ -7,7 +7,7 @@
     >
         <n-card :bordered="false" size="huge" class="container">
             <div class="closeBtn" @click.stop="closeModal">
-                <img src="../assets/Images/common/close-round.svg" alt="關閉" />
+                <img :src="closeIcon" alt="關閉" />
             </div>
             <UserInfo :info="info" />
             <div class="description">{{ info.description }}</div>
@@ -42,6 +42,7 @@ import { useChatStore } from "@/store/chat";
 import { useApiStore } from "@/store/api";
 import { DO_CALL_NAME } from "@/util/commonUtil";
 import UserInfo from "@/components/UserInfo.vue";
+import closeIcon from "@/assets/Images/common/close-round.svg";
 
 const route = useRoute();
 //model store

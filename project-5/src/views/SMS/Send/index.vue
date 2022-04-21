@@ -4,20 +4,44 @@
             <h2>輸入簡訊內容</h2>
             <n-divider></n-divider>
             <div class="smsChannel">
-                <h3>發送頻道</h3>
+                <div>
+                    <h3><span>*</span>&ensp;發送頻道</h3>
+                    <n-popover trigger="hover" placement="right">
+                        <template #trigger>
+                            <n-icon :depth="3" size="22">
+                                <help-circle-outline />
+                            </n-icon>
+                        </template>
+                        <span class="pop"
+                            >請選擇本次發送SMS所要帶入的「活動頻道」，該活動頻道的聊天室專屬連結，將於「發送內容」自動嵌入簡訊內文。
+                        </span>
+                    </n-popover>
+                </div>
+
                 <n-select
                     class="selectChannel"
                     v-model:value="smsChannel"
                     :options="filterChannelList"
                     placeholder="請選擇發送頻道"
-                />
+                >
+                    <template #empty>
+                        <n-empty description="請先建立頻道"> </n-empty>
+                    </template>
+                </n-select>
             </div>
             <div class="smsSubject">
                 <div class="subject">
                     <h3>簡訊主旨</h3>
-                    <p>
-                        (「簡訊主旨」內不會出現於訊內容中，亦不列入訊字數計算。輸入「簡訊主旨」可讓您更容易管理每一次簡訊發送作業，當您為每一次的發送予以命名，在查詢報表時，將可方便區分每一次的發送記錄。)
-                    </p>
+                    <n-popover trigger="hover" placement="right">
+                        <template #trigger>
+                            <n-icon :depth="3" size="22">
+                                <help-circle-outline />
+                            </n-icon>
+                        </template>
+                        <span class="pop"
+                            >簡訊主旨用於查詢報表時，可清楚辨識每一次的發送紀錄，便於彙整與管理：主旨不會出現在簡訊發送內容，亦不列入簡訊字數計算。</span
+                        >
+                    </n-popover>
                 </div>
                 <n-input
                     id="input"
@@ -28,7 +52,9 @@
             </div>
             <div class="smsSendContent">
                 <div class="contentTitle">
-                    <h3>發送內容</h3>
+                    <div class="contentPopUp">
+                        <h3><span>*</span>&ensp;發送內容</h3>
+                    </div>
 
                     <div class="storeCommonMessage" @click="storeToCommonMsg" v-show="storeBoolean">
                         <p>儲存至常用簡訊</p>
@@ -50,7 +76,7 @@
                         @input="wordCount"
                         @keydown="storeBoolean = true"
                     />
-                    <div class="lazyText">{{ lazyText }}</div>
+                    <div class="phrases">{{ smsPhrases }}</div>
                 </div>
                 <!-- {{ errorMsg }} -->
             </div>
@@ -60,13 +86,13 @@
                         {{ smsWord }} 字 &ensp;
                         <n-popover trigger="hover" placement="bottom">
                             <template #trigger>
-                                <n-icon size="20">
-                                    <help-circle />
+                                <n-icon :depth="3" size="22">
+                                    <help-circle-outline />
                                 </n-icon>
                             </template>
-                            <span class="pop"
-                                >系統會在收到與關鍵字完全一致的訊息時自動回傳訊息，未輸入則在不符合其他關鍵字時自動回傳訊息。</span
-                            >
+                            <span class="pop">
+                                一則SMS簡訊限定70字元，此處將於發送文字最末端自動嵌入聊天室專屬連結共17字元(發送內容不顯示於連結，請於發送後至「發送查詢」取得連結)，若欲以一則簡訊發送，其字數請設定53字元以內。
+                            </span>
                         </n-popover>
                     </div>
                     <div class="numOfMessage">{{ smsCount }} 則</div>
@@ -80,12 +106,12 @@
                             </n-icon>
                         </template>
                         <span class="pop"
-                            >系統會在收到與關鍵字完全一致的訊息時自動回傳訊息，未輸入則在不符合其他關鍵字時自動回傳訊息。</span
+                            >選擇罐頭片語後，將自動以文字方式(預設2至4個字)顯示於發送內容最末端，且罐頭片語後方自動嵌入聊天室專屬連結共17字元。</span
                         >
                     </n-popover>
                     <n-select
                         placeholder="請選擇罐頭片語"
-                        v-model:value="lazyText"
+                        v-model:value="smsPhrases"
                         :options="options"
                         @update:value="wordCount"
                     />
@@ -258,7 +284,17 @@ export default {
 
 <script lang="ts" setup>
 import { onMounted, ref, watch, computed, h, reactive } from "vue";
-import { NInput, NSpace, NDivider, NSelect, NDataTable, NRadio, NIcon, NPopover } from "naive-ui";
+import {
+    NInput,
+    NSpace,
+    NDivider,
+    NSelect,
+    NDataTable,
+    NRadio,
+    NIcon,
+    NPopover,
+    NEmpty,
+} from "naive-ui";
 import { useRouter, useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
 import { HelpCircleOutline } from "@vicons/ionicons5";
@@ -283,7 +319,8 @@ const { eventList, uploadRef: getUploadFile, commonMsgList } = storeToRefs(apiSt
 const { getCommonMsgList, addCommonMsgObj, removeCommonMsgObj, editCommonMsgObj } = apiStore;
 //smsStore
 const smsStore: any = useSmsStore();
-const { smsChannel, smsSubject, smsContent, smsWord, smsCount, smsPoint } = storeToRefs(smsStore);
+const { smsPhrases, smsChannel, smsSubject, smsContent, smsWord, smsCount, smsPoint } =
+    storeToRefs(smsStore);
 // 常用簡訊彈窗
 const commonMsgPopUp = ref(false);
 //新增常用簡訊彈窗
@@ -299,8 +336,6 @@ const content = ref("");
 const word = ref(0);
 const count = ref(0);
 const point = ref(0);
-
-const lazyText = ref(null);
 
 //常用簡訊功能
 onMounted(() => {
@@ -549,19 +584,14 @@ const errorMsg = ref("");
 const demoContent =
     "輸入簡訊內容\n\n說明：\n１.支援『長簡訊』之發送,每則簡訊字數最多可達333（中文）字。\n２.超過333字仍可發送,系統將自動進行拆則。\n３.為使簡訊內容正常呈現於手機中,請勿在簡訊內容中填入~．^)|1>等特殊符號。";
 
-onMounted(() => {
-    if (smsContent.value === "") {
-        smsContent.value = demoContent;
-    }
-});
-
 watch(
     () => route.path,
     () => {
         if (smsContent.value === "") {
             smsContent.value = demoContent;
         }
-    }
+    },
+    { immediate: true }
 );
 
 // textarea 預設文字
@@ -576,7 +606,7 @@ const blurJudge = (e: any) => {
 };
 
 const wordCount = () => {
-    let lazyTextLen = !lazyText.value ? 0 : lazyText.value.length;
+    let phrasesLen = !smsPhrases.value ? 0 : smsPhrases.value.length;
 
     if (smsContent.value === demoContent || !smsContent.value) {
         smsContent.value = "";
@@ -585,14 +615,14 @@ const wordCount = () => {
         smsCount.value = 0;
     }
     smsCount.value =
-        smsContent.value.length === 0 && lazyTextLen === 0
+        smsContent.value.length === 0 && phrasesLen === 0
             ? 0
-            : pointCalculation(smsContent.value + lazyText.value).smsCount;
+            : pointCalculation(smsContent.value + smsPhrases.value).smsCount;
     smsPoint.value =
-        smsContent.value.length === 0 && lazyTextLen === 0
+        smsContent.value.length === 0 && phrasesLen === 0
             ? 0
-            : pointCalculation(smsContent.value + lazyText.value).point;
-    smsWord.value = smsContent.value.length + lazyTextLen;
+            : pointCalculation(smsContent.value + smsPhrases.value).point;
+    smsWord.value = smsContent.value.length + phrasesLen;
 };
 
 const uploadRef = computed({
@@ -741,7 +771,7 @@ const themeOverrides = {
 .inputWrap {
     border: 1px solid $gray-3;
     border-radius: 5px;
-    .lazyText {
+    .phrases {
         padding: 0 10px 10px;
     }
 }
@@ -872,8 +902,6 @@ const themeOverrides = {
                 font-weight: 400;
                 color: $gray-1;
                 font-family: $font-family;
-                margin-top: 5px;
-                margin-right: 10px;
                 display: inline-block;
                 min-width: 56px;
             }
@@ -894,6 +922,7 @@ const themeOverrides = {
             justify-content: flex-start;
             width: 200px;
         }
+
         .contentTitle {
             margin-bottom: 15px;
             display: flex;
@@ -1048,12 +1077,19 @@ const themeOverrides = {
             font-family: $font-family;
         }
         .smsChannel {
-            h3 {
-                font-size: $font-size-14;
-                font-weight: 400;
-                color: $gray-1;
-                font-family: $font-family;
+            > div {
+                display: flex;
+                align-items: center;
                 margin-bottom: 15px;
+                h3 {
+                    font-size: $font-size-14;
+                    font-weight: 400;
+                    color: $gray-1;
+                    font-family: $font-family;
+                    span {
+                        color: red;
+                    }
+                }
             }
         }
         .smsSubject {
@@ -1061,14 +1097,15 @@ const themeOverrides = {
             margin-bottom: 30px;
             .subject {
                 display: flex;
+                align-items: center;
                 margin-bottom: 15px;
                 h3 {
                     font-size: $font-size-14;
                     font-weight: 400;
                     color: $gray-1;
                     font-family: $font-family;
-                    margin-top: 5px;
-                    margin-right: 10px;
+                    // margin-top: 5px;
+                    // margin-right: 10px;
                     display: inline-block;
                     min-width: 56px;
                 }
@@ -1087,11 +1124,18 @@ const themeOverrides = {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
-                h3 {
-                    font-size: $font-size-14;
-                    font-weight: 400;
-                    color: $gray-1;
-                    font-family: $font-family;
+                .contentPopUp {
+                    display: flex;
+                    align-items: center;
+                    h3 {
+                        font-size: $font-size-14;
+                        font-weight: 400;
+                        color: $gray-1;
+                        font-family: $font-family;
+                        span {
+                            color: red;
+                        }
+                    }
                 }
                 .commonMessage {
                     width: 72px;

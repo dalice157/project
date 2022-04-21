@@ -38,6 +38,8 @@ const getChangeList = (lists: any) => {
 };
 </script>
 <style lang="scss" scoped>
+@import "~@/assets/scss/var";
+@import "~@/assets/scss/extend";
 .chatRecord {
     height: 100%;
     grid-area: body;

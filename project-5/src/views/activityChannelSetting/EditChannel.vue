@@ -32,7 +32,7 @@
                                 </div>
                             </n-upload>
                         </div>
-                        <div class="functionSetting">
+                        <!-- 暫時隱藏 <div class="functionSetting">
                             <h3>功能設定</h3>
                             <div class="freecall">
                                 <n-checkbox
@@ -42,7 +42,7 @@
                                 ></n-checkbox>
                                 <p>免費通話</p>
                             </div>
-                        </div>
+                        </div> -->
                         <div class="status">
                             <h3>活動頻道開關</h3>
                             <n-switch
@@ -87,7 +87,8 @@
                         <div class="customServiceTagArea">
                             <p v-show="addList.length === 0">請選擇客服人員</p>
                             <div class="staffTag" v-for="item in tagList" :key="item.accountID">
-                                <p>{{ item.name }}</p>
+                                <p v-if="item.accountID !== 0">{{ item.name }}</p>
+                                <p v-else>{{ item.account }}</p>
                                 <img
                                     :src="closeIcon"
                                     :alt="item.accountID"
@@ -99,7 +100,7 @@
                 </div>
                 <div class="welcomeStatus">
                     <div class="welcomeTitle">
-                        <h2><span>*</span>&ensp;歡迎訊息</h2>
+                        <h2><span>*</span>&ensp;預設訊息</h2>
                         <p>(至少一則，最多三則)</p>
                     </div>
                     <div
@@ -110,7 +111,7 @@
                         <div v-if="item.janusMsg.msgType === 1">
                             <n-input
                                 type="textarea"
-                                placeholder="請輸入歡迎訊息"
+                                placeholder="請輸入文字或點擊視窗右下角插入檔案或圖片"
                                 :autosize="{
                                     minRows: 3,
                                 }"
@@ -202,17 +203,24 @@
                     <h2>客服人員列表</h2>
                 </div>
                 <n-checkbox-group
-                    class="staffList"
+                    class="accounts"
                     @update:checked="onUpdate"
                     v-model:value="addList"
                 >
                     <ul>
-                        <li v-for="staff in staffList" :key="staff.accountID">
+                        <li v-for="staff in accounts" :key="staff.accountID">
                             <div class="staffData">
                                 <n-checkbox
                                     class="staff"
+                                    v-if="staff.accountID !== 0"
                                     :value="staff.accountID"
                                     :label="staff.name"
+                                />
+                                <n-checkbox
+                                    class="staff"
+                                    v-else
+                                    :value="staff.accountID"
+                                    :label="staff.account"
                                 />
                             </div>
                         </li>
@@ -262,17 +270,16 @@ const route = useRoute();
 //store
 const apiStore = useApiStore();
 const {
-    getCustomServiceStaffList,
+    getAccounts,
     getActivetyCsList,
     getChannelEvent,
     sendChannelEventInfo,
     deleteChannelEventInfo,
 } = apiStore;
-const { staffList, channelEvent, activetyCsList, checkedCsList, isDisabled } =
-    storeToRefs(apiStore);
+const { accounts, channelEvent, activetyCsList, checkedCsList, isDisabled } = storeToRefs(apiStore);
 
 getChannelEvent(route.query.eventID);
-getCustomServiceStaffList();
+getAccounts();
 getActivetyCsList(route.query.eventID);
 
 watch(
@@ -280,7 +287,7 @@ watch(
     () => {
         if (Object.keys(route.query).length > 0) {
             getChannelEvent(route.query.eventID);
-            getCustomServiceStaffList();
+            getAccounts();
             getActivetyCsList(route.query.eventID);
         }
     }
@@ -369,7 +376,7 @@ const deleteStaff = (id: any) => {
     const list = tagList.value.filter((tag) => {
         return tag.accountID !== id;
     });
-    staffList.value.forEach((staff) => {
+    accounts.value.forEach((staff) => {
         Object.values(list).forEach((item: any) => {
             if (item.accountID === staff.accountID) {
                 getAddList.push(staff.accountID);
@@ -479,15 +486,24 @@ const onShowPop = () => {
 //確認按鈕
 const onPopUp = () => {
     popUp.value = false;
-    let list = staffList.value
+    let list = accounts.value
         .filter((item) => {
             return addList.value.includes(item.accountID);
         })
         .sort();
-    list = list.map((item) => ({
-        accountID: item.accountID,
-        name: item.name,
-    }));
+    list = list.map((item) => {
+        if (item.accountID === 0) {
+            return {
+                accountID: item.accountID,
+                account: item.account,
+                name: item.name,
+            };
+        }
+        return {
+            accountID: item.accountID,
+            name: item.name,
+        };
+    });
     tagList.value = list;
 };
 
@@ -610,11 +626,17 @@ const goActivity = () => {
         const hasAccountID = cslist.value.some(
             (item) => item.accountID === (value as any).accountID
         );
-        if (!hasAccountID) {
+        if (hasAccountID) return;
+        if ((value as any).accountID == 0) {
+            cslist.value.push({
+                accountID: (value as any).accountID,
+                account: (value as any).account,
+                name: (value as any).name,
+            });
+        } else {
             cslist.value.push({ accountID: (value as any).accountID });
         }
     });
-    console.log("welcomeMsgCount.value:", welcomeMsgCount.value);
     const inValid = ref(false);
     if (welcomeMsgCount.value.length === 0) {
         inValid.value = true;
@@ -702,7 +724,7 @@ const deleteChannel = () => {
                 color: $gray-1;
             }
         }
-        .staffList {
+        .accounts {
             overflow-y: auto;
             min-height: 200px;
             max-height: 350px;

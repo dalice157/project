@@ -5,6 +5,7 @@ import { nanoid } from "nanoid";
 import { useChatStore } from "@/store/chat";
 import { useApiStore } from "@/store/api";
 import { usePhoneCallStore } from "@/store/phoneCall";
+import { useChatRecordStore } from "@/store/chatRecord";
 
 //發送私人訊息
 export const sendPrivateMsg = ({
@@ -68,7 +69,10 @@ export const sendPrivateMsg = ({
 export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
     const chatStore = useChatStore();
     const { getCompanyMsg } = chatStore;
-    const { isOnline } = storeToRefs(chatStore);
+    const { isOnline, textPlugin, messageFrom, messageForm } = storeToRefs(chatStore);
+
+    const chatRecordStore = useChatRecordStore();
+    const { recordMessages } = storeToRefs(chatRecordStore);
 
     // api store
     const apiStore = useApiStore();
@@ -84,15 +88,44 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
                 console.log("Private message->", data);
                 const msg = JSON.parse(data.msg);
                 const getFrom = msg.janusMsg.chatroomID;
-                setTimeout(() => {
-                    getChatroomlistApi(eventID);
-                }, 500);
+                console.log("msg", msg);
                 console.log("getFrom:", getFrom);
-                console.log("chatroomID:", chatroomID);
+                messageFrom.value = getFrom;
+                messageForm.value = msg;
+                // console.log("messageFrom", messageFrom.value);
+                // console.log("messageForm", messageForm.value);
+                // console.log("chatroomID:", chatroomID);
+                // console.log("data.from:", data.from);
                 // notifyMe(data);
                 if (chatroomID == getFrom && data.from) {
+                    const message: any = {
+                        textroom: "message",
+                        transaction: randomString(12),
+                        room: Number(eventID),
+                        // tos: [全部在線客服1,全部在線客服2],
+                        tos: [chatroomID],
+                        text: "pin",
+                    };
+                    textPlugin.value.data({
+                        text: JSON.stringify(message),
+                        error: function (reason: any) {
+                            console.log("error:", reason);
+                        },
+                        success: function () {
+                            console.log("gotoChat pin");
+                        },
+                    });
                     isInput.value = true;
                     messageList.value.push(msg);
+                    // chatroomList.value.forEach((msg) => {
+                    //     msg.unread = 0;
+                    // });
+                } else if (chatroomID != getFrom && data.from) {
+                    // if (chatroomID == getFrom) {
+                    //     chatroomList.value.forEach((msg) => {
+                    //         msg.unread = 1;
+                    //     });
+                    // }
                 }
 
                 messageList.value = messageList.value.reduce((unique, o) => {

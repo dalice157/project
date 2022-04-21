@@ -15,12 +15,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from "vue";
-import VConsole from "vconsole";
+import { onMounted, onUnmounted, ref, watchEffect } from "vue";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
-import FingerprintJS from "@fingerprintjs/fingerprintjs";
+// import FingerprintJS from "@fingerprintjs/fingerprintjs";
 import vConsole from "@/plugin/vConsole";
+import Fingerprint from "@/assets/js/fingerprint";
+import java_hashcode from "@/assets/js/java_hashcode";
 
 import NavBar from "@/components/Chat/NavBar.vue";
 import HamburgerBar from "@/components/HamburgerBar.vue";
@@ -43,48 +44,75 @@ const closeChatBubble = (): void => {
 
 onMounted(() => {
     vConsole;
-    const fpPromise = FingerprintJS.load();
-    (async () => {
-        // Get the visitor identifier when you need it.
-        const fp = await fpPromise;
-        const result = await fp.get();
-        console.log("visitorId:", result.visitorId);
-        console.log("FingerprintJS result:", result);
-    })();
+    /***
+     * 參考
+     * https://github.com/artem0/canvas-fingerprinting
+     * https://www.wfublog.com/2020/11/js-track-user-device-browser-fingerprint.html
+     * var withCanvasDrawing = new Fingerprint({ canvas: true });
+     * var withoutCanvasDrawing = new Fingerprint({ canvas: false });
+     * */
+    let withCanvasDrawing = new Fingerprint({ hasher: java_hashcode });
+    console.log("withCanvasDrawing :", withCanvasDrawing.get());
+    localStorage.setItem("vConsole_switch_x", JSON.stringify(0));
+    localStorage.setItem("vConsole_switch_y", JSON.stringify(520));
 });
 
 const shieldBoolean = ref(false);
-let phoneDirection = window.matchMedia("(orientation: portrait)");
 
 //判斷設備使用者設備瀏覽方向
 onMounted(() => {
     if (
-        navigator.userAgent.match(
-            /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|SAMSUNG|SGH-[I|N|T]|GT-[I|P|N]|SM-[N|P|T|Z|G]|SHV-E|SCH-[I|J|R|S]|SPH-L|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennc|wOSBrowser|BrowserNG|WebOS|Symbian|Windos Phone)/i
-        ) &&
-        // !phoneDirection.matches
+        navigator.userAgent.match(/(iPhone|iPod|ios|iPad)/i) &&
         document.body.clientWidth > document.body.clientHeight
     ) {
-        console.log("橫屏");
+        console.log("ios橫屏");
+        shieldBoolean.value = true;
+    } else if (
+        navigator.userAgent.match(/(iPhone|iPod|ios|iPad)/i) &&
+        document.body.clientWidth < document.body.clientHeight
+    ) {
+        console.log("ios豎屏");
+        shieldBoolean.value = false;
+    } else if (
+        navigator.userAgent.match(
+            /(Android|SAMSUNG|SGH-[I|N|T]|GT-[I|P|N]|SM-[N|P|T|Z|G]|SHV-E|SCH-[I|J|R|S]|SPH-L|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennc|wOSBrowser|BrowserNG|WebOS|Symbian|Windos Phone)/i
+        ) &&
+        (screen.orientation.type === "landscape-primary" ||
+            screen.orientation.type === "landscape-secondary")
+    ) {
+        console.log("android橫屏");
         shieldBoolean.value = true;
     } else {
-        console.log("豎屏");
+        console.log("android豎屏");
         shieldBoolean.value = false;
     }
 });
+
 onMounted(() => {
     window.addEventListener("resize", () => {
         if (
-            navigator.userAgent.match(
-                /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|SAMSUNG|SGH-[I|N|T]|GT-[I|P|N]|SM-[N|P|T|Z|G]|SHV-E|SCH-[I|J|R|S]|SPH-L|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennc|wOSBrowser|BrowserNG|WebOS|Symbian|Windos Phone)/i
-            ) &&
-            // !phoneDirection.matches
-            document.body.clientWidth > document.body.clientHeight + 20
+            navigator.userAgent.match(/(iPhone|iPod|ios|iPad)/i) &&
+            document.body.clientWidth > document.body.clientHeight
         ) {
-            console.log("橫屏");
+            console.log("ios橫屏");
+            shieldBoolean.value = true;
+        } else if (
+            navigator.userAgent.match(/(iPhone|iPod|ios|iPad)/i) &&
+            document.body.clientWidth < document.body.clientHeight
+        ) {
+            console.log("ios豎屏");
+            shieldBoolean.value = false;
+        } else if (
+            navigator.userAgent.match(
+                /(Android|SAMSUNG|SGH-[I|N|T]|GT-[I|P|N]|SM-[N|P|T|Z|G]|SHV-E|SCH-[I|J|R|S]|SPH-L|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennc|wOSBrowser|BrowserNG|WebOS|Symbian|Windos Phone)/i
+            ) &&
+            (screen.orientation.type === "landscape-primary" ||
+                screen.orientation.type === "landscape-secondary")
+        ) {
+            console.log("android橫屏");
             shieldBoolean.value = true;
         } else {
-            console.log("豎屏");
+            console.log("android豎屏");
             shieldBoolean.value = false;
         }
     });
@@ -92,16 +120,28 @@ onMounted(() => {
 onUnmounted(() => {
     window.removeEventListener("resize", () => {
         if (
-            navigator.userAgent.match(
-                /(phone|pad|pod|iPhone|iPod|ios|iPad|Android|SAMSUNG|SGH-[I|N|T]|GT-[I|P|N]|SM-[N|P|T|Z|G]|SHV-E|SCH-[I|J|R|S]|SPH-L|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennc|wOSBrowser|BrowserNG|WebOS|Symbian|Windos Phone)/i
-            ) &&
-            // !phoneDirection.matches
-            document.body.clientWidth > document.body.clientHeight + 20
+            navigator.userAgent.match(/(iPhone|iPod|ios|iPad)/i) &&
+            document.body.clientWidth > document.body.clientHeight
         ) {
-            console.log("橫屏");
+            console.log("ios橫屏");
+            shieldBoolean.value = true;
+        } else if (
+            navigator.userAgent.match(/(iPhone|iPod|ios|iPad)/i) &&
+            document.body.clientWidth < document.body.clientHeight
+        ) {
+            console.log("ios豎屏");
+            shieldBoolean.value = false;
+        } else if (
+            navigator.userAgent.match(
+                /(Android|SAMSUNG|SGH-[I|N|T]|GT-[I|P|N]|SM-[N|P|T|Z|G]|SHV-E|SCH-[I|J|R|S]|SPH-L|Mobile|BlackBerry|IEMobile|MQQBrowser|JUC|Fennc|wOSBrowser|BrowserNG|WebOS|Symbian|Windos Phone)/i
+            ) &&
+            (screen.orientation.type === "landscape-primary" ||
+                screen.orientation.type === "landscape-secondary")
+        ) {
+            console.log("android橫屏");
             shieldBoolean.value = true;
         } else {
-            console.log("豎屏");
+            console.log("android豎屏");
             shieldBoolean.value = false;
         }
     });

@@ -14,7 +14,7 @@
                         :size="120"
                         object-fit="cover"
                         fallback-src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-                        :src="`${config.fileUrl}/fls/${eventInfo.icon}`"
+                        :src="`${config.fileUrl}${eventInfo.icon}`"
                     />
                 </div>
             </div>
@@ -30,15 +30,20 @@
                 <ScaleLoader class="scale" color="#ffb400" height="20px" width="3px"></ScaleLoader>
             </div>
             <div class="phoneCallModelFunctionBar">
-                <div class="phoneMicrophone">
-                    <img src="../assets/Images/chatroom/voice-fill-disabled.svg" alt="#" />
-                    <p>關閉</p>
+                <div class="phoneMicrophone disable" v-if="isDisabled">
+                    <img :src="isMuted ? voiceDisabled : voiceEnabled" alt="麥克風" />
+                    <p>{{ isMuted ? "開啟" : "關閉" }}</p>
+                    <p>麥克風</p>
+                </div>
+                <div class="phoneMicrophone" v-else @click="onVoice">
+                    <img :src="isMuted ? voiceDisabled : voiceEnabled" alt="麥克風" />
+                    <p>{{ isMuted ? "開啟" : "關閉" }}</p>
                     <p>麥克風</p>
                 </div>
                 <div class="phoneClose">
                     <img
                         @click="doHangup(!isAccepted ? 2 : 3, eventID(eventKey))"
-                        src="../assets/Images/chatroom/close-round-red.svg"
+                        :src="closeIcon"
                         alt="掛斷"
                     />
                 </div>
@@ -47,7 +52,7 @@
     </n-modal>
 </template>
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
 import { NModal, NCard, NAvatar } from "naive-ui";
@@ -59,6 +64,9 @@ import { useApiStore } from "@/store/api";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import config from "@/config/config";
 import { eventID } from "@/util/commonUtil";
+import voiceDisabled from "@/assets/Images/chatroom/voice-fill-disabled.svg";
+import voiceEnabled from "@/assets/Images/chatroom/voice-fill-enabled.svg";
+import closeIcon from "@/assets/Images/chatroom/close-round-red.svg";
 
 //route
 const route = useRoute();
@@ -72,12 +80,28 @@ const { eventInfo } = storeToRefs(apiStore);
 //phoneCall store
 const phoneCallStore = usePhoneCallStore();
 const { doHangup } = phoneCallStore;
-const { isAccepted, phoneTime } = storeToRefs(phoneCallStore);
+const { isAccepted, phoneTime, isMuted, callPlugin } = storeToRefs(phoneCallStore);
 
 //modal store
 const modelStore = useModelStore();
 const { closeModal } = modelStore;
 const { phoneCallModal, info } = storeToRefs(modelStore);
+
+const isDisabled = ref(false);
+const preventReClickFun = () => {
+    if (!isDisabled.value) {
+        isDisabled.value = true;
+        setTimeout(() => {
+            isDisabled.value = false;
+        }, 2000);
+    }
+};
+
+const onVoice = () => {
+    preventReClickFun();
+    isMuted.value = !isMuted.value;
+    callPlugin.value.send({ message: { request: "set", audio: !isMuted.value } });
+};
 </script>
 <style lang="scss">
 @import "~@/assets/scss/var";
@@ -120,6 +144,10 @@ const { phoneCallModal, info } = storeToRefs(modelStore);
             justify-content: center;
             align-items: center;
             .phoneMicrophone {
+                &.disable {
+                    opacity: 0.5;
+                    cursor: not-allowed;
+                }
                 display: flex;
                 flex-direction: column;
                 align-items: center;

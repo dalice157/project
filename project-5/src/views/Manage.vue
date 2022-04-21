@@ -3,7 +3,6 @@
         <n-layout-sider bordered content-style="padding: 20px 0;">
             <div class="logo">
                 <div class="logoImg"></div>
-                <h1>talkOD</h1>
             </div>
             <div class="sms">
                 <h1>SMS</h1>
@@ -160,17 +159,13 @@ const closeChatRoomBubble = () => {
                 justify-content: center;
                 align-items: center;
                 .logoImg {
-                    width: 40px;
+                    width: 125px;
                     height: 40px;
-                    border-radius: 50%;
-                    background-color: $primary-1;
-                }
-                h1 {
-                    color: $primary-1;
-                    font-size: $font-family;
-                    font-weight: 400;
-                    font-size: $font-size-18;
-                    margin-left: 15px;
+                    background: url("~@/assets/Images/talkOD-logo.png") center no-repeat;
+                    background-size: 100%;
+                    text-indent: -9999px;
+                    white-space: nowrap;
+                    line-height: 0;
                 }
             }
 

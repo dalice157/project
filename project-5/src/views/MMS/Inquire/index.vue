@@ -22,7 +22,7 @@
                     <n-checkbox-group v-model:value="model.searchSend_box">
                         <n-space item-style="display: flex;">
                             <div class="timeInquire">
-                                <n-checkbox value="box_time">依發送時間查詢</n-checkbox>
+                                <n-checkbox value="box_time" disabled>依發送時間查詢</n-checkbox>
                                 <n-form-item path="searchSend_date">
                                     <n-date-picker
                                         class="datePicker"
@@ -56,17 +56,49 @@
                 class="mms_table"
                 :bordered="false"
                 :scroll-x="1200"
-                :columns="createColumns"
+                :columns="createColumns({ cancelReservationPopUp })"
                 :data="data"
                 :pagination="pagination"
                 :bottom-bordered="false"
             />
         </div>
     </div>
+    <teleport to="body" v-if="popUpisOpen">
+        <!-- v-if="isOpen" -->
+        <div class="mask">
+            <div class="dataTable">
+                <div>
+                    <div class="delete" @click="deleteReservationPopUp">刪除已預約的簡訊紀錄</div>
+                    <img :src="closeIcon" alt="關閉" @click="popUpisOpen = !popUpisOpen" />
+                </div>
+                <n-data-table
+                    class="sms_table"
+                    :bordered="false"
+                    :scroll-x="800"
+                    :columns="popUpColumns()"
+                    :data="popUpData"
+                    :bottom-bordered="false"
+                    :row-key="(row) => row"
+                    @update:checked-row-keys="handleCheck"
+                />
+            </div>
+        </div>
+    </teleport>
+    <teleport to="body" v-if="confirmCancel">
+        <div class="mask1">
+            <div class="deleteChannelPopUp">
+                <div class="deleteChannelConfirm">您確定要刪除此預約訊息!!</div>
+                <div class="buttonContainer">
+                    <div type="button" class="cancel" @click="cancel">取消</div>
+                    <div type="button" class="confirm" @click="deleteReservation">確定</div>
+                </div>
+            </div>
+        </div>
+    </teleport>
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, h } from "vue";
+import { reactive, ref, h, computed } from "vue";
 import {
     NForm,
     NFormItem,
@@ -80,34 +112,57 @@ import {
     NConfigProvider,
     NSpace,
 } from "naive-ui";
-
+import { useApiStore } from "@/store/api";
+import { storeToRefs } from "pinia";
 import searchIcon from "@/assets/Images/manage/search.svg";
+import closeIcon from "@/assets/Images/chatroom/close-round.svg";
+import dayjs from "dayjs";
+
+//store
+const apiStore = useApiStore();
+const { inquireShortMessage, deleteReservationShortMsg } = apiStore;
+const { inquireMMSShortMessageList } = storeToRefs(apiStore);
 
 const search = ref("");
 
-const createColumns = [
+const createColumns = ({ cancelReservationPopUp }) => [
     {
         title: "編號",
         key: "id",
         align: "center",
+        render(row, index) {
+            return h(
+                "p",
+                {
+                    class: "link subject",
+                },
+                index + 1
+            );
+        },
     },
     {
         title: "發送時間",
         key: "time",
         align: "center",
         width: 100,
+        render(row, index) {
+            return h(
+                "p",
+                {
+                    class: "link subject",
+                },
+                dayjs(row.time / 1000000).format("YYYY/MM/DD")
+            );
+        },
     },
     {
         title: "訊息主旨",
         key: "subject",
         render(row, index) {
             return h(
-                "a",
+                "p",
                 {
                     class: "link subject",
-                    href: "javascript:;",
-                    target: "_blank",
-                    title: row.subject,
                 },
                 row.subject
             );
@@ -115,185 +170,251 @@ const createColumns = [
     },
     {
         title: "發送內容",
-        key: "content",
+        key: "text",
         render(row, index) {
             return h(
-                "a",
+                "p",
                 {
                     class: "link content",
-                    href: "javascript:;",
-                    target: "_blank",
-                    title: row.content,
                 },
-                row.content
+                row.text
             );
         },
     },
     {
         title: "發送通數",
-        key: "totalSent",
+        key: "count",
         align: "center",
         render(row, index) {
             return h(
-                "a",
+                "p",
                 {
                     class: "link",
-                    href: "javascript:;",
-                    target: "_blank",
                 },
-                row.totalSent
+                row.count
             );
         },
     },
     {
-        title: "已傳送",
-        key: "success",
+        title: "成功接收",
+        key: "status",
         align: "center",
         render(row, index) {
             return h(
-                "a",
+                "p",
                 {
                     class: "link",
-                    href: "javascript:;",
-                    target: "_blank",
                 },
-                row.success
+                row.status === 0 ? 1 : 0
+            );
+        },
+    },
+    {
+        title: "傳送中通數",
+        key: "status",
+        align: "center",
+        render(row, index) {
+            return h(
+                "p",
+                {
+                    class: "link",
+                },
+                row.status === 1 ? 1 : 0
             );
         },
     },
     {
         title: "預約傳送通數",
-        key: "totalAppointmentDelivery",
+        key: "status",
         align: "center",
         render(row, index) {
             return h(
                 "a",
                 {
-                    class: "link",
-                    href: "javascript:;",
-                    target: "_blank",
+                    class: "link hover",
+                    onClick: () => cancelReservationPopUp(row),
                 },
-                row.totalAppointmentDelivery
+                row.status === 2 ? 1 : 0
             );
         },
     },
     {
         title: "預約取消通數",
-        key: "totalAppointmentCancellation",
+        key: "status",
         align: "center",
         render(row, index) {
             return h(
-                "a",
+                "p",
                 {
                     class: "link",
-                    href: "javascript:;",
-                    target: "_blank",
                 },
-                row.totalAppointmentCancellation
+                row.status === 3 ? 1 : 0
+            );
+        },
+    },
+    {
+        title: "收訊失敗",
+        key: "status",
+        align: "center",
+        render(row, index) {
+            return h(
+                "p",
+                {
+                    class: "link",
+                },
+                row.status === 4 ? 1 : 0
             );
         },
     },
     {
         title: "發送扣點",
-        key: "deduction",
+        key: "cost",
         align: "center",
         className: "deduction",
-    },
-] as any;
-
-const data = [
-    {
-        key: 0,
-        id: "1",
-        time: "2021/12/11 15:14:20",
-        subject:
-            "週年慶優惠活動週年慶優惠活動週年慶優惠活動週年慶優惠活動週年慶優惠活動週年慶優惠活動週年慶優惠活動",
-        content: "最新優惠活動優惠活動快截止了，要買要快喔  http://e8d.tw/sample",
-        totalSent: 1000,
-        success: 800,
-        totalSending: 8,
-        totalAppointmentDelivery: 8,
-        totalAppointmentCancellation: 8,
-        fail: 50,
-        deduction: 456,
-    },
-    {
-        key: 1,
-        id: "2",
-        time: "2021/12/11 15:14:20",
-        subject: "預約取消通數預約取消通數預約取消通數",
-        content: "DaliceDaliceDaliceDalice",
-        totalSent: 1000,
-        success: 800,
-        totalSending: 8,
-        totalAppointmentDelivery: 8,
-        totalAppointmentCancellation: 8,
-        fail: 50,
-        deduction: 234,
-    },
-    {
-        key: 2,
-        id: "3",
-        time: "2021/12/11 15:14:20",
-        subject: "Dalice Brown",
-        content: "DaliceDaliceDaliceDalice",
-        totalSent: 1000,
-        success: 800,
-        totalSending: 8,
-        totalAppointmentDelivery: 8,
-        totalAppointmentCancellation: 8,
-        fail: 50,
-        deduction: 222,
-    },
-    {
-        key: 3,
-        id: "4",
-        time: "2021/12/11 15:14:20",
-        subject: "Dalice Brown",
-        content: "DaliceDaliceDaliceDalice",
-        totalSent: 1000,
-        success: 800,
-        totalSending: 8,
-        totalAppointmentDelivery: 8,
-        totalAppointmentCancellation: 8,
-        fail: 50,
-        deduction: 111,
-    },
-    {
-        key: 4,
-        id: "5",
-        time: "2021/12/11 15:14:20",
-        subject: "Dalice Brown",
-        content: "DaliceDaliceDaliceDalice",
-        totalSent: 1000,
-        success: 800,
-        totalSending: 8,
-        totalAppointmentDelivery: 8,
-        totalAppointmentCancellation: 8,
-        fail: 50,
-        deduction: 233,
-    },
-    {
-        key: 5,
-        id: "6",
-        time: "2021/12/11 15:14:20",
-        subject: "Dalice Brown",
-        content: "DaliceDaliceDaliceDalice",
-        totalSent: 1000,
-        success: 800,
-        totalSending: 8,
-        totalAppointmentDelivery: 8,
-        totalAppointmentCancellation: 8,
-        fail: 50,
-        deduction: 123,
+        render(row, index) {
+            return h(
+                "p",
+                {
+                    class: "link",
+                },
+                row.cost
+            );
+        },
     },
 ];
+const popUpColumns = () =>
+    [
+        {
+            type: "selection",
+        },
+        {
+            title: "發送時間",
+            key: "time",
+            align: "center",
+            width: 100,
+            render(row, index) {
+                return h(
+                    "p",
+                    {
+                        class: "link",
+                    },
+                    dayjs(row.time / 1000000).format("YYYY/MM/DD")
+                );
+            },
+        },
+        {
+            title: "訊息主旨",
+            key: "subject",
+            align: "center",
+            render(row, index) {
+                return h(
+                    "p",
+                    {
+                        class: "link",
+                    },
+                    row.subject
+                );
+            },
+        },
+        {
+            title: "發送內容",
+            key: "text",
+            render(row, index) {
+                return h(
+                    "p",
+                    {
+                        class: "link",
+                    },
+                    row.text
+                );
+            },
+        },
+
+        {
+            title: "預約傳送通數",
+            key: "status",
+            align: "center",
+            render(row, index) {
+                return h(
+                    "a",
+                    {
+                        class: "link hover",
+                    },
+                    row.status === 2 ? 1 : 0
+                );
+            },
+        },
+
+        {
+            title: "發送扣點",
+            key: "cost",
+            align: "center",
+            className: "deduction",
+            render(row, index) {
+                return h(
+                    "p",
+                    {
+                        class: "link",
+                    },
+                    row.cost
+                );
+            },
+        },
+    ] as any;
+const popUpisOpen = ref(false);
+const confirmCancel = ref(false);
+const cancelReservationPopUp = (rowData) => {
+    if (rowData.status === 2) {
+        popUpisOpen.value = !popUpisOpen.value;
+        popUpData.value = [rowData];
+        // console.log("rowData", rowData);
+    } else {
+        alert("無預約傳送訊息,無法取消!!!");
+    }
+};
+//點進去popup帶的資料
+const popUpData = ref([]);
+//選中的資料
+const pickUpData = ref([]);
+//選取資料function
+const handleCheck = (rowKey) => {
+    pickUpData.value = rowKey;
+    console.log("pickUpData", pickUpData.value);
+};
+//確定刪除彈窗
+const deleteReservationPopUp = () => {
+    if (pickUpData.value.length !== 0) {
+        confirmCancel.value = !confirmCancel.value;
+    } else {
+        alert("請選取要刪除的訊息!!!");
+    }
+};
+//取消刪除簡訊
+const cancel = () => {
+    confirmCancel.value = !confirmCancel.value;
+};
+//確定刪除簡訊
+const deleteReservation = () => {
+    deleteReservationShortMsg("1", pickUpData.value[0]);
+    confirmCancel.value = false;
+    popUpisOpen.value = false;
+};
+const pagination = {
+    pageSize: 6,
+};
+
+const data = computed(() => {
+    return inquireMMSShortMessageList.value;
+});
 
 const formRef = ref(null);
 
 const model = reactive({
     searchSend_box: ["box_time"],
-    searchSend_date: [Date.now(), Date.now()],
+    searchSend_date: [
+        dayjs().startOf("date").valueOf(),
+        dayjs().add(1, "days").startOf("date").valueOf(),
+    ],
     searchSend_phone: null,
 }) as any;
 
@@ -326,14 +447,16 @@ const onMmsSubmit = (e: any) => {
     e.preventDefault();
     formRef.value.validate((errors) => {
         if (!errors) {
-            console.log("驗證成功, 打api", model);
+            const transformDate = ref([]);
+            transformDate.value = model.searchSend_date.map((item) => {
+                return item * 1000000;
+            });
+            inquireShortMessage("1", transformDate.value, model.searchSend_phone, null);
+            // console.log("驗證成功, 打api", model);
         } else {
             console.log("驗證失敗, 不打api", errors);
         }
     });
-};
-const pagination = {
-    pageSize: 6,
 };
 </script>
 <style lang="scss">
@@ -493,6 +616,9 @@ const pagination = {
             color: $primary-1;
         }
     }
+    .hover {
+        cursor: pointer;
+    }
     .subject {
         width: 110px;
         white-space: nowrap;
@@ -513,6 +639,107 @@ const pagination = {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
+.mask {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .dataTable {
+        padding: 10px;
+        width: 800px;
+        height: 375px;
+        background-color: $white;
+        > div {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            .delete {
+                width: 200px;
+                height: 36px;
+                line-height: 36px;
+                border: 1px solid $gray-1;
+                text-align: center;
+                color: $white;
+                background-color: $gray-1;
+                cursor: pointer;
+            }
+            img {
+                cursor: pointer;
+            }
+        }
+    }
+}
+.mask1 {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    .deleteChannelPopUp {
+        border-radius: 5px;
+        width: 342px;
+        padding: 15px;
+        background-color: $white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        .deleteChannelConfirm {
+            font-size: $font-size-16;
+            color: $gray-1;
+            letter-spacing: -0.1px;
+            min-width: 342px;
+            text-align: left;
+            line-height: 22px;
+        }
+        .buttonContainer {
+            margin-top: 20px;
+            text-align: right;
+            display: flex;
+            justify-content: flex-end;
+            & .cancel {
+                border-radius: 100px;
+                padding: 6px 16px;
+                cursor: pointer;
+                font-size: $font-size-16;
+                transition: background-color 0.2s linear;
+                line-height: 20px;
+                background-color: $white;
+                color: $gray-5;
+                margin-right: 16px;
+                &:hover,
+                &:active {
+                    background: $gray-4;
+                    color: $white;
+                }
+            }
+            & .confirm {
+                border-radius: 100px;
+                padding: 6px 16px;
+                cursor: pointer;
+                font-size: $font-size-16;
+                transition: background-color 0.2s linear;
+                line-height: 20px;
+                background-color: rgba(223, 54, 54, 0.7);
+                color: $white;
+                &:hover,
+                &:active {
+                    background-color: #df3636;
+                }
+            }
+        }
+    }
+}
 #mms_inquire_wrap {
     position: relative;
     display: flex;

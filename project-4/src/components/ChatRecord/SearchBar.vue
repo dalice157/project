@@ -2,7 +2,7 @@
     <!-- 搜尋bar -->
     <div class="searchBar">
         <span class="search">
-            <img src="../../assets/Images/search/search.svg" />
+            <img :src="searchIcon" />
         </span>
         <input
             type="text"
@@ -11,7 +11,7 @@
             @input="(e:any) => onSearchRecordResult(e.target.value)"
         />
         <span class="clearBtn" @click="clearRecordKeyWord()">
-            <img src="../../assets/Images/search/round-fill_close.svg" />
+            <img :src="closeIcon" />
         </span>
     </div>
 </template>
@@ -21,6 +21,8 @@ import { storeToRefs } from "pinia";
 import { useRoute } from "vue-router";
 
 import { useSearchStore } from "@/store/search";
+import searchIcon from "@/assets/Images/search/search.svg";
+import closeIcon from "@/assets/Images/search/round-fill_close.svg";
 
 const searchStore = useSearchStore();
 const { onSearchRecordResult, onClickGoto, clearRecordKeyWord } = searchStore;

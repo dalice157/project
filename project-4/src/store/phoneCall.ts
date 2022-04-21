@@ -30,6 +30,7 @@ export const usePhoneCallStore = defineStore({
         route: <any>useRoute(),
         phoneType: <any>0,
         phoneTime: <any>"0:00",
+        isMuted: <boolean>false,
     }),
     getters: {},
     actions: {
@@ -44,11 +45,13 @@ export const usePhoneCallStore = defineStore({
             // eslint-disable-next-line @typescript-eslint/no-this-alias
             const that = this;
             // Call this user
-            this.callPlugin.createOffer({
-                media: { audio: false, video: false, data: true },
+            that.callPlugin.createOffer({
+                trickle: true,
+                media: { audioRecv: true, audioSend: true, audio: true, keepAudio: true },
                 success: function (jsep: any) {
                     // @ts-ignore
                     Janus.debug("videocall Got SDP!", jsep);
+                    that.localJsep = jsep;
                     const body = { request: "call", username: display };
                     that.callPlugin.send({ message: body, jsep: jsep });
                     console.log("body:", body);
@@ -74,13 +77,13 @@ export const usePhoneCallStore = defineStore({
             this.isIncomingCall = false;
             // eslint-disable-next-line @typescript-eslint/no-this-alias
             const that = this;
-            this.callPlugin.createAnswer({
+            that.callPlugin.createAnswer({
                 jsep: jsep,
-                media: { audio: false, video: false, data: true },
-                simulcast: true,
+                media: { audioRecv: true, audioSend: true, audio: true, keepAudio: true },
                 success: function (jsep: any) {
                     // @ts-ignore
-                    Janus.debug("Got SDP!", jsep);
+                    console.log("有電話進來 Got SDP!", jsep);
+                    that.localJsep = jsep;
                     const body = { request: "accept" };
                     that.callPlugin.send({ message: body, jsep: jsep });
                 },
@@ -95,7 +98,7 @@ export const usePhoneCallStore = defineStore({
             console.log("掛掉電話", type);
             this.yourUsername = null;
             const chatstore = useChatStore();
-            const { messages, participantList, textPlugin, isOnline } = storeToRefs(chatstore);
+            const { messages, participantList, textPlugin, adminCount } = storeToRefs(chatstore);
             const phoneObj = {
                 janusMsg: {
                     chatroomID: chatroomID(this.route.params.eventKey),
@@ -116,7 +119,7 @@ export const usePhoneCallStore = defineStore({
                         currentDate: currentDate(),
                         isExpire: false,
                         isPlay: false,
-                        isRead: isOnline.value ? true : false,
+                        isRead: adminCount.value > 0 ? true : false,
                         msgFunctionStatus: false,
                         msgMoreStatus: false,
                         recallPopUp: false,

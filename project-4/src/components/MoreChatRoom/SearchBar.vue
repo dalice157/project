@@ -2,7 +2,7 @@
     <!-- 搜尋bar -->
     <div class="searchBar">
         <span class="search">
-            <img src="../../assets/Images/search/search.svg" />
+            <img :src="searchIcon" />
         </span>
         <input
             type="text"
@@ -11,7 +11,7 @@
             @input="(e:any) => onSearchMoreImResult(e.target.value)"
         />
         <span class="clearBtn" @click="clearMoreKeyWord()">
-            <img src="../../assets/Images/search/round-fill_close.svg" />
+            <img :src="closeIcon" />
         </span>
     </div>
 </template>
@@ -23,7 +23,8 @@ import { NInput, NIcon, NAvatar, NEllipsis } from "naive-ui";
 
 import { useSearchStore } from "@/store/search";
 import { useApiStore } from "@/store/api";
-import { getFileExtension } from "@/util/commonUtil";
+import searchIcon from "@/assets/Images/search/search.svg";
+import closeIcon from "@/assets/Images/search/round-fill_close.svg";
 
 // api store
 const apiStore = useApiStore();
