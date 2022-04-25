@@ -289,3 +289,30 @@ export const options = [
         value: "詳洽",
     },
 ];
+
+// 大頭照
+export const imgList: any = [
+    `${config.fileUrl}icon/default.svg`,
+    `${config.fileUrl}icon/1.png`,
+    `${config.fileUrl}icon/2.png`,
+    `${config.fileUrl}icon/3.png`,
+    `${config.fileUrl}icon/4.png`,
+    `${config.fileUrl}icon/5.png`,
+    `${config.fileUrl}icon/6.png`,
+    `${config.fileUrl}icon/7.png`,
+    `${config.fileUrl}icon/8.png`,
+    `${config.fileUrl}icon/9.png`,
+    `${config.fileUrl}icon/10.png`,
+    `${config.fileUrl}icon/11.png`,
+    `${config.fileUrl}icon/12.png`,
+];
+
+// 聊天室可上傳檔案類型
+export const chatfileAccept =
+    "image/png, image/jpeg, image/gif, text/*, video/*, audio/*, application/*, application/rtf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.wordprocessingml.templat, application/vnd.ms-word.document.macroEnabled.12, application/vnd.ms-word.template.macroEnabled.12";
+// 可上傳檔案類型
+export const fileAccept =
+    "text/*, video/*, audio/*, application/*, application/rtf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.wordprocessingml.templat, application/vnd.ms-word.document.macroEnabled.12, application/vnd.ms-word.template.macroEnabled.12";
+
+// 可上傳圖片類型
+export const imgAccept = "image/png, image/jpeg, image/gif";

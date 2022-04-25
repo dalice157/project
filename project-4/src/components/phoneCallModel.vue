@@ -100,7 +100,7 @@ const preventReClickFun = () => {
 const onVoice = () => {
     preventReClickFun();
     isMuted.value = !isMuted.value;
-    callPlugin.value.send({ message: { request: "set", audio: !isMuted.value } });
+    callPlugin.value.send({ message: { request: "set", audio: !isMuted.value, video: false } });
 };
 </script>
 <style lang="scss">

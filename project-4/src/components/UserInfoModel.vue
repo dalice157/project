@@ -11,7 +11,7 @@
             </div>
             <UserInfo :info="info" />
             <div class="description">{{ info.description }}</div>
-            <ul class="call_container">
+            <!-- <ul class="call_container">
                 <li
                     v-if="eventInfo.callable === true"
                     class="call-phone"
@@ -24,7 +24,7 @@
                     <span class="icon"><img :src="messageIcon" alt="傳送訊息" /></span>
                     <p class="text">傳送訊息</p>
                 </li>
-            </ul>
+            </ul> -->
         </n-card>
     </n-modal>
 </template>

@@ -9,7 +9,11 @@
                                 <h2><span>*</span>&ensp;頭像設定</h2>
                                 <p>(請上傳商標或形象圖以供辨識)</p>
                             </div>
-                            <n-upload @change="uploadAvatar($event)" accept="image/*" type="file">
+                            <n-upload
+                                @change="uploadAvatar($event)"
+                                :accept="imgAccept"
+                                type="file"
+                            >
                                 <div class="addChannelUploadImg">
                                     <img
                                         class="avatarDefault"
@@ -32,7 +36,7 @@
                                 </div>
                             </n-upload>
                         </div>
-                        <!-- 暫時隱藏 <div class="functionSetting">
+                        <div class="functionSetting" v-if="!isProduction">
                             <h3>功能設定</h3>
                             <div class="freecall">
                                 <n-checkbox
@@ -42,7 +46,7 @@
                                 ></n-checkbox>
                                 <p>免費通話</p>
                             </div>
-                        </div> -->
+                        </div>
                         <div class="status">
                             <h3>活動頻道開關</h3>
                             <n-switch
@@ -88,7 +92,7 @@
                             <p v-show="addList.length === 0">請選擇客服人員</p>
                             <div class="staffTag" v-for="item in tagList" :key="item.accountID">
                                 <p v-if="item.accountID !== 0">{{ item.name }}</p>
-                                <p v-else>{{ item.account }}</p>
+                                <p v-else>{{ item.nickname }}</p>
                                 <img
                                     :src="closeIcon"
                                     :alt="item.accountID"
@@ -158,7 +162,7 @@
                                     <input
                                         type="file"
                                         @change="welcomePicture($event, index)"
-                                        accept="image/*"
+                                        :accept="imgAccept"
                                     />
                                 </span>
                             </div>
@@ -220,7 +224,7 @@
                                     class="staff"
                                     v-else
                                     :value="staff.accountID"
-                                    :label="staff.account"
+                                    :label="staff.nickname"
                                 />
                             </div>
                         </li>
@@ -262,10 +266,13 @@ import closeIcon from "@/assets/Images/manage/round-fill_close.svg";
 import fileIcon from "@/assets/Images/common/file.svg";
 import delIcon from "@/assets/Images/manage/delete.svg";
 import picIcon from "@/assets/Images/chatroom/pic.svg";
+import { fileAccept, imgAccept } from "@/util/commonUtil";
 
 //router
 const router = useRouter();
 const route = useRoute();
+
+const isProduction = process.env.NODE_ENV === "production";
 
 //store
 const apiStore = useApiStore();
@@ -495,8 +502,8 @@ const onPopUp = () => {
         if (item.accountID === 0) {
             return {
                 accountID: item.accountID,
-                account: item.account,
                 name: item.name,
+                nickname: item.nickname,
             };
         }
         return {
@@ -566,9 +573,6 @@ const welcomePicture = (e: any, index: any) => {
     });
 };
 
-// 可上傳檔案類型
-const fileAccept =
-    "text/*, video/*, audio/*, application/*, application/rtf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.wordprocessingml.templat, application/vnd.ms-word.document.macroEnabled.12, application/vnd.ms-word.template.macroEnabled.12";
 //上傳檔案
 const files = ref();
 const welcomeFile = (e: any, index: any) => {
@@ -630,7 +634,7 @@ const goActivity = () => {
         if ((value as any).accountID == 0) {
             cslist.value.push({
                 accountID: (value as any).accountID,
-                account: (value as any).account,
+                nickname: (value as any).nickname,
                 name: (value as any).name,
             });
         } else {

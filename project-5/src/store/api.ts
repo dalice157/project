@@ -20,7 +20,7 @@ export const useApiStore = defineStore({
             description: "hi",
             homeurl: "http://e8d.tw/",
             icon: "logo.png",
-            messagelist: [],
+            messageList: [],
         },
         eventList: <any>[],
         stickerList: <any>[],
@@ -202,6 +202,7 @@ export const useApiStore = defineStore({
                             return item;
                         });
                     }
+
                     this.isInput = false;
                     this.isUserMsg = false;
                 })
@@ -439,17 +440,12 @@ export const useApiStore = defineStore({
                 headers: { Authorization: `Bearer ${getToken}` },
             })
                 .then((res: any) => {
-                    // console.log("point res:", res);
-                    this.point = res.data.status === "-302" ? 0 : res.data.point;
+                    // console.log("point res:", res.data.status);
+                    this.point = res.data.point === undefined ? 0 : res.data.point;
                 })
                 .catch((err: any) => {
-                    if (err.response && [-1, -2, -3, -4].includes(err.response.data.status)) {
-                        location.href = `/`;
-                    }
-                    if (err.response && err.response.data.status == -302) {
-                        this.point = 0;
-                    }
                     console.error(err);
+                    location.href = `/`;
                 });
         },
         //取得管理者list

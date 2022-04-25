@@ -1,16 +1,17 @@
 const env = process.env.NODE_ENV || "development";
 console.log(`"env" is ${env}`);
+// api
 const SERVER_SITE = {
     develop: "https://t.talkod.im:443",
-    production: "https://fapi.talkod.im",
+    production: "https://tfapi.talkod.im",
 };
 const JANUS_SITE = {
     develop: "https://t.talkod.im:8089",
-    production: "https://j1.talkod.im:8089",
+    production: "https://tj1.talkod.im:8089",
 };
 const FILE_SITE = {
     develop: "https://t.talkod.im:8029/fls/",
-    production: "https://fls.talkod.im/",
+    production: "https://tfls.talkod.im/",
 };
 
 const setting = {

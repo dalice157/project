@@ -1,5 +1,11 @@
 <template>
-    <div class="chatroom-inner notMsg" ref="findScrollHeight" v-if="messageArray.length === 0">
+    <div
+        id="drop-area"
+        :class="{ dropActive: dropActive }"
+        class="chatroom-inner notMsg"
+        ref="findScrollHeight"
+        v-if="messageArray.length === 0"
+    >
         尚無聊天訊息!!
     </div>
     <div
@@ -137,6 +143,7 @@
                                             :href="`${config.serverUrl}/v1/file/${text.janusMsg.format.Fileid}`"
                                             target="_blank"
                                         >
+                                            {{ text.janusMsg.config.isExpire }}
                                             下載
                                         </a>
                                     </li>
@@ -163,7 +170,14 @@
                         </div>
                         <!-- 對方頭像 -->
                         <div class="avatar" v-if="text.janusMsg.sender === 1 && !deleteBoolean">
-                            <n-avatar round :size="42" :src="user_pic_defaul" />
+                            <n-avatar
+                                class="userImg"
+                                :size="42"
+                                round
+                                object-fit="cover"
+                                :fallback-src="user_pic_defaul"
+                                :src="img"
+                            />
                         </div>
                         <!-- 訊息 -->
                         <div
@@ -348,20 +362,6 @@
                             v-else-if="text.janusMsg.msgType === 9"
                             @touchend="doCall(chatRoomID)"
                         >
-                            <router-link class="phone" :to="`/phone?eventID=${route.params.id}`">
-                                <div class="phonePic">
-                                    <img :src="phoneIcon" alt="撥打電話" />
-                                </div>
-                                <div class="phoneStatus">
-                                    <h4 v-if="text.janusMsg.format.phoneType === 1">無回應</h4>
-                                    <h4 v-if="text.janusMsg.format.phoneType === 2">取消通話</h4>
-                                    <h4 v-if="text.janusMsg.format.phoneType === 3">語音來電</h4>
-                                    <p v-if="text.janusMsg.format.phoneType === 3">
-                                        {{ text.janusMsg.format.phoneTime }}
-                                    </p>
-                                    <h4 v-if="text.janusMsg.format.phoneType === 4">未接來電</h4>
-                                </div>
-                            </router-link>
                             <a class="phone-web" @click="onPhoneCallModal(chatRoomID)">
                                 <div class="phonePic">
                                     <img :src="phoneIcon" alt="撥打電話" />
@@ -430,7 +430,6 @@
             </div>
         </div>
     </div>
-    <UserInfoModel />
     <!-- 刪除訊息滿版 poopup 出現
     <teleport to="body" v-if="deletePopUp">
         <div class="mask">
@@ -454,7 +453,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, onUpdated, watch, nextTick } from "vue";
+import { ref, computed, onMounted, onUpdated, watch, nextTick, reactive } from "vue";
 import useClipboard from "vue-clipboard3";
 import { api as viewerApi } from "v-viewer";
 import { storeToRefs } from "pinia";
@@ -474,9 +473,8 @@ import { useSearchStore } from "@/store/search";
 import { txt } from "@/util/interfaceUtil";
 import { sendPrivateMsg } from "@/util/chatUtil";
 import user_pic_defaul from "@/assets/Images/mugShot/User-round.svg";
-import { scrollPageTo, convertTime } from "@/util/commonUtil";
+import { scrollPageTo, convertTime, imgList } from "@/util/commonUtil";
 import { unixTime, currentDate, dateFormat, currentTime } from "@/util/dateUtil";
-import UserInfoModel from "@/components/UserInfoModel.vue";
 import config from "@/config/config";
 import moreIcon from "@/assets/Images/chatroom/more.svg";
 import googleMapIcon from "@/assets/Images/chatroom/map.jpg";
@@ -487,7 +485,7 @@ import phoneIcon from "@/assets/Images/chatroom/phone-fill-round-y.svg";
 //api store
 const apiStore = useApiStore();
 const { getHistoryApi, recallAPI } = apiStore;
-const { messageList, msgStart, totalCount } = storeToRefs(apiStore);
+const { messageList, msgStart, totalCount, userInfo, chatroomList } = storeToRefs(apiStore);
 const timeOutEvent = ref(0);
 
 // 彈窗 store
@@ -546,21 +544,28 @@ const pictures: any = computed(() => {
         return item.janusMsg.msgType == 6;
     });
 });
-console.log("pictures", pictures);
 
 //聊天室功能
 const preDate: any = ref([]);
 const viewImgs: any = ref([]);
 
-//拖拽上傳
-const dropActive = ref(false);
-const files = ref();
-const dropEvent = (e: any) => {
-    dropActive.value = false;
-    e.stopPropagation();
-    e.preventDefault();
-    onUploadFile(e.dataTransfer.files);
-};
+let getCurChatRoomId: any = reactive({});
+// 環境設定
+const isProduction = process.env.NODE_ENV === "production";
+const getSplit = isProduction ? 4 : 5;
+const img = computed(() => {
+    getCurChatRoomId = chatroomList.value.find((obj) => {
+        return obj.chatroomID === chatRoomID.value;
+    });
+    return imgList.find((item) => {
+        // console.log('save item.split("/"):', getCurChatRoomId.icon);
+        const icon =
+            item.split("/")[getSplit] === "default.svg"
+                ? 0
+                : item.split("/")[getSplit].split(".")[0];
+        return getCurChatRoomId?.icon ? icon == getCurChatRoomId.icon : "default.svg";
+    });
+});
 
 //開始按
 const gtouchstart = (msg: txt) => {
@@ -590,13 +595,50 @@ const longPress = (msg: any) => {
     onBubble(msg);
 };
 
-//上傳檔案
+//拖拽上傳
+const dropActive = ref(false);
+const files = ref();
+const dropEvent = (e: any) => {
+    console.log("dataTransfer:", e.dataTransfer.files);
+    dropActive.value = false;
+    e.stopPropagation();
+    e.preventDefault();
+    onUploadFile(e.dataTransfer.files);
+};
 const dropFiles = ref();
 const image = ref();
+
+onMounted(() => {
+    watch(messageArray, () => {
+        if (messageArray.value.length > 0) {
+            const dropArea = document.getElementById("drop-area");
+            console.log("dropArea:", dropArea);
+
+            dropArea?.addEventListener("drop", dropEvent, false);
+            dropArea?.addEventListener("dragleave", (e: any) => {
+                e.stopPropagation();
+                e.preventDefault();
+                dropActive.value = false;
+            });
+            dropArea?.addEventListener("dragenter", (e: any) => {
+                e.stopPropagation();
+                e.preventDefault();
+                dropActive.value = true;
+            });
+            dropArea?.addEventListener("dragover", (e: any) => {
+                e.stopPropagation();
+                e.preventDefault();
+                dropActive.value = true;
+            });
+        }
+    });
+});
+
 const onUploadFile = (file: any) => {
     const fileArr = file[0];
     const fileArrType = file[0].type;
     const fileName = fileArr.name;
+    const getToken = localStorage.getItem("access_token");
     if (!fileArr) {
         return;
     }
@@ -607,9 +649,7 @@ const onUploadFile = (file: any) => {
             success(result) {
                 //呼叫api
                 const fd = new FormData();
-                // console.log("file.name:", file);
-                fd.append("file", new File([result], fileName, { type: "image/*" }));
-                const getToken = localStorage.getItem("access_token");
+                fd.append("file", new File([result], fileArr.name, { type: "image/*" }));
                 axios({
                     method: "post",
                     url: `${config.serverUrl}/v1/file`,
@@ -617,8 +657,6 @@ const onUploadFile = (file: any) => {
                     headers: { Authorization: `Bearer ${getToken}` },
                 })
                     .then((res) => {
-                        console.log("img res:", res);
-
                         const reader = new FileReader();
                         reader.readAsDataURL(fileArr);
                         reader.onload = (e: any) => {
@@ -642,10 +680,8 @@ const onUploadFile = (file: any) => {
                                     },
                                     config: {
                                         id: nanoid(),
-                                        isReply: replyMsg.value.janusMsg.msgContent ? true : false,
-                                        replyObj: replyMsg.value.janusMsg.msgContent
-                                            ? { ...replyMsg.value }
-                                            : "",
+                                        isReply: replyMsg.value ? true : false,
+                                        replyObj: replyMsg.value ? { ...replyMsg.value } : "",
                                         currentDate: currentDate(),
                                         isExpire: false,
                                         isPlay: false,
@@ -659,7 +695,6 @@ const onUploadFile = (file: any) => {
                                 },
                             };
 
-                            messageList.value.push(imageObj);
                             const sendMsgObj = {
                                 msg: imageObj,
                                 textPlugin: textPlugin.value,
@@ -667,6 +702,7 @@ const onUploadFile = (file: any) => {
                                 eventID: route.params.id,
                             };
                             sendPrivateMsg(sendMsgObj);
+                            messageList.value.push(imageObj);
                             pictures.value.push(imageObj);
                         };
                     })
@@ -680,19 +716,21 @@ const onUploadFile = (file: any) => {
         });
     } else {
         const fd = new FormData();
+        console.log("fileArr:", fileArr);
+
         fd.append("file", new File([fileArr], fileArr.name, { type: fileArr.type }));
 
         axios({
             method: "post",
             url: `${config.serverUrl}/v1/file`,
             data: fd,
+            headers: { Authorization: `Bearer ${getToken}` },
         })
             .then((res) => {
-                console.log("上傳 res:", res);
                 const reader = new FileReader();
                 reader.readAsDataURL(fileArr);
                 reader.onload = (e: any) => {
-                    dropFiles.value = e.target.result;
+                    files.value = e.target.result;
 
                     let fileObj: any = {};
                     fileObj = {
@@ -726,7 +764,6 @@ const onUploadFile = (file: any) => {
                             },
                         },
                     };
-                    messageList.value.push(fileObj);
                     const sendMsgObj = {
                         msg: fileObj,
                         textPlugin: textPlugin.value,
@@ -734,6 +771,7 @@ const onUploadFile = (file: any) => {
                         eventID: route.params.id,
                     };
                     sendPrivateMsg(sendMsgObj);
+                    messageList.value.push(fileObj);
                     pictures.value.push(fileObj);
                 };
             })
@@ -778,29 +816,6 @@ const toggleAudio = (msg: any) => {
         msg.janusMsg.config.isPlay = false;
     }
 };
-onMounted(() => {
-    //拖拽上傳
-    let dropArea = document.getElementById("drop-area");
-    console.log("dropArea:", dropArea);
-
-    dropArea?.addEventListener("drop", dropEvent, false);
-    dropArea?.addEventListener("dragleave", (e: any) => {
-        e.stopPropagation();
-        e.preventDefault();
-        dropActive.value = false;
-    });
-    dropArea?.addEventListener("dragenter", (e: any) => {
-        e.stopPropagation();
-        e.preventDefault();
-        dropActive.value = true;
-    });
-    dropArea?.addEventListener("dragover", (e: any) => {
-        e.stopPropagation();
-        e.preventDefault();
-        dropActive.value = true;
-    });
-});
-
 onMounted(() => {
     scrollToBottom();
 });
@@ -928,16 +943,12 @@ const previewURL = (fileid: string): void => {
     pictures.value.forEach((img: any) => {
         if (
             !viewImgs.value.includes(
-                `${config.fileUrl}${
-                    img.janusMsg.format.Fileid
-                }.${img.janusMsg.format.ShowName.split(".").pop()}`
+                `${config.fileUrl}${img.janusMsg.format.Fileid}${img.janusMsg.format.ExtensionName}`
             ) &&
             img.janusMsg.msgType === 6
         ) {
             viewImgs.value.push(
-                `${config.fileUrl}${
-                    img.janusMsg.format.Fileid
-                }.${img.janusMsg.format.ShowName.split(".").pop()}`
+                `${config.fileUrl}${img.janusMsg.format.Fileid}${img.janusMsg.format.ExtensionName}`
             );
         }
     });

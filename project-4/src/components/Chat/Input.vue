@@ -35,7 +35,7 @@
                     class="upload_input"
                     type="file"
                     multiple
-                    :accept="fileAccept"
+                    :accept="fileAcceptMP"
                     @change="onUploadFileMP"
                 />
                 <span class="upload_icon">文件</span>
@@ -69,16 +69,22 @@
                 <input
                     type="file"
                     name="image"
-                    accept="image/*"
+                    :accept="imgfileAccept"
                     capture="user"
                     @change="uploadImage"
                 />
             </span>
             <span class="photo">
-                <input type="file" name="image" accept="image/*" @change="uploadImage" />
+                <input
+                    type="file"
+                    name="image"
+                    :accept="imgfileAccept"
+                    @change="uploadImage"
+                    ref="photo"
+                />
             </span>
             <span class="file-folder">
-                <input type="file" @change="onUploadFilePC" />
+                <input type="file" :accept="fileAcceptPC" @change="onUploadFilePC" ref="file" />
             </span>
             <div class="textArea">
                 <n-input
@@ -290,7 +296,7 @@ const { eventInfo, stickerList, stickerUrl } = storeToRefs(apiStore);
 //store
 const chatStore = useChatStore();
 const inputInstRef: any = ref(null);
-const { replyHide, confirmDelete, openRecorder, closeRecorder, handleStickckerGroup } = chatStore;
+const { replyHide, confirmDelete, handleStickckerGroup } = chatStore;
 const {
     messages,
     pictures,
@@ -311,6 +317,7 @@ const {
     participantList,
     isOnline,
     adminCount,
+    janusConnectStatus,
 } = storeToRefs(chatStore);
 //router
 const route = useRoute();
@@ -320,10 +327,14 @@ onMounted(() => {
     inputVal.value = inputInstRef.value;
 });
 
-// 可上傳檔案類型
-const fileAccept =
+// 圖片可上傳檔案類型
+const imgfileAccept = "image/png, image/jpeg, image/gif";
+// PC可上傳檔案類型
+const fileAcceptPC =
+    "image/png, image/jpeg, image/gif, text/*, video/*, audio/*, application/*, application/rtf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.wordprocessingml.templat, application/vnd.ms-word.document.macroEnabled.12, application/vnd.ms-word.template.macroEnabled.12";
+// MP可上傳檔案類型
+const fileAcceptMP =
     "text/*, video/*, audio/*, application/*, application/rtf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.wordprocessingml.templat, application/vnd.ms-word.document.macroEnabled.12, application/vnd.ms-word.template.macroEnabled.12";
-
 // 地圖定位
 const showMapModal = ref(false);
 const latitude = ref();
@@ -424,6 +435,32 @@ const recorderTime = ref("00:00");
 const isClock = ref(false);
 const posStart = ref(0) as any;
 
+const userMediaMicrophone: any = ref(null);
+//開啟錄音視窗並詢問
+const openRecorder = () => {
+    showRecorderModal.value = true;
+    inputFunctionBoolean.value = false;
+    showStickerModal.value = false;
+    navigator.mediaDevices
+        .getUserMedia({ audio: true })
+        .then(function (stream) {
+            userMediaMicrophone.value = stream;
+            console.log("userMicrophone", userMediaMicrophone.value);
+            console.log("You let me use your mic!");
+        })
+        .catch(function (err) {
+            console.log("No mic for you !");
+            console.log("err", err);
+        });
+};
+//關閉錄音視窗
+const closeRecorder = () => {
+    showRecorderModal.value = false;
+    inputFunctionBoolean.value = false;
+    userMediaMicrophone.value.getTracks().forEach((track) => track.stop());
+    console.log("userMicrophone", userMediaMicrophone.value);
+};
+
 onMounted(() => {
     const all = document.querySelector(".all") as any;
     const recordArea = document.querySelector("#audio") as any;
@@ -490,6 +527,7 @@ const startRecorder = (e: any) => {
     };
     if (!recorder.value) {
         recorder.value = new Recorder(config);
+        // console.log("recorder", recorder.value);
         recorder.value.onprogress = (params: any) => {
             duration.value = params.duration;
             recorderTime.value = convertTime(duration.value);
@@ -513,6 +551,7 @@ const startRecorder = (e: any) => {
 };
 //失敗銷毀錄音並重置
 const stopClRecorder = (e: any) => {
+    recorder.value.stream.getTracks().forEach((track) => track.stop());
     recorder.value.stop();
     recorder.value.destroy().then(function () {
         recorder.value = null;
@@ -524,6 +563,7 @@ const stopClRecorder = (e: any) => {
 const stopRecorder = (e: any) => {
     isRecording.value = false;
     console.log("結束錄音");
+    recorder.value.stream.getTracks().forEach((track) => track.stop());
     recorder.value.stop();
     const audioFile = recorder.value.getWAVBlob();
     const fd = new FormData();
@@ -628,6 +668,7 @@ const addMsg = (): void => {
             msgParticipantList: participantList.value,
             eventID: eventID(route.params.eventKey),
         };
+
         sendPrivateMsg(sendMsgObj);
     }
     localStorageMsg(messages.value, route.params.eventKey);
@@ -635,7 +676,9 @@ const addMsg = (): void => {
     msg.value = null;
     replyHide();
 };
-//發送圖片
+
+//手機板發送圖片
+const photo = ref(null);
 const image = ref();
 const uploadImage = (e: any) => {
     const file = e.target.files[0];
@@ -659,12 +702,11 @@ const uploadImage = (e: any) => {
             })
                 .then((res) => {
                     console.log("img res:", res);
-
                     const reader = new FileReader();
                     reader.readAsDataURL(file);
                     reader.onload = (e: any) => {
                         image.value = e.target.result;
-                        const imageObj: any = {
+                        const imageObj = {
                             janusMsg: {
                                 chatroomID: chatroomID(route.params.eventKey),
                                 msgType: 6,
@@ -697,6 +739,8 @@ const uploadImage = (e: any) => {
                         };
 
                         messages.value.push(imageObj);
+
+                        localStorageMsg(messages.value, route.params.eventKey);
                         const sendMsgObj = {
                             msg: imageObj,
                             textPlugin: textPlugin.value,
@@ -704,9 +748,9 @@ const uploadImage = (e: any) => {
                             msgParticipantList: participantList.value,
                             eventID: eventID(route.params.eventKey),
                         };
-                        sendPrivateMsg(sendMsgObj);
-                        localStorageMsg(messages.value, route.params.eventKey);
-
+                        setTimeout(() => {
+                            sendPrivateMsg(sendMsgObj);
+                        }, 1000);
                         pictures.value.push(imageObj);
                         localStorage.setItem(
                             `${route.params.eventKey}-pictures`,
@@ -722,8 +766,11 @@ const uploadImage = (e: any) => {
             console.error(err);
         },
     });
+    photo.value.value = null;
 };
+
 //上傳
+const file = ref(null);
 const files = ref();
 const onUploadFilePC = (e: any) => {
     inputFunctionBoolean.value = false;
@@ -882,6 +929,7 @@ const onUploadFilePC = (e: any) => {
                 console.error(err);
             });
     }
+    file.value.value = null;
 };
 
 const onUploadFileMP = (e: any) => {
@@ -1333,16 +1381,16 @@ watchEffect(() => {
             margin: 3px 6px 3px 0;
             background-image: url("~@/assets/Images/chatroom/Photo.svg");
             background-size: 24px;
-            cursor: pointer;
+            // cursor: pointer;
             input {
                 opacity: 0;
                 box-sizing: border-box;
-                border: 12px solid #00a;
+                // border: 12px solid #00a;
                 width: 24px;
                 height: 24px;
                 cursor: pointer;
                 position: relative;
-                z-index: 1;
+                z-index: 10;
             }
         }
         @media (max-width: 768px) {
@@ -1353,7 +1401,8 @@ watchEffect(() => {
                 margin: 3px 6px 3px 0;
                 background-image: url("~@/assets/Images/chatroom/Photo.svg");
                 background-size: 24px;
-                cursor: pointer;
+                // cursor: pointer;
+                // outline: 1px solid red;
                 input {
                     opacity: 0;
                     box-sizing: border-box;
@@ -1362,7 +1411,7 @@ watchEffect(() => {
                     height: 24px;
                     cursor: pointer;
                     position: relative;
-                    z-index: 1;
+                    z-index: 10;
                 }
             }
         }
@@ -1373,7 +1422,7 @@ watchEffect(() => {
             margin: 3px 6px 3px 0;
             background-image: url("~@/assets/Images/chatroom/pic.svg");
             background-size: 24px;
-            cursor: pointer;
+            // cursor: pointer;
             input {
                 opacity: 0;
                 box-sizing: border-box;
@@ -1391,7 +1440,8 @@ watchEffect(() => {
                 margin: 3px 6px 3px 0;
                 background-image: url("~@/assets/Images/chatroom/pic.svg");
                 background-size: 24px;
-                cursor: pointer;
+                // cursor: pointer;
+                // outline: 1px solid red;
                 input {
                     opacity: 0;
                     box-sizing: border-box;
@@ -1399,6 +1449,8 @@ watchEffect(() => {
                     width: 24px;
                     height: 24px;
                     cursor: pointer;
+                    position: relative;
+                    z-index: 10;
                 }
             }
         }

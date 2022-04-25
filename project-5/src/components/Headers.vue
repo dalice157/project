@@ -5,8 +5,7 @@
             v-if="
                 route.path == `/chat` ||
                 route.path == `/chat/${eventID}` ||
-                route.path == `/gallery/${eventID}` ||
-                route.path == `/phone/${eventID}`
+                route.path == `/gallery/${eventID}`
             "
         >
             {{ eventInfo.name }}
@@ -87,7 +86,7 @@ const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime
 // api store
 const apiStore = useApiStore();
 const { getPoint, getEventApi, getChatroomlistApi, getHistoryApi } = apiStore;
-const { eventInfo, point, isJanusinit, eventList, staffEvents } = storeToRefs(apiStore);
+const { eventInfo, point, isJanusinit, eventList } = storeToRefs(apiStore);
 const access_token = localStorage.getItem("access_token");
 
 const chatRoomID: any = computed(() => route.query.chatroomID);
@@ -181,7 +180,6 @@ let myid: any = null;
 let myusername: any = null;
 let transactions: any = {};
 let participants: any = {};
-let yourusername: any = null;
 let simulcastStarted: any = false;
 let audioenabled = false;
 
@@ -203,21 +201,12 @@ const handleClick = () => {
     showDropdown.value = !showDropdown.value;
 };
 
-var iOS = ["iPad", "iPhone", "iPod"].indexOf(navigator.platform) >= 0;
+var iOS = ["iPad", "iPhone", "iPod"].indexOf(navigator.platform) !== -1;
 var eventName = iOS ? "pagehide" : "beforeunload";
-var oldOBF = window["on" + eventName];
-window.addEventListener("visibilitychange", (event) => {
+var oldOBF = document["on" + eventName];
+document.addEventListener("visibilitychange", (event) => {
     if (document.visibilityState === "hidden") {
-        for (var s in Janus.sessions) {
-            if (Janus.sessions[s] && Janus.sessions[s].destroyOnUnload) {
-                console.log("Room Destroying session " + s);
-
-                Janus.sessions[s].destroy({ unload: true, notifyDestroyed: false });
-            }
-        }
-        if (oldOBF && typeof oldOBF == "function") {
-            oldOBF();
-        }
+        janus.destroy();
         return;
     }
     if (document.visibilityState === "visible") {
@@ -455,7 +444,7 @@ const attachTextroomPlugin = () => {
             if (what === "message") {
                 // Incoming message: public or private?
                 let msg = json["text"];
-                console.log("msg", msg);
+                // console.log("msg", msg);
                 msg = msg.replace(new RegExp("<", "g"), "&lt");
                 msg = msg.replace(new RegExp(">", "g"), "&gt");
                 let from = json["from"];
@@ -465,7 +454,7 @@ const attachTextroomPlugin = () => {
                 data.date = dateString;
                 data.from = participants[from];
                 data.msg = msg;
-                console.log("from", from);
+                // console.log("from", from);
                 if (msg === "recall") {
                     getHistoryApi(chatRoomID.value);
                 }
@@ -619,8 +608,7 @@ const attachVideocallPlugin = () => {
                     } else if (event === "incomingcall") {
                         // @ts-ignore
                         Janus.log("call-> Incoming call from " + result["username"] + "!");
-                        yourusername = result["username"];
-                        yourUsername.value = yourusername;
+                        yourUsername.value = result["username"];
                         jsepMsg.value = jsep;
                         isIncomingCall.value = true;
                         isAccepted.value = false;
@@ -639,7 +627,7 @@ const attachVideocallPlugin = () => {
                             console.log("Call started!");
                         } else {
                             console.log(peer + " accepted the call!");
-                            yourusername = peer;
+                            yourUsername.value = peer;
                         }
                         // Video call can start
                         if (jsep) callPlugin.value.handleRemoteJsep({ jsep: jsep });
@@ -738,7 +726,7 @@ const attachVideocallPlugin = () => {
         oncleanup: function () {
             // @ts-ignore
             Janus.log("call-> ::: Got a cleanup notification :::");
-            yourusername = null;
+            yourUsername.value = null;
             simulcastStarted = false;
             isIncomingCall.value = false;
             phoneCallModal.value = false;

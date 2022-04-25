@@ -593,16 +593,6 @@ watch(adminCount, () => {
     localStorage.setItem(`${route.params.eventKey}`, JSON.stringify(messages.value));
 });
 
-//拖拽上傳
-const dropActive = ref(false);
-const files = ref();
-const dropEvent = (e: any) => {
-    dropActive.value = false;
-    e.stopPropagation();
-    e.preventDefault();
-    onUploadFile(e.dataTransfer.files);
-};
-
 //開始按
 const gtouchstart = (msg: txt) => {
     timeOutEvent.value = setTimeout(function () {
@@ -631,6 +621,15 @@ const longPress = (msg: any) => {
     closeBubble(msg);
 };
 
+//拖拽上傳
+const dropActive = ref(false);
+const files = ref();
+const dropEvent = (e: any) => {
+    dropActive.value = false;
+    e.stopPropagation();
+    e.preventDefault();
+    onUploadFile(e.dataTransfer.files);
+};
 //上傳檔案
 const dropFiles = ref();
 const image = ref();
@@ -791,6 +790,26 @@ const onUploadFile = (file: any) => {
             });
     }
 };
+onMounted(() => {
+    //拖拽上傳
+    let dropArea = document.getElementById("drop-area");
+    dropArea?.addEventListener("drop", dropEvent, false);
+    dropArea?.addEventListener("dragleave", (e: any) => {
+        e.stopPropagation();
+        e.preventDefault();
+        dropActive.value = false;
+    });
+    dropArea?.addEventListener("dragenter", (e: any) => {
+        e.stopPropagation();
+        e.preventDefault();
+        dropActive.value = true;
+    });
+    dropArea?.addEventListener("dragover", (e: any) => {
+        e.stopPropagation();
+        e.preventDefault();
+        dropActive.value = true;
+    });
+});
 
 const track: any = ref();
 const newTime: any = ref("0:00");
@@ -827,26 +846,6 @@ const toggleAudio = (msg: any) => {
         msg.janusMsg.config.isPlay = false;
     }
 };
-onMounted(() => {
-    //拖拽上傳
-    let dropArea = document.getElementById("drop-area");
-    dropArea?.addEventListener("drop", dropEvent, false);
-    dropArea?.addEventListener("dragleave", (e: any) => {
-        e.stopPropagation();
-        e.preventDefault();
-        dropActive.value = false;
-    });
-    dropArea?.addEventListener("dragenter", (e: any) => {
-        e.stopPropagation();
-        e.preventDefault();
-        dropActive.value = true;
-    });
-    dropArea?.addEventListener("dragover", (e: any) => {
-        e.stopPropagation();
-        e.preventDefault();
-        dropActive.value = true;
-    });
-});
 
 onMounted(() => {
     scrollToBottom();
@@ -1788,7 +1787,7 @@ const themeOverrides = {
             .timestamp {
                 display: flex;
                 flex-direction: column;
-                .textMsg{
+                .textMsg {
                     color: red;
                 }
                 span {

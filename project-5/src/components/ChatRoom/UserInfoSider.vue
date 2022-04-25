@@ -111,22 +111,7 @@ import { useApiStore } from "@/store/api";
 import { useSearchStore } from "@/store/search";
 import config from "@/config/config";
 import editIcon from "@/assets/Images/chatroom/edit-round.svg";
-
-const imgList = [
-    `${config.fileUrl}icon/default.svg`,
-    `${config.fileUrl}icon/1.png`,
-    `${config.fileUrl}icon/2.png`,
-    `${config.fileUrl}icon/3.png`,
-    `${config.fileUrl}icon/4.png`,
-    `${config.fileUrl}icon/5.png`,
-    `${config.fileUrl}icon/6.png`,
-    `${config.fileUrl}icon/7.png`,
-    `${config.fileUrl}icon/8.png`,
-    `${config.fileUrl}icon/9.png`,
-    `${config.fileUrl}icon/10.png`,
-    `${config.fileUrl}icon/11.png`,
-    `${config.fileUrl}icon/12.png`,
-];
+import { imgList } from "@/util/commonUtil";
 
 const route = useRoute();
 
@@ -207,8 +192,6 @@ const onSaveEdited = () => {
 
 // 選擇圖像
 const onClickChoose = (e: any) => {
-    console.log("src:", e.target.src);
-
     img.value = e.target.src;
     showPopover.value = false;
 };

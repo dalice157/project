@@ -134,7 +134,10 @@ getBackendApi(route.params.eventKey);
 watchEffect(() => {
     pictures.value = JSON.parse(localStorage.getItem(`${eventKey.value}-pictures`) || "[]");
     pictures.value.forEach((pic: any, index: any) => {
-        if (dayjs().isAfter(dayjs(pic.janusMsg.format.expirationDate))) {
+        if (
+            dayjs().isAfter(dayjs(pic.janusMsg.format.expirationDate)) &&
+            !pic.janusMsg.config.isWelcomeMsg
+        ) {
             pic.janusMsg.config.isExpire = true;
             localStorage.setItem(
                 `${route.params.eventKey}-pictures`,

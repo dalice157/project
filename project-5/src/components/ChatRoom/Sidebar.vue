@@ -11,7 +11,7 @@
 <script lang="ts" setup>
 import { defineComponent, computed, ref } from "vue";
 import { storeToRefs } from "pinia";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 
 import config from "@/config/config";
 import { useApiStore } from "@/store/api";
@@ -24,6 +24,7 @@ const { eventInfo } = storeToRefs(apiStore);
 
 //router
 const route = useRoute();
+
 const eventID = computed(() => route.params.id);
 //search store
 const searchStore = useSearchStore();
@@ -44,6 +45,7 @@ const { closeSearchBar } = searchStore;
     margin-bottom: 20px;
     justify-content: center;
     align-items: center;
+
     .logoImg {
         width: 125px;
         height: 40px;

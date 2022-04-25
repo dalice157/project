@@ -13,8 +13,8 @@
                         round
                         :size="120"
                         object-fit="cover"
-                        fallback-src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
-                        :src="`${filterUserInfo.icon == '0' ? user_pic_defaul : ''}`"
+                        :fallback-src="user_pic_defaul"
+                        :src="img"
                     />
                 </div>
             </div>
@@ -53,7 +53,7 @@
     </n-modal>
 </template>
 <script setup lang="ts">
-import { watchEffect, computed, ref } from "vue";
+import { watchEffect, computed, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
 import { NModal, NCard, NAvatar } from "naive-ui";
@@ -63,7 +63,7 @@ import ScaleLoader from "vue-spinner/src/ScaleLoader.vue";
 import { useModelStore } from "@/store/model";
 import { useApiStore } from "@/store/api";
 import { usePhoneCallStore } from "@/store/phoneCall";
-import config from "@/config/config";
+import { imgList } from "@/util/commonUtil";
 import user_pic_defaul from "@/assets/Images/mugShot/User-round.svg";
 import voiceDisabled from "@/assets/Images/chatroom/voice-fill-disabled.svg";
 import voiceEnabled from "@/assets/Images/chatroom/voice-fill-enabled.svg";
@@ -74,7 +74,7 @@ const route = useRoute();
 
 // api store
 const apiStore = useApiStore();
-const { chatroomList } = storeToRefs(apiStore);
+const { chatroomList, userInfo } = storeToRefs(apiStore);
 
 //phoneCall store
 const phoneCallStore = usePhoneCallStore();
@@ -92,6 +92,25 @@ const filterUserInfo = computed(() => {
         return item.chatroomID === chatRoomID.value;
     });
 });
+
+const img = ref(null);
+// 環境設定
+const isProduction = process.env.NODE_ENV === "production";
+const getSplit = isProduction ? 4 : 5;
+watch(
+    userInfo,
+    () => {
+        img.value = imgList.find((item) => {
+            // console.log('save item.split("/"):', item.split("/"));
+            const icon =
+                item.split("/")[getSplit] === "default.svg"
+                    ? 0
+                    : item.split("/")[getSplit].split(".")[0];
+            return icon == userInfo.value.icon;
+        });
+    },
+    { immediate: true }
+);
 
 const isDisabled = ref(false);
 const preventReClickFun = () => {

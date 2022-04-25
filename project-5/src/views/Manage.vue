@@ -2,7 +2,7 @@
     <n-layout class="manage" has-sider @click="closeChatRoomBubble">
         <n-layout-sider bordered content-style="padding: 20px 0;">
             <div class="logo">
-                <div class="logoImg"></div>
+                <div class="logoImg" @click="goHome"></div>
             </div>
             <div class="sms">
                 <h1>SMS</h1>
@@ -84,7 +84,7 @@
 <script lang="ts" setup>
 import { computed } from "vue";
 import { NLayout, NLayoutSider, NMenu } from "naive-ui";
-import { RouterLink, useRoute, onBeforeRouteUpdate } from "vue-router";
+import { RouterLink, useRoute, useRouter } from "vue-router";
 
 import Headers from "@/components/Headers.vue";
 import { useModelStore } from "@/store/model";
@@ -121,6 +121,7 @@ const cacheComponent = computed(() => {
 
 //路由
 const route = useRoute();
+const router = useRouter();
 const params = route.params;
 
 const apiStore = useApiStore();
@@ -137,6 +138,11 @@ const adminStatus: string | null = localStorage.getItem("adminStatus");
 // 全局關閉聊天室清單
 const closeChatRoomBubble = () => {
     showDropdown.value = false;
+};
+
+//點選logo回首頁
+const goHome = () => {
+    router.push(`/chat`);
 };
 </script>
 
@@ -166,6 +172,7 @@ const closeChatRoomBubble = () => {
                     text-indent: -9999px;
                     white-space: nowrap;
                     line-height: 0;
+                    cursor: pointer;
                 }
             }
 

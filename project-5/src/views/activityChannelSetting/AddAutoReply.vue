@@ -93,7 +93,7 @@
                             <input
                                 type="file"
                                 @change="autoReplyMsgPicture($event, index)"
-                                accept="image/*"
+                                :accept="imgAccept"
                             />
                         </span>
                     </div>
@@ -147,6 +147,7 @@ import { unixTime, currentDate } from "@/util/dateUtil";
 import fileIcon from "@/assets/Images/common/file.svg";
 import delIcon from "@/assets/Images/manage/delete.svg";
 import picIcon from "@/assets/Images/chatroom/pic.svg";
+import { fileAccept, imgAccept } from "@/util/commonUtil";
 
 //router 設定
 const route = useRoute();
@@ -287,9 +288,7 @@ const autoReplyMsgPicture = (e: any, index: any) => {
         },
     });
 };
-// 可上傳檔案類型
-const fileAccept =
-    "text/*, video/*, audio/*, application/*, application/rtf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.wordprocessingml.templat, application/vnd.ms-word.document.macroEnabled.12, application/vnd.ms-word.template.macroEnabled.12";
+
 //上傳檔案
 const files = ref();
 const autoReplyMsgFile = (e: any, index: any) => {

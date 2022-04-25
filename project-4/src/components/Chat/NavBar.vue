@@ -17,7 +17,7 @@
                 <router-link class="back" :to="`/chatRecord/${eventKey}`">
                     <img :src="commentIcon" alt="回交談紀錄" />
                 </router-link>
-                <a class="phone" v-if="eventInfo.callable === true">
+                <a class="phone" v-if="!isProduction && eventInfo.callable === true">
                     <video
                         class="hide"
                         id="remotevideo"
@@ -87,17 +87,17 @@ const router = useRouter();
 const route = useRoute();
 const eventKey = computed(() => route.params.eventKey);
 
+const isProduction = process.env.NODE_ENV === "production";
+
 const webPhoneCall = () => {
     phoneCallModal.value = true;
     console.log("participantList phone", participantList.value);
     const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
-    console.log("getCutomer", getCutomer);
     doCall(getCutomer);
 };
 const phoneCall = () => {
     console.log("participantList phone", participantList.value);
     const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
-    console.log("getCutomer", getCutomer);
     doCall(getCutomer);
 };
 const goToGallery = () => {

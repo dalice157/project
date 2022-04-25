@@ -117,15 +117,6 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
                     });
                     isInput.value = true;
                     messageList.value.push(msg);
-                    // chatroomList.value.forEach((msg) => {
-                    //     msg.unread = 0;
-                    // });
-                } else if (chatroomID != getFrom && data.from) {
-                    // if (chatroomID == getFrom) {
-                    //     chatroomList.value.forEach((msg) => {
-                    //         msg.unread = 1;
-                    //     });
-                    // }
                 }
 
                 messageList.value = messageList.value.reduce((unique, o) => {
@@ -230,7 +221,7 @@ export const randomString = (len: any, charSet?: any) => {
 
 function notifyMe(data: any) {
     const msg = JSON.parse(data.msg).janusMsg.message;
-    console.log("msg:", msg);
+    // console.log("msg:", msg);
 
     if (Notification.permission !== "granted") Notification.requestPermission();
     else {

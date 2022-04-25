@@ -156,7 +156,11 @@
                         :scroll-x="840"
                         :bottom-bordered="false"
                         :style="{ height: `50px` }"
-                    />
+                    >
+                        <template #empty>
+                            <n-empty description="尚無常用簡訊"> </n-empty>
+                        </template>
+                    </n-data-table>
                 </div>
             </div>
         </div>

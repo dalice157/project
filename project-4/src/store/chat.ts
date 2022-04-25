@@ -29,6 +29,8 @@ export const useChatStore = defineStore({
         isOnline: <boolean>false,
         isOpenGallery: <boolean>false,
         adminCount: <number>0,
+        janusConnectStatus: <boolean>false,
+        userMicrophone: <any>null,
     }),
     getters: {},
     actions: {
@@ -95,31 +97,33 @@ export const useChatStore = defineStore({
             this.showRecorderModal = true;
             this.inputFunctionBoolean = false;
             this.showStickerModal = false;
-            //取得麥克風權限
-            navigator.mediaDevices
-                .getUserMedia({ audio: true })
-                .then(function (stream) {
-                    console.log("You let me use your mic!");
-                    stream.getTracks().forEach((track) => track.stop());
-                })
-                .catch(function (err) {
-                    console.log("No mic for you !");
-                });
+            // //取得麥克風權限
+            // navigator.mediaDevices
+            //     .getUserMedia({ audio: true })
+            //     .then(function (stream) {
+            //         this.userMicrophone = stream;
+            //         console.log("userMicrophone", stream);
+            //         console.log("You let me use your mic!");
+            //     })
+            //     .catch(function (err) {
+            //         console.log("No mic for you !");
+            //         console.log("err", err);
+            //     });
         },
         //關閉錄音室窗
         closeRecorder() {
             this.showRecorderModal = false;
             this.inputFunctionBoolean = false;
-            //取得麥克風權限
-            navigator.mediaDevices
-                .getUserMedia({ audio: true })
-                .then(function (stream) {
-                    console.log("You let me use your mic!");
-                    stream.getTracks().forEach((track) => track.stop());
-                })
-                .catch(function (err) {
-                    console.log("No mic for you !");
-                });
+            // //取得麥克風權限
+            // navigator.mediaDevices
+            //     .getUserMedia({ audio: true })
+            //     .then(function (stream) {
+            //         console.log("You let me use your mic!");
+            //         // stream.getTracks().forEach((track) => track.stop());
+            //     })
+            //     .catch(function (err) {
+            //         console.log("No mic for you !");
+            //     });
         },
         // 貼圖
         handleStickckerGroup(id: any) {

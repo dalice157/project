@@ -9,7 +9,11 @@
                                 <h1><span>*</span>&ensp;頭像設定</h1>
                                 <p>(請上傳商標或形象圖以供辨識)</p>
                             </div>
-                            <n-upload @change="uploadAvatar($event)" accept="image/*" type="file">
+                            <n-upload
+                                @change="uploadAvatar($event)"
+                                :accept="imgAccept"
+                                type="file"
+                            >
                                 <div class="addChannelUploadImg">
                                     <img
                                         class="avatarDefault"
@@ -26,7 +30,7 @@
                                 </div>
                             </n-upload>
                         </div>
-                        <!-- 暫時隱藏 <div class="functionSetting">
+                        <div class="functionSetting" v-if="!isProduction">
                             <h1>功能設定</h1>
                             <div class="freecall">
                                 <n-checkbox
@@ -36,7 +40,7 @@
                                 ></n-checkbox>
                                 <p>免費通話</p>
                             </div>
-                        </div> -->
+                        </div>
                     </div>
                     <div class="activityTitle">
                         <h1><span>*</span>&ensp;活動名稱</h1>
@@ -79,7 +83,7 @@
                                 :key="item.accountID"
                             >
                                 <p v-if="item.accountID !== 0">{{ item.name }}</p>
-                                <p v-else>{{ item.account }}</p>
+                                <p v-else>{{ item.nickname }}</p>
                                 <img :src="closeIcon" alt="close" @click="deleteStaff(index)" />
                             </div>
                         </div>
@@ -142,7 +146,7 @@
                                     <input
                                         type="file"
                                         @change="welcomePicture($event, index)"
-                                        accept="image/*"
+                                        :accept="imgAccept"
                                         title="選擇圖片"
                                     />
                                 </span>
@@ -194,7 +198,7 @@
                                     v-else
                                     class="staff"
                                     :value="staff"
-                                    :label="staff.account"
+                                    :label="staff.nickname"
                                 />
                             </div>
                         </li>
@@ -210,7 +214,6 @@
 import { ref, reactive, onMounted, onUpdated, watchEffect } from "vue";
 import { NInput, NCheckbox, NCheckboxGroup, NUpload } from "naive-ui";
 import { nanoid } from "nanoid";
-import config from "@/config/config";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import { storeToRefs } from "pinia";
@@ -226,11 +229,15 @@ import closeIcon from "@/assets/Images/manage/round-fill_close.svg";
 import fileIcon from "@/assets/Images/common/file.svg";
 import delIcon from "@/assets/Images/manage/delete.svg";
 import picIcon from "@/assets/Images/chatroom/pic.svg";
+import config from "@/config/config";
+import { fileAccept, imgAccept } from "@/util/commonUtil";
 
 //router 資訊
 const router = useRouter();
 const route = useRoute();
 const params = route.params;
+
+const isProduction = process.env.NODE_ENV === "production";
 
 //store 使用
 const apiStore = useApiStore();
@@ -310,12 +317,13 @@ onUpdated(() => {
         if (item.accountID === 0) {
             return {
                 accountID: item.accountID,
-                account: item.account,
+                nickname: item.nickname,
                 name: item.name,
             };
         }
         return {
             accountID: item.accountID,
+            name: item.name,
         };
     });
 });
@@ -457,9 +465,6 @@ const welcomePicture = (e: any, index: any) => {
     });
 };
 
-// 可上傳檔案類型
-const fileAccept =
-    "text/*, video/*, audio/*, application/*, application/rtf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.wordprocessingml.templat, application/vnd.ms-word.document.macroEnabled.12, application/vnd.ms-word.template.macroEnabled.12";
 //上傳檔案
 const files = ref();
 const welcomeFile = (e: any, index: any) => {
@@ -541,7 +546,7 @@ const goActivityStore = () => {
             homeurl: url.value,
             description: description.value,
             cslist: JSON.stringify(csList.value),
-            messagelist: JSON.stringify(welcomeMsgCount.value),
+            messageList: JSON.stringify(welcomeMsgCount.value),
         };
         console.log("塞api資料", channelDataObj);
         const fd = new FormData();
@@ -552,7 +557,7 @@ const goActivityStore = () => {
         fd.append("homeurl", channelDataObj.homeurl);
         fd.append("description", channelDataObj.description);
         fd.append("cslist", channelDataObj.cslist);
-        fd.append("messageList", channelDataObj.messagelist);
+        fd.append("messageList", channelDataObj.messageList);
         const getToken = localStorage.getItem("access_token");
         isDisabled.value = true;
         axios({

@@ -33,7 +33,7 @@ export const useApiStore = defineStore({
                 .get(`${config.serverUrl}/Event/${token}`)
                 .then((res: any) => {
                     this.eventInfo = res.data.eventInfo;
-                    console.log("this.eventInfo 的未讀訊息", this.eventInfo);
+                    // console.log("this.eventInfo 的未讀訊息", this.eventInfo);
                     const chatStore = useChatStore();
                     const { messages } = storeToRefs(chatStore);
                     if (this.eventInfo.unreadList !== null) {

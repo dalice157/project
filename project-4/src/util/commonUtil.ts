@@ -10,13 +10,6 @@ export const YOU_USER_NAME = ["DA"]; // 對方
 export const OPAQUEID = "SMS_Plugin-123456789123";
 export const MY_ROOM = 1234; //Demo room
 export const JANUS_URL: any = `${config.janusUrl}/janus`;
-// export let JANUS_URL: any = "";
-// if (window.location.protocol === "http:") {
-//     // server = "http://" + window.location.hostname + ":8088/janus";
-//     JANUS_URL = "wss://janus.conf.meetecho.com/ws"; //Demo server
-// } else {
-//     JANUS_URL = "https://" + window.location.hostname + ":8089/janus";
-// }
 
 // chatroomID
 export const chatroomID = (eventKey: any) => eventKey?.slice(-7);

@@ -73,7 +73,7 @@
         >
             <div class="chatRoomList">
                 <!-- @click.stop="showCompanyInfo(num)" -->
-                <!-- {{ num }} -->
+                <!-- {{ num.unread }} -->
                 <div class="avatar">
                     <n-avatar
                         v-if="num.icon == 0"
@@ -171,6 +171,7 @@ import user_pic_default from "@/assets/Images/mugShot/User-round.svg";
 import pinIcon from "@/assets/Images/chatRecord/pushpin-round.svg";
 import moreIcon from "@/assets/Images/chatRecord/more.svg";
 import { objectExpression } from "@babel/types";
+import _ from "lodash";
 
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);
@@ -208,17 +209,6 @@ watch(route, () => {
         return;
     }
     if (Object.keys(route.query).includes("chatroomID")) {
-        // const chatroomIDArr = JSON.parse(localStorage.getItem("chatroomIDArr") || "[]");
-        // if (chatroomIDArr.includes(route.query.chatroomID)) {
-        // chatroomList.value.forEach((msg) => {
-        //     if (route.query.chatroomID === msg.chatroomID) {
-        //         console.log("route.query log", route.query);
-        //         msg.unread = 0;
-        //     }
-        //     msg.unread = 1;
-        // });
-        // recordMessages.value = chatroomList.value;
-        // }
         const message: any = {
             textroom: "message",
             transaction: randomString(12),
@@ -236,11 +226,6 @@ watch(route, () => {
                 console.log("gotoChat pin");
             },
         });
-        // const index = chatRoomArr.value.indexOf(route.query.chatroomID);
-        // index === -1
-        //     ? chatRoomArr.value.push(route.query.chatroomID)
-        //     : chatRoomArr.value.splice(index, 1);
-        // localStorage.setItem("chatroomIDArr", JSON.stringify(chatRoomArr.value));
     }
 });
 
@@ -285,35 +270,79 @@ const goChat = (num, index) => {
 };
 
 //highlight所在聊天室
-const highlightRoomID = ref("");
+const highlightRoomID: any = ref("");
 onMounted(() => {
     highlightRoomID.value = route.query.chatroomID;
 });
 const highlightRoom = (chatRoomID) => {
     highlightRoomID.value = chatRoomID;
 };
-//
-let i = ref(0);
 
 //有即時訊息來更新左側聊天紀錄狀態
 watchEffect(() => {
     recordMessages.value = chatroomList.value;
-    changeList.value.forEach((msg) => {
-        if (messageFrom.value === msg.chatroomID && messageForm.value.janusMsg.msgType === 1) {
-            msg.unread = 1;
-            msg.msg = messageForm.value.janusMsg.msgContent;
-            msg.time = messageForm.value.janusMsg.time;
-        } else if (
-            messageFrom.value === msg.chatroomID &&
-            messageForm.value.janusMsg.msgType !== 1
-        ) {
-            msg.msg = `傳送了${sendMsgTypeObj[messageForm.value.janusMsg.msgType]}`;
-            msg.time = messageForm.value.janusMsg.time;
-            msg.unread = 1;
-        }
-    });
-    changeList.value.sort((a, b) => b.time - a.time);
+    if (changeList.value.length > 0) {
+        changeList.value.forEach((msg) => {
+            if (messageFrom.value === msg.chatroomID && messageForm.value.janusMsg.msgType === 1) {
+                msg.unread = 1;
+                msg.msg = messageForm.value.janusMsg.msgContent;
+                msg.time = messageForm.value.janusMsg.time;
+                msg.msgType = messageForm.value.janusMsg.msgType;
+                if (messageFrom.value === route.query.chatroomID) {
+                    msg.unread = 0;
+                    messageFrom.value = "";
+                }
+            } else if (
+                messageFrom.value === msg.chatroomID &&
+                messageForm.value.janusMsg.msgType !== 1
+            ) {
+                msg.unread = 1;
+                msg.msg = `傳送了${sendMsgTypeObj[messageForm.value.janusMsg.msgType]}`;
+                msg.time = messageForm.value.janusMsg.time;
+                msg.msgType = messageForm.value.janusMsg.msgType;
+                if (messageFrom.value === route.query.chatroomID) {
+                    msg.unread = 0;
+                    messageFrom.value = "";
+                }
+            }
+        });
+        changeList.value.sort((a, b) => b.time - a.time);
+    }
 });
+//unread => 0:已讀,1:未讀
+// watch(
+//     () => _.cloneDeep(changeList.value),
+//     (newVal, oldVal) => {
+//         newVal.forEach((newItem, newIndex, newArr) => {
+//             // console.log("newtime", newArr[newIndex]?.time);
+//             // console.log("oldtime", oldVal[newIndex]?.time);
+//             // console.log("newText", newArr[newIndex]?.msg);
+//             // console.log("oldText", oldVal[newIndex]?.msg);
+//             console.log("newTime", newArr[newIndex]?.time);
+//             console.log("oldTime", oldVal[newIndex]?.time);
+
+//             if (oldVal[newIndex]?.time !== undefined) {
+//                 if (
+//                     newArr[newIndex]?.time !== oldVal[newIndex]?.time &&
+//                     messageFrom.value === route.query.chatroomID
+//                 ) {
+//                     // console.log("messageFrom", messageFrom.value);
+//                     // console.log("route.query.chatroomID", route.query.chatroomID);
+//                     changeList.value[newIndex].unread = 0;
+//                     console.log("不顯示未讀");
+
+//                 } else if (
+//                     newArr[newIndex]?.time !== oldVal[newIndex]?.time &&
+//                     messageFrom.value !== route.query.chatroomID
+//                 ) {
+//                     changeList.value[newIndex].unread = 1;
+//                     console.log("顯示未讀");
+//                 }
+//             }
+//         });
+//     },
+//     { deep: true }
+// );
 
 //開啟功能列表
 const openFunctionPopUp = (num: any) => {

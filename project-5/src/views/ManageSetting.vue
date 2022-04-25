@@ -54,15 +54,8 @@
                                 <div class="staffData">
                                     <n-checkbox
                                         class="staff"
-                                        v-if="staff.accountID !== 0"
                                         :value="staff"
                                         :label="staff.name"
-                                    ></n-checkbox>
-                                    <n-checkbox
-                                        v-else
-                                        class="staff"
-                                        :value="staff"
-                                        :label="staff.account"
                                     ></n-checkbox>
                                 </div>
                             </n-checkbox-group>
@@ -124,12 +117,13 @@ const csToAdmin = () => {
         if (item.accountID === 0) {
             return {
                 accountID: item.accountID,
-                account: item.account,
+                nickname: item.nickname,
                 name: item.name,
             };
         }
         return {
             accountID: item.accountID,
+            name: item.name,
         };
     });
     if (csList.value.length !== 0) {

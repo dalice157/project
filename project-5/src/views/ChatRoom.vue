@@ -41,7 +41,7 @@
         preset="card"
     >
         <n-card :bordered="false" size="huge" class="container">
-            <UserInfo :info="eventInfo" />
+            <UserInfo :info="userInfo" />
             <div class="description">語音來電</div>
             <ul class="call_container">
                 <li @click="doHangup(2, chatRoomID, route.params.id)">
@@ -59,7 +59,7 @@
 
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { watch, ref, onMounted, computed, onUnmounted } from "vue";
+import { watch, ref, onMounted, computed, watchEffect } from "vue";
 import { NModal, NCard, NLayout, NLayoutSider, NLayoutContent } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
 
@@ -68,6 +68,9 @@ import { txt, ITransactions, IAttachPlugin } from "@/util/interfaceUtil";
 import { useApiStore } from "@/store/api";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { useChatStore } from "@/store/chat";
+import { sendPrivateMsg } from "@/util/chatUtil";
+import { currentDate, unixTime } from "@/util/dateUtil";
+import { nanoid } from "nanoid";
 
 import NavBar from "@/components/ChatRoom/NavBar.vue";
 import MessageBox from "@/components/ChatRoom/MessageBox";
@@ -78,6 +81,7 @@ import Sidebar from "@/components/ChatRoom/Sidebar";
 import Headers from "@/components/Headers.vue";
 import UserInfo from "@/components/UserInfo.vue";
 import hangUpIcon from "@/assets/Images/common/close-round-red.svg";
+import user_pic_defaul from "@/assets/Images/mugShot/User-round.svg";
 
 //router
 const route = useRoute();
@@ -85,7 +89,7 @@ const router = useRouter();
 // api store
 const apiStore = useApiStore();
 const { getChatroomlistApi, getHistoryApi, getChatroomUserInfoApi } = apiStore;
-const { eventInfo, isInput, eventList, staffEvents } = storeToRefs(apiStore);
+const { eventInfo, userInfo, isInput, eventList, chatroomList } = storeToRefs(apiStore);
 
 //phoneCall store
 const phoneCallStore = usePhoneCallStore();
@@ -95,7 +99,7 @@ const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime
 
 //chat store
 const chatStore = useChatStore();
-const { showStickerModal, isOnline } = storeToRefs(chatStore);
+const { textPlugin, isOnline } = storeToRefs(chatStore);
 
 const chatRoomID: any = computed(() => route.query.chatroomID);
 const mobile: any = computed(() => route.query.mobile);
@@ -107,6 +111,37 @@ onMounted(() => {
         eventID.value = route.params.id ? route.params.id : eventList.value[0].eventID;
         getChatroomlistApi(eventID.value);
     });
+});
+const welcomeStatus: any = ref(false);
+const welcomeMsg = computed({
+    get() {
+        return eventInfo.value.messageList;
+    },
+    set(val) {
+        eventInfo.value = val;
+    },
+}) as any;
+const initWeclomeMsg = () => {
+    const welcomeList = JSON.parse(localStorage.getItem(`${eventID.value}-welcomeList`) || "[]");
+    localStorage.setItem(`${eventID.value}-welcomeList`, JSON.stringify(welcomeMsg.value));
+    messageList.value = [...welcomeList, ...messageList.value];
+    messageList.value = messageList.value.reduce((unique, o) => {
+        const hasRepeatId = unique.some((obj) => {
+            return obj.janusMsg.config.id === o.janusMsg.config.id;
+        });
+        if (!hasRepeatId) {
+            unique.push(o);
+        }
+        unique.sort((a, b) => {
+            return a.janusMsg.time / 1000000 - b.janusMsg.time / 1000000;
+        });
+        return unique;
+    }, []);
+};
+watchEffect(() => {
+    if (eventID.value) {
+        initWeclomeMsg();
+    }
 });
 
 // 監聽route query change寫法 2
@@ -131,28 +166,6 @@ watch(
 );
 
 const { messageList } = storeToRefs(apiStore);
-const messageListLength = computed(() => {
-    return messageList.value.length;
-});
-//監聽 messageList 打chatroomlist api
-// watch(messageListLength, (newVal, oldVal) => {
-//     if (newVal !== oldVal) {
-//         setTimeout(() => {
-//             getChatroomlistApi(route.params.id);
-//         }, 500);
-//     }
-// });
-
-//每五秒刷新一次 chatroomlist api
-// let timer = ref(null);
-// onMounted(() => {
-//     timer.value = setInterval(() => {
-//         getChatroomlistApi(route.params.id);
-//     }, 5000);
-// });
-// onUnmounted(() => {
-//     clearInterval(timer.value);
-// });
 
 const messages: any = computed({
     get() {

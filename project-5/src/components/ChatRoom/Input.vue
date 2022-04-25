@@ -18,9 +18,7 @@
             </n-ellipsis>
             <div class="img" v-if="replyMsg && replyMsg.janusMsg.msgType === 6">
                 <img
-                    :src="`${config.fileUrl}${
-                        replyMsg.janusMsg.format.Fileid
-                    }.${replyMsg.janusMsg.format.ShowName.split('.').pop()}`"
+                    :src="`${config.fileUrl}${replyMsg.janusMsg.format.Fileid}${replyMsg.janusMsg.format.ExtensionName}`"
                 />
             </div>
             <div class="img" v-if="replyMsg && replyMsg.janusMsg.msgType === 3">
@@ -33,21 +31,7 @@
             </div>
         </div>
     </div>
-    <!-- 功能欄視窗 -->
-    <div class="inputFunctionBar" v-if="inputFunctionBoolean">
-        <div class="file">
-            <label class="upload_cover">
-                <input
-                    class="upload_input"
-                    type="file"
-                    multiple
-                    :accept="fileAccept"
-                    @change="onUploadFileMP"
-                />
-                <span class="upload_icon">文件</span>
-            </label>
-        </div>
-    </div>
+
     <!-- 使用者輸入框 -->
     <div class="input">
         <!-- <div class="deleteOption" v-if="deleteBoolean">
@@ -69,7 +53,7 @@
                 </span>
             </n-popover>
             <span class="file-folder" v-if="!isMmsSend">
-                <input type="file" @change="onUploadFilePC" />
+                <input type="file" :accept="chatfileAccept" @change="onUploadFilePC" ref="file" />
             </span>
             <div class="textArea">
                 <n-input
@@ -216,7 +200,7 @@ import voiceIcon from "@/assets/Images/chatroom/voice.svg";
 import voiceEnabled from "@/assets/Images/chatroom/voice-enabled.svg";
 import reloadTimeEnabled from "@/assets/Images/chatroom/reload-time-enabled.svg";
 import reloadTimeIcon from "@/assets/Images/chatroom/reload-time.svg";
-import { convertTime } from "@/util/commonUtil";
+import { chatfileAccept } from "@/util/commonUtil";
 import config from "@/config/config";
 
 //環境設定
@@ -260,10 +244,6 @@ onMounted(() => {
 });
 
 const getUserName = localStorage.getItem("userName");
-
-// 可上傳檔案類型
-const fileAccept =
-    "text/*, video/*, audio/*, application/*, application/rtf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.wordprocessingml.templat, application/vnd.ms-word.document.macroEnabled.12, application/vnd.ms-word.template.macroEnabled.12";
 
 const chatRoomID: any = computed(() => route.query.chatroomID);
 
@@ -443,10 +423,12 @@ const uploadImage = (e: any) => {
     });
 };
 //桌機版上傳檔案
+const file = ref(null);
 const files = ref();
 const onUploadFilePC = (e: any) => {
     inputFunctionBoolean.value = false;
     const fileArr = e.target.files[0];
+    console.log("fileArr", fileArr);
     const fileArrType = e.target.files[0].type;
     const fileName = fileArr.name;
     const getToken = localStorage.getItem("access_token");
@@ -460,7 +442,6 @@ const onUploadFilePC = (e: any) => {
             success(result) {
                 //呼叫api
                 const fd = new FormData();
-                console.log("file.name:", fileArr);
                 fd.append("file", new File([result], fileArr.name, { type: "image/*" }));
                 axios({
                     method: "post",
@@ -591,78 +572,79 @@ const onUploadFilePC = (e: any) => {
                 console.error(err);
             });
     }
+    file.value.value = null;
 };
 // 手機版上傳檔案
-const onUploadFileMP = (e: any) => {
-    inputFunctionBoolean.value = false;
-    const fileArr = e.target.files[0];
-    if (!fileArr) {
-        return;
-    }
+// const onUploadFileMP = (e: any) => {
+//     inputFunctionBoolean.value = false;
+//     const fileArr = e.target.files[0];
+//     if (!fileArr) {
+//         return;
+//     }
 
-    const getToken = localStorage.getItem("access_token");
-    const fd = new FormData();
-    fd.append("file", new File([fileArr], fileArr.name, { type: fileArr.type }));
+//     const getToken = localStorage.getItem("access_token");
+//     const fd = new FormData();
+//     fd.append("file", new File([fileArr], fileArr.name, { type: fileArr.type }));
 
-    axios({
-        method: "post",
-        url: `${config.serverUrl}/v1/file`,
-        data: fd,
-        headers: { Authorization: `Bearer ${getToken}` },
-    })
-        .then((res) => {
-            console.log("上傳 res:", res);
-            const reader = new FileReader();
-            reader.readAsDataURL(fileArr);
-            reader.onload = (e: any) => {
-                files.value = e.target.result;
-                let fileObj: any = {};
-                fileObj = {
-                    janusMsg: {
-                        chatroomID: chatRoomID.value,
-                        msgType: 7,
-                        sender: 0,
-                        msgContent: "",
-                        time: unixTime(),
-                        type: 2,
-                        format: {
-                            Fileid: res.data.fileid,
-                            ShowName: fileArr.name,
-                            ExtensionName: res.data.ext,
-                            FileSize: fileArr.size,
-                            expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
-                        },
-                        config: {
-                            id: nanoid(),
-                            isReply: false,
-                            replyObj: "",
-                            currentDate: currentDate(),
-                            isExpire: false,
-                            isPlay: false,
-                            isRead: isOnline.value ? true : false,
-                            msgFunctionStatus: false,
-                            msgMoreStatus: false,
-                            recallPopUp: false,
-                            recallStatus: false,
-                            userName: getUserName,
-                        },
-                    },
-                };
-                const sendMsgObj = {
-                    msg: fileObj,
-                    textPlugin: textPlugin.value,
-                    chatRoomID: chatRoomID.value,
-                    eventID: route.params.id,
-                };
-                sendPrivateMsg(sendMsgObj);
-                messageList.value.push(fileObj);
-                pictures.value.push(fileObj);
-            };
-        })
-        .catch((err) => {
-            console.error(err);
-        });
-};
+//     axios({
+//         method: "post",
+//         url: `${config.serverUrl}/v1/file`,
+//         data: fd,
+//         headers: { Authorization: `Bearer ${getToken}` },
+//     })
+//         .then((res) => {
+//             console.log("上傳 res:", res);
+//             const reader = new FileReader();
+//             reader.readAsDataURL(fileArr);
+//             reader.onload = (e: any) => {
+//                 files.value = e.target.result;
+//                 let fileObj: any = {};
+//                 fileObj = {
+//                     janusMsg: {
+//                         chatroomID: chatRoomID.value,
+//                         msgType: 7,
+//                         sender: 0,
+//                         msgContent: "",
+//                         time: unixTime(),
+//                         type: 2,
+//                         format: {
+//                             Fileid: res.data.fileid,
+//                             ShowName: fileArr.name,
+//                             ExtensionName: res.data.ext,
+//                             FileSize: fileArr.size,
+//                             expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
+//                         },
+//                         config: {
+//                             id: nanoid(),
+//                             isReply: false,
+//                             replyObj: "",
+//                             currentDate: currentDate(),
+//                             isExpire: false,
+//                             isPlay: false,
+//                             isRead: isOnline.value ? true : false,
+//                             msgFunctionStatus: false,
+//                             msgMoreStatus: false,
+//                             recallPopUp: false,
+//                             recallStatus: false,
+//                             userName: getUserName,
+//                         },
+//                     },
+//                 };
+//                 const sendMsgObj = {
+//                     msg: fileObj,
+//                     textPlugin: textPlugin.value,
+//                     chatRoomID: chatRoomID.value,
+//                     eventID: route.params.id,
+//                 };
+//                 sendPrivateMsg(sendMsgObj);
+//                 messageList.value.push(fileObj);
+//                 pictures.value.push(fileObj);
+//             };
+//         })
+//         .catch((err) => {
+//             console.error(err);
+//         });
+// };
 // 貼圖功能
 let stickerItems: any = ref([]);
 if (window.localStorage.getItem("sticker-backend") !== null) {

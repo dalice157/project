@@ -23,7 +23,7 @@ export const usePhoneCallStore = defineStore({
     id: "phoneCall",
     state: () => ({
         callPlugin: <any>null,
-        yourUsername: <any>"",
+        yourUsername: <any>null,
         jsepMsg: <any>null,
         isIncomingCall: <boolean>false,
         isAccepted: <boolean>false,
@@ -36,32 +36,30 @@ export const usePhoneCallStore = defineStore({
     actions: {
         //撥打電話
         doCall(display: any) {
-            console.log("do Call display", display);
             // Call someone
+            console.log("do Call display", display);
+            if (display === "") {
+                alert("Insert a username to call (e.g., pluto)");
+                return;
+            }
             if (/[^a-zA-Z0-9]/.test(display)) {
                 alert("Input is not alphanumeric");
                 return;
             }
-            // eslint-disable-next-line @typescript-eslint/no-this-alias
             const that = this;
             // Call this user
             that.callPlugin.createOffer({
-                trickle: true,
-                media: { audioRecv: true, audioSend: true, audio: true, keepAudio: true },
+                // By default, it's sendrecv for audio and video...
+                media: { video: false },
                 success: function (jsep: any) {
-                    // @ts-ignore
-                    Janus.debug("videocall Got SDP!", jsep);
-                    that.localJsep = jsep;
+                    console.log("videocall Got SDP!", jsep);
                     const body = { request: "call", username: display };
                     that.callPlugin.send({ message: body, jsep: jsep });
-                    console.log("body:", body);
                 },
-
                 error: function (error: any) {
-                    console.log("error");
-                    // @ts-ignore
-                    Janus.error("videocall createOffer WebRTC error...", error);
+                    console.error("videocall createOffer WebRTC error...", error);
                     //TODO do something
+                    alert("videocall createOffer WebRTC error..." + error.message);
                 },
             });
         },
@@ -75,27 +73,27 @@ export const usePhoneCallStore = defineStore({
             const { phoneCallModal } = storeToRefs(modelStore);
             phoneCallModal.value = true;
             this.isIncomingCall = false;
-            // eslint-disable-next-line @typescript-eslint/no-this-alias
             const that = this;
             that.callPlugin.createAnswer({
                 jsep: jsep,
-                media: { audioRecv: true, audioSend: true, audio: true, keepAudio: true },
+                media: { video: false },
                 success: function (jsep: any) {
-                    // @ts-ignore
-                    console.log("有電話進來 Got SDP!", jsep);
-                    that.localJsep = jsep;
+                    console.log("video call Got SDP!", jsep);
                     const body = { request: "accept" };
                     that.callPlugin.send({ message: body, jsep: jsep });
                 },
                 error: function (error: any) {
-                    // @ts-ignore
-                    Janus.error("WebRTC error:", error);
+                    console.error("video call WebRTC error:", error);
                 },
             });
         },
         //掛電話
         doHangup(type: any, eventID: any) {
             console.log("掛掉電話", type);
+            // Hangup a call
+            const hangup = { request: "hangup" };
+            this.callPlugin.send({ message: hangup });
+            this.callPlugin.hangup();
             this.yourUsername = null;
             const chatstore = useChatStore();
             const { messages, participantList, textPlugin, adminCount } = storeToRefs(chatstore);
@@ -127,7 +125,6 @@ export const usePhoneCallStore = defineStore({
                     },
                 },
             };
-            // console.log("phoneObj", phoneObj);
             messages.value.push(phoneObj);
             const sendMsgObj = {
                 msg: phoneObj,
@@ -138,12 +135,6 @@ export const usePhoneCallStore = defineStore({
             };
             sendPrivateMsg(sendMsgObj);
             localStorageMsg(messages.value, this.route.params.eventKey);
-
-            // Hangup a call
-            const hangup = { request: "hangup" };
-            this.callPlugin.send({ message: hangup });
-            this.callPlugin.hangup();
-            console.log("電話傳電話訊息掛掉");
         },
     },
 });

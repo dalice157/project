@@ -31,9 +31,7 @@
                                 @click="previewURL(picture.janusMsg.format.Fileid)"
                             >
                                 <img
-                                    :src="`${config.fileUrl}${
-                                        picture.janusMsg.format.Fileid
-                                    }.${picture.janusMsg.format.ShowName.split('.').pop()}`"
+                                    :src="`${config.fileUrl}${picture.janusMsg.format.Fileid}${picture.janusMsg.format.ExtensionName}`"
                                 />
                             </div>
 
@@ -195,17 +193,13 @@ const previewURL = (fileid: string): void => {
     pictures.value.forEach((img: any) => {
         if (
             !viewImgs.value.includes(
-                `${config.fileUrl}${
-                    img.janusMsg.format.Fileid
-                }.${img.janusMsg.format.ShowName.split(".").pop()}`
+                `${config.fileUrl}${img.janusMsg.format.Fileid}${img.janusMsg.format.ExtensionName}`
             ) &&
             img.janusMsg.msgType === 6 &&
             !img.janusMsg.config.isExpire
         ) {
             viewImgs.value.push(
-                `${config.fileUrl}${
-                    img.janusMsg.format.Fileid
-                }.${img.janusMsg.format.ShowName.split(".").pop()}`
+                `${config.fileUrl}${img.janusMsg.format.Fileid}${img.janusMsg.format.ExtensionName}`
             );
         }
     });
