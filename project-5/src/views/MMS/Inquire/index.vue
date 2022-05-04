@@ -415,7 +415,7 @@ const model = reactive({
         dayjs().startOf("date").valueOf(),
         dayjs().add(1, "days").startOf("date").valueOf(),
     ],
-    searchSend_phone: null,
+    searchSend_phone: "",
 }) as any;
 
 const rules = {

@@ -6,15 +6,9 @@
                 <h2>客服人員</h2>
                 <h2>{{ staffEvents.accountName }}</h2>
             </div>
-            <div class="csList" v-if="showEvents.length > 0">
+            <div class="csList" v-if="staffEvents.events.length > 0">
                 <ul>
-                    <li
-                        v-for="channel in showEvents"
-                        :key="channel.eventID"
-                        @mouseenter="channelHoverIndex = channel.eventID"
-                        @mouseleave="channelHoverIndex = '0'"
-                        :class="{ hoverEffect: channelHoverIndex === channel.eventID }"
-                    >
+                    <li v-for="channel in staffEvents.events" :key="channel.eventID">
                         <div class="channelTitle">
                             <img :src="`${config.fileUrl}${channel.icon}`" alt="" />
                             <p class="channelName">{{ channel.name }}</p>
@@ -52,15 +46,9 @@
                     </template>
                 </n-input>
             </n-config-provider>
-            <div class="channelList" v-if="addEvents.length > 0">
+            <div class="channelList" v-if="filterChannel.length > 0">
                 <ul>
-                    <li
-                        v-for="channel in addEvents"
-                        :key="channel.eventID"
-                        @mouseenter="stafflHoverIndex = channel.eventID"
-                        @mouseleave="stafflHoverIndex = '0'"
-                        :class="{ hoverEffect: stafflHoverIndex === channel.eventID }"
-                    >
+                    <li v-for="channel in filterChannel" :key="channel.eventID">
                         <div class="channelTitle">
                             <img :src="`${config.fileUrl}${channel.icon}`" alt="" />
                             <p class="channelName">{{ channel.name }}</p>
@@ -101,49 +89,39 @@ getEvents(route.query.accountID);
 
 //v-model
 const searchChannel = ref("");
-const channelHoverIndex = ref("0");
-const stafflHoverIndex = ref("0");
 
-//搜尋新陣列
-const isPush = ref(false);
-
-const getEventList = computed(() => {
-    const list = Object.values(showEvents.value).map((item) => item.eventID);
-    const arr = eventList.value.filter((event) => !list.includes(event.eventID));
-    return arr;
-});
-const addEvents = computed(() => {
-    const arr = getEventList.value.filter((p: any) => {
-        return p.name.includes(searchChannel.value);
+//搜尋頻道陣列
+const filterChannel = computed(() => {
+    const list = Object.values(staffEvents.value.events).map((item) => item.eventID);
+    const arr = eventList.value.filter((event) => {
+        return (
+            !list.includes(event.eventID) &&
+            event.name.toLowerCase().includes(searchChannel.value.toLowerCase())
+        );
     });
     return arr;
 });
-const showEvents = computed(() => staffEvents.value.events || []);
 
 const addChannel = (info) => {
-    isPush.value = true;
-    showEvents.value.push(info);
-    console.log(showEvents.value);
+    staffEvents.value.events.push(info);
 };
 
 const onDelList = (info) => {
-    showEvents.value.forEach((event, index) => {
-        if (event.eventID === info.eventID) {
-            showEvents.value.splice(index, 1);
-        }
+    staffEvents.value.events.forEach((event, index) => {
+        if (event.eventID !== info.eventID) return;
+        staffEvents.value.events.splice(index, 1);
     });
 };
 
 const onSendList = () => {
     let getEventIdList = [];
-    if (showEvents.value.length > 0) {
-        getEventIdList = Object.values(showEvents.value).map((item) => {
+    if (staffEvents.value.events.length > 0) {
+        getEventIdList = Object.values(staffEvents.value.events).map((item) => {
             return {
                 eventID: item.eventID,
             };
         });
     }
-    isPush.value = false;
     sendEvents(route.query.accountID, getEventIdList, router);
 };
 
@@ -177,10 +155,6 @@ const themeOverrides = {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
-// li hover
-.hoverEffect {
-    background-color: #fffaed;
-}
 
 .addCustomService {
     background-color: $bg;
@@ -219,6 +193,9 @@ const themeOverrides = {
                     justify-content: space-between;
                     align-items: center;
                     height: 68px;
+                    &:hover {
+                        background-color: $primary-5;
+                    }
 
                     .channelTitle {
                         display: flex;
@@ -331,6 +308,9 @@ const themeOverrides = {
                     justify-content: space-between;
                     align-items: center;
                     height: 68px;
+                    &:hover {
+                        background-color: $primary-5;
+                    }
 
                     .channelTitle {
                         display: flex;

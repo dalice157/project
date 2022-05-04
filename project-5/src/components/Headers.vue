@@ -30,11 +30,11 @@
             <li class="btnBg myChatRoom">
                 <n-dropdown
                     class="dropdown"
-                    :show="showDropdown"
+                    trigger="click"
                     :options="options"
                     @select="handleSelect"
                 >
-                    <span @click.stop="handleClick">我的聊天室</span>
+                    <span>我的聊天室</span>
                 </n-dropdown>
             </li>
             <li v-if="!access_token">
@@ -44,11 +44,73 @@
                 <a href="/">登出</a>
             </li>
         </ul>
+        {{ isFirstLogin }}
     </n-layout-header>
+    <teleport to="body" v-if="isFirstLogin">
+        <div class="mask">
+            <div class="previewWrap">
+                <a @click="onCloseModel" class="close"><img :src="closeIcon" /></a>
+                <div v-if="currentStep == 1">
+                    <p>
+                        歡迎加入 talkOD 客戶線上溝通雲端服務平台！<br />請點擊【我要導覽】瞭解各項功能與操作唷～
+                    </p>
+                    <button @click="onNext" class="button">我要導覽</button>
+                </div>
+                <div v-if="currentStep == 2">
+                    <p>首先，請點擊【管理功能】，所有重要管理工具都能在這裡找到！</p>
+                    <button @click="onNext" class="button">下一步</button>
+                </div>
+                <div v-if="currentStep == 3">
+                    <p>接著，請點擊【活動頻道管理】</p>
+                    <button @click="onNext" class="button">下一步</button>
+                </div>
+                <div v-if="currentStep == 4">
+                    <p>
+                        在【活動頻道管理】頁裡, 請點擊上方「＋」符號，來建立您的第一間『活動頻道』
+                    </p>
+                    <button @click="onNext" class="button">下一步</button>
+                </div>
+                <div v-if="currentStep == 5">
+                    <p>
+                        請在【編輯活動頻道】依序建立活動頻道的頭像、名稱、網址、簡介，並選擇能於此頻道與客戶對話的客服人員；此外，免費(網路)通話功能如果要啟用別忘了勾選唷～
+                    </p>
+                    <button @click="onNext" class="button">下一步</button>
+                </div>
+                <div v-if="currentStep == 6">
+                    <p>
+                        建立完成基本資訊後，請點擊【新增歡迎訊息】，最多能建立三則帶有文字、圖片或檔案的歡迎訊息，讓客戶一進到talkOD聊天室就能看到喔！
+                    </p>
+                    <button @click="onNext" class="button">下一步</button>
+                </div>
+                <div v-if="currentStep == 7">
+                    <p>活動頻道建立完成後，就能在【活動頻道管理】的列表中看到囉！</p>
+                    <button @click="onNext" class="button">下一步</button>
+                </div>
+                <div v-if="currentStep == 8">
+                    <p>
+                        接下來，回到【管理功能】發送「SMS文字簡訊」或「MMS多媒體訊息」，並在「發送頻道」選擇您建立的活動頻道，並依序填妥內容後發送簡訊；客戶收到簡訊點擊連結就能透過瀏覽器開啟聊天室並跟您對話囉！
+                    </p>
+                    <button @click="onNext" class="button">下一步</button>
+                </div>
+                <div v-if="currentStep == 9">
+                    <p>
+                        最後，您只要點擊【我的聊天室】並選擇活動頻道，在選擇左側客戶列表選擇對象就能開始對話！
+                    </p>
+                    <button @click="onNext" class="button">下一步</button>
+                </div>
+                <div v-if="currentStep == 10">
+                    <p>
+                        提醒您，點數是用來發送簡訊，請隨時注意點數是否充足，若不足請盡早【儲值】唷～
+                    </p>
+                    <button @click="onCloseModel" class="button">完成</button>
+                </div>
+            </div>
+        </div>
+    </teleport>
 </template>
 
 <script lang="ts" setup>
-import { computed, watch, onMounted, ref, watchEffect, onBeforeMount } from "vue";
+import { computed, reactive, onMounted, ref, watchEffect, onBeforeMount } from "vue";
 import { useRoute } from "vue-router";
 import { NDropdown, NPopover, NIcon, NLayoutHeader } from "naive-ui";
 import { storeToRefs } from "pinia";
@@ -64,6 +126,7 @@ import { ITransactions, IAttachPlugin } from "@/util/interfaceUtil";
 import { useChatStore } from "@/store/chat";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { useModelStore } from "@/store/model";
+import closeIcon from "@/assets/Images/chatroom/close-round.svg";
 
 const route = useRoute();
 const params = route.params;
@@ -75,7 +138,8 @@ const { phoneCallModal, showDropdown } = storeToRefs(modelStore);
 
 //Chat store
 const chatStore = useChatStore();
-const { textPlugin, participantList, onlineList, isOnline } = storeToRefs(chatStore);
+const { textPlugin, participantList, onlineList, isOnline, messageFrom, messageForm } =
+    storeToRefs(chatStore);
 
 //phoneCall store
 const phoneCallStore = usePhoneCallStore();
@@ -86,12 +150,19 @@ const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime
 // api store
 const apiStore = useApiStore();
 const { getPoint, getEventApi, getChatroomlistApi, getHistoryApi } = apiStore;
-const { eventInfo, point, isJanusinit, eventList } = storeToRefs(apiStore);
+const { eventInfo, point, isJanusinit, eventList, isInput } = storeToRefs(apiStore);
 const access_token = localStorage.getItem("access_token");
 
 const chatRoomID: any = computed(() => route.query.chatroomID);
 const mobile: any = computed(() => route.query.mobile);
 const eventID: any = ref("");
+
+const isFirstLogin = ref(false);
+const currentStep = ref(1);
+
+const onNext = () => {
+    currentStep.value += 1;
+};
 
 //未登入跳回登入頁
 onBeforeMount(() => {
@@ -119,6 +190,7 @@ onMounted(() => {
             }
             eventList.value = res.data.eventList;
             eventID.value = route.params.id ? route.params.id : eventList.value[0].eventID;
+            isFirstLogin.value = eventList.value.length <= 0; // 判斷第一次進入開啟導覽
             getEventApi(eventID.value);
         })
         .catch((err: any) => {
@@ -183,28 +255,27 @@ let participants: any = {};
 let simulcastStarted: any = false;
 let audioenabled = false;
 
-const options: any = ref([]);
-
-const handleSelect = (key: string | number) => {
-    console.log("key:", key);
-    location.href = `/chat/${key}`;
+const onCloseModel = () => {
+    isFirstLogin.value = false;
 };
-
-const handleClick = () => {
-    options.value = eventList.value.map((item) => {
+const options: any = computed(() => {
+    return eventList.value.map((item) => {
         return {
             label: item.name,
             key: item.eventID,
         };
     });
-
-    showDropdown.value = !showDropdown.value;
+});
+const handleSelect = (key: string | number) => {
+    console.log("key:", key);
+    location.href = `/chat/${key}`;
 };
 
 var iOS = ["iPad", "iPhone", "iPod"].indexOf(navigator.platform) !== -1;
 var eventName = iOS ? "pagehide" : "beforeunload";
-var oldOBF = document["on" + eventName];
+const getEventID = computed(() => (route.params.id ? `/chat/${route.params.id}` : "/chat"));
 document.addEventListener("visibilitychange", (event) => {
+    if (route.path !== getEventID.value) return;
     if (document.visibilityState === "hidden") {
         janus.destroy();
         return;
@@ -222,13 +293,12 @@ document.addEventListener("visibilitychange", (event) => {
                 }
                 connect();
                 getChatroomlistApi(route.params.id);
-                getHistoryApi(route.query.chatroomID);
+                getHistoryApi(route.query.chatroomID, route.params.id);
             },
         });
         return;
     }
 });
-
 // 連線
 const connect = () => {
     janus = new Janus({
@@ -430,7 +500,7 @@ const attachTextroomPlugin = () => {
             console.log("text-> We got data from the DataChannel!", item);
 
             let json = JSON.parse(item);
-            console.log("json", json);
+            // console.log("json", json);
             let transaction = json["transaction"];
             if (transactions[transaction]) {
                 // Someone was waiting for this
@@ -444,7 +514,6 @@ const attachTextroomPlugin = () => {
             if (what === "message") {
                 // Incoming message: public or private?
                 let msg = json["text"];
-                // console.log("msg", msg);
                 msg = msg.replace(new RegExp("<", "g"), "&lt");
                 msg = msg.replace(new RegExp(">", "g"), "&gt");
                 let from = json["from"];
@@ -454,9 +523,13 @@ const attachTextroomPlugin = () => {
                 data.date = dateString;
                 data.from = participants[from];
                 data.msg = msg;
-                // console.log("from", from);
+                console.log("data.from", from);
+                messageFrom.value = from;
+                console.log(" recall messageFrom", messageFrom.value);
+
                 if (msg === "recall") {
-                    getHistoryApi(chatRoomID.value);
+                    isInput.value = true;
+                    getHistoryApi(chatRoomID.value, route.params.id);
                 }
             } else if (what === "announcement") {
                 // Room announcement
@@ -749,6 +822,51 @@ const attachVideocallPlugin = () => {
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
 $headerHeight: 80px;
+
+.mask {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .previewWrap {
+        position: relative;
+        width: 600px;
+        min-height: 200px;
+        color: $gray-1;
+        font-size: $font-size-20;
+        border-radius: 10px;
+        background: $white url("~@/assets/Images/common/guide-pages-bg.png") no-repeat top left;
+        background-size: 600px auto;
+        text-align: center;
+        padding: 45px;
+        line-height: 1.6;
+        .close {
+            cursor: pointer;
+            position: absolute;
+            right: 15px;
+            top: 15px;
+        }
+        .button {
+            background-color: $primary-1;
+            border-radius: 20px;
+            color: $white;
+            font-size: $font-size-16;
+            border: none;
+            padding: 8px 25px;
+            margin-top: 45px;
+            cursor: pointer;
+            &:hover {
+                background-color: $primary-2;
+            }
+        }
+    }
+}
 .userInfo {
     margin-top: 0 !important;
     .n-popover-arrow-wrapper .n-popover-arrow {

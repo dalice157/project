@@ -187,6 +187,7 @@ const onQa = () => {
             padding: 5px 10px;
             border-radius: 4px;
             font-size: $font-size-16;
+            cursor: pointer;
         }
     }
 }

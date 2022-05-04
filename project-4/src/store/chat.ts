@@ -31,6 +31,8 @@ export const useChatStore = defineStore({
         adminCount: <number>0,
         janusConnectStatus: <boolean>false,
         userMicrophone: <any>null,
+        userMediaMicrophone: <any>null,
+        janus: <any>null,
     }),
     getters: {},
     actions: {
@@ -79,6 +81,19 @@ export const useChatStore = defineStore({
                 return;
             }
             const messagesParse: any = JSON.parse(msgObj.msg);
+            console.log("messagesParse", messagesParse);
+
+            if (
+                messagesParse.janusMsg.config.recallStatus === true &&
+                messagesParse.janusMsg.msgType === 10
+            ) {
+                this.messages.forEach((element) => {
+                    if (element.janusMsg.config.id === messagesParse.janusMsg.config.id) {
+                        element.janusMsg.config.recallStatus = true;
+                    }
+                });
+                return;
+            }
             if (messagesParse.janusMsg.sender === 0) {
                 this.messages.push(messagesParse);
                 localStorageMsg(this.messages, eventKey);
@@ -87,6 +102,7 @@ export const useChatStore = defineStore({
                 this.pictures.push(messagesParse);
                 localStorage.setItem(`${eventKey}-pictures`, JSON.stringify(this.pictures));
             }
+
             console.log("this.messages:", this.messages);
             this.messages.forEach((element) => {
                 element.janusMsg.config.isRead = true;

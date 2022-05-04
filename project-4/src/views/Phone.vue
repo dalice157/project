@@ -30,13 +30,13 @@
             <div class="phoneClose">
                 <router-link :to="`/${eventKey}`">
                     <img
-                        @click="doHangup(!isAccepted ? 2 : 3, eventID(route.params.eventKey))"
+                        @[events]="doHangup(!isAccepted ? 2 : 3, eventID(route.params.eventKey))"
                         :src="closeIcon"
                         alt="掛斷"
                     />
                 </router-link>
             </div>
-            <div class="phoneSpeaker" @click="speakerBoolean = !speakerBoolean">
+            <div class="phoneSpeaker" @[events]="speakerBoolean = !speakerBoolean">
                 <img
                     :src="notificationDisabled"
                     alt="notificationDisabled"
@@ -64,11 +64,13 @@ import { useApiStore } from "@/store/api";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { useChatStore } from "@/store/chat";
 import config from "@/config/config";
-import { eventID } from "@/util/commonUtil";
+import { eventID, isMobile } from "@/util/commonUtil";
 import voiceFillDisabled from "@/assets/Images/chatroom/voice-fill-disabled.svg";
 import closeIcon from "@/assets/Images/chatroom/close-round-red.svg";
 import notificationDisabled from "@/assets/Images/chatroom/notification-fill-disabled.svg";
 import notificationEnalbed from "@/assets/Images/chatroom/notification-fill-enabled.svg";
+
+const events = ref(isMobile ? "touchstart" : "click");
 
 // api store
 const apiStore = useApiStore();

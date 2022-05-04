@@ -58,7 +58,11 @@
                         <n-checkbox v-model:checked="rememberAccountPassword" />
                         <span>記住帳號</span>
                     </div>
-                    <a href="#">忘記密碼</a>
+                    <a
+                        href="https://every8d.teamplus.tech/every8d30/Account/ForgotPwd.aspx"
+                        target="_blank"
+                        >忘記密碼</a
+                    >
                 </div>
                 <div id="submitTarget" class="loginBtn" @click.prevent="login">
                     <p>登入</p>

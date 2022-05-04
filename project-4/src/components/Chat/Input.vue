@@ -1,6 +1,10 @@
 <template>
     <!-- 回覆視窗 -->
-    <div class="reply" v-if="isReplyBox" @click.prevent="scrollPageTo(replyMsg.janusMsg.config.id)">
+    <div
+        class="reply"
+        v-if="isReplyBox"
+        @[events].prevent="scrollPageTo(replyMsg.janusMsg.config.id)"
+    >
         <div class="usertext">
             <div class="replyText" v-if="replyMsg && replyMsg.janusMsg.msgType === 6">[照片]</div>
             <div class="replyText" v-if="replyMsg && replyMsg.janusMsg.msgType === 3">[貼圖]</div>
@@ -22,7 +26,7 @@
                     :src="`${replyMsg.janusMsg.format.stickerUrl}${replyMsg.janusMsg.format.stickerPackID}/${replyMsg.janusMsg.format.stickerFileID}.${replyMsg.janusMsg.format.ext}`"
                 />
             </div>
-            <div @click.stop="replyHide" class="closeBtn">
+            <div @[events].stop="replyHide" class="closeBtn">
                 <img :src="closeIcon" alt="close" />
             </div>
         </div>
@@ -41,7 +45,7 @@
                 <span class="upload_icon">文件</span>
             </label>
         </div>
-        <div class="position" @click="handleFindMe()">
+        <div class="position" @[events]="handleFindMe()">
             <img :src="mapIcon" alt="map" />
             <p>位置</p>
         </div>
@@ -49,20 +53,20 @@
     <!-- 使用者輸入框 -->
     <div class="input">
         <div class="deleteOption" v-if="deleteBoolean">
-            <div class="cancelBtn" @click="deleteBoolean = !deleteBoolean">取消</div>
-            <div class="deleteBtn" @click="confirmDeletePopup">
+            <div class="cancelBtn" @[events]="deleteBoolean = !deleteBoolean">取消</div>
+            <div class="deleteBtn" @[events]="confirmDeletePopup">
                 刪除{{ deleteGroup.length > 0 ? `(${deleteGroup.length})` : "" }}
             </div>
         </div>
         <div class="input-inner" v-else>
             <span
                 class="attachOpen"
-                @click.stop="inputFunctionOpen"
+                @[events].prevent="inputFunctionOpen"
                 v-show="!inputFunctionBoolean"
             ></span>
             <span
                 class="attachClose"
-                @click.stop="inputFunctionClose"
+                @[events].prevent="inputFunctionClose"
                 v-show="inputFunctionBoolean"
             ></span>
             <span class="camera">
@@ -86,50 +90,55 @@
             <span class="file-folder">
                 <input type="file" :accept="fileAcceptPC" @change="onUploadFilePC" ref="file" />
             </span>
-            <div class="textArea">
+            <div class="textArea" id="textArea">
                 <n-input
                     class="n-input-modify"
                     placeholder="Aa"
                     type="textarea"
                     size="small"
-                    :autosize="{
-                        minRows: 1,
-                        maxRows: 5,
-                    }"
+                    :autosize="{ minRows: 1 }"
                     v-model:value.trim="msg"
-                    @focus="closeAll()"
+                    @focus="closeAll"
+                    @input="focusMsg"
                     @keydown.enter.exact.prevent="addMsg"
-                    ref="inputInstRef"
+                    ref="inputRef"
+                    id="input"
                 >
                 </n-input>
 
                 <img
-                    @click.stop="closeStickerBox"
+                    @click="closeStickerBox"
                     v-if="showStickerModal"
                     :src="emojiEnabled"
                     alt="表情貼圖"
                 />
                 <img
-                    @click.stop="openStickerBox"
+                    @click="openStickerBox"
                     v-if="!showStickerModal"
                     :src="emojiIcon"
                     alt="表情貼圖"
                 />
             </div>
-            <img class="send" :src="sendIcon" alt="傳送訊息" @click.prevent="addMsg" v-show="msg" />
+            <img
+                class="send"
+                :src="sendIcon"
+                alt="傳送訊息"
+                @[events].prevent="addMsg"
+                v-show="msg"
+            />
             <img
                 class="recorder"
                 :src="voiceIcon"
                 alt="開啟錄音"
                 v-show="!msg && !showRecorderModal"
-                @click="openRecorder()"
+                @[events]="openRecorder()"
             />
             <img
                 class="recorder"
                 :src="voiceIconEnabled"
                 alt="關閉錄音"
                 v-show="!msg && showRecorderModal"
-                @click="closeRecorder()"
+                @[events]="closeRecorder()"
             />
         </div>
         <!-- 貼圖視窗 -->
@@ -139,7 +148,7 @@
                     <li
                         v-if="stickerItems.length > 0"
                         class="reload-time"
-                        @click="stickerGroupID == 0 ? '' : handleStickckerGroup(0)"
+                        @[events].prevent="stickerGroupID == 0 ? '' : handleStickckerGroup(0)"
                         :class="{
                             active: stickerGroupID == 0,
                         }"
@@ -150,7 +159,7 @@
                     <li
                         v-for="tab in stickerList"
                         :key="tab.stickerPackID"
-                        @click="
+                        @[events].prevent="
                             stickerGroupID == tab.stickerPackID
                                 ? ''
                                 : handleStickckerGroup(tab.stickerPackID)
@@ -168,7 +177,7 @@
                     <n-grid-item
                         v-for="(item, index) in stickerItems"
                         :key="index"
-                        @click="addSticker(item, item.stickerFileID)"
+                        @[events].prevent="addSticker(item, item.stickerFileID)"
                     >
                         <div class="stickerIcon">
                             <img
@@ -187,7 +196,7 @@
                     <n-grid-item
                         v-for="tab in stickerGroup.stickerList"
                         :key="tab"
-                        @click="addSticker(stickerGroup, tab)"
+                        @[events].prevent="addSticker(stickerGroup, tab)"
                         :class="{ hide: tab == 'tab' || tab == 'main' }"
                     >
                         <div class="stickerIcon">
@@ -201,7 +210,7 @@
             </div>
         </div>
         <!-- 錄音視窗 -->
-        <div class="audioRecorderArea" v-show="showRecorderModal" @touchend="clearRecorder">
+        <div class="audioRecorderArea" v-show="showRecorderModal" @[events].prevent="clearRecorder">
             <!--未錄音狀態  -->
             <h1 class="recorderDescription" v-show="!isRecording">
                 放開即可傳送語音，左右滑動即可取消
@@ -220,7 +229,7 @@
         <n-modal class="map" v-model:show="showMapModal">
             <n-card title="位置分享" :bordered="false" size="huge">
                 <template #header-extra>
-                    <span class="shareMap" @click="shareMap()"
+                    <span class="shareMap" @[events]="shareMap()"
                         >分享
                         <n-icon class="icon" size="20" color="#01bad4">
                             <arrow-redo />
@@ -242,7 +251,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref, onMounted, reactive, watchEffect } from "vue";
+import { defineComponent, ref, onMounted, reactive, watchEffect, toRef } from "vue";
 import { nanoid } from "nanoid";
 import Compressor from "compressorjs";
 import axios from "axios";
@@ -284,6 +293,9 @@ import reloadTimeEnabled from "@/assets/Images/chatroom/reload-time-enabled.svg"
 import reloadTimeIcon from "@/assets/Images/chatroom/reload-time.svg";
 import voiceDisabled from "@/assets/Images/chatroom/voice-fill-disabled.svg";
 import voiceEnabled from "@/assets/Images/chatroom/voice-fill-enabled.svg";
+import { isMobile } from "@/util/commonUtil";
+
+const events = ref(isMobile ? "touchend" : "click");
 
 // model sotre
 const modelStore = useModelStore();
@@ -295,7 +307,7 @@ const { getSticker } = apiStore;
 const { eventInfo, stickerList, stickerUrl } = storeToRefs(apiStore);
 //store
 const chatStore = useChatStore();
-const inputInstRef: any = ref(null);
+const inputRef: any = ref(null);
 const { replyHide, confirmDelete, handleStickckerGroup } = chatStore;
 const {
     messages,
@@ -317,14 +329,13 @@ const {
     participantList,
     isOnline,
     adminCount,
-    janusConnectStatus,
+    userMediaMicrophone,
 } = storeToRefs(chatStore);
 //router
 const route = useRoute();
 onMounted(() => {
-    // console.log("**************", inputInstRef);
-    inputInstRef.value.blur();
-    inputVal.value = inputInstRef.value;
+    inputRef.value.blur();
+    inputVal.value = inputRef.value;
 });
 
 // 圖片可上傳檔案類型
@@ -335,6 +346,7 @@ const fileAcceptPC =
 // MP可上傳檔案類型
 const fileAcceptMP =
     "text/*, video/*, audio/*, application/*, application/rtf, application/msword, application/vnd.openxmlformats-officedocument.wordprocessingml.document, application/vnd.openxmlformats-officedocument.wordprocessingml.templat, application/vnd.ms-word.document.macroEnabled.12, application/vnd.ms-word.template.macroEnabled.12";
+
 // 地圖定位
 const showMapModal = ref(false);
 const latitude = ref();
@@ -377,7 +389,8 @@ const successCallback = (position: any) => {
     });
 };
 const errorCallback = (error: any) => {
-    console.log("error", error.message);
+    console.log("navigator.geolocation error:", error.message);
+    alert("您已將位置權限關閉,請將位置權限設為允許");
     showMapModal.value = false;
 };
 
@@ -435,7 +448,6 @@ const recorderTime = ref("00:00");
 const isClock = ref(false);
 const posStart = ref(0) as any;
 
-const userMediaMicrophone: any = ref(null);
 //開啟錄音視窗並詢問
 const openRecorder = () => {
     showRecorderModal.value = true;
@@ -459,6 +471,7 @@ const closeRecorder = () => {
     inputFunctionBoolean.value = false;
     userMediaMicrophone.value.getTracks().forEach((track) => track.stop());
     console.log("userMicrophone", userMediaMicrophone.value);
+    recorder.value.stop();
 };
 
 onMounted(() => {
@@ -470,8 +483,8 @@ onMounted(() => {
         e.preventDefault(); //
         isClock.value = true;
         posStart.value = e.touches[0]; //獲取起點坐標
-        console.log("posStart X:", posStart.value.clientX);
-        console.log("posStart Y:", posStart.value.clientY);
+        // console.log("posStart X:", posStart.value.clientX);
+        // console.log("posStart Y:", posStart.value.clientY);
         startRecorder(e);
     });
     recordArea.addEventListener("touchmove", (e: any) => {
@@ -479,8 +492,8 @@ onMounted(() => {
         const xPon = Math.abs(e.touches[e.touches.length - 1].clientX - posStart.value.clientX);
         const yPon = Math.abs(e.touches[e.touches.length - 1].clientY - posStart.value.clientY);
 
-        console.log("x 軸", xPon);
-        console.log("y 軸", yPon);
+        // console.log("x 軸", xPon);
+        // console.log("y 軸", yPon);
         if (
             (xPon > pon && yPon > pon) ||
             (xPon < pon && yPon > pon) ||
@@ -492,16 +505,13 @@ onMounted(() => {
         }
     });
     recordArea.addEventListener("touchend", (e: any) => {
-        console.log("recorderTime.value:", recorderTime.value);
-
         e.preventDefault();
-        console.log("posStart.value end:", e);
         if (isClock.value == true && recorderTime.value !== "0:00") {
             stopRecorder(e);
             console.log("送出錄音");
         } else if (recorderTime.value === "0:00") {
             stopClRecorder(e);
-            console.log("取消錄音");
+            console.log("秒數過短 取消錄音");
         } else {
             stopClRecorder(e);
             console.log("取消錄音");
@@ -547,10 +557,17 @@ const startRecorder = (e: any) => {
         })
         .catch((error: any) => {
             console.log(`異常了,${error.name}:${error.message}`);
+            alert(`異常了,未找到設備`);
+            isRecording.value = false;
+            isClock.value = false;
         });
 };
 //失敗銷毀錄音並重置
 const stopClRecorder = (e: any) => {
+    e.preventDefault();
+    isRecording.value = false;
+    isClock.value = false;
+    userMediaMicrophone.value.getTracks().forEach((track) => track.stop());
     recorder.value.stream.getTracks().forEach((track) => track.stop());
     recorder.value.stop();
     recorder.value.destroy().then(function () {
@@ -561,8 +578,10 @@ const stopClRecorder = (e: any) => {
 };
 //完成錄音並送出
 const stopRecorder = (e: any) => {
+    e.preventDefault();
     isRecording.value = false;
     console.log("結束錄音");
+    userMediaMicrophone.value.getTracks().forEach((track) => track.stop());
     recorder.value.stream.getTracks().forEach((track) => track.stop());
     recorder.value.stop();
     const audioFile = recorder.value.getWAVBlob();
@@ -631,6 +650,17 @@ const clearRecorder = () => {
     recorder.value = null;
 };
 
+const focusMsg = () => {
+    const textArea = document.getElementById("textArea");
+    const str = msg.value.trim();
+    if (str !== "") {
+        textArea.classList.remove("small");
+    }
+    showRecorderModal.value = false;
+    inputFunctionBoolean.value = false;
+    showStickerModal.value = false;
+};
+
 //發送訊息
 const addMsg = (): void => {
     const str = msg.value.trim();
@@ -675,6 +705,8 @@ const addMsg = (): void => {
     // 送出後清除 msg 及 replyMsg
     msg.value = null;
     replyHide();
+    const textArea = document.getElementById("textArea");
+    textArea.classList.add("small");
 };
 
 //手機板發送圖片
@@ -1114,9 +1146,19 @@ watchEffect(() => {
 .n-input-modify {
     width: 100%;
     background-color: $gray-7;
+    &.n-input,
+    &.n-input .n-input-wrapper,
+    &.n-input.n-input--textarea .n-input__textarea-mirror,
+    &.n-input .n-input__input,
+    &.n-input .n-input__textarea {
+        min-height: 30px !important;
+        max-height: 120px !important;
+    }
     &.n-input .n-input__border,
     &.n-input .n-input__state-border {
         border: none;
+        min-height: 30px !important;
+        max-height: 120px !important;
     }
     &.n-input:not(.n-input--disabled):hover .n-input__state-border {
         border: none;
@@ -1518,6 +1560,10 @@ watchEffect(() => {
             overflow-x: hidden;
             display: flex;
             justify-content: space-between;
+            &.small {
+                height: 38px;
+                overflow: hidden;
+            }
             img {
                 margin-right: 5px;
                 cursor: pointer;

@@ -1,38 +1,38 @@
 {
-  "name": "104scb-50talent-frontend-web",
-  "version": "1.0.0",
-  "private": true,
-  "scripts": {
-    "dev": "cross-env NODE_ENV=development nodemon src/server/index.js --watch server",
-    "build:client": "cross-env NODE_ENV=production nuxt build",
-    "build:server": "backpack build",
-    "build": "npm run build:client && npm run build:server",
-    "start:prod": "cross-env NODE_ENV=production node build/main.js",
-    "start": "nuxt start",
-    "clear": "rimraf ./dist ./.nuxt",
-    "lint:script": "eslint --ext .html,.js,.vue . --fix",
-    "lint:style": "stylelint --cache **/*.{vue,scss} --fix"
-  },
-  "dependencies": {
-    "@nuxtjs/axios": "^5.13.6",
-    "axios": "^0.21.1",
-    "backpack-core": "^0.8.4",
-    "body-parser": "^1.19.0",
-    "bootstrap-vue": "^2.21.2",
-    "config": "^3.3.6",
-    "cookie-parser": "^1.4.5",
-    "core-js": "^3.15.1",
-    "cross-env": "^7.0.3",
-    "dotenv": "^10.0.0",
-    "express": "^4.17.1",
-    "helmet": "^4.6.0",
-    "nocache": "^3.0.1",
-    "nodemon": "^2.0.12",
-    "nuxt": "^2.15.7"
-  },
-  "devDependencies": {
-    "@nuxtjs/style-resources": "^1.2.1",
-    "node-sass": "^6.0.1",
-    "sass-loader": "^10"
-  }
+    "name": "frontend-web",
+    "version": "1.0.0",
+    "private": true,
+    "scripts": {
+        "dev": "cross-env NODE_ENV=development nodemon src/server/index.js --watch server",
+        "build:client": "cross-env NODE_ENV=production nuxt build",
+        "build:server": "backpack build",
+        "build": "npm run build:client && npm run build:server",
+        "start:prod": "cross-env NODE_ENV=production node build/main.js",
+        "start": "nuxt start",
+        "clear": "rimraf ./dist ./.nuxt",
+        "lint:script": "eslint --ext .html,.js,.vue . --fix",
+        "lint:style": "stylelint --cache **/*.{vue,scss} --fix"
+    },
+    "dependencies": {
+        "@nuxtjs/axios": "^5.13.6",
+        "axios": "^0.21.1",
+        "backpack-core": "^0.8.4",
+        "body-parser": "^1.19.0",
+        "bootstrap-vue": "^2.21.2",
+        "config": "^3.3.6",
+        "cookie-parser": "^1.4.5",
+        "core-js": "^3.15.1",
+        "cross-env": "^7.0.3",
+        "dotenv": "^10.0.0",
+        "express": "^4.17.1",
+        "helmet": "^4.6.0",
+        "nocache": "^3.0.1",
+        "nodemon": "^2.0.12",
+        "nuxt": "^2.15.7"
+    },
+    "devDependencies": {
+        "@nuxtjs/style-resources": "^1.2.1",
+        "node-sass": "^6.0.1",
+        "sass-loader": "^10"
+    }
 }

@@ -5,7 +5,7 @@
                 <h2>簡訊內容</h2>
                 <div class="mmsMessageInfo">
                     <div class="numOfMessage">
-                        <p>{{ 0 }} KB</p>
+                        <p>{{ Math.ceil(mmsKB) }} KB</p>
                     </div>
                     <div class="point">
                         <p>{{ mmsPoint }} 點</p>

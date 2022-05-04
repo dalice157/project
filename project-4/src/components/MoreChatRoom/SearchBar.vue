@@ -1,7 +1,25 @@
 <template>
     <!-- 搜尋bar -->
     <div class="searchBar">
-        <span class="search">
+        <n-input
+            v-model:value="moreKeyWord"
+            type="text"
+            placeholder="直接輸入公司或店家名稱問問題吧..."
+        >
+            <template #prefix>
+                <img :src="searchIcon" alt="search" />
+            </template>
+            <template #suffix>
+                <img
+                    class="clearKeyWord"
+                    :src="closeIcon"
+                    v-if="moreKeyWord"
+                    @[events]="clearMoreKeyWord()"
+                    alt="close"
+                />
+            </template>
+        </n-input>
+        <!-- <span class="search">
             <img :src="searchIcon" />
         </span>
         <input
@@ -10,9 +28,9 @@
             v-model.trim="moreKeyWord"
             @input="(e:any) => onSearchMoreImResult(e.target.value)"
         />
-        <span class="clearBtn" @click="clearMoreKeyWord()">
+        <span class="clearBtn" @[events]="clearMoreKeyWord()">
             <img :src="closeIcon" />
-        </span>
+        </span> -->
     </div>
 </template>
 <script setup lang="ts">
@@ -25,6 +43,9 @@ import { useSearchStore } from "@/store/search";
 import { useApiStore } from "@/store/api";
 import searchIcon from "@/assets/Images/search/search.svg";
 import closeIcon from "@/assets/Images/search/round-fill_close.svg";
+import { isMobile } from "@/util/commonUtil";
+
+const events = ref(isMobile ? "touchstart" : "click");
 
 // api store
 const apiStore = useApiStore();
@@ -37,11 +58,54 @@ const { moreKeyWord } = storeToRefs(searchStore);
 const route = useRoute();
 getEventListApi(route.params.eventKey);
 </script>
+<style lang="scss">
+@import "~@/assets/scss/var";
+@import "~@/assets/scss/extend";
+.searchBar {
+    .n-input {
+        width: 100%;
+        background-color: $white;
+        height: 36px;
+        font-size: $font-size-16;
+    }
+    .n-input__input-el {
+        outline-style: none;
+        margin: 0;
+    }
+    .n-input-wrapper {
+        height: 36px;
+    }
+    .n-input__suffix {
+        & .n-icon {
+            cursor: pointer;
+        }
+    }
+    .n-input .n-input__border,
+    .n-input .n-input__state-border {
+        border: none;
+    }
+    .n-input:not(.n-input--disabled):hover .n-input__state-border {
+        border: none;
+    }
+    .n-input:not(.n-input--disabled).n-input--focus {
+        background-color: none;
+    }
+    .n-input:not(.n-input--disabled).n-input--focus .n-input__state-border {
+        border: none;
+        box-shadow: none;
+    }
+    .n-input .n-input__input-el,
+    .n-input .n-input__textarea-el {
+        caret-color: $gray-2;
+    }
+}
+</style>
 <style lang="scss" scoped>
 @import "~@/assets/scss/var";
 @import "~@/assets/scss/extend";
 .searchBar {
     display: flex;
+    align-items: center;
     border-radius: 20px;
     background-color: $white;
     padding: 0 8px;

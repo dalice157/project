@@ -35,14 +35,14 @@
                     <p>{{ isMuted ? "開啟" : "關閉" }}</p>
                     <p>麥克風</p>
                 </div>
-                <div class="phoneMicrophone" v-else @click="onVoice">
+                <div class="phoneMicrophone" v-else @[events]="onVoice">
                     <img :src="isMuted ? voiceDisabled : voiceEnabled" alt="麥克風" />
                     <p>{{ isMuted ? "開啟" : "關閉" }}</p>
                     <p>麥克風</p>
                 </div>
                 <div class="phoneClose">
                     <img
-                        @click="doHangup(!isAccepted ? 2 : 3, eventID(eventKey))"
+                        @[events]="doHangup(!isAccepted ? 2 : 3, eventID(eventKey))"
                         :src="closeIcon"
                         alt="掛斷"
                     />
@@ -63,10 +63,12 @@ import { useModelStore } from "@/store/model";
 import { useApiStore } from "@/store/api";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import config from "@/config/config";
-import { eventID } from "@/util/commonUtil";
+import { eventID, isMobile } from "@/util/commonUtil";
 import voiceDisabled from "@/assets/Images/chatroom/voice-fill-disabled.svg";
 import voiceEnabled from "@/assets/Images/chatroom/voice-fill-enabled.svg";
 import closeIcon from "@/assets/Images/chatroom/close-round-red.svg";
+
+const events = ref(isMobile ? "touchstart" : "click");
 
 //route
 const route = useRoute();

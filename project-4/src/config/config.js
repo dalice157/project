@@ -1,17 +1,19 @@
-const env = process.env.NODE_ENV || "development";
-console.log(`"env" is ${env}`);
+const env = process.env.VUE_APP_config || "development";
 // api
 const SERVER_SITE = {
     develop: "https://t.talkod.im:443",
-    production: "https://tfapi.talkod.im",
+    staging: "https://tfapi.talkod.im",
+    production: "https://fapi.talkod.im",
 };
 const JANUS_SITE = {
     develop: "https://t.talkod.im:8089",
-    production: "https://tj1.talkod.im:8089",
+    staging: "https://tj1.talkod.im:8089",
+    production: "https://j1.talkod.im:8089",
 };
 const FILE_SITE = {
     develop: "https://t.talkod.im:8029/fls/",
-    production: "https://tfls.talkod.im/",
+    staging: "https://tfls.talkod.im/",
+    production: "https://fls.talkod.im/",
 };
 
 const setting = {
@@ -24,6 +26,11 @@ const setting = {
         serverUrl: SERVER_SITE.develop,
         janusUrl: JANUS_SITE.develop,
         fileUrl: FILE_SITE.develop,
+    },
+    staging: {
+        serverUrl: SERVER_SITE.staging,
+        janusUrl: JANUS_SITE.staging,
+        fileUrl: FILE_SITE.staging,
     },
     production: {
         serverUrl: SERVER_SITE.production,

@@ -44,7 +44,6 @@
                     :size="48"
                     :src="`${config.fileUrl}${eventInfo.icon}`"
                 />
-
                 <img
                     class="avatar"
                     :size="48"

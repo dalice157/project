@@ -8,23 +8,23 @@
         }"
         v-show="route.meta.home"
     >
-        <div class="hamburger" @click="hamburgerToggle" :class="{ isActive: isActive }">
+        <div class="hamburger" @[events]="hamburgerToggle" :class="{ isActive: isActive }">
             <span class="line"></span>
             <span class="line"></span>
             <span class="line"></span>
         </div>
         <div class="container">
             <ul class="hamburgerMenu">
-                <li class="moreChatRoom" @click="goMoreChatRoom">
+                <li class="moreChatRoom" @[events]="goMoreChatRoom">
                     <router-link :to="`/moreChatRoom/${eventKey}`"> 更多聊天室 </router-link>
                 </li>
-                <li class="burgerChatHistory" @click="goChatRecord">
+                <li class="burgerChatHistory" @[events]="goChatRecord">
                     <router-link :to="`/chatRecord/${eventKey}`">交談紀錄</router-link>
                 </li>
             </ul>
             <ul class="hamburgerMenu">
-                <li class="burgerKnow" @click="onBurgerKnow">認識talkOD</li>
-                <li class="qa" @click="onQa">常見問題</li>
+                <li class="burgerKnow" @[events]="onBurgerKnow">認識talkOD</li>
+                <li class="qa" @[events]="onQa">常見問題</li>
                 <li class="terms">
                     <a href="https://www.teamplus.tech/every8d-agreement/" target="_blank"
                         >服務條款</a
@@ -49,7 +49,7 @@
                 talkOD是一款線上即時雙向溝通工具，滿足目的性的溝通需求。<br />
                 你可以透過網頁瀏覽器開啟對話視窗，無需下載APP軟體，也不用再經過層層註冊關卡，只要點擊連結，即刻展開對話！
                 <div class="btnWrap">
-                    <button @click="showKnowModal = false">關閉</button>
+                    <button @[events]="showKnowModal = false">關閉</button>
                 </div>
             </div>
         </div>
@@ -64,7 +64,7 @@
                 <h2 class="title">Q3可以使用不同裝置開啟視窗連結嗎?</h2>
                 可以。但因應資安考量，之前裝置的聊天紀錄便會消失。
                 <div class="btnWrap">
-                    <button @click="showQaModal = false">關閉</button>
+                    <button @[events]="showQaModal = false">關閉</button>
                 </div>
             </div>
         </div>
@@ -78,6 +78,7 @@ import { storeToRefs } from "pinia";
 
 import { useApiStore } from "@/store/api";
 import { useSearchStore } from "@/store/search";
+import { isMobile } from "@/util/commonUtil";
 
 export default defineComponent({
     name: "HamburgerBar",
@@ -125,6 +126,8 @@ export default defineComponent({
             showQaModal.value = true;
         };
 
+        const events = ref(isMobile ? "touchstart" : "click");
+
         return {
             isActive,
             hamburgerToggle,
@@ -141,6 +144,7 @@ export default defineComponent({
             showKnowModal,
             onQa,
             showQaModal,
+            events,
         };
     },
 });
@@ -183,13 +187,14 @@ export default defineComponent({
     .btnWrap {
         text-align: center;
         margin-top: 20px;
-        button {
+        > button {
             border: 1px solid $primary-1;
             background-color: $primary-1;
             color: $white;
             padding: 5px 10px;
             border-radius: 4px;
             font-size: $font-size-16;
+            cursor: pointer;
         }
     }
 }

@@ -1,65 +1,75 @@
 <template>
-    <n-layout has-sider class="chatroom" @click="closeChatBubble">
-        <n-layout-sider width="330px" bordered>
-            <Sidebar eventId="eventID" />
-        </n-layout-sider>
-        <n-layout class="content">
-            <Headers />
-            <n-layout-content
-                ref="content"
-                content-style="padding: 24px;"
-                :native-scrollbar="false"
-                v-if="Object.keys(route.query).length == 0"
-                class="notFound"
-                >點擊左側開始交談</n-layout-content
-            >
-            <n-layout
-                class="room-wrap"
-                v-if="Object.keys(route.query).length > 0"
-                has-sider
-                sider-placement="right"
-            >
-                <n-layout-content ref="content" content-style="padding: 0;" class="msg-wrap">
-                    <NavBar />
-                    <SearchBar />
-                    <!-- 聊天室主畫面 -->
-                    <MessageBox />
-                    <!-- 使用者輸入框 -->
-                    <Input />
-                </n-layout-content>
-                <n-layout-sider class="user-info" width="230px" content-style="padding: 0;">
-                    <UserInfoSider />
-                </n-layout-sider>
+    <div>
+        <n-layout has-sider class="chatroom" @click="closeChatBubble">
+            <n-layout-sider width="330px" bordered>
+                <Sidebar />
+            </n-layout-sider>
+            <n-layout class="content">
+                <Headers />
+                <n-layout-content
+                    ref="content"
+                    content-style="padding: 24px;"
+                    :native-scrollbar="false"
+                    v-if="Object.keys(route.query).length == 0"
+                    class="notFound"
+                    >點擊左側開始交談</n-layout-content
+                >
+                <n-layout
+                    class="room-wrap"
+                    v-if="Object.keys(route.query).length > 0"
+                    has-sider
+                    sider-placement="right"
+                >
+                    <n-layout-content ref="content" content-style="padding: 0;" class="msg-wrap">
+                        <NavBar />
+                        <SearchBar />
+                        <!-- 聊天室主畫面 -->
+                        <MessageBox :eventID="eventID" />
+                        <!-- 使用者輸入框 -->
+                        <Input />
+                    </n-layout-content>
+                    <n-layout-sider class="user-info" width="230px" content-style="padding: 0;">
+                        <UserInfoSider />
+                    </n-layout-sider>
+                </n-layout>
             </n-layout>
         </n-layout>
-    </n-layout>
 
-    <n-modal
-        class="chatRecordCard"
-        v-model:show="isIncomingCall"
-        :mask-closable="false"
-        preset="card"
-    >
-        <n-card :bordered="false" size="huge" class="container">
-            <UserInfo :info="userInfo" />
-            <div class="description">語音來電</div>
-            <ul class="call_container">
-                <li @click="doHangup(2, chatRoomID, route.params.id)">
-                    <span class="icon"><img :src="hangUpIcon" alt="掛斷" /></span>
-                    <h4 class="text">掛斷</h4>
-                </li>
-                <li>
-                    <button class="icon" @click="onIncomingCall(yourUsername, jsepMsg)"></button>
-                    <h4 class="text">接聽</h4>
-                </li>
-            </ul>
-        </n-card>
-    </n-modal>
+        <n-modal
+            class="chatRecordCard"
+            v-model:show="isIncomingCall"
+            :mask-closable="false"
+            preset="card"
+        >
+            <n-card :bordered="false" size="huge" class="container">
+                <UserInfo :info="userInfo" />
+                <div class="description">語音來電</div>
+                <ul class="call_container">
+                    <li @click="doHangup(2, chatRoomID, route.params.id)">
+                        <span class="icon"><img :src="hangUpIcon" alt="掛斷" /></span>
+                        <h4 class="text">掛斷</h4>
+                    </li>
+                    <li>
+                        <button
+                            class="icon"
+                            @click="onIncomingCall(yourUsername, jsepMsg)"
+                        ></button>
+                        <h4 class="text">接聽</h4>
+                    </li>
+                </ul>
+            </n-card>
+        </n-modal>
+    </div>
 </template>
-
+<script lang="ts">
+export default {
+    name: "ChatRoom",
+    inheritAttrs: false,
+};
+</script>
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { watch, ref, onMounted, computed, watchEffect } from "vue";
+import { watch, ref, onMounted, computed, watchEffect, onActivated, onDeactivated } from "vue";
 import { NModal, NCard, NLayout, NLayoutSider, NLayoutContent } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
 
@@ -112,43 +122,12 @@ onMounted(() => {
         getChatroomlistApi(eventID.value);
     });
 });
-const welcomeStatus: any = ref(false);
-const welcomeMsg = computed({
-    get() {
-        return eventInfo.value.messageList;
-    },
-    set(val) {
-        eventInfo.value = val;
-    },
-}) as any;
-const initWeclomeMsg = () => {
-    const welcomeList = JSON.parse(localStorage.getItem(`${eventID.value}-welcomeList`) || "[]");
-    localStorage.setItem(`${eventID.value}-welcomeList`, JSON.stringify(welcomeMsg.value));
-    messageList.value = [...welcomeList, ...messageList.value];
-    messageList.value = messageList.value.reduce((unique, o) => {
-        const hasRepeatId = unique.some((obj) => {
-            return obj.janusMsg.config.id === o.janusMsg.config.id;
-        });
-        if (!hasRepeatId) {
-            unique.push(o);
-        }
-        unique.sort((a, b) => {
-            return a.janusMsg.time / 1000000 - b.janusMsg.time / 1000000;
-        });
-        return unique;
-    }, []);
-};
-watchEffect(() => {
-    if (eventID.value) {
-        initWeclomeMsg();
-    }
-});
 
 // 監聽route query change寫法 2
 const initData = () => {
     console.log("initData");
     getChatroomUserInfoApi(route.query.chatroomID);
-    getHistoryApi(route.query.chatroomID);
+    getHistoryApi(route.query.chatroomID, eventID.value);
 };
 if (Object.keys(route.query).length > 0) {
     isInput.value = true;
@@ -178,7 +157,7 @@ const messages: any = computed({
 
 //取消訊息功能泡泡
 const closeChatBubble = (): void => {
-    messages.value = messageList.value.map((text: txt) => {
+    messageList.value = messageList.value.map((text: txt) => {
         text.janusMsg.config.msgFunctionStatus = false;
         return text;
     });

@@ -22,13 +22,7 @@
                 </n-config-provider>
                 <div class="mememberList">
                     <ul>
-                        <li
-                            v-for="channel in filterChannel"
-                            :key="channel.eventID"
-                            @mouseenter="channelHoverIndex = channel.eventID"
-                            @mouseleave="channelHoverIndex = '0'"
-                            :class="{ hoverEffect: channelHoverIndex === channel.eventID }"
-                        >
+                        <li v-for="channel in filterChannel" :key="channel.eventID">
                             <!-- {{ channel }} -->
                             <div class="channelTitle">
                                 <img :src="`${config.fileUrl}${channel.icon}`" alt="#" />
@@ -72,14 +66,7 @@
                 </n-config-provider>
                 <div class="staffList">
                     <ul v-if="filterStaff.length > 0">
-                        <li
-                            class="staffData"
-                            v-for="staff in filterStaff"
-                            :key="staff.accountID"
-                            @mouseenter="stafflHoverIndex = staff.accountID"
-                            @mouseleave="stafflHoverIndex = '0'"
-                            :class="{ hoverEffect: stafflHoverIndex === staff.accountID }"
-                        >
+                        <li class="staffData" v-for="staff in filterStaff" :key="staff.accountID">
                             <p>{{ staff.name }}</p>
                             <p>
                                 {{ staff.events }}
@@ -105,7 +92,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, watchEffect } from "vue";
+import { ref, computed } from "vue";
 import { NInput, NConfigProvider, NGrid, NGridItem } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
 
@@ -128,10 +115,6 @@ const route = useRoute();
 //v-model
 const searchChannel = ref("");
 const searchStaff = ref("");
-const channelHoverIndex = ref("0");
-const stafflHoverIndex = ref("0");
-const loading = ref(false);
-const activityChannel = ref(null);
 
 getEventListApi();
 getCustomServiceStaffList();
@@ -210,10 +193,6 @@ const themeOverrides = {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
-// li hover
-.hoverEffect {
-    background-color: #fffaed;
-}
 
 .activitySetting {
     background-color: $bg;
@@ -273,6 +252,9 @@ const themeOverrides = {
                     padding: 15px 10px;
                     position: relative;
                     border-bottom: 1px solid $border-line;
+                    &:hover {
+                        background-color: $primary-5;
+                    }
                     .channelPopUp {
                         position: absolute;
                         box-shadow: 0 2px 4px 0 rgba(209, 209, 209, 0.5);
@@ -383,6 +365,11 @@ const themeOverrides = {
             }
             ul {
                 padding: 0 20px;
+                li {
+                    &:hover {
+                        background-color: $primary-5;
+                    }
+                }
                 .staffData {
                     padding: 15px 10px;
                     border-bottom: 1px solid $border-line;

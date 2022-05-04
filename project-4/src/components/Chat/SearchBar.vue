@@ -12,15 +12,15 @@
                             class="clearKeyWord"
                             :src="closeIcon"
                             v-if="keyWord"
-                            @click="clearResultKeyWord()"
+                            @[events]="clearResultKeyWord()"
                             alt="close"
                         />
                     </template>
                 </n-input>
             </n-config-provider>
         </div>
-        <div class="searchBtn" v-if="keyWord" @click="onSearchResult(keyWord)">搜尋</div>
-        <div class="closeSearchBar" @click="closeSearchBar()" v-else>關閉</div>
+        <div class="searchBtn" v-if="keyWord" @[events]="onSearchResult(keyWord)">搜尋</div>
+        <div class="closeSearchBar" @[events]="closeSearchBar()" v-else>關閉</div>
     </div>
     <div v-if="isResult" class="result">
         <h1 class="numOfsearchMessage" v-if="searcMessages.length > 0">
@@ -31,7 +31,7 @@
                 class="item"
                 :key="msg.janusMsg.config.id"
                 v-for="msg in searcMessages"
-                @click.prevent="onClickGoto(msg.janusMsg.config.id, route.params.eventKey)"
+                @[events].prevent="onClickGoto(msg.janusMsg.config.id, route.params.eventKey)"
             >
                 <n-avatar
                     class="avatar"
@@ -84,12 +84,14 @@ import { NConfigProvider, NInput, NIcon, NAvatar, NEllipsis } from "naive-ui";
 
 import { useSearchStore } from "@/store/search";
 import { useApiStore } from "@/store/api";
-import { getFileExtension } from "@/util/commonUtil";
+import { isMobile } from "@/util/commonUtil";
 import { currentTime } from "@/util/dateUtil";
 import config from "@/config/config";
 import searchIcon from "@/assets/Images/chatroom/search.svg";
 import closeIcon from "@/assets/Images/chatroom/round-fill_close.svg";
 import userIcon from "@/assets/Images/chatroom/User-round.svg";
+
+const events = ref(isMobile ? "touchstart" : "click");
 
 // api store
 const apiStore = useApiStore();

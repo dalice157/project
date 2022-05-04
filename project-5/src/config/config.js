@@ -1,27 +1,31 @@
-const env = process.env.NODE_ENV || "development";
-console.log(`"env" is ${env}`);
+const env = process.env.VUE_APP_config || "development";
 //api
 const SERVER_SITE = {
     develop: "https://t.Talkod.im:9000",
-    production: "https://tbapi.talkod.im",
+    staging: "https://tbapi.talkod.im",
+    production: "https://bapi.talkod.im",
 };
 const JANUS_SITE = {
     develop: "https://t.Talkod.im:8089",
-    production: "https://tj1.talkod.im:8089",
+    staging: "https://tj1.talkod.im:8089",
+    production: "https://j1.talkod.im:8089",
 };
 
 const FILE_SITE = {
     develop: "https://t.talkod.im:8029/fls/",
-    production: "https://tfls.talkod.im/",
+    staging: "https://tfls.talkod.im/",
+    production: "https://fls.talkod.im/",
 };
 
 const WORD_LIMIT = {
     develop: 20,
-    production: 18,
+    staging: 18,
+    production: 17,
 };
 const DOMAIN = {
     development: "1", // 如果不是COMMTEST把1改成0, 才可登入
     develop: "1",
+    staging: "1",
     production: "1",
 };
 
@@ -39,6 +43,13 @@ const setting = {
         fileUrl: FILE_SITE.develop,
         wordLimit: WORD_LIMIT.develop,
         domain: DOMAIN.develop,
+    },
+    staging: {
+        serverUrl: SERVER_SITE.staging,
+        janusUrl: JANUS_SITE.staging,
+        fileUrl: FILE_SITE.staging,
+        wordLimit: WORD_LIMIT.staging,
+        domain: DOMAIN.staging,
     },
     production: {
         serverUrl: SERVER_SITE.production,

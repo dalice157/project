@@ -14,7 +14,7 @@
                     {{ eventInfo.name }}
                 </h1>
 
-                <a class="close" @click="goToChat">
+                <a class="close" @[events]="goToChat">
                     <img :src="closeIcon" />
                 </a>
             </div>
@@ -35,7 +35,7 @@
                             v-if="
                                 picture.janusMsg.msgType === 6 && !picture.janusMsg.config.isExpire
                             "
-                            @click="previewURL(picture.janusMsg.format.Fileid)"
+                            @[events]="previewURL(picture.janusMsg.format.Fileid)"
                         >
                             <img
                                 :src="`${config.fileUrl}${picture.janusMsg.format.Fileid}${picture.janusMsg.format.ExtensionName}`"
@@ -106,10 +106,12 @@ import { useApiStore } from "@/store/api";
 import { useChatStore } from "@/store/chat";
 import config from "@/config/config";
 import { isProduction } from "@/util/commonUtil";
-import { currentDate, currentMonth } from "@/util/dateUtil";
+import { isMobile } from "@/util/commonUtil";
 import closeIcon from "@/assets/Images/chatroom/close-round.svg";
 import picDisabled from "@/assets/Images/gallery/pic-disabled.svg";
 import fileIcon from "@/assets/Images/chatroom/file-fill.svg";
+
+const events = ref(isMobile ? "touchend" : "click");
 
 //chat store
 const chatStore = useChatStore();
@@ -230,7 +232,9 @@ const previewURL = (fileid: string): void => {
     });
 };
 const goToChat = () => {
-    location.href = `/${eventKey.value}`;
+    setTimeout(function () {
+        document.location.href = `/${eventKey.value}`;
+    }, 250);
 };
 </script>
 <style lang="scss" scoped>

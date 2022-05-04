@@ -1,28 +1,34 @@
 <template>
     <!-- 搜尋bar -->
     <div class="searchBar">
-        <span class="search">
-            <img :src="searchIcon" />
-        </span>
-        <input
-            type="text"
-            placeholder="搜尋"
-            v-model.trim="recordKeyWord"
-            @input="(e:any) => onSearchRecordResult(e.target.value)"
-        />
-        <span class="clearBtn" @click="clearRecordKeyWord()">
-            <img :src="closeIcon" />
-        </span>
+        <n-input v-model:value="recordKeyWord" type="text" placeholder="搜尋">
+            <template #prefix>
+                <img :src="searchIcon" alt="search" />
+            </template>
+            <template #suffix>
+                <img
+                    class="clearKeyWord"
+                    :src="closeIcon"
+                    v-if="recordKeyWord"
+                    @[events]="clearRecordKeyWord()"
+                    alt="close"
+                />
+            </template>
+        </n-input>
     </div>
 </template>
 <script setup lang="ts">
 import { defineComponent, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute } from "vue-router";
+import { NConfigProvider, NInput } from "naive-ui";
 
 import { useSearchStore } from "@/store/search";
 import searchIcon from "@/assets/Images/search/search.svg";
 import closeIcon from "@/assets/Images/search/round-fill_close.svg";
+import { isMobile } from "@/util/commonUtil";
+
+const events = ref(isMobile ? "touchstart" : "click");
 
 const searchStore = useSearchStore();
 const { onSearchRecordResult, onClickGoto, clearRecordKeyWord } = searchStore;
@@ -30,14 +36,57 @@ const { recordKeyWord } = storeToRefs(searchStore);
 
 const route = useRoute();
 </script>
+<style lang="scss">
+@import "~@/assets/scss/var";
+@import "~@/assets/scss/extend";
+.searchBar {
+    .n-input {
+        width: 100%;
+        background-color: $white;
+        height: 36px;
+        font-size: $font-size-16;
+    }
+    .n-input__input-el {
+        outline-style: none;
+        margin: 0;
+    }
+    .n-input-wrapper {
+        height: 36px;
+    }
+    .n-input__suffix {
+        & .n-icon {
+            cursor: pointer;
+        }
+    }
+    .n-input .n-input__border,
+    .n-input .n-input__state-border {
+        border: none;
+    }
+    .n-input:not(.n-input--disabled):hover .n-input__state-border {
+        border: none;
+    }
+    .n-input:not(.n-input--disabled).n-input--focus {
+        background-color: none;
+    }
+    .n-input:not(.n-input--disabled).n-input--focus .n-input__state-border {
+        border: none;
+        box-shadow: none;
+    }
+    .n-input .n-input__input-el,
+    .n-input .n-input__textarea-el {
+        caret-color: $gray-2;
+    }
+}
+</style>
 <style lang="scss" scoped>
 @import "~@/assets/scss/var";
 @import "~@/assets/scss/extend";
 .searchBar {
     display: flex;
+    align-items: center;
     border-radius: 20px;
     background-color: $white;
-    padding: 0 8px;
+    padding: 0 6px;
     height: 44px;
     border: 1px solid $border-line;
     box-shadow: 2px 0px 4px $gray-6;
@@ -52,14 +101,6 @@ const route = useRoute();
             width: 16px;
             height: 16px;
         }
-    }
-    input[type="text"] {
-        width: 100%;
-        border: none;
-        outline-style: none;
-        color: $gray-1;
-        @extend %h4;
-        margin-left: 10px;
     }
     .clearBtn {
         display: flex;

@@ -4,7 +4,7 @@
         :class="{ dropActive: dropActive }"
         class="chatroom-inner"
         ref="findScrollHeight"
-        @click="closeAll"
+        @[events]="closeAll"
         @scroll="chatroomToBottom($event)"
     >
         <div class="background">
@@ -67,15 +67,16 @@
                 <!-- 收回訊息樣板 -->
                 <div class="recall" v-if="text.janusMsg.config.recallStatus">
                     <div>
-                        <p>
+                        <p v-if="text.janusMsg.sender === 1 && text.janusMsg.msgContent">
                             您已收回訊息&emsp;
-                            <span
-                                @click="reEdit(text.janusMsg.config.id)"
-                                v-if="text.janusMsg.msgContent"
-                            >
+                            <span @[events]="reEdit(text.janusMsg.config.id)">
                                 <u>重新編輯</u>
                             </span>
                         </p>
+                        <p v-if="text.janusMsg.sender === 1 && !text.janusMsg.msgContent">
+                            您已收回訊息
+                        </p>
+                        <p v-if="text.janusMsg.sender === 0">對方已收回訊息</p>
                     </div>
                 </div>
 
@@ -87,12 +88,12 @@
                             v-if="text.janusMsg.config.msgFunctionStatus"
                         >
                             <ul class="ulList">
-                                <li v-if="text.janusMsg.msgContent" @click.stop="copyMsg(text)">
+                                <li v-if="text.janusMsg.msgContent" @[events].stop="copyMsg(text)">
                                     <span>複製</span>
                                 </li>
                                 <li
                                     v-if="[6, 7].includes(text.janusMsg.msgType)"
-                                    @click.stop="downloadImage(text)"
+                                    @[events].stop="downloadImage(text)"
                                 >
                                     <a
                                         :href="`${config.serverUrl}/file/${route.params.eventKey}/${text.janusMsg.format.Fileid}`"
@@ -101,16 +102,19 @@
                                         下載
                                     </a>
                                 </li>
-                                <!-- <li @click.stop="deleteQuestion(text)"><span>刪除</span></li> -->
+                                <!-- <li @[events].stop="deleteQuestion(text)"><span>刪除</span></li> -->
                                 <li
-                                    v-if="text.janusMsg.sender === 1 && text.janusMsg.msgType !== 6"
-                                    @click.stop="confirmRecallPopup(text)"
+                                    v-if="
+                                        text.janusMsg.sender === 1 &&
+                                        ![8, 9].includes(text.janusMsg.msgType)
+                                    "
+                                    @[events].stop="confirmRecallPopup(text)"
                                 >
                                     <span>收回</span>
                                 </li>
                                 <li
                                     v-if="[1, 3, 6].includes(text.janusMsg.msgType)"
-                                    @click.stop="replyMsgEvent(text)"
+                                    @[events].stop="replyMsgEvent(text)"
                                 >
                                     <span>回覆</span>
                                 </li>
@@ -125,7 +129,7 @@
                                         <div
                                             type="button"
                                             class="cancel"
-                                            @click.stop="
+                                            @[events].stop="
                                                 text.janusMsg.config.recallPopUp =
                                                     !text.janusMsg.config.recallPopUp
                                             "
@@ -135,7 +139,7 @@
                                         <div
                                             type="button"
                                             class="confirm"
-                                            @click.stop="recallMsg(text)"
+                                            @[events].stop="recallMsg(text)"
                                         >
                                             確定
                                         </div>
@@ -147,7 +151,7 @@
                         <div
                             class="msg_more"
                             :class="{ show: text.janusMsg.config.msgFunctionStatus }"
-                            @click.stop="closeBubble(text)"
+                            @[events].stop="closeBubble(text)"
                         >
                             <img :src="moreIcon" alt="more" />
                             <!-- 訊息功能框 -->
@@ -156,12 +160,15 @@
                                 v-show="text.janusMsg.config.msgFunctionStatus"
                             >
                                 <ul class="ulList">
-                                    <li v-if="text.janusMsg.msgContent" @click.stop="copyMsg(text)">
+                                    <li
+                                        v-if="text.janusMsg.msgContent"
+                                        @[events].stop="copyMsg(text)"
+                                    >
                                         <span>複製</span>
                                     </li>
                                     <li
                                         v-if="[6, 7].includes(text.janusMsg.msgType)"
-                                        @click.stop="downloadImage(text)"
+                                        @[events].stop="downloadImage(text)"
                                     >
                                         <a
                                             :href="`${config.serverUrl}/file/${route.params.eventKey}/${text.janusMsg.format.Fileid}`"
@@ -169,19 +176,19 @@
                                             下載
                                         </a>
                                     </li>
-                                    <!-- <li @click.stop="deleteQuestion(text)"><span>刪除</span></li> -->
+                                    <!-- <li @[events].stop="deleteQuestion(text)"><span>刪除</span></li> -->
                                     <li
                                         v-if="
                                             text.janusMsg.sender === 1 &&
-                                            text.janusMsg.msgType !== 6
+                                            ![8, 9].includes(text.janusMsg.msgType)
                                         "
-                                        @click.stop="confirmRecallPopup(text)"
+                                        @[events].stop="confirmRecallPopup(text)"
                                     >
                                         <span>收回</span>
                                     </li>
                                     <li
                                         v-if="[1, 3, 6].includes(text.janusMsg.msgType)"
-                                        @click.stop="replyMsgEvent(text)"
+                                        @[events].stop="replyMsgEvent(text)"
                                     >
                                         <span>回覆</span>
                                     </li>
@@ -189,20 +196,17 @@
                             </div>
                         </div>
                         <!-- 對方頭像 -->
-                        <div
-                            class="avatar"
-                            @click="
-                                showCompanyInfo({
-                                    ...eventInfo,
-                                    eventKey: route.params.eventKey,
-                                })
-                            "
-                            v-if="text.janusMsg.sender === 0 && !deleteBoolean"
-                        >
+                        <div class="avatar" v-if="text.janusMsg.sender === 0 && !deleteBoolean">
                             <n-avatar
                                 round
                                 :size="42"
                                 :src="`${config.fileUrl}${eventInfo.icon}`"
+                                @[events]="
+                                    showCompanyInfo({
+                                        ...eventInfo,
+                                        eventKey: route.params.eventKey,
+                                    })
+                                "
                             />
                         </div>
                         <!-- 訊息 -->
@@ -223,7 +227,7 @@
                                     noMsgClick: !text.janusMsg.config.isReply,
                                 }"
                                 v-if="text.janusMsg.config.isReply"
-                                @click.prevent="
+                                @[events].prevent="
                                     text.janusMsg.config.isReply
                                         ? scrollPageTo(
                                               text.janusMsg.config.replyObj.janusMsg.config.id
@@ -324,7 +328,7 @@
                                 />
                                 Your browser does not support the audio tag.
                             </audio>
-                            <n-icon @click="toggleAudio(text)" size="24">
+                            <n-icon @[events]="toggleAudio(text)" size="24">
                                 <pause-circle-sharp v-show="text.janusMsg.config.isPlay" />
                                 <play-circle-sharp v-show="!text.janusMsg.config.isPlay" />
                             </n-icon>
@@ -385,7 +389,7 @@
                             v-else-if="text.janusMsg.msgType === 9"
                             @touchend="callAgain"
                         >
-                            <a class="phone-web" @click="onPhoneCallModal">
+                            <a class="phone-web" @[events]="onPhoneCallModal">
                                 <div class="phonePic">
                                     <img :src="phoneIcon" alt="phone" />
                                 </div>
@@ -440,7 +444,7 @@
                         !showStickerModal &&
                         !showRecorderModal
                     "
-                    @click="scrollToBottom"
+                    @[events]="scrollToBottom"
                 >
                     <arrow-down-circle />
                 </n-icon>
@@ -454,13 +458,13 @@
             <div class="popUp">
                 <div class="recallMsgConfirm">對方仍能看到你刪除的訊息</div>
                 <div class="buttonContainer">
-                    <div type="button" class="cancel" @click.stop="deletePopUp = !deletePopUp">
+                    <div type="button" class="cancel" @[events].stop="deletePopUp = !deletePopUp">
                         取消
                     </div>
                     <div
                         type="button"
                         class="confirm"
-                        @click.stop="confirmDelete($route.params.eventKey)"
+                        @[events].stop="confirmDelete($route.params.eventKey)"
                     >
                         確定
                     </div>
@@ -507,6 +511,7 @@ import {
     convertTime,
     isProduction,
     eventID,
+    isMobile,
 } from "@/util/commonUtil";
 import { currentTime, currentDate, unixTime } from "@/util/dateUtil";
 import UserInfoModel from "@/components/UserInfoModel.vue";
@@ -516,6 +521,8 @@ import googleMap from "@/assets/Images/chatroom/map.jpg";
 import audioIcon from "@/assets/Images/chatroom/audio.svg";
 import fileIcon from "@/assets/Images/chatroom/file-fill.svg";
 import phoneIcon from "@/assets/Images/chatroom/phone-fill-round-y.svg";
+
+const events = ref(isMobile ? "touchstart" : "click");
 
 const apiStore = useApiStore();
 const { getBackendApi, recallAPI } = apiStore;
@@ -1270,7 +1277,8 @@ const themeOverrides = {
                 }
             }
         }
-        &.recallChoice {
+        &.recallChoice,
+        &.recallChoice.otherMsg {
             justify-content: center;
         }
         &.myMsg {

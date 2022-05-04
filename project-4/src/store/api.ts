@@ -38,6 +38,18 @@ export const useApiStore = defineStore({
                     const { messages } = storeToRefs(chatStore);
                     if (this.eventInfo.unreadList !== null) {
                         this.eventInfo.unreadList.forEach((unReadMsg, _, arr) => {
+                            if (unReadMsg.janusMsg.msgType === 10) {
+                                const chatStore = useChatStore();
+                                const { messages } = storeToRefs(chatStore);
+                                messages.value = JSON.parse(
+                                    localStorage.getItem(`${token}`) || "[]"
+                                );
+                                messages.value.forEach((msg) => {
+                                    if (msg.janusMsg.config.id === unReadMsg.janusMsg.config.id) {
+                                        msg.janusMsg.config.recallStatus = true;
+                                    }
+                                });
+                            }
                             if (
                                 !messages.value.some((msg) => {
                                     return msg.janusMsg.config.id === unReadMsg.janusMsg.config.id;

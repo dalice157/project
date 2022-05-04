@@ -17,14 +17,12 @@ export const eventID = (eventKey: any) => eventKey?.slice(0, -7);
 
 // 回覆點擊功能
 export const scrollPageTo = (replyId: string | null) => {
-    console.log("replyId", replyId);
-
     if (!replyId) return;
     const element: any = document.getElementById(`${replyId}`);
     element.scrollIntoView({ behavior: "smooth", block: "center", nearest: "center" });
-
-    const getAnimateClassName = element.childNodes[8].childNodes[0];
-    console.log("element.childNodes", element.childNodes[8].childNodes[0]);
+    const shakeDom = isProduction ? 2 : 8;
+    console.log("getAnimateClassName:", element.childNodes);
+    const getAnimateClassName = element.childNodes[shakeDom];
 
     getAnimateClassName.classList.add("animate__shakeX");
     setTimeout(() => {
@@ -112,3 +110,8 @@ export const convertTime = (seconds: any) => {
 export const isObjToBeZero = (obj: any) => {
     return Object.keys(obj).length === 0;
 };
+
+// 判斷是否是手機
+export const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+    navigator.userAgent.toLowerCase()
+);

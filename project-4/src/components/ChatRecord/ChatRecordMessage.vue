@@ -3,13 +3,13 @@
     <div v-if="searcRecordMessages?.length > 0 && recordKeyWord !== ''" class="searchRecordMessage">
         <div
             class="chatRoomBox"
-            @click.stop="gotoChat(num.chatroomID)"
+            @[events].stop="gotoChat(num.chatroomID)"
             v-for="num in searcRecordMessages"
             :key="num.chatroomID"
         >
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
-                <div class="avatar" @click.stop="showCompanyInfo(num)">
+                <div class="avatar" @[events].stop="showCompanyInfo(num)">
                     <n-avatar round :size="48" :src="`${config.fileUrl}${num.icon}`" />
                 </div>
                 <div class="chatRoomInfo">
@@ -46,11 +46,11 @@
             class="chatRoomBox"
             v-for="(num, index) in changeList"
             :key="num.chatroomID"
-            @click.stop="gotoChat(num.chatroomID)"
+            @[events].stop="gotoChat(num.chatroomID)"
         >
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
-                <div class="avatar" @click.stop="showCompanyInfo(num)">
+                <div class="avatar" @[events].stop="showCompanyInfo(num)">
                     <n-avatar round :size="48" :src="`${config.fileUrl}${num.icon}`" />
                     <img class="img" :src="pinIcon" alt="置頂" v-if="num.toTop" />
                 </div>
@@ -80,12 +80,12 @@
                     </div> -->
                 </div>
                 <div class="functionBoxMore">
-                    <img :src="moreIcon" alt="more" @click.stop="openFunctionPopUp(num)" />
+                    <img :src="moreIcon" alt="more" @[events].stop="openFunctionPopUp(num)" />
                     <div class="functionPopUp" v-show="num.isfunctionPopUp">
                         <ul class="ulList">
-                            <li @click.stop="pin(num, index)" v-if="!num.toTop">開啟置頂</li>
-                            <li @click.stop="unpin(num, index)" v-if="num.toTop">取消置頂</li>
-                            <!-- <li @click.stop="deletechatRoomBox(num)">刪除</li> -->
+                            <li @[events].stop="pin(num, index)" v-if="!num.toTop">開啟置頂</li>
+                            <li @[events].stop="unpin(num, index)" v-if="num.toTop">取消置頂</li>
+                            <!-- <li @touchend.stop="deletechatRoomBox(num)">刪除</li> -->
                         </ul>
                     </div>
                 </div>
@@ -112,7 +112,7 @@ import dayjs from "dayjs";
 import isYesterday from "dayjs/plugin/isYesterday";
 import isToday from "dayjs/plugin/isToday";
 
-import { getFileExtension } from "@/util/commonUtil";
+import { isMobile } from "@/util/commonUtil";
 import { currentTime } from "@/util/dateUtil";
 import { useApiStore } from "@/store/api";
 import { useSearchStore } from "@/store/search";
@@ -122,6 +122,8 @@ import UserInfoModel from "@/components/UserInfoModel.vue";
 import config from "@/config/config";
 import pinIcon from "@/assets/Images/chatRecord/pushpin-round.svg";
 import moreIcon from "@/assets/Images/chatRecord/more.svg";
+
+const events = ref(isMobile ? "touchend" : "click");
 
 dayjs.extend(isToday);
 dayjs.extend(isYesterday);

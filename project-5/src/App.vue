@@ -7,7 +7,12 @@
     >
         <router-view name="login"></router-view>
         <!--監聽route query change寫法 1 <router-view name="container":key="route.query"></router-view> -->
-        <router-view name="container"></router-view>
+
+        <router-view name="container" v-slot="{ Component }">
+            <keep-alive include="ChatRoom">
+                <component :is="Component" />
+            </keep-alive>
+        </router-view>
     </n-config-provider>
 </template>
 

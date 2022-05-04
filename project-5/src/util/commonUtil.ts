@@ -1,4 +1,5 @@
 import config from "@/config/config";
+import { useChatStore } from "@/store/chat";
 
 // 預設值
 export const ME_USER_NAME = "admin1"; // 自己
@@ -7,6 +8,8 @@ export const YOU_USER_NAME = ["tony1"]; // 對方
 export const OPAQUEID = "SMS_Plugin-123456789123";
 export const MY_ROOM = 1234; //Demo room
 export const JANUS_URL: any = `${config.janusUrl}/janus`;
+
+export const isProduction = process.env.NODE_ENV === "production";
 // export let JANUS_URL: any = "";
 // if (window.location.protocol === "http:") {
 //     // server = "http://" + window.location.hostname + ":8088/janus";
@@ -15,15 +18,13 @@ export const JANUS_URL: any = `${config.janusUrl}/janus`;
 //     JANUS_URL = "https://" + window.location.hostname + ":8089/janus";
 // }
 // 回覆點擊功能
-export const scrollPageTo = (replyId: string | null, isProduction?) => {
-    console.log("replyId:", replyId);
+export const scrollPageTo = (replyId: string | null) => {
     if (!replyId) return;
-
     const element: any = document.getElementById(`${replyId}`);
     element.scrollIntoView({ behavior: "smooth", block: "center", nearest: "center" });
-    const shakeDom = isProduction ? 5 : 7;
-    const getAnimateClassName = element.childNodes[shakeDom].childNodes[0];
-    // console.log("dom", element.childNodes[7].childNodes[0]);
+    const shakeDom = isProduction ? 1 : 7;
+    console.log("getAnimateClassName:", element.childNodes);
+    const getAnimateClassName = element.childNodes[shakeDom];
     setTimeout(() => {
         getAnimateClassName.classList.add("animate__shakeX");
     }, 600);
@@ -316,3 +317,23 @@ export const fileAccept =
 
 // 可上傳圖片類型
 export const imgAccept = "image/png, image/jpeg, image/gif";
+
+//監聽sessionStorage
+export const resetSetItem = (key, newVal) => {
+    if (key !== null) {
+        // 创建一个StorageEvent事件
+        const newStorageEvent = document.createEvent("StorageEvent") as any;
+        const storage = {
+            setItem: function (k, val) {
+                sessionStorage.setItem(k, val);
+
+                // 初始化创建的事件
+                newStorageEvent.initStorageEvent("setItem", false, false, k, null, val, null, null);
+
+                // 派发对象
+                window.dispatchEvent(newStorageEvent);
+            },
+        };
+        return storage.setItem(key, newVal);
+    }
+};

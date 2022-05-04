@@ -376,16 +376,15 @@ const createColumns = ({ cancelReservationPopUp }) =>
             },
         },
         {
-            title: "發送通數",
-            key: "count",
-            align: "center",
+            title: "發送門號",
+            key: "mobile",
             render(row, index) {
                 return h(
                     "p",
                     {
-                        class: "link",
+                        class: "link ",
                     },
-                    row.count
+                    row.mobile
                 );
             },
         },
@@ -400,20 +399,6 @@ const createColumns = ({ cancelReservationPopUp }) =>
                         class: "link",
                     },
                     row.status === 0 ? 1 : 0
-                );
-            },
-        },
-        {
-            title: "傳送中通數",
-            key: "status",
-            align: "center",
-            render(row, index) {
-                return h(
-                    "p",
-                    {
-                        class: "link",
-                    },
-                    row.status === 1 ? 1 : 0
                 );
             },
         },
@@ -703,10 +688,10 @@ const pagination = {
     }
     .content {
         width: 200px;
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
-        overflow: hidden;
+        // display: -webkit-box;
+        // -webkit-box-orient: vertical;
+        // -webkit-line-clamp: 2;
+        // overflow: hidden;
     }
 }
 </style>

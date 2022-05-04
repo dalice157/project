@@ -18,12 +18,12 @@
             <UserInfo :info="eventInfo" />
             <div class="description">語音來電</div>
             <ul class="call_container">
-                <li @click="doHangup(2, eventID(route.params.eventKey))">
+                <li @[events]="doHangup(2, eventID(route.params.eventKey))">
                     <span class="icon"><img :src="hangUpIcon" alt="掛斷" /></span>
                     <h4 class="text">掛斷</h4>
                 </li>
                 <li>
-                    <button class="icon" @click="onIncomingCall(yourUsername, jsepMsg)"></button>
+                    <button class="icon" @[events]="onIncomingCall(yourUsername, jsepMsg)"></button>
                     <h4 class="text">接聽</h4>
                 </li>
             </ul>
@@ -35,7 +35,7 @@
             <div class="popUp">
                 您已在其他設備使用, 請關閉其他設備後點選重整按鈕
                 <div class="btnWrap">
-                    <n-button color="#ffb400" text-color="#fff" type="primary" @click="onReload">
+                    <n-button color="#ffb400" text-color="#fff" type="primary" @[events]="onReload">
                         重整
                     </n-button>
                 </div>
@@ -49,7 +49,17 @@ import { storeToRefs } from "pinia";
 import adapter from "webrtc-adapter";
 import Janus from "@/assets/js/janus";
 import { nanoid } from "nanoid";
-import { defineComponent, ref, onMounted, computed, watchEffect, watch, onUnmounted } from "vue";
+import {
+    defineComponent,
+    ref,
+    onMounted,
+    computed,
+    watchEffect,
+    onBeforeMount,
+    nextTick,
+    watch,
+    reactive,
+} from "vue";
 import { NModal, NCard, NButton } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
 import dayjs from "dayjs";
@@ -77,6 +87,7 @@ import {
     JANUS_URL,
     chatroomID,
     convertTime,
+    isMobile,
 } from "@/util/commonUtil";
 import NavBar from "@/components/Chat/NavBar.vue";
 import MessageBox from "@/components/Chat/MessageBox";
@@ -85,9 +96,8 @@ import Input from "@/components/Chat/Input";
 import UserInfo from "@/components/UserInfo.vue";
 import hangUpIcon from "@/assets/Images/common/close-round-red.svg";
 
-import Gallery from "./Gallery.vue";
+const events = ref(isMobile ? "touchstart" : "click");
 
-let janus: any = null;
 let myid: any = null;
 let myusername: any = null;
 let transactions: any = {};
@@ -122,6 +132,7 @@ const {
     isOnline,
     adminCount,
     janusConnectStatus,
+    janus,
 } = storeToRefs(chatStore);
 
 //phoneCall store
@@ -133,21 +144,29 @@ const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime
 getEventListApi(route.params.eventKey);
 getBackendApi(route.params.eventKey);
 
-const iOS = ["iPad", "iPhone", "iPod"].indexOf(navigator.platform) !== -1;
-console.log("platform:", navigator.platform);
-console.log("iOS platform:", iOS);
-if (iOS) {
-    window.addEventListener("pagehide", (event) => {
-        console.log("pagehide:", event);
-        janus.destroy();
-    });
+var isiOS = !!navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
+if (isiOS) {
+    addEventListener(
+        "pagehide",
+        () => {
+            if (document.visibilityState === "visible") {
+                console.log("pagehide visible iOS platform:", isiOS);
+                for (var s in Janus.sessions) {
+                    if (Janus.sessions[s] && Janus.sessions[s].destroyOnUnload) {
+                        console.log("Destroying session " + s);
+                        Janus.sessions[s].destroy({ unload: true, notifyDestroyed: false });
+                    }
+                }
+            }
+        },
+        true
+    );
 }
-document.addEventListener("visibilitychange", (event) => {
+addEventListener("visibilitychange", (event) => {
     if (document.visibilityState === "hidden") {
-        janus.destroy();
+        janus.value.destroy();
     }
     if (document.visibilityState === "visible") {
-        console.log("visible:", event);
         Janus.init({
             debug: "all",
             dependencies: Janus.useDefaultDependencies({
@@ -234,7 +253,9 @@ const initWeclomeMsg = () => {
     );
     pictures.value = JSON.parse(localStorage.getItem(`${route.params.eventKey}-pictures`) || "[]");
 };
+const sessionId = ref(null);
 watchEffect(() => {
+    sessionId.value = Object.keys(Janus.sessions);
     initWeclomeMsg();
 });
 onMounted(() => {
@@ -242,7 +263,6 @@ onMounted(() => {
 });
 //janus 初始值
 onMounted(() => {
-    console.log("onMounted");
     Janus.init({
         debug: "all",
         dependencies: Janus.useDefaultDependencies({
@@ -260,7 +280,7 @@ onMounted(() => {
 
 // 連線
 const connect = () => {
-    janus = new Janus({
+    janus.value = new Janus({
         server: JANUS_URL,
         success: () => {
             if (route) {
@@ -364,7 +384,7 @@ const onReload = () => {
 };
 // attach textroom plugin
 const attachTextroomPlugin = () => {
-    janus.attach({
+    janus.value.attach({
         plugin: "janus.plugin.textroom",
         OPAQUEID: OPAQUEID,
         success: function (pluginHandle: IAttachPlugin) {
@@ -559,7 +579,7 @@ const calling = ref();
 const connecting = ref();
 //video call plugin
 const attachVideocallPlugin = () => {
-    janus.attach({
+    janus.value.attach({
         plugin: "janus.plugin.videocall",
         OPAQUEID: OPAQUEID,
         success: function (pluginHandle: IAttachPlugin) {

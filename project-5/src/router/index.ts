@@ -30,11 +30,11 @@ const routes: Array<RouteRecordRaw> = [
     },
     {
         path: "/chat/:id?",
-        name: "Chat",
+        name: "ChatRoom",
         components: {
             container: ChatRoom,
         },
-        meta: { show: true, home: false },
+        meta: { show: true, home: false, keepAlive: true },
     },
     {
         path: "/gallery/:id",

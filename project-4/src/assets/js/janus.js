@@ -381,7 +381,7 @@ Janus.init = function (options) {
         var eventName = iOS ? "pagehide" : "beforeunload";
         var oldOBF = window["on" + eventName];
         window.addEventListener(eventName, function () {
-            console.log("Closing window");
+            console.log("Closing window", eventName);
             for (var s in Janus.sessions) {
                 if (Janus.sessions[s] && Janus.sessions[s].destroyOnUnload) {
                     console.log("Destroying session " + s);
@@ -968,7 +968,7 @@ function Janus(gatewayCallbacks) {
                 open: function () {
                     // We need to be notified about the success
                     transactions[transaction] = function (json) {
-                        Janus.debug(json);
+                        console.log("wsHandlers open:", json);
                         if (json["janus"] !== "success") {
                             Janus.error(
                                 "Ooops: " + json["error"].code + " " + json["error"].reason
@@ -1015,7 +1015,7 @@ function Janus(gatewayCallbacks) {
             withCredentials: withCredentials,
             body: request,
             success: function (json) {
-                Janus.debug(json);
+                console.log("httpAPICall POST: ", json);
                 if (json["janus"] !== "success") {
                     Janus.error("Ooops: " + json["error"].code + " " + json["error"].reason); // FIXME
                     callbacks.error(json["error"].reason);
@@ -1201,7 +1201,7 @@ function Janus(gatewayCallbacks) {
             withCredentials: withCredentials,
             body: request,
             success: function (json) {
-                console.log("Destroyed session:");
+                console.log("Destroyed POST session:");
                 Janus.debug(json);
                 sessionId = null;
                 connected = false;

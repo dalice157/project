@@ -28,7 +28,9 @@ export const useModelStore = defineStore({
             this.showModal = false;
         },
         gotoChat(eventKey: string | null) {
-            location.href = `/${eventKey}`;
+            setTimeout(function () {
+                document.location.href = `/${eventKey}`;
+            }, 250);
         },
         gotoPhone(eventKey: string | null) {
             this.router.push(`/phone/${eventKey}`);
@@ -36,13 +38,19 @@ export const useModelStore = defineStore({
         closeAll() {
             const chatStore = useChatStore();
             const { closeRecorder } = chatStore;
-            const { showRecorderModal, inputFunctionBoolean, showStickerModal } =
-                storeToRefs(chatStore);
+            const {
+                showRecorderModal,
+                inputFunctionBoolean,
+                showStickerModal,
+                userMediaMicrophone,
+            } = storeToRefs(chatStore);
             const searchStore = useSearchStore();
             const { closeSearchBar } = searchStore;
             showRecorderModal.value = false;
             inputFunctionBoolean.value = false;
             showStickerModal.value = false;
+            if (!userMediaMicrophone.value) return;
+            userMediaMicrophone.value.getTracks().forEach((track) => track.stop());
             // closeRecorder();
             closeSearchBar();
         },

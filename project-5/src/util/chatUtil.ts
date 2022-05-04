@@ -6,6 +6,7 @@ import { useChatStore } from "@/store/chat";
 import { useApiStore } from "@/store/api";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { useChatRecordStore } from "@/store/chatRecord";
+import { resetSetItem } from "@/util/commonUtil";
 
 //發送私人訊息
 export const sendPrivateMsg = ({
@@ -82,18 +83,45 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
         [key: string]: any;
     }
     const { what, whisper } = data;
+
     const whatStatus: whatType = {
         message: () => {
             if (whisper === true) {
                 console.log("Private message->", data);
                 const msg = JSON.parse(data.msg);
                 const getFrom = msg.janusMsg.chatroomID;
-                console.log("msg", msg);
-                console.log("getFrom:", getFrom);
-                messageFrom.value = getFrom;
-                messageForm.value = msg;
-                // console.log("messageFrom", messageFrom.value);
-                // console.log("messageForm", messageForm.value);
+
+                if (data.msg !== "recall") {
+                    messageFrom.value = getFrom;
+                    messageForm.value = msg;
+                    console.log(" whisper messageFrom", messageFrom.value);
+                    console.log(" whisper messageForm", messageForm.value);
+                    const lastChatMessageArr = JSON.parse(
+                        sessionStorage.getItem(`${messageFrom.value}-lastChatMessage`)
+                    );
+                    lastChatMessageArr.push(messageForm.value);
+                    resetSetItem(
+                        `${messageFrom.value}-lastChatMessage`,
+                        JSON.stringify(lastChatMessageArr.slice(-10))
+                    );
+                } else {
+                    console.log("lastChatMessageArr recall:");
+
+                    const lastChatMessageArr = JSON.parse(
+                        sessionStorage.getItem(`${messageFrom.value}-lastChatMessage`)
+                    );
+
+                    lastChatMessageArr.push(messageForm.value);
+                    resetSetItem(
+                        `${messageFrom.value}-lastChatMessage`,
+                        JSON.stringify(lastChatMessageArr.slice(-10))
+                    );
+                }
+                // sessionStorage.setItem(
+                //     `${messageFrom.value}-lastChatMessage`,
+                //     JSON.stringify(lastChatMessageArr.slice(-10))
+                // );
+                // console.log("lastChatMessageArr", lastChatMessageArr);
                 // console.log("chatroomID:", chatroomID);
                 // console.log("data.from:", data.from);
                 // notifyMe(data);

@@ -3,7 +3,7 @@
     <div
         class="reply"
         v-show="isReplyBox"
-        @click.prevent="scrollPageTo(replyMsg.janusMsg.config.id, isProduction)"
+        @click.prevent="scrollPageTo(replyMsg.janusMsg.config.id)"
     >
         <div class="usertext">
             <div class="replyText" v-if="replyMsg && replyMsg.janusMsg.msgType === 6">[照片]</div>

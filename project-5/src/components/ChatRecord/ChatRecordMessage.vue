@@ -41,10 +41,8 @@
             <div class="functionBox">
                 <div class="time">
                     {{
-                        isToday
+                        dayjs(num.time / 1000000).isToday()
                             ? dayjs(num.time / 1000000).format("A hh:mm")
-                            : isYesterday
-                            ? "昨天"
                             : dayjs(num.time / 1000000).format("MM/DD")
                     }}
                 </div>
@@ -96,13 +94,14 @@
                     </h2>
                     <h2 class="info_title" v-else>{{ num.name }}</h2>
                     <n-ellipsis class="messageEllipsis" :line-clamp="1" :tooltip="false">
+                        <!-- <p v-if="num.sender === 0 && num.recallStatus === true">您已收回訊息</p>
+                        <p v-if="num.sender === 1 && num.recallStatus === true">對方以收回訊息</p> -->
                         <p v-if="num.msgType === 1 && num.msg !== ''">
                             {{ num.msg }}
                         </p>
                         <p v-if="[3, 5, 6, 7, 8, 9].includes(num.msgType)">
                             傳送了{{ sendMsgTypeObj[num.msgType] }}
                         </p>
-                        <p v-if="num.msgType === 1 && num.msg == ''"></p>
                     </n-ellipsis>
                 </div>
             </div>
@@ -110,10 +109,8 @@
                 <div>
                     <div class="time">
                         {{
-                            isToday
+                            dayjs(num.time / 1000000).isToday()
                                 ? dayjs(num.time / 1000000).format("A hh:mm")
-                                : isYesterday
-                                ? "昨天"
                                 : dayjs(num.time / 1000000).format("MM/DD")
                         }}
                     </div>
@@ -150,7 +147,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed, onMounted, watch, watchEffect } from "vue";
+import { ref, computed, onMounted, watch, watchEffect, reactive } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { NAvatar, NEllipsis, NModal, NCard } from "naive-ui";
 import { nanoid } from "nanoid";
@@ -203,11 +200,8 @@ onMounted(() => {
         eventID.value = route.params.id ? route.params.id : eventList.value[0].eventID;
     });
 });
-let chatRoomArr = ref([]);
 watch(route, () => {
-    if (!route.query) {
-        return;
-    }
+    if (!route.query) return;
     if (Object.keys(route.query).includes("chatroomID")) {
         const message: any = {
             textroom: "message",
@@ -277,72 +271,80 @@ onMounted(() => {
 const highlightRoom = (chatRoomID) => {
     highlightRoomID.value = chatRoomID;
 };
-
+//最後一筆訊息陣列
+const lastChatMessageArr = ref([]);
+let lastObj = reactive({});
 //有即時訊息來更新左側聊天紀錄狀態
+onMounted(() => {
+    // window.addEventListener("setItem", () => {
+    //     // setTimeout(function () {
+    //     lastChatMessageArr.value = JSON.parse(
+    //         sessionStorage.getItem(`${messageFrom.value}-lastChatMessage` || "[]")
+    //     );
+    //     lastChatMessageArr.value?.forEach((item, idx, arr) => {
+    //         lastObj = arr[arr.length - 1];
+    //     });
+    //     console.log("messagefrom", messageFrom.value);
+    //     console.log("lastChatMessageArr", lastChatMessageArr.value);
+    //     console.log("lastObj", lastObj);
+    //     // }, 1000);
+    // });
+});
+const aaa = ref({});
 watchEffect(() => {
     recordMessages.value = chatroomList.value;
-    if (changeList.value.length > 0) {
-        changeList.value.forEach((msg) => {
-            if (messageFrom.value === msg.chatroomID && messageForm.value.janusMsg.msgType === 1) {
-                msg.unread = 1;
-                msg.msg = messageForm.value.janusMsg.msgContent;
-                msg.time = messageForm.value.janusMsg.time;
-                msg.msgType = messageForm.value.janusMsg.msgType;
-                if (messageFrom.value === route.query.chatroomID) {
-                    msg.unread = 0;
-                    messageFrom.value = "";
-                }
-            } else if (
-                messageFrom.value === msg.chatroomID &&
-                messageForm.value.janusMsg.msgType !== 1
-            ) {
-                msg.unread = 1;
-                msg.msg = `傳送了${sendMsgTypeObj[messageForm.value.janusMsg.msgType]}`;
-                msg.time = messageForm.value.janusMsg.time;
-                msg.msgType = messageForm.value.janusMsg.msgType;
-                if (messageFrom.value === route.query.chatroomID) {
-                    msg.unread = 0;
-                    messageFrom.value = "";
-                }
+
+    if (changeList.value.length <= 0) return;
+    console.log("watchEffect messagefrom", messageFrom.value);
+    aaa.value = messageFrom.value;
+    window.addEventListener(
+        "setItem",
+        () => {
+            // setTimeout(() => {
+            console.log("setItem messagefrom", aaa.value);
+            lastChatMessageArr.value = JSON.parse(
+                sessionStorage.getItem(`${aaa.value}-lastChatMessage` || "[]")
+            );
+            lastChatMessageArr.value?.forEach((item, idx, arr) => {
+                lastObj = arr[arr.length - 1];
+            });
+            console.log("lastChatMessageArr", lastChatMessageArr.value);
+            console.log("lastObj", lastObj);
+            // }, 1000);
+        },
+        false
+    );
+
+    // lastChatMessageArr.value = JSON.parse(
+    //     sessionStorage.getItem(`${messageFrom.value}-lastChatMessage` || "[]")
+    // );
+
+    // lastChatMessageArr.value?.forEach((item, idx, arr) => {
+    //     lastObj = arr[arr.length - 1];
+    // });
+    // console.log("lastChatMessageArr", lastChatMessageArr.value);
+    // console.log("lastObj", lastObj);
+
+    changeList.value.forEach((msg) => {
+        if (messageFrom.value !== msg.chatroomID) return;
+        if (messageForm.value.janusMsg.msgType !== 10) {
+            msg.unread = 1;
+            msg.time = messageForm.value.janusMsg.time;
+            msg.msgType = messageForm.value.janusMsg.msgType;
+            msg.msg =
+                messageForm.value.janusMsg.msgType === 1
+                    ? messageForm.value.janusMsg.msgContent
+                    : `傳送了${sendMsgTypeObj[messageForm.value.janusMsg.msgType]}`;
+            msg.recallStatus = messageForm.value.janusMsg.config.recallStatus;
+            msg.sender = messageForm.value.janusMsg.sender;
+            if (messageFrom.value === route.query.chatroomID) {
+                msg.unread = 0;
+                messageFrom.value = "";
             }
-        });
-        changeList.value.sort((a, b) => b.time - a.time);
-    }
+        }
+    });
+    changeList.value.sort((a, b) => b.time - a.time).sort((a, b) => b.pinTop - a.pinTop);
 });
-//unread => 0:已讀,1:未讀
-// watch(
-//     () => _.cloneDeep(changeList.value),
-//     (newVal, oldVal) => {
-//         newVal.forEach((newItem, newIndex, newArr) => {
-//             // console.log("newtime", newArr[newIndex]?.time);
-//             // console.log("oldtime", oldVal[newIndex]?.time);
-//             // console.log("newText", newArr[newIndex]?.msg);
-//             // console.log("oldText", oldVal[newIndex]?.msg);
-//             console.log("newTime", newArr[newIndex]?.time);
-//             console.log("oldTime", oldVal[newIndex]?.time);
-
-//             if (oldVal[newIndex]?.time !== undefined) {
-//                 if (
-//                     newArr[newIndex]?.time !== oldVal[newIndex]?.time &&
-//                     messageFrom.value === route.query.chatroomID
-//                 ) {
-//                     // console.log("messageFrom", messageFrom.value);
-//                     // console.log("route.query.chatroomID", route.query.chatroomID);
-//                     changeList.value[newIndex].unread = 0;
-//                     console.log("不顯示未讀");
-
-//                 } else if (
-//                     newArr[newIndex]?.time !== oldVal[newIndex]?.time &&
-//                     messageFrom.value !== route.query.chatroomID
-//                 ) {
-//                     changeList.value[newIndex].unread = 1;
-//                     console.log("顯示未讀");
-//                 }
-//             }
-//         });
-//     },
-//     { deep: true }
-// );
 
 //開啟功能列表
 const openFunctionPopUp = (num: any) => {

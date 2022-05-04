@@ -7,6 +7,8 @@ import { useChatStore } from "@/store/chat";
 import { useSmsStore } from "@/store/smsStore";
 import { useMmsStore } from "@/store/mmsStore";
 import { currentTime, currentDate } from "@/util/dateUtil";
+import { randomString } from "@/util/chatUtil";
+import { resetSetItem } from "@/util/commonUtil";
 import dayjs from "dayjs";
 
 export const useApiStore = defineStore({
@@ -156,9 +158,11 @@ export const useApiStore = defineStore({
                 });
         },
         // 聊天室歷史內容
-        async getHistoryApi(chatRoomID) {
+        async getHistoryApi(chatRoomID, eventID) {
             console.log("1 isInput:", this.isInput);
             const getToken = localStorage.getItem("access_token");
+            const welcomeList = JSON.parse(localStorage.getItem(`${eventID}-welcomeList`) || "[]");
+
             const bodyFormData = new FormData();
             this.msgStart = this.isInput ? 0 : this.msgStart;
             bodyFormData.append("chatroomID", chatRoomID);
@@ -175,14 +179,19 @@ export const useApiStore = defineStore({
                     this.totalCount = res.data.totalCount;
                     this.messageList = this.isInput
                         ? !res.data.messageList
-                            ? []
-                            : res.data.messageList
+                            ? [...welcomeList]
+                            : [...welcomeList, ...res.data.messageList]
                         : this.messageList.concat(
-                              !res.data.messageList ? [] : res.data.messageList
+                              !res.data.messageList
+                                  ? [...welcomeList]
+                                  : [...welcomeList, ...res.data.messageList]
                           );
                     this.messageList = this.messageList.reduce((unique, o) => {
                         const hasRepeatId = unique.some((obj) => {
-                            return obj.janusMsg.config.id === o.janusMsg.config.id;
+                            return (
+                                obj.janusMsg.config.id === o.janusMsg.config.id &&
+                                obj.janusMsg.msgType !== 10
+                            );
                         });
                         if (!hasRepeatId) {
                             unique.push(o);
@@ -192,6 +201,18 @@ export const useApiStore = defineStore({
                         });
                         return unique;
                     }, []);
+                    const lastChatMessage = this.messageList.filter(
+                        (item) => !item.janusMsg.config.recallStatus
+                    );
+                    resetSetItem(
+                        `${chatRoomID}-lastChatMessage`,
+                        JSON.stringify(lastChatMessage.slice(-10))
+                    );
+
+                    // sessionStorage.setItem(
+                    //     `${chatRoomID}-lastChatMessage`,
+                    //     JSON.stringify(lastChatMessage.slice(-10))
+                    // );
                     if (
                         this.messageList.length > 0 &&
                         this.userInfo.lastVisit >
@@ -250,6 +271,10 @@ export const useApiStore = defineStore({
                 .then((res: any) => {
                     // console.log("event res:", res);
                     this.eventInfo = res.data.msg;
+                    localStorage.setItem(
+                        `${eventID}-welcomeList`,
+                        JSON.stringify(res.data.msg.messageList)
+                    );
                 })
                 .catch((err: any) => {
                     console.error(err);
@@ -267,6 +292,7 @@ export const useApiStore = defineStore({
                 .then((res: any) => {
                     // console.log("eventlist res:", res);
                     this.eventList = res.data.eventList;
+                    console.log("this.eventList:", this.eventList);
                 })
                 .catch((err: any) => {
                     console.error(err);
@@ -519,13 +545,15 @@ export const useApiStore = defineStore({
                     },
                 })
                 .then((res: any) => {
-                    this.staffEvents = res.data;
-                    console.log("staffEvents", this.staffEvents);
+                    this.staffEvents = { ...res.data, events: res.data.events || [] };
                     // this.channelEvent = res.data.msg;
                 })
                 .catch((err: any) => {
                     if (err.response && err.response.data.msg === "沒有管理人員") {
-                        this.staffEvents = [];
+                        this.staffEvents = {
+                            accountName: "",
+                            events: [],
+                        };
                     }
                     console.log("events err:", err);
                 });
@@ -654,8 +682,11 @@ export const useApiStore = defineStore({
                 });
         },
         //收回訊息api
-        async recallAPI(msg, chatroomID) {
+        async recallAPI(msg, params, chatroomID) {
+            console.log("msg:", msg);
             // api store
+            const chatStore = useChatStore();
+            const { textPlugin } = storeToRefs(chatStore);
             const getToken = localStorage.getItem("access_token");
             const fd = new FormData();
             fd.append("chatroomID", chatroomID);
@@ -670,6 +701,31 @@ export const useApiStore = defineStore({
             })
                 .then((res: any) => {
                     console.log("recall API", res);
+                    const recallMsgObj = {
+                        janusMsg: {
+                            ...msg.janusMsg,
+                            msgType: 10,
+                        },
+                    };
+                    const message: any = {
+                        textroom: "message",
+                        transaction: randomString(12),
+                        room: Number(params),
+                        // tos: [全部在線客服1,全部在線客服2],
+                        tos: [chatroomID],
+                        text: JSON.stringify(recallMsgObj),
+                    };
+                    textPlugin.value.data({
+                        text: JSON.stringify(message),
+                        error: function (reason: any) {
+                            console.log("error:", reason);
+                        },
+                        success: function () {
+                            console.log("recall pin");
+                        },
+                    });
+                    console.log("recallAPI res:", message);
+                    this.getHistoryApi(chatroomID, params);
                 })
                 .catch((err: any) => {
                     console.error(err.response);

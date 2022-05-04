@@ -55,7 +55,7 @@ export const useSearchStore = defineStore({
                     // regStr = regStr + "(" + val[i] + ")([\\s]*)";
                     regStr += s;
                 });
-                console.log("regStr:", regStr);
+                // console.log("regStr:", regStr);
 
                 const reg = new RegExp(regStr);
                 messageList.value.forEach((msg: any) => {
@@ -111,7 +111,7 @@ export const useSearchStore = defineStore({
         },
         //更多聊天室
         onSearchMoreImResult(val: any) {
-            console.log("val:", val);
+            // console.log("val:", val);
             const apiStore = useApiStore();
             const { eventList } = storeToRefs(apiStore);
             if (val) {
@@ -141,12 +141,14 @@ export const useSearchStore = defineStore({
             console.log("searcMessages:", this.searcMoreMessages);
         },
         onClickGoto(id: string, eventID: any) {
-            console.log("eventID:", eventID);
+            console.log("janus ID:", id);
+
+            // console.log("eventID:", eventID);
             //chat store
             const chatStore = useChatStore();
             const { messages } = storeToRefs(chatStore);
             const route = useRoute();
-            scrollPageTo(id,);
+            scrollPageTo(id);
             messages.value = JSON.parse(localStorage.getItem(`${eventID}-backend`) || "[]");
             this.closeSearchBar();
             this.isResult = false;

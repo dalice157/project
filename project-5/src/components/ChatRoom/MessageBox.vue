@@ -1,5 +1,5 @@
 <template>
-    <div
+    <!-- <div
         id="drop-area"
         :class="{ dropActive: dropActive }"
         class="chatroom-inner notMsg"
@@ -7,7 +7,7 @@
         v-if="messageArray.length === 0"
     >
         尚無聊天訊息!!
-    </div>
+    </div> -->
     <div
         id="drop-area"
         :class="{ dropActive: dropActive }"
@@ -15,17 +15,20 @@
         ref="findScrollHeight"
         @click="closeAll"
         @scroll="chatroomToBottom($event)"
-        v-if="messageArray.length > 0"
     >
-        <div class="background">
+        <div class="background" v-if="messageArray.length > 0">
             <!-- 對話區塊 -->
+
             <div
                 class="dialog-box"
                 :class="{
                     otherMsg: text.janusMsg.sender === 1,
                     myMsg: text.janusMsg.sender === 0,
                     mapMsg: text.janusMsg.msgType === 8,
-                    mobileMsg: text.janusMsg.msgType === 9 || text.janusMsg.msgType === 5,
+                    mobileMsg:
+                        text.janusMsg.msgType === 9 ||
+                        text.janusMsg.msgType === 5 ||
+                        text.janusMsg.msgType === 8,
                     delChoice: deleteBoolean,
                     recallChoice: text.janusMsg.config.recallStatus,
                     dateMsg:
@@ -39,6 +42,7 @@
                 :id="text.janusMsg.config.id"
             >
                 <!-- {{ text }} -->
+
                 <!-- 日期樣板 -->
                 <div
                     v-if="
@@ -69,20 +73,22 @@
                 </n-checkbox-group> -->
 
                 <!-- 收回訊息樣板 -->
-                <div class="recall" v-if="text.janusMsg.config.recallStatus">
+                <div
+                    class="recall"
+                    v-if="text.janusMsg.config.recallStatus && text.janusMsg.msgType !== 10"
+                >
+                    <!-- {{ text }} -->
                     <div>
-                        <p v-if="text.janusMsg.msgContent && text.janusMsg.sender === 0">
+                        <p v-if="text.janusMsg.sender === 0">
                             您已收回訊息&emsp;
-                            <span @click="reEdit(text.janusMsg.config.id)">
+                            <span
+                                v-if="text.janusMsg.msgContent"
+                                @click="reEdit(text.janusMsg.config.id)"
+                            >
                                 <u>重新編輯</u>
                             </span>
                         </p>
-                        <p
-                            class="recallMsg"
-                            v-if="text.janusMsg.msgContent && text.janusMsg.sender === 1"
-                        >
-                            對方已收回訊息
-                        </p>
+                        <p v-if="text.janusMsg.sender === 1">對方已收回訊息</p>
                     </div>
                 </div>
 
@@ -121,6 +127,7 @@
                             class="msg_more"
                             :class="{ show: text.janusMsg.config.msgFunctionStatus }"
                             @click.stop="onBubble(text)"
+                            v-if="text.janusMsg.msgType !== 10"
                         >
                             <img :src="moreIcon" alt="more" />
                             <!-- 訊息功能框 -->
@@ -143,7 +150,6 @@
                                             :href="`${config.serverUrl}/v1/file/${text.janusMsg.format.Fileid}`"
                                             target="_blank"
                                         >
-                                            {{ text.janusMsg.config.isExpire }}
                                             下載
                                         </a>
                                     </li>
@@ -398,7 +404,11 @@
                         </div>
                     </div>
                     <!-- 時間戳記 -->
-                    <div class="timestamp" :class="{ yourTimeStamp: text.janusMsg.sender === 0 }">
+                    <div
+                        class="timestamp"
+                        :class="{ yourTimeStamp: text.janusMsg.sender === 0 }"
+                        v-if="text.janusMsg.msgType !== 10"
+                    >
                         <div class="mms" v-if="text.janusMsg.type === 1">以簡訊發送</div>
                         <span v-if="text.janusMsg.config.isRead && text.janusMsg.sender === 0"
                             >已讀</span
@@ -451,9 +461,23 @@
         </div>
     </teleport> -->
 </template>
-
+<script lang="ts">
+export default {
+    name: "MessageBox",
+    inheritAttrs: false,
+};
+</script>
 <script setup lang="ts">
-import { ref, computed, onMounted, onUpdated, watch, nextTick, reactive } from "vue";
+import {
+    ref,
+    computed,
+    onMounted,
+    onUpdated,
+    watch,
+    nextTick,
+    reactive,
+    onBeforeUnmount,
+} from "vue";
 import useClipboard from "vue-clipboard3";
 import { api as viewerApi } from "v-viewer";
 import { storeToRefs } from "pinia";
@@ -481,6 +505,10 @@ import googleMapIcon from "@/assets/Images/chatroom/map.jpg";
 import audioIcon from "@/assets/Images/chatroom/audio.svg";
 import fileIcon from "@/assets/Images/chatroom/file-fill.svg";
 import phoneIcon from "@/assets/Images/chatroom/phone-fill-round-y.svg";
+
+const props = defineProps({
+    eventID: String,
+});
 
 //api store
 const apiStore = useApiStore();
@@ -599,7 +627,6 @@ const longPress = (msg: any) => {
 const dropActive = ref(false);
 const files = ref();
 const dropEvent = (e: any) => {
-    console.log("dataTransfer:", e.dataTransfer.files);
     dropActive.value = false;
     e.stopPropagation();
     e.preventDefault();
@@ -612,7 +639,6 @@ onMounted(() => {
     watch(messageArray, () => {
         if (messageArray.value.length > 0) {
             const dropArea = document.getElementById("drop-area");
-            console.log("dropArea:", dropArea);
 
             dropArea?.addEventListener("drop", dropEvent, false);
             dropArea?.addEventListener("dragleave", (e: any) => {
@@ -867,7 +893,7 @@ const handleScroll = (e) => {
 const loadMore = () => {
     if (totalCount.value >= 30) {
         msgStart.value = msgStart.value + 30 + 1;
-        getHistoryApi(chatRoomID.value);
+        getHistoryApi(chatRoomID.value, props.eventID);
     }
 };
 
@@ -876,9 +902,8 @@ window.addEventListener("scroll", handleScroll, true);
 //重新編輯
 const reEdit = (id: string): void => {
     messageList.value.forEach((text: txt) => {
-        if (text.janusMsg.config.id === id) {
-            msg.value = text.janusMsg.msgContent;
-        }
+        if (text.janusMsg.config.id !== id) return;
+        msg.value = text.janusMsg.msgContent;
     });
 };
 
@@ -914,48 +939,40 @@ const downloadImage = (text: txt): void => {
 //收回訊息
 const recallMsg = (msg): void => {
     messageList.value.forEach((text: txt) => {
-        if (text.janusMsg.config.id === msg.janusMsg.config.id) {
-            text.janusMsg.config.recallStatus = true;
-            text.janusMsg.config.recallPopUp = false;
-        }
-        // if (text.janusMsg.config.replyObj.janusMsg.config.id === id) {
-        //     text.janusMsg.config.replyObj.janusMsg.config.recallStatus = true;
-        // }
+        if (text.janusMsg.config.id !== msg.janusMsg.config.id) return;
+        text.janusMsg.config.recallStatus = true;
+        text.janusMsg.config.recallPopUp = false;
     });
-    recallAPI(msg, chatRoomID.value);
+    recallAPI(msg, route.params.id, chatRoomID.value);
 };
 
 //收回彈窗
 const confirmRecallPopup = (text: txt): void => {
     messageList.value.forEach((item: txt) => {
-        if (item.janusMsg.config.id === text.janusMsg.config.id) {
-            text.janusMsg.config.msgFunctionStatus = false;
-            item.janusMsg.config.recallPopUp = !item.janusMsg.config.recallPopUp;
-        }
-        // if (item.janusMsg.config.replyObj.janusMsg.config.id === text.janusMsg.config.id) {
-        //     item.janusMsg.config.replyObj.janusMsg.config.recallPopUp =
-        //         !item.janusMsg.config.replyObj.janusMsg.config.recallPopUp;
-        // }
+        if (item.janusMsg.config.id !== text.janusMsg.config.id) return;
+        text.janusMsg.config.msgFunctionStatus = false;
+        item.janusMsg.config.recallPopUp = !item.janusMsg.config.recallPopUp;
     });
 };
 // 圖片展示
 const previewURL = (fileid: string): void => {
     pictures.value.forEach((img: any) => {
         if (
-            !viewImgs.value.includes(
+            viewImgs.value.includes(
                 `${config.fileUrl}${img.janusMsg.format.Fileid}${img.janusMsg.format.ExtensionName}`
-            ) &&
-            img.janusMsg.msgType === 6
-        ) {
+            )
+        )
+            return;
+        if (img.janusMsg.msgType === 6) {
             viewImgs.value.push(
                 `${config.fileUrl}${img.janusMsg.format.Fileid}${img.janusMsg.format.ExtensionName}`
             );
         }
     });
-    console.log(
-        "viewImgs",
-        viewImgs.value.map((img) => img.split("/"))
-    );
+    // console.log(
+    //     "viewImgs",
+    //     viewImgs.value.map((img) => img.split("/"))
+    // );
     // 環境設定
     const isProduction = process.env.NODE_ENV === "production";
     const getSplit = isProduction ? 3 : 4;
@@ -1347,22 +1364,20 @@ const previewURL = (fileid: string): void => {
         .recall {
             padding: 10px 14px;
             div {
-                width: 180px;
+                width: 210px;
                 margin: 0 auto;
+                display: flex;
+                justify-content: center;
                 padding: 3px 10px;
                 background-color: rgba(65, 73, 78, 0.2);
                 color: $gray-3;
-                font-size: $font-size-14;
-                line-height: 16px;
                 border-radius: 100px;
                 p {
-                    // text-align: center;
+                    font-size: $font-size-14;
+                    line-height: 16px;
                 }
                 span {
                     cursor: pointer;
-                }
-                .recallMsg {
-                    text-align: center;
                 }
             }
         }

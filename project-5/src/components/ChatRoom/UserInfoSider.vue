@@ -63,9 +63,7 @@
                 <n-dynamic-tags round v-model:value="tags" :closable="false" />
             </div>
             <h4 class="service-log">客服紀錄</h4>
-            <p class="service-content">
-                {{ userInfo.description || "無客服紀錄" }}
-            </p>
+            <p class="service-content" v-html="regDescShow || '無客服紀錄'"></p>
         </div>
 
         <div v-show="isUserIcon">
@@ -166,28 +164,25 @@ watch(
         isUserIcon.value = false;
     }
 );
+const regDescShow = computed(() => userInfo.value.description.replace(/\n/g, "<br>"));
 // 儲存
 const onSaveEdited = () => {
-    if (userInfo.value.name === "") {
-        alert("暱稱不能為空!!!");
-    } else {
-        console.log('save img.split("/"):', img.value.split("/"));
+    console.log("rexDesc:", regDescShow.value);
 
-        const infoObj = {
-            chatroomID: chatroomID.value,
-            name: userInfo.value.name,
-            mobile: Number(userInfo.value.mobile),
-            icon:
-                img.value.split("/")[getSplit] === "default.svg"
-                    ? 0
-                    : img.value.split("/")[getSplit].split(".")[0],
-            tag: tags.value.length === 0 ? userInfo.value.tag : tags.value,
-            description: userInfo.value.description,
-            eventID: route.params.id,
-        };
-        sendUserInfo(infoObj);
-        isEdited.value = false;
-    }
+    const infoObj = {
+        chatroomID: chatroomID.value,
+        name: userInfo.value.name,
+        mobile: Number(userInfo.value.mobile),
+        icon:
+            img.value.split("/")[getSplit] === "default.svg"
+                ? 0
+                : img.value.split("/")[getSplit].split(".")[0],
+        tag: tags.value.length === 0 ? userInfo.value.tag : tags.value,
+        description: userInfo.value.description,
+        eventID: route.params.id,
+    };
+    sendUserInfo(infoObj);
+    isEdited.value = false;
 };
 
 // 選擇圖像

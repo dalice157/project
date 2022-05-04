@@ -118,7 +118,7 @@ const { getHistoryApi } = apiStore;
 const { messageList } = storeToRefs(apiStore);
 
 if (Object.keys(route.query).length > 0) {
-    getHistoryApi(route.query.chatroomID);
+    getHistoryApi(route.query.chatroomID, route.params.id);
 }
 const pictures: any = computed({
     get() {
@@ -192,12 +192,13 @@ const previewURL = (fileid: string): void => {
 
     pictures.value.forEach((img: any) => {
         if (
-            !viewImgs.value.includes(
+            viewImgs.value.includes(
                 `${config.fileUrl}${img.janusMsg.format.Fileid}${img.janusMsg.format.ExtensionName}`
             ) &&
-            img.janusMsg.msgType === 6 &&
-            !img.janusMsg.config.isExpire
-        ) {
+            img.janusMsg.config.isExpire
+        )
+            return;
+        if (img.janusMsg.msgType === 6) {
             viewImgs.value.push(
                 `${config.fileUrl}${img.janusMsg.format.Fileid}${img.janusMsg.format.ExtensionName}`
             );

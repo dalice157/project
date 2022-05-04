@@ -1,12 +1,12 @@
 <template>
     <n-modal
         class="chatRecordCard"
-        @click.prevent="closeModal"
+        @[events].prevent="closeModal"
         v-model:show="showModal"
         preset="card"
     >
         <n-card :bordered="false" size="huge" class="container">
-            <div class="closeBtn" @click.stop="closeModal">
+            <div class="closeBtn" @[events].stop="closeModal">
                 <img :src="closeIcon" alt="關閉" />
             </div>
             <UserInfo :info="info" />
@@ -15,12 +15,12 @@
                 <li
                     v-if="eventInfo.callable === true"
                     class="call-phone"
-                    @click.stop="onPhoneCallModal"
+                    @[events].stop="onPhoneCallModal"
                 >
                     <span class="icon"><img :src="phoneIcon" alt="語音通話" /></span>
                     <p class="text">語音通話</p>
                 </li>
-                <li v-if="route.path !== '/'" @click.stop="gotoChat(info.eventKey)">
+                <li v-if="route.path !== '/'" @[events].stop="gotoChat(info.eventKey)">
                     <span class="icon"><img :src="messageIcon" alt="傳送訊息" /></span>
                     <p class="text">傳送訊息</p>
                 </li>
@@ -40,9 +40,11 @@ import { useModelStore } from "@/store/model";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { useChatStore } from "@/store/chat";
 import { useApiStore } from "@/store/api";
-import { DO_CALL_NAME } from "@/util/commonUtil";
+import { isMobile } from "@/util/commonUtil";
 import UserInfo from "@/components/UserInfo.vue";
 import closeIcon from "@/assets/Images/common/close-round.svg";
+
+const events = ref(isMobile ? "touchstart" : "click");
 
 const route = useRoute();
 //model store

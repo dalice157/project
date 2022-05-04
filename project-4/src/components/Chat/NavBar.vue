@@ -1,10 +1,10 @@
 <template>
-    <div class="navbar" @click="closeSearchBar">
+    <div class="navbar" @[events]="closeSearchBar">
         <div class="navbarFuncitonbar">
             <div class="navbartitle">
-                <router-link class="back" :to="`/chatRecord/${eventKey}`">
+                <a class="back" @[events]="goToRecord">
                     <img :src="arrowLeft" alt="回交談紀錄" />
-                </router-link>
+                </a>
                 <!-- NavBar 大頭貼 -->
                 <div class="navbarAvatar">
                     <n-avatar round :size="42" :src="`${config.fileUrl}${eventInfo.icon}`" />
@@ -14,9 +14,9 @@
             </div>
             <!-- 功能欄 -->
             <div class="chatpane">
-                <router-link class="back" :to="`/chatRecord/${eventKey}`">
+                <a class="back" @[events]="goToRecord">
                     <img :src="commentIcon" alt="回交談紀錄" />
-                </router-link>
+                </a>
                 <a class="phone" v-if="!isProduction && eventInfo.callable === true">
                     <video
                         class="hide"
@@ -26,13 +26,13 @@
                         autoplay
                         playsinline
                     />
-                    <img :src="phoneIcon" alt="撥打電話" @click="webPhoneCall" />
+                    <img :src="phoneIcon" alt="撥打電話" @[events]="webPhoneCall" />
                 </a>
                 <phoneCallModel />
-                <a class="gallery" @click="goToGallery">
+                <a class="gallery" @[events]="goToGallery">
                     <img :src="galleryIcon" alt="進入相本" />
                 </a>
-                <router-link class="search" :to="`/${eventKey}`" @click.stop="searchSwitch">
+                <router-link class="search" :to="`/${eventKey}`" @[events].stop="searchSwitch">
                     <img :src="searchIcon" alt="搜尋" />
                 </router-link>
             </div>
@@ -51,7 +51,7 @@ import { useChatStore } from "@/store/chat";
 import { useSearchStore } from "@/store/search";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { useModelStore } from "@/store/model";
-import { DO_CALL_NAME } from "@/util/commonUtil";
+import { isMobile } from "@/util/commonUtil";
 import config from "@/config/config";
 import phoneCallModel from "@/components/phoneCallModel.vue";
 import arrowLeft from "@/assets/Images/chatroom/arrow-left.svg";
@@ -60,13 +60,15 @@ import phoneIcon from "@/assets/Images/chatroom/phone.svg";
 import galleryIcon from "@/assets/Images/chatroom/list.svg";
 import searchIcon from "@/assets/Images/chatroom/search.svg";
 
+const events = ref(isMobile ? "touchstart" : "click");
+
 // api store
 const apiStore = useApiStore();
 const { eventInfo } = storeToRefs(apiStore);
 
 // chat store
 const chatStore = useChatStore();
-const { participantList, isOpenGallery } = storeToRefs(chatStore);
+const { participantList, janus } = storeToRefs(chatStore);
 
 //search store
 const searchStore = useSearchStore();
@@ -100,7 +102,14 @@ const phoneCall = () => {
     const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
     doCall(getCutomer);
 };
+
+const goToRecord = () => {
+    janus.value.destroy();
+    router.push(`/chatRecord/${eventKey.value}`);
+};
+
 const goToGallery = () => {
+    janus.value.destroy();
     router.push(`/gallery/${eventKey.value}`);
     // isOpenGallery.value = true;
 };
