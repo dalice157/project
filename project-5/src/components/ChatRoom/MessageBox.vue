@@ -944,6 +944,14 @@ const recallMsg = (msg): void => {
         text.janusMsg.config.recallPopUp = false;
     });
     recallAPI(msg, route.params.id, chatRoomID.value);
+    const lastChatMessageArr = JSON.parse(
+        sessionStorage.getItem(`${route.query.chatroomID}-lastChatMessage`)
+    );
+    lastChatMessageArr.forEach((item, index) => {
+        if (msg.janusMsg.config.id === item.janusMsg.config.id) {
+            lastChatMessageArr.splice(index, 1);
+        }
+    });
 };
 
 //收回彈窗

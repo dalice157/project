@@ -64,7 +64,10 @@ export const usePhoneCallStore = defineStore({
                 },
 
                 error: function (error: any) {
-                    console.log("error");
+                    alert("請檢查麥克風是否開啟!!");
+                    const modelStore = useModelStore();
+                    const { phoneCallModal } = storeToRefs(modelStore);
+                    phoneCallModal.value = false;
                     // @ts-ignore
                     Janus.error("videocall createOffer WebRTC error...", error);
                     //TODO do something
@@ -96,6 +99,10 @@ export const usePhoneCallStore = defineStore({
                 error: function (error: any) {
                     // @ts-ignore
                     Janus.error("WebRTC error:", error);
+                    alert("請檢查麥克風是否開啟!!");
+                    const modelStore = useModelStore();
+                    const { phoneCallModal } = storeToRefs(modelStore);
+                    phoneCallModal.value = false;
                 },
             });
         },

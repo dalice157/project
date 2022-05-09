@@ -201,18 +201,20 @@ export const useApiStore = defineStore({
                         });
                         return unique;
                     }, []);
-                    const lastChatMessage = this.messageList.filter(
-                        (item) => !item.janusMsg.config.recallStatus
-                    );
+                    const lastChatMessage = this.messageList
+                        .filter((item) => !item.janusMsg.config.recallStatus)
+                        .map((item) => {
+                            return {
+                                janusMsg: {
+                                    ...item.janusMsg,
+                                    chatroomID: chatRoomID,
+                                },
+                            };
+                        });
                     resetSetItem(
                         `${chatRoomID}-lastChatMessage`,
                         JSON.stringify(lastChatMessage.slice(-10))
                     );
-
-                    // sessionStorage.setItem(
-                    //     `${chatRoomID}-lastChatMessage`,
-                    //     JSON.stringify(lastChatMessage.slice(-10))
-                    // );
                     if (
                         this.messageList.length > 0 &&
                         this.userInfo.lastVisit >
@@ -252,8 +254,10 @@ export const useApiStore = defineStore({
                     //     //     item.unread = 1;
                     //     // }
                     // });
-
                     console.log("chatroomList api:", this.chatroomList);
+                    this.chatroomList.forEach((chatroom) => {
+                        sessionStorage.setItem(`${chatroom.chatroomID}-lastChatMessage`, "[]");
+                    });
                 })
                 .catch((err: any) => {
                     console.error(err);
@@ -725,7 +729,7 @@ export const useApiStore = defineStore({
                         },
                     });
                     console.log("recallAPI res:", message);
-                    this.getHistoryApi(chatroomID, params);
+                    // this.getHistoryApi(chatroomID, params);
                 })
                 .catch((err: any) => {
                     console.error(err.response);

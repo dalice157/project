@@ -49,20 +49,12 @@ import { storeToRefs } from "pinia";
 import adapter from "webrtc-adapter";
 import Janus from "@/assets/js/janus";
 import { nanoid } from "nanoid";
-import {
-    defineComponent,
-    ref,
-    onMounted,
-    computed,
-    watchEffect,
-    onBeforeMount,
-    nextTick,
-    watch,
-    reactive,
-} from "vue";
+import { defineComponent, ref, onMounted, computed, watchEffect, watch, nextTick } from "vue";
 import { NModal, NCard, NButton } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
 import dayjs from "dayjs";
+import jwt from "jws";
+import crypto from "crypto-js";
 
 import { txt, ITransactions, IAttachPlugin, IMessageList } from "@/util/interfaceUtil";
 import {
@@ -145,28 +137,26 @@ getEventListApi(route.params.eventKey);
 getBackendApi(route.params.eventKey);
 
 var isiOS = !!navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
-if (isiOS) {
-    addEventListener(
-        "pagehide",
-        () => {
-            if (document.visibilityState === "visible") {
-                console.log("pagehide visible iOS platform:", isiOS);
-                for (var s in Janus.sessions) {
-                    if (Janus.sessions[s] && Janus.sessions[s].destroyOnUnload) {
-                        console.log("Destroying session " + s);
-                        Janus.sessions[s].destroy({ unload: true, notifyDestroyed: false });
-                    }
-                }
-            }
-        },
-        true
-    );
-}
-addEventListener("visibilitychange", (event) => {
+console.log("iOS platform:", isiOS);
+// if (isiOS) {
+//     //在页面刷新时将vuex里的信息保存到缓存里
+//     window.addEventListener("pagehide", () => {
+//         janus.value.destroy();
+//     });
+// } else {
+//     //在页面刷新时将vuex里的信息保存到缓存里
+//     window.addEventListener("beforeunload", () => {
+//         console.log("beforeunload");
+
+//         janus.value.destroy();
+//     });
+// }
+document.addEventListener("visibilitychange", (event) => {
     if (document.visibilityState === "hidden") {
         janus.value.destroy();
     }
     if (document.visibilityState === "visible") {
+        console.log("visible:", event);
         Janus.init({
             debug: "all",
             dependencies: Janus.useDefaultDependencies({
@@ -253,28 +243,59 @@ const initWeclomeMsg = () => {
     );
     pictures.value = JSON.parse(localStorage.getItem(`${route.params.eventKey}-pictures`) || "[]");
 };
-const sessionId = ref(null);
 watchEffect(() => {
-    sessionId.value = Object.keys(Janus.sessions);
     initWeclomeMsg();
 });
 onMounted(() => {
     initWeclomeMsg();
+    // const exp = res.data.expire;
+    const headers = {
+        alg: "ES256",
+        typ: "JWT",
+    };
+    const payload = {
+        dev: "iphone",
+    };
+    const secret = `-----BEGIN PRIVATE KEY-----
+MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg0eNx9nnYxs9Cfa5h
+ba4ubuWb6XFGUndrqosR4Kt2OuKhRANCAARQAzUzkgmcwoSVnRZpJABQlYU52jiH
+z57d5CNJzr6k1imyH1Cp+jQtdadp+HETir/ykCxF7AnOP0oRfhpsE50H
+-----END PRIVATE KEY-----`;
+    const signature = jwt.sign({
+        header: headers,
+        payload,
+        secret,
+    });
+    localStorage.setItem("access_token", signature);
+    // const signer = jwt.createSign({
+    //     header: headers,
+    //     payload,
+    // });
+    // console.log("signer", signer);
+    // const verifier = jwt.createVerify({
+    //     header: headers,
+    //     payload,
+    // });
+    // console.log("verifier", verifier);
 });
+
 //janus 初始值
 onMounted(() => {
-    Janus.init({
-        debug: "all",
-        dependencies: Janus.useDefaultDependencies({
-            adapter: adapter,
-        }),
-        callback: () => {
-            if (!Janus.isWebrtcSupported()) {
-                console.log("No WebRTC support... ");
-                return;
-            }
-            connect();
-        },
+    nextTick(() => {
+        console.log("onMounted nextTick");
+        Janus.init({
+            debug: "all",
+            dependencies: Janus.useDefaultDependencies({
+                adapter: adapter,
+            }),
+            callback: () => {
+                if (!Janus.isWebrtcSupported()) {
+                    console.log("No WebRTC support... ");
+                    return;
+                }
+                connect();
+            },
+        });
     });
 });
 
@@ -549,7 +570,8 @@ const attachTextroomPlugin = () => {
                 let when = new Date();
                 delete participants[username];
                 if (username === myid) {
-                    alert("你被踢出房間!");
+                    isAlreadyTaken.value = true;
+                    janus.value.destroy();
                 }
 
                 data.username = username;
@@ -640,6 +662,7 @@ const attachVideocallPlugin = () => {
                         calling.value = setTimeout(() => {
                             // 撥打超過15秒， 自動掛掉
                             doHangup(1, eventID(route.params.eventKey));
+                            // console.log("setTimeOut 未關閉 又掛一次");
                         }, 15000);
                     } else if (event === "incomingcall") {
                         console.log("call-> Incoming call from " + result["username"] + "!");
@@ -697,12 +720,18 @@ const attachVideocallPlugin = () => {
                                 result["reason"] +
                                 ")!"
                         );
+                        if (result["reason"] === "User busy") {
+                            alert("對方忙線中,請稍後再撥!!!");
+                        }
                         clearInterval(connecting.value);
                         // Reset status
                         callPlugin.value.hangup();
+                        phoneTime.value = "0:00";
+                        isAccepted.value = false;
                         isIncomingCall.value = false;
                         phoneCallModal.value = false;
-                        window.location.reload();
+                        clearTimeout(calling.value);
+                        // window.location.reload();
                     } else if (event === "simulcast") {
                         // Is simulcast in place?
                         let substream = result["substream"];
@@ -728,6 +757,7 @@ const attachVideocallPlugin = () => {
                 console.error(error);
                 if (error.indexOf("already taken") > 0) {
                     // FIXME Use status codes...
+                    //window.location.reload();
                 }
                 isIncomingCall.value = false;
                 phoneCallModal.value = false;
@@ -772,7 +802,7 @@ const attachVideocallPlugin = () => {
     left: 0;
     right: 0;
     background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
+    z-index: 10000;
     .popUp {
         border-radius: 20px;
         width: 342px;

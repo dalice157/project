@@ -88,63 +88,62 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
         message: () => {
             if (whisper === true) {
                 console.log("Private message->", data);
-                const msg = JSON.parse(data.msg);
-                const getFrom = msg.janusMsg.chatroomID;
-
-                if (data.msg !== "recall") {
+                const parseMsg = JSON.parse(data.msg);
+                const isRecall = Object.keys(parseMsg).includes("recall");
+                if (isRecall) {
+                    const getFrom = parseMsg.janusMsg.chatroomID;
+                    const msg = parseMsg;
                     messageFrom.value = getFrom;
-                    messageForm.value = msg;
-                    console.log(" whisper messageFrom", messageFrom.value);
-                    console.log(" whisper messageForm", messageForm.value);
+                    delete msg.recall;
+                    // console.log("msg", msg);
                     const lastChatMessageArr = JSON.parse(
-                        sessionStorage.getItem(`${messageFrom.value}-lastChatMessage`)
+                        sessionStorage.getItem(`${getFrom}-lastChatMessage`)
                     );
-                    lastChatMessageArr.push(messageForm.value);
+                    // console.log("lastChatMessageArr", lastChatMessageArr);
+                    lastChatMessageArr.forEach((item, index) => {
+                        if (item.janusMsg.config.id === msg.janusMsg.config.id) {
+                            lastChatMessageArr.splice(index, 1);
+                        }
+                    });
                     resetSetItem(
-                        `${messageFrom.value}-lastChatMessage`,
+                        `${getFrom}-lastChatMessage`,
                         JSON.stringify(lastChatMessageArr.slice(-10))
                     );
                 } else {
-                    console.log("lastChatMessageArr recall:");
-
+                    const msg = JSON.parse(data.msg);
+                    const getFrom = msg.janusMsg.chatroomID;
+                    messageFrom.value = getFrom;
+                    // console.log("janus msg", msg);
+                    // console.log("janus msg from", getFrom);
                     const lastChatMessageArr = JSON.parse(
-                        sessionStorage.getItem(`${messageFrom.value}-lastChatMessage`)
+                        sessionStorage.getItem(`${getFrom}-lastChatMessage`)
                     );
-
-                    lastChatMessageArr.push(messageForm.value);
+                    lastChatMessageArr.push(msg);
                     resetSetItem(
-                        `${messageFrom.value}-lastChatMessage`,
+                        `${getFrom}-lastChatMessage`,
                         JSON.stringify(lastChatMessageArr.slice(-10))
                     );
-                }
-                // sessionStorage.setItem(
-                //     `${messageFrom.value}-lastChatMessage`,
-                //     JSON.stringify(lastChatMessageArr.slice(-10))
-                // );
-                // console.log("lastChatMessageArr", lastChatMessageArr);
-                // console.log("chatroomID:", chatroomID);
-                // console.log("data.from:", data.from);
-                // notifyMe(data);
-                if (chatroomID == getFrom && data.from) {
-                    const message: any = {
-                        textroom: "message",
-                        transaction: randomString(12),
-                        room: Number(eventID),
-                        // tos: [全部在線客服1,全部在線客服2],
-                        tos: [chatroomID],
-                        text: "pin",
-                    };
-                    textPlugin.value.data({
-                        text: JSON.stringify(message),
-                        error: function (reason: any) {
-                            console.log("error:", reason);
-                        },
-                        success: function () {
-                            console.log("gotoChat pin");
-                        },
-                    });
-                    isInput.value = true;
-                    messageList.value.push(msg);
+                    if (chatroomID == getFrom && data.from) {
+                        const message: any = {
+                            textroom: "message",
+                            transaction: randomString(12),
+                            room: Number(eventID),
+                            // tos: [全部在線客服1,全部在線客服2],
+                            tos: [chatroomID],
+                            text: "pin",
+                        };
+                        textPlugin.value.data({
+                            text: JSON.stringify(message),
+                            error: function (reason: any) {
+                                console.log("error:", reason);
+                            },
+                            success: function () {
+                                console.log("gotoChat pin");
+                            },
+                        });
+                        isInput.value = true;
+                        messageList.value.push(msg);
+                    }
                 }
 
                 messageList.value = messageList.value.reduce((unique, o) => {

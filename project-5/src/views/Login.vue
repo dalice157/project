@@ -223,6 +223,7 @@ const login = () => {
                     payload,
                     secret,
                 });
+    
                 localStorage.setItem("access_token", access_token);
                 localStorage.setItem("accountID", accountID);
                 localStorage.setItem("adminStatus", admin);

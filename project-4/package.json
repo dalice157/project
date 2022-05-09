@@ -1,23 +1,28 @@
 {
-    "name": "project",
+    "name": "talkOD",
     "version": "0.1.0",
     "private": true,
     "scripts": {
         "serve": "vue-cli-service serve",
         "build:dev": "vue-cli-service --mode dev build",
+        "build:stg": "vue-cli-service --mode staging build",
         "build": "vue-cli-service build",
-        "lint": "vue-cli-service lint"
+        "lint": "vue-cli-service lint",
+        "ins": "vue-cli-service --mode production inspect"
     },
     "dependencies": {
+        "@fingerprintjs/fingerprintjs": "^3.3.3",
         "@vicons/ionicons5": "^0.11.0",
         "axios": "^0.24.0",
         "bootbox": "^5.5.2",
         "compressorjs": "^1.1.1",
         "core-js": "^3.6.5",
+        "crypto-js": "^4.1.1",
         "dayjs": "^1.10.7",
         "jquery": "^3.6.0",
         "jquery-blockui": "^2.7.0",
         "js-audio-recorder": "^1.0.7",
+        "jws": "^4.0.0",
         "lamejs": "^1.2.1",
         "nanoid": "^3.1.30",
         "npm": "^1.2.1",

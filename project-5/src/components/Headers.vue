@@ -14,6 +14,9 @@
             {{ showTitle() }}
         </h1>
         <ul class="pages">
+            <li class="btnBg" v-if="isAdmin >= 1">
+                <p>使用者:{{ userName }}</p>
+            </li>
             <li class="btnBg">
                 點數<span class="point">{{ point }}點</span>(<a
                     class="store-value"
@@ -34,7 +37,7 @@
                     :options="options"
                     @select="handleSelect"
                 >
-                    <span>我的聊天室</span>
+                    <n-badge class="dot" :dot="hasUnread">頻道列表</n-badge>
                 </n-dropdown>
             </li>
             <li v-if="!access_token">
@@ -44,7 +47,6 @@
                 <a href="/">登出</a>
             </li>
         </ul>
-        {{ isFirstLogin }}
     </n-layout-header>
     <teleport to="body" v-if="isFirstLogin">
         <div class="mask">
@@ -112,7 +114,7 @@
 <script lang="ts" setup>
 import { computed, reactive, onMounted, ref, watchEffect, onBeforeMount } from "vue";
 import { useRoute } from "vue-router";
-import { NDropdown, NPopover, NIcon, NLayoutHeader } from "naive-ui";
+import { NDropdown, NBadge, NIcon, NLayoutHeader } from "naive-ui";
 import { storeToRefs } from "pinia";
 import adapter from "webrtc-adapter";
 import Janus from "@/assets/js/janus";
@@ -150,8 +152,9 @@ const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime
 // api store
 const apiStore = useApiStore();
 const { getPoint, getEventApi, getChatroomlistApi, getHistoryApi } = apiStore;
-const { eventInfo, point, isJanusinit, eventList, isInput } = storeToRefs(apiStore);
+const { eventInfo, point, isJanusinit, eventList, isInput, chatroomList } = storeToRefs(apiStore);
 const access_token = localStorage.getItem("access_token");
+const userName = ref(localStorage.getItem("userName"));
 
 const chatRoomID: any = computed(() => route.query.chatroomID);
 const mobile: any = computed(() => route.query.mobile);
@@ -163,6 +166,14 @@ const currentStep = ref(1);
 const onNext = () => {
     currentStep.value += 1;
 };
+
+const hasUnread = computed(() => {
+    return (
+        chatroomList.value.some((item) => {
+            return item.unread === 1;
+        }) || messageFrom.value !== ""
+    );
+});
 
 //未登入跳回登入頁
 onBeforeMount(() => {
@@ -274,6 +285,7 @@ const handleSelect = (key: string | number) => {
 var iOS = ["iPad", "iPhone", "iPod"].indexOf(navigator.platform) !== -1;
 var eventName = iOS ? "pagehide" : "beforeunload";
 const getEventID = computed(() => (route.params.id ? `/chat/${route.params.id}` : "/chat"));
+
 document.addEventListener("visibilitychange", (event) => {
     if (route.path !== getEventID.value) return;
     if (document.visibilityState === "hidden") {
@@ -309,11 +321,14 @@ const connect = () => {
         },
         error: (error: any) => {
             onError("Failed to connect to janus server", error);
-            alert("連線中斷,按下確認重新連線");
-            janus.destroy();
+            if (!navigator.userAgent.match("CriOS")) {
+                // 判斷 Chrome for iOS
+                alert("連線中斷,按下確認重新連線");
+                window.location.reload();
+            }
         },
         destroyed: () => {
-            window.location.reload();
+            console.log("destroyed");
         },
     });
 };
@@ -523,11 +538,10 @@ const attachTextroomPlugin = () => {
                 data.date = dateString;
                 data.from = participants[from];
                 data.msg = msg;
-                console.log("data.from", from);
-                messageFrom.value = from;
-                console.log(" recall messageFrom", messageFrom.value);
-
-                if (msg === "recall") {
+                // console.log("recall msgobj", msg);
+                const isrecall = JSON.parse(msg);
+                // console.log("isrecall", isrecall);
+                if (isrecall.recall === "recall") {
                     isInput.value = true;
                     getHistoryApi(chatRoomID.value, route.params.id);
                 }
@@ -549,6 +563,7 @@ const attachTextroomPlugin = () => {
                 data.username = username;
                 data.display = display;
                 data.mobile = mobile.value;
+                // console.log("participants 處理前:", participants);
                 participantList.value = Object.keys(participants).map((key) => {
                     return {
                         [key]: participants[key],
@@ -559,6 +574,7 @@ const attachTextroomPlugin = () => {
                 if (chatRoomIDArr.includes(chatRoomID.value)) {
                     isOnline.value = true;
                 }
+                // console.log("participantList 處理後", participantList.value);
             } else if (what === "leave") {
                 // Somebody left
                 let username = json["username"];
@@ -674,7 +690,7 @@ const attachVideocallPlugin = () => {
                     } else if (event === "calling") {
                         // TODO Any ringtone?
                         calling.value = setTimeout(() => {
-                            // 撥打超過30秒， 自動掛掉
+                            // 撥打超過15秒， 自動掛掉
                             doHangup(1, chatRoomID.value, route.params.id);
                         }, 15000);
                         console.log("call-> Waiting for the peer to answer...");
@@ -734,14 +750,22 @@ const attachVideocallPlugin = () => {
                                 result["reason"] +
                                 ")!"
                         );
+                        if (result["reason"] === "User busy") {
+                            alert("對方忙線中,請稍後再撥!!!");
+                        }
                         clearInterval(connecting.value);
+                        phoneTime.value = "0:00";
+                        isAccepted.value = false;
+                        console.log("phoneTime", phoneTime.value);
+                        console.log("電話時間清0!!");
                         // Reset status
                         callPlugin.value.hangup();
                         isIncomingCall.value = false;
                         phoneCallModal.value = false;
-                        location.href = route.query
-                            ? `/chat/${eventID.value}?chatroomID=${chatRoomID.value}&mobile=${mobile.value}`
-                            : `/chat/${eventID.value}`;
+                        clearTimeout(calling.value);
+                        // location.href = route.query
+                        //     ? `/chat/${eventID.value}?chatroomID=${chatRoomID.value}&mobile=${mobile.value}`
+                        //     : `/chat/${eventID.value}`;
                     } else if (event === "simulcast") {
                         // Is simulcast in place?
                         var substream = result["substream"];
@@ -775,10 +799,10 @@ const attachVideocallPlugin = () => {
                 phoneCallModal.value = false;
                 // TODO Reset status
                 callPlugin.value.hangup();
-                onHangup();
-                location.href = route.query
-                    ? `/chat/${eventID.value}?chatroomID=${chatRoomID.value}&mobile=${mobile.value}`
-                    : `/chat/${eventID.value}`;
+                // onHangup();
+                // location.href = route.query
+                //     ? `/chat/${eventID.value}?chatroomID=${chatRoomID.value}&mobile=${mobile.value}`
+                //     : `/chat/${eventID.value}`;
             }
         },
         onlocalstream: function (stream: any) {
@@ -803,19 +827,24 @@ const attachVideocallPlugin = () => {
             simulcastStarted = false;
             isIncomingCall.value = false;
             phoneCallModal.value = false;
-            location.href = route.query
-                ? `/chat/${eventID.value}?chatroomID=${chatRoomID.value}&mobile=${mobile.value}`
-                : `/chat/${eventID.value}`;
+            // callPlugin.value.hangup();
+            // location.href = route.query
+            //     ? `/chat/${eventID.value}?chatroomID=${chatRoomID.value}&mobile=${mobile.value}`
+            //     : `/chat/${eventID.value}`;
         },
     });
 };
 </script>
 <style lang="scss">
+@import "~@/assets/scss/var";
 .n-dropdown-menu.dropdown.n-popover.n-dropdown {
     margin-top: 13px !important;
 }
 .dropdown.n-popover {
     width: 100%;
+}
+.n-badge.dot {
+    color: $gray-1;
 }
 </style>
 <style lang="scss" scoped>

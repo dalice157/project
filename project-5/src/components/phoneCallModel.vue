@@ -23,6 +23,7 @@
                 {{ String(filterUserInfo.mobile).slice(-9) }}
             </h1>
             <div v-if="!isAccepted" class="phoneStatus">
+                
                 <p>撥號中</p>
                 <PulseLoader color="#ffb400" size="10px"></PulseLoader>
             </div>

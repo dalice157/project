@@ -8,7 +8,7 @@ export const useSmsStore = defineStore({
         smsChannel: <any>null,
         smsSubject: <any>"",
         smsContent: <any>"",
-        smsWord: <any>0,
+        smsWord: <any>config.wordLimit,
         smsCount: <any>0,
         smsPoint: <any>0,
         smsSendOption: <any>0,

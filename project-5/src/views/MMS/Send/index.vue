@@ -79,8 +79,8 @@
                         type="textarea"
                         placeholder="請輸入簡訊內容..."
                         :autosize="{
-                            minRows: 7,
-                            maxRows: 7,
+                            minRows: 9,
+                            maxRows: 9,
                         }"
                         @focus="focusType"
                         @blur="blurJudge"
@@ -521,11 +521,10 @@ const clearFile = () => {
             }
         }
         .messageCount {
-            margin-top: 15px;
-            margin-bottom: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
             .lazyWrap {
                 display: flex;
                 justify-content: flex-start;
@@ -533,6 +532,8 @@ const clearFile = () => {
             }
 
             .messageInfo {
+                margin-top: 15px;
+                margin-bottom: 15px;
                 display: flex;
                 justify-content: flex-start;
                 .messageKB {

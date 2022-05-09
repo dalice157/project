@@ -114,6 +114,10 @@ export const useApiStore = defineStore({
             fd.append("msgType", msg.janusMsg.msgType);
             fd.append("id", msg.janusMsg.config.id);
             fd.append("config", JSON.stringify(msg.janusMsg.config));
+            const msgs = {
+                ...msg,
+                recall: "recall",
+            };
             await axios({
                 method: "patch",
                 url: `${config.serverUrl}/message/${chatToken}`,
@@ -126,7 +130,7 @@ export const useApiStore = defineStore({
                         room: Number(eventID(chatToken)),
                         // tos: [全部在線客服1,全部在線客服2],
                         tos: participantList.value,
-                        text: "recall",
+                        text: `${JSON.stringify(msgs)}`,
                     };
                     console.log("recallAPI res:", message);
                     textPlugin.value.data({

@@ -1,4 +1,14 @@
 const env = process.env.VUE_APP_config || "development";
+
+const randomString = (len) => {
+    var charSet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    var randomString = "";
+    for (var i = 0; i < len; i++) {
+        var randomPoz = Math.floor(Math.random() * charSet.length);
+        randomString += charSet.substring(randomPoz, randomPoz + 1);
+    }
+    return randomString;
+};
 //api
 const SERVER_SITE = {
     develop: "https://t.Talkod.im:9000",
@@ -22,6 +32,11 @@ const WORD_LIMIT = {
     staging: 18,
     production: 17,
 };
+const EXTRA_STRING = {
+    develop: randomString(WORD_LIMIT.develop),
+    staging: randomString(WORD_LIMIT.staging),
+    production: randomString(WORD_LIMIT.production),
+};
 const DOMAIN = {
     development: "1", // 如果不是COMMTEST把1改成0, 才可登入
     develop: "1",
@@ -35,6 +50,7 @@ const setting = {
         janusUrl: JANUS_SITE.develop,
         fileUrl: FILE_SITE.develop,
         wordLimit: WORD_LIMIT.develop,
+        extraString: EXTRA_STRING.develop,
         domain: DOMAIN.development,
     },
     develop: {
@@ -42,6 +58,7 @@ const setting = {
         janusUrl: JANUS_SITE.develop,
         fileUrl: FILE_SITE.develop,
         wordLimit: WORD_LIMIT.develop,
+        extraString: EXTRA_STRING.develop,
         domain: DOMAIN.develop,
     },
     staging: {
@@ -49,6 +66,7 @@ const setting = {
         janusUrl: JANUS_SITE.staging,
         fileUrl: FILE_SITE.staging,
         wordLimit: WORD_LIMIT.staging,
+        extraString: EXTRA_STRING.staging,
         domain: DOMAIN.staging,
     },
     production: {
@@ -56,6 +74,7 @@ const setting = {
         janusUrl: JANUS_SITE.production,
         fileUrl: FILE_SITE.production,
         wordLimit: WORD_LIMIT.production,
+        extraString: EXTRA_STRING.production,
         domain: DOMAIN.production,
     },
 };

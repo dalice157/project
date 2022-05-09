@@ -255,11 +255,11 @@ let changeList: any = computed({
 });
 //進入聊天室
 const goChat = (num, index) => {
-    changeList.value.forEach((msg) => {
-        if (num.chatroomID === msg.chatroomID) {
-            msg.unread = 0;
-        }
-    });
+    // changeList.value.forEach((msg) => {
+    //     if (num.chatroomID === msg.chatroomID) {
+    //         msg.unread = 0;
+    //     }
+    // });
     gotoChat(eventID.value, num.chatroomID, num.mobile, index);
 };
 
@@ -273,7 +273,30 @@ const highlightRoom = (chatRoomID) => {
 };
 //最後一筆訊息陣列
 const lastChatMessageArr = ref([]);
-let lastObj = reactive({});
+let lastObj = reactive({
+    janusMsg: {
+        chatroomID: "",
+        msgType: 1,
+        sender: 1, // 0:客服, 1:使用者
+        msgContent: "",
+        time: 0,
+        type: 1, //1:簡訊 2: 文字
+        format: {}, // 塞如下方顯示資料,
+        config: {
+            id: "",
+            isReply: false,
+            replyObj: "",
+            currentDate: "",
+            isExpire: false,
+            isPlay: false,
+            isRead: false,
+            msgFunctionStatus: false,
+            msgMoreStatus: false,
+            recallPopUp: false,
+            recallStatus: false,
+        },
+    },
+});
 //有即時訊息來更新左側聊天紀錄狀態
 onMounted(() => {
     // window.addEventListener("setItem", () => {
@@ -290,60 +313,46 @@ onMounted(() => {
     //     // }, 1000);
     // });
 });
-const aaa = ref({});
 watchEffect(() => {
     recordMessages.value = chatroomList.value;
-
     if (changeList.value.length <= 0) return;
     console.log("watchEffect messagefrom", messageFrom.value);
-    aaa.value = messageFrom.value;
     window.addEventListener(
         "setItem",
         () => {
-            // setTimeout(() => {
-            console.log("setItem messagefrom", aaa.value);
             lastChatMessageArr.value = JSON.parse(
-                sessionStorage.getItem(`${aaa.value}-lastChatMessage` || "[]")
+                sessionStorage.getItem(`${messageFrom.value}-lastChatMessage` || "[]")
             );
             lastChatMessageArr.value?.forEach((item, idx, arr) => {
                 lastObj = arr[arr.length - 1];
             });
             console.log("lastChatMessageArr", lastChatMessageArr.value);
             console.log("lastObj", lastObj);
-            // }, 1000);
+
+            changeList.value.forEach((msg) => {
+                if (lastObj.janusMsg.chatroomID !== msg.chatroomID) return;
+                if (messageFrom.value !== "") {
+                    msg.chatroomID = lastObj.janusMsg.chatroomID;
+                    msg.unread = 1;
+                    msg.time = lastObj.janusMsg.time;
+                    msg.msgType = lastObj.janusMsg.msgType;
+                    msg.msg =
+                        lastObj.janusMsg.msgType === 1
+                            ? lastObj.janusMsg.msgContent
+                            : `傳送了${sendMsgTypeObj[lastObj.janusMsg.msgType]}`;
+                }
+                if (
+                    msg.chatroomID === route.query.chatroomID &&
+                    msg.chatroomID === messageFrom.value
+                ) {
+                    msg.unread = 0;
+                    messageFrom.value = "";
+                }
+            });
+            changeList.value.sort((a, b) => b.time - a.time).sort((a, b) => b.pinTop - a.pinTop);
         },
         false
     );
-
-    // lastChatMessageArr.value = JSON.parse(
-    //     sessionStorage.getItem(`${messageFrom.value}-lastChatMessage` || "[]")
-    // );
-
-    // lastChatMessageArr.value?.forEach((item, idx, arr) => {
-    //     lastObj = arr[arr.length - 1];
-    // });
-    // console.log("lastChatMessageArr", lastChatMessageArr.value);
-    // console.log("lastObj", lastObj);
-
-    changeList.value.forEach((msg) => {
-        if (messageFrom.value !== msg.chatroomID) return;
-        if (messageForm.value.janusMsg.msgType !== 10) {
-            msg.unread = 1;
-            msg.time = messageForm.value.janusMsg.time;
-            msg.msgType = messageForm.value.janusMsg.msgType;
-            msg.msg =
-                messageForm.value.janusMsg.msgType === 1
-                    ? messageForm.value.janusMsg.msgContent
-                    : `傳送了${sendMsgTypeObj[messageForm.value.janusMsg.msgType]}`;
-            msg.recallStatus = messageForm.value.janusMsg.config.recallStatus;
-            msg.sender = messageForm.value.janusMsg.sender;
-            if (messageFrom.value === route.query.chatroomID) {
-                msg.unread = 0;
-                messageFrom.value = "";
-            }
-        }
-    });
-    changeList.value.sort((a, b) => b.time - a.time).sort((a, b) => b.pinTop - a.pinTop);
 });
 
 //開啟功能列表

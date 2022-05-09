@@ -1,10 +1,11 @@
 {
-    "name": "backend-project",
+    "name": "talkOD",
     "version": "0.1.0",
     "private": true,
     "scripts": {
         "serve": "vue-cli-service serve",
         "build:dev": "vue-cli-service --mode dev build",
+        "build:stg": "vue-cli-service --mode staging build",
         "build": "vue-cli-service build",
         "lint": "vue-cli-service lint"
     },
@@ -26,7 +27,7 @@
         "spin": "0.0.1",
         "twitter-bootstrap": "^2.1.1",
         "v-viewer": "^3.0.10",
-        "vue": "^3.0.0",
+        "vue": "^3.2.19",
         "vue-clipboard3": "^1.0.1",
         "vue-router": "^4.0.0-0",
         "webrtc-adapter": "^8.1.0"
@@ -53,7 +54,6 @@
         "sass": "^1.26.5",
         "sass-loader": "^8.0.2",
         "typescript": "~4.1.5",
-        "uglifyjs-webpack-plugin": "^2.2.0",
         "unplugin-element-plus": "^0.1.3",
         "vfonts": "^0.1.0",
         "vue-spinner": "^1.0.4"

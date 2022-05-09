@@ -68,8 +68,8 @@
                         type="textarea"
                         placeholder="請輸入簡訊內容..."
                         :autosize="{
-                            minRows: 7,
-                            maxRows: 7,
+                            minRows: 8,
+                            maxRows: 8,
                         }"
                         @focus="focusType"
                         @blur="blurJudge"
@@ -614,19 +614,19 @@ const wordCount = () => {
 
     if (smsContent.value === demoContent || !smsContent.value) {
         smsContent.value = "";
-        smsWord.value = 0;
+        smsWord.value = config.wordLimit;
         smsPoint.value = 0;
         smsCount.value = 0;
     }
     smsCount.value =
         smsContent.value.length === 0 && phrasesLen === 0
             ? 0
-            : pointCalculation(smsContent.value + smsPhrases.value).smsCount;
+            : pointCalculation(smsContent.value + smsPhrases.value + config.extraString).smsCount;
     smsPoint.value =
         smsContent.value.length === 0 && phrasesLen === 0
             ? 0
-            : pointCalculation(smsContent.value + smsPhrases.value).point;
-    smsWord.value = smsContent.value.length + phrasesLen;
+            : pointCalculation(smsContent.value + smsPhrases.value + config.extraString).point;
+    smsWord.value = smsContent.value.length + phrasesLen + config.wordLimit;
 };
 
 const uploadRef = computed({
@@ -958,12 +958,13 @@ const themeOverrides = {
     }
 
     .messageCount {
-        margin-top: 15px;
-        margin-bottom: 15px;
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap;
         .messageInfo {
+            margin-top: 15px;
+            margin-bottom: 15px;
             display: flex;
             justify-content: flex-start;
             .wordCount {
@@ -1160,13 +1161,14 @@ const themeOverrides = {
             }
         }
         .messageCount {
-            margin-top: 15px;
-            margin-bottom: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
 
             .messageInfo {
+                margin-top: 15px;
+                margin-bottom: 15px;
                 display: flex;
                 justify-content: space-around;
                 width: 330px;

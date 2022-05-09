@@ -59,7 +59,10 @@ export const usePhoneCallStore = defineStore({
                 error: function (error: any) {
                     console.error("videocall createOffer WebRTC error...", error);
                     //TODO do something
-                    alert("videocall createOffer WebRTC error..." + error.message);
+                    alert("請檢查麥克風是否開啟!!");
+                    const modelStore = useModelStore();
+                    const { phoneCallModal } = storeToRefs(modelStore);
+                    phoneCallModal.value = false;
                 },
             });
         },
@@ -84,6 +87,10 @@ export const usePhoneCallStore = defineStore({
                 },
                 error: function (error: any) {
                     console.error("video call WebRTC error:", error);
+                    alert("請檢查麥克風是否開啟!!");
+                    const modelStore = useModelStore();
+                    const { phoneCallModal } = storeToRefs(modelStore);
+                    phoneCallModal.value = false;
                 },
             });
         },
