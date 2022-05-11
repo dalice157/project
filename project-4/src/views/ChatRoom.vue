@@ -18,7 +18,7 @@
             <UserInfo :info="eventInfo" />
             <div class="description">語音來電</div>
             <ul class="call_container">
-                <li @[events]="doHangup(2, eventID(route.params.eventKey))">
+                <li @[events]="doHangup(2, eventID(route.params.eventKey), 0)">
                     <span class="icon"><img :src="hangUpIcon" alt="掛斷" /></span>
                     <h4 class="text">掛斷</h4>
                 </li>
@@ -135,24 +135,35 @@ const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime
 
 var isiOS = !!navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
 document.addEventListener("visibilitychange", (event) => {
+    let transaction = randomString(12);
     if (document.visibilityState === "hidden") {
-        janus.value.destroy();
+        let leave = {
+            textroom: "leave",
+            transaction: transaction,
+            room: Number(eventID(route.params.eventKey)),
+        };
+        textPlugin.value.data({
+            text: JSON.stringify(leave),
+            error: function (reason: any) {
+                console.log("error leave:", reason);
+            },
+            success: function () {},
+        });
     }
     if (document.visibilityState === "visible" && !isAlreadyTaken.value) {
-        console.log("visible:", event);
-        Janus.init({
-            debug: "all",
-            dependencies: Janus.useDefaultDependencies({
-                adapter: adapter,
-            }),
-            callback: () => {
-                if (!Janus.isWebrtcSupported()) {
-                    console.log("No WebRTC support... ");
-                    return;
-                }
-                connect();
-                getBackendApi(route.params.eventKey);
+        let join = {
+            textroom: "join",
+            transaction: transaction,
+            room: Number(eventID(route.params.eventKey)),
+            username: myid,
+            display: "user",
+        };
+        textPlugin.value.data({
+            text: JSON.stringify(join),
+            error: function (reason: any) {
+                console.log("error join:", reason);
             },
+            success: function () {},
         });
         return;
     }
@@ -280,14 +291,14 @@ const connect = () => {
         error: (error: any) => {
             onError("Failed to connect to janus server", error);
             janusConnectStatus.value = false;
-            // if (!navigator.userAgent.match("CriOS")) {
-            //     // 判斷 Chrome for iOS
-            //     alert("連線中斷,按下確認重新連線");
-            //     window.location.reload();
-            // }
+            if (!navigator.userAgent.match("CriOS")) {
+                // 判斷 Chrome for iOS
+                alert("連線中斷,按下確認重新連線");
+                window.location.reload();
+            }
         },
         destroyed: () => {
-            console.log("連線中斷,按下確認重新連線 destroyed");
+            console.log("聊天室已被銷毀");
             // window.location.reload();
         },
     });
@@ -554,7 +565,7 @@ const attachTextroomPlugin = () => {
                 let errorCode = json["error_code"];
                 let errorMsg = json["error"];
                 let parseErrorMsg = JSON.parse(errorMsg);
-                console.log("parseErrorMsg", parseErrorMsg);
+                // console.log("parseErrorMsg", parseErrorMsg);
                 // console.log("errorCode", errorCode);
                 if (errorCode === 901) {
                     // console.log("訊息發送錯誤碼");
@@ -563,7 +574,7 @@ const attachTextroomPlugin = () => {
                     localMsg.forEach((item) => {
                         if (parseErrorMsg.janusMsg.config.id === item.janusMsg.config.id) {
                             item.janusMsg.config.deliveryStatusSuccess = false;
-                            console.log("更改重傳訊息狀態成功");
+                            // console.log("更改重傳訊息狀態成功");
                         }
                     });
                     localStorage.setItem(`${route.params.eventKey}`, JSON.stringify(localMsg));
@@ -649,7 +660,7 @@ const attachVideocallPlugin = () => {
                         // TODO Any ringtone?
                         calling.value = setTimeout(() => {
                             // 撥打超過15秒， 自動掛掉
-                            doHangup(1, eventID(route.params.eventKey));
+                            doHangup(1, eventID(route.params.eventKey), 1);
                             // console.log("setTimeOut 未關閉 又掛一次");
                         }, 15000);
                     } else if (event === "incomingcall") {

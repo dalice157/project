@@ -15,7 +15,7 @@
             <button v-show="isMmsSend" @click="onChangSMSSend" class="change-mms">
                 切換發送文字
             </button>
-            <a class="phone-web" v-if="!isProduction && eventInfo.callable === 1">
+            <a class="phone-web" v-if="eventInfo.callable === 1">
                 <img :src="phoneIcon" alt="撥打電話" @click="onPhoneCallModal(chatroomID)" />
                 <video
                     class="hide"
@@ -64,8 +64,6 @@ const router = useRouter();
 const route = useRoute();
 const eventID = computed(() => route.params.id);
 
-const isProduction = process.env.NODE_ENV === "production";
-
 // api store
 const apiStore = useApiStore();
 const { getChatroomUserInfoApi } = apiStore;
@@ -85,13 +83,14 @@ const { searchSwitch, closeSearchBar } = searchStore;
 //phone store
 const phoneCallStore = usePhoneCallStore();
 const { doCall } = phoneCallStore;
-const { isAccepted } = storeToRefs(phoneCallStore);
+const { sender } = storeToRefs(phoneCallStore);
 
 //modal store
 const modelStore = useModelStore();
 const { phoneCallModal } = storeToRefs(modelStore);
 
 const onPhoneCallModal = (chatroomID) => {
+    sender.value = 0;
     if (isOnline.value === true) {
         phoneCallModal.value = true;
         doCall(chatroomID);

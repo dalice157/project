@@ -287,26 +287,37 @@ var eventName = iOS ? "pagehide" : "beforeunload";
 const getEventID = computed(() => (route.params.id ? `/chat/${route.params.id}` : "/chat"));
 
 document.addEventListener("visibilitychange", (event) => {
+    let transaction = randomString(12);
     if (route.path !== getEventID.value) return;
     if (document.visibilityState === "hidden") {
-        janus.destroy();
+        let leave = {
+            textroom: "leave",
+            transaction: transaction,
+            room: Number(eventID.value),
+        };
+        textPlugin.value.data({
+            text: JSON.stringify(leave),
+            error: function (reason: any) {
+                console.log("error leave:", reason);
+            },
+            success: function () {},
+        });
         return;
     }
     if (document.visibilityState === "visible") {
-        Janus.init({
-            debug: "all",
-            dependencies: Janus.useDefaultDependencies({
-                adapter: adapter,
-            }),
-            callback: () => {
-                if (!Janus.isWebrtcSupported()) {
-                    console.log("No WebRTC support... ");
-                    return;
-                }
-                connect();
-                getChatroomlistApi(route.params.id);
-                getHistoryApi(route.query.chatroomID, route.params.id);
+        let join = {
+            textroom: "join",
+            transaction: transaction,
+            room: Number(eventID.value),
+            username: myid,
+            display: "admin",
+        };
+        textPlugin.value.data({
+            text: JSON.stringify(join),
+            error: function (reason: any) {
+                console.log("error join:", reason);
             },
+            success: function () {},
         });
         return;
     }
@@ -691,7 +702,7 @@ const attachVideocallPlugin = () => {
                         // TODO Any ringtone?
                         calling.value = setTimeout(() => {
                             // 撥打超過15秒， 自動掛掉
-                            doHangup(1, chatRoomID.value, route.params.id);
+                            doHangup(1, chatRoomID.value, route.params.id, 0);
                         }, 15000);
                         console.log("call-> Waiting for the peer to answer...");
                     } else if (event === "incomingcall") {

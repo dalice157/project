@@ -45,7 +45,7 @@
                 <UserInfo :info="userInfo" />
                 <div class="description">語音來電</div>
                 <ul class="call_container">
-                    <li @click="doHangup(2, yourUserChatroomID, route.params.id)">
+                    <li @click="doHangup(2, yourUserChatroomID, route.params.id, 1)">
                         <span class="icon"><img :src="hangUpIcon" alt="掛斷" /></span>
                         <h4 class="text">掛斷</h4>
                     </li>

@@ -42,7 +42,7 @@
                 </div>
                 <div class="phoneClose">
                     <img
-                        @[events]="doHangup(!isAccepted ? 2 : 3, eventID(eventKey))"
+                        @[events]="doHangup(!isAccepted ? 2 : 3, eventID(eventKey), sender)"
                         :src="closeIcon"
                         alt="掛斷"
                     />
@@ -82,7 +82,7 @@ const { eventInfo } = storeToRefs(apiStore);
 //phoneCall store
 const phoneCallStore = usePhoneCallStore();
 const { doHangup } = phoneCallStore;
-const { isAccepted, phoneTime, isMuted, callPlugin } = storeToRefs(phoneCallStore);
+const { isAccepted, phoneTime, isMuted, callPlugin, sender } = storeToRefs(phoneCallStore);
 
 //modal store
 const modelStore = useModelStore();

@@ -233,7 +233,7 @@ const init: any = () => {
     ) {
         let getObj = {
             chatroomID: route.params.eventKey,
-            ...messages[messages.length - 1],
+            ...messages.at(-1), // .at(-1) 寫法同等於 messages.length - 1
         };
         const isInfoYesterday = dayjs(getObj.janusMsg.config.currentDate).isYesterday();
         const isInfoToday = dayjs(getObj.janusMsg.config.currentDate).isToday();
@@ -255,9 +255,6 @@ const init: any = () => {
     if (recordMsgs.value.length > 0) {
         recordMessages.value = [...recordMsgs.value, ...recordMessages.value];
     }
-    // recordMessages.value.forEach((item: any) => {
-    //     item.key = i.value++;
-    // });
     changeList.value = recordMessages.value;
     changeList.value = changeList.value.reduce((unique, o) => {
         const hasRepeatId = unique.some((obj) => {
@@ -316,7 +313,7 @@ watchEffect(() => {
                 ).isToday();
                 lastObj = {
                     ...eventInfo.value,
-                    ...arr[arr.length - 1],
+                    ...arr.at(-1),
                     chatroomID: route.params.eventKey,
                     toTop: false,
                     show: true,

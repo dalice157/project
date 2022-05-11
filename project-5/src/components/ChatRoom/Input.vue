@@ -203,8 +203,6 @@ import reloadTimeIcon from "@/assets/Images/chatroom/reload-time.svg";
 import { chatfileAccept } from "@/util/commonUtil";
 import config from "@/config/config";
 
-//環境設定
-const isProduction = process.env.NODE_ENV === "production";
 // model sotre
 const modelStore = useModelStore();
 const { closeAll } = modelStore;

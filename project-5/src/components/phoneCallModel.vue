@@ -23,7 +23,6 @@
                 {{ String(filterUserInfo.mobile).slice(-9) }}
             </h1>
             <div v-if="!isAccepted" class="phoneStatus">
-                
                 <p>撥號中</p>
                 <PulseLoader color="#ffb400" size="10px"></PulseLoader>
             </div>
@@ -44,7 +43,7 @@
                 </div>
                 <div class="phoneClose">
                     <img
-                        @click="doHangup(!isAccepted ? 2 : 3, chatRoomID, route.params.id)"
+                        @click="doHangup(!isAccepted ? 2 : 3, chatRoomID, route.params.id, sender)"
                         :src="closeIcon"
                         alt="掛斷"
                     />
@@ -80,7 +79,7 @@ const { chatroomList, userInfo } = storeToRefs(apiStore);
 //phoneCall store
 const phoneCallStore = usePhoneCallStore();
 const { doHangup } = phoneCallStore;
-const { isAccepted, phoneTime, isMuted, callPlugin } = storeToRefs(phoneCallStore);
+const { isAccepted, phoneTime, isMuted, callPlugin, sender } = storeToRefs(phoneCallStore);
 
 //modal store
 const modelStore = useModelStore();

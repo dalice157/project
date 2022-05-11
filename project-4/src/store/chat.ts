@@ -81,7 +81,6 @@ export const useChatStore = defineStore({
                 return;
             }
             const messagesParse: any = JSON.parse(msgObj.msg);
-            console.log("messagesParse", messagesParse);
 
             if (
                 messagesParse.janusMsg.config.recallStatus === true &&
@@ -94,18 +93,19 @@ export const useChatStore = defineStore({
                 });
                 return;
             }
-            if (messagesParse.janusMsg.sender === 0) {
-                this.messages.push(messagesParse);
-                localStorageMsg(this.messages, eventKey);
-            }
+
             if (messagesParse.janusMsg.msgType === 6 || messagesParse.janusMsg.msgType === 7) {
                 this.pictures.push(messagesParse);
                 localStorage.setItem(`${eventKey}-pictures`, JSON.stringify(this.pictures));
             }
 
-            console.log("this.messages:", this.messages);
+            this.messages.push(messagesParse);
+            localStorageMsg(this.messages, eventKey);
             this.messages.forEach((element) => {
                 element.janusMsg.config.isRead = true;
+                if (element.janusMsg.sender == 0 && element.janusMsg.format.phoneType == 1) {
+                    element.janusMsg.format.phoneType = 4;
+                }
             });
         },
         // 開啟錄音視窗
@@ -143,7 +143,7 @@ export const useChatStore = defineStore({
         },
         // 貼圖
         handleStickckerGroup(id: any) {
-            console.log("id:", id);
+            // console.log("id:", id);
 
             // api store
             const apiStore = useApiStore();

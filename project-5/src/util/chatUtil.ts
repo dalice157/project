@@ -159,6 +159,8 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
                     }
                     return unique;
                 }, []);
+                console.log("messageList.value:", messageList.value);
+
                 return;
             }
             console.log("Public message->", data);

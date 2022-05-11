@@ -85,6 +85,7 @@
                     <div
                         class="resendMsg"
                         v-if="text.janusMsg.config.deliveryStatusSuccess === false"
+                        @[events].stop="resendMsg(text)"
                     >
                         <img :src="resendIcon" alt="重傳訊息" />
                     </div>
@@ -409,11 +410,7 @@
                                     <p v-if="text.janusMsg.format.phoneType === 3">
                                         {{ text.janusMsg.format.phoneTime }}
                                     </p>
-                                </div>
-                                <div class="phoneStatus" v-else>
-                                    <h4 v-if="text.janusMsg.format.phoneTypeOther === 4">
-                                        未接來電
-                                    </h4>
+                                    <h4 v-if="text.janusMsg.format.phoneType === 4">未接來電</h4>
                                 </div>
                             </a>
                         </div>
@@ -583,6 +580,23 @@ const onPhoneCallModal = () => {
 const callAgain = () => {
     const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
     doCall(getCutomer);
+};
+const resendMsg = (msg) => {
+    // console.log(msg);
+    const sendMsgObj = {
+        msg: msg,
+        textPlugin: textPlugin.value,
+        eventKey: route.params.eventKey,
+        msgParticipantList: participantList.value,
+        eventID: eventID(route.params.eventKey),
+    };
+    sendPrivateMsg(sendMsgObj);
+    messages.value.forEach((item) => {
+        if (item.janusMsg.config.id === msg.janusMsg.config.id) {
+            item.janusMsg.config.deliveryStatusSuccess = true;
+        }
+    });
+    localStorage.setItem(`${route.params.eventKey}`, JSON.stringify(messages.value));
 };
 //search store
 const searchStore = useSearchStore();
@@ -870,7 +884,7 @@ onMounted(() => {
 
 onUpdated(() => {
     scrollHeight.value = findScrollHeight.value.scrollHeight;
-    console.log("scrollHeight:", scrollHeight.value);
+    // console.log("scrollHeight:", scrollHeight.value);
 });
 
 const chatroomScrolltop = ref(0);
@@ -906,7 +920,7 @@ watch(scrollHeight, (newValue, oldValue) => {
 //聊天室滾動條置底
 const scrollToBottom = (): void => {
     findScrollHeight.value.scrollTop = scrollHeight.value;
-    console.log("findScorllHeight:", findScrollHeight.value.scrollTop);
+    // console.log("findScorllHeight:", findScrollHeight.value.scrollTop);
 };
 
 //重新編輯

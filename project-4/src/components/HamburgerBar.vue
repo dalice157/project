@@ -19,7 +19,7 @@
                     <router-link :to="`/moreChatRoom/${eventKey}`"> 更多聊天室 </router-link>
                 </li>
                 <li class="burgerChatHistory" @[events]="goChatRecord">
-                    <router-link :to="`/chatRecord/${eventKey}`">交談紀錄</router-link>
+                    <a :href="`/chatRecord/${eventKey}`">交談紀錄</a>
                 </li>
             </ul>
             <ul class="hamburgerMenu">

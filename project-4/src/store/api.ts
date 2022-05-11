@@ -81,6 +81,12 @@ export const useApiStore = defineStore({
                         });
                         console.log("this.eventInfo.unreadList", this.eventInfo.unreadList);
                     }
+                    messages.value.forEach((msg) => {
+                        if (msg.janusMsg.sender == 0 && msg.janusMsg.format.phoneType == 1) {
+                            msg.janusMsg.format.phoneType = 4;
+                        }
+                    });
+                    console.log("api msg:", messages.value);
                 })
                 .catch((err: any) => {
                     console.error("Event err:", err);

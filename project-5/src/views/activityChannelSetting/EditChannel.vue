@@ -36,7 +36,7 @@
                                 </div>
                             </n-upload>
                         </div>
-                        <div class="functionSetting" v-if="!isProduction">
+                        <div class="functionSetting">
                             <h3>功能設定</h3>
                             <div class="freecall">
                                 <n-checkbox
@@ -271,8 +271,6 @@ import { fileAccept, imgAccept } from "@/util/commonUtil";
 //router
 const router = useRouter();
 const route = useRoute();
-
-const isProduction = process.env.NODE_ENV === "production";
 
 //store
 const apiStore = useApiStore();

@@ -382,11 +382,7 @@
                                     <p v-if="text.janusMsg.format.phoneType === 3">
                                         {{ text.janusMsg.format.phoneTime }}
                                     </p>
-                                </div>
-                                <div class="phoneStatus" v-else>
-                                    <h4 v-if="text.janusMsg.format.phoneTypeOther === 4">
-                                        未接來電
-                                    </h4>
+                                    <h4 v-if="text.janusMsg.format.phoneType === 4">未接來電</h4>
                                 </div>
                             </a>
                         </div>

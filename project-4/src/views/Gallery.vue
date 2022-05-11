@@ -98,7 +98,7 @@
 import { defineComponent, onMounted, computed, ref, watchEffect } from "vue";
 import { storeToRefs } from "pinia";
 import { NEllipsis, NAvatar } from "naive-ui";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import dayjs from "dayjs";
 import { api as viewerApi } from "v-viewer";
 import axios from "axios";
@@ -126,6 +126,7 @@ const { eventInfo, isIllegalDevice } = storeToRefs(apiStore);
 
 //router
 const route = useRoute();
+const router = useRouter();
 const eventKey = computed(() => route.params.eventKey);
 
 // const result: any = ref([]);
@@ -250,7 +251,7 @@ const previewURL = (fileid: string): void => {
 };
 const goToChat = () => {
     setTimeout(function () {
-        document.location.href = `/${eventKey.value}`;
+        router.push(`/${eventKey.value}`);
     }, 250);
 };
 </script>

@@ -40,6 +40,7 @@ export const usePhoneCallStore = defineStore({
         phoneType: <any>0,
         phoneTime: <any>"0:00",
         isMuted: <boolean>false,
+        sender: <any>null,
     }),
     getters: {},
     actions: {
@@ -88,9 +89,10 @@ export const usePhoneCallStore = defineStore({
             const modelStore = useModelStore();
             const { phoneCallModal } = storeToRefs(modelStore);
             const { gotoChat } = modelStore;
-            gotoChat(this.route.params.id, this.yourUserChatroomID, phoneCallNumber.value);
+            gotoChat(this.route.params.id, name, phoneCallNumber.value);
             phoneCallModal.value = true;
             this.isIncomingCall = false;
+            this.sender = 1;
             // eslint-disable-next-line @typescript-eslint/no-this-alias
             const that = this;
             that.callPlugin.createAnswer({
@@ -114,23 +116,24 @@ export const usePhoneCallStore = defineStore({
             });
         },
         //掛電話
-        doHangup(type: any, chatRoomID, eventID) {
+        doHangup(type: any, chatRoomID, eventID, sender?) {
             const chatstore = useChatStore();
             const { textPlugin, isOnline } = storeToRefs(chatstore);
             console.log("掛掉電話種類", type);
+            console.log("掛掉電話", sender);
             // api store
             const apiStore = useApiStore();
             const { messageList, phoneCallNumber } = storeToRefs(apiStore);
             // model store
             const modelStore = useModelStore();
             const { gotoChat } = modelStore;
-            gotoChat(eventID, this.yourUserChatroomID, phoneCallNumber.value);
+            gotoChat(eventID, chatRoomID, phoneCallNumber.value);
             this.yourUserChatroomID = null;
             const phoneObj = {
                 janusMsg: {
                     chatroomID: chatRoomID,
                     msgType: 9,
-                    sender: 0,
+                    sender: sender,
                     msgContent: "",
                     time: unixTime(),
                     type: 2,

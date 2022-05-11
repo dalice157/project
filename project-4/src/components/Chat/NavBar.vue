@@ -17,7 +17,7 @@
                 <a class="back" @[events]="goToRecord">
                     <img :src="commentIcon" alt="回交談紀錄" />
                 </a>
-                <a class="phone" v-if="!isProduction && eventInfo.callable === true">
+                <a class="phone" v-if="eventInfo.callable === true">
                     <video
                         class="hide"
                         id="remotevideo"
@@ -51,8 +51,9 @@ import { useChatStore } from "@/store/chat";
 import { useSearchStore } from "@/store/search";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { useModelStore } from "@/store/model";
-import { isMobile } from "@/util/commonUtil";
+import { isMobile, eventID } from "@/util/commonUtil";
 import config from "@/config/config";
+import { randomString } from "@/util/chatUtil";
 import phoneCallModel from "@/components/phoneCallModel.vue";
 import arrowLeft from "@/assets/Images/chatroom/arrow-left.svg";
 import commentIcon from "@/assets/Images/chatroom/comment.svg";
@@ -68,7 +69,7 @@ const { eventInfo } = storeToRefs(apiStore);
 
 // chat store
 const chatStore = useChatStore();
-const { participantList, janus } = storeToRefs(chatStore);
+const { participantList, textPlugin } = storeToRefs(chatStore);
 
 //search store
 const searchStore = useSearchStore();
@@ -78,7 +79,7 @@ const { searchBoolean } = storeToRefs(searchStore);
 //phone store
 const phoneCallStore = usePhoneCallStore();
 const { doCall } = phoneCallStore;
-const { isAccepted } = storeToRefs(phoneCallStore);
+const { sender } = storeToRefs(phoneCallStore);
 
 //modal store
 const modelStore = useModelStore();
@@ -88,10 +89,10 @@ const { phoneCallModal } = storeToRefs(modelStore);
 const router = useRouter();
 const route = useRoute();
 const eventKey = computed(() => route.params.eventKey);
-
-const isProduction = process.env.NODE_ENV == "production";
+let transaction = randomString(12);
 
 const webPhoneCall = () => {
+    sender.value = 1;
     phoneCallModal.value = true;
     console.log("participantList phone", participantList.value);
     const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
@@ -110,7 +111,18 @@ const goToRecord = () => {
 };
 
 const goToGallery = () => {
-    janus.value.destroy();
+    let leave = {
+        textroom: "leave",
+        transaction: transaction,
+        room: Number(eventID(eventKey.value)),
+    };
+    textPlugin.value.data({
+        text: JSON.stringify(leave),
+        error: function (reason: any) {
+            console.log("error leave:", reason);
+        },
+        success: function () {},
+    });
     router.push(`/gallery/${eventKey.value}`);
     // isOpenGallery.value = true;
 };

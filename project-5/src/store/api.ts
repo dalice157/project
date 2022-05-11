@@ -204,6 +204,11 @@ export const useApiStore = defineStore({
                         });
                         return unique;
                     }, []);
+                    this.messageList.forEach((msg) => {
+                        if (msg.janusMsg.sender == 1 && msg.janusMsg.format.phoneType == 1) {
+                            msg.janusMsg.format.phoneType = 4;
+                        }
+                    });
                     const lastChatMessage = this.messageList
                         .filter((item) => !item.janusMsg.config.recallStatus)
                         .map((item) => {

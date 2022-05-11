@@ -31,6 +31,7 @@ export const usePhoneCallStore = defineStore({
         phoneType: <any>0,
         phoneTime: <any>"0:00",
         isMuted: <boolean>false,
+        sender: <any>null,
     }),
     getters: {},
     actions: {
@@ -77,6 +78,7 @@ export const usePhoneCallStore = defineStore({
             phoneCallModal.value = true;
             this.isIncomingCall = false;
             const that = this;
+            this.sender = 0;
             that.callPlugin.createAnswer({
                 jsep: jsep,
                 media: { video: false },
@@ -95,8 +97,8 @@ export const usePhoneCallStore = defineStore({
             });
         },
         //掛電話
-        doHangup(type: any, eventID: any) {
-            console.log("掛掉電話", type);
+        doHangup(type: any, eventID: any, sender?) {
+            console.log("掛掉電話", sender);
             // Hangup a call
             const hangup = { request: "hangup" };
             this.callPlugin.send({ message: hangup });
@@ -108,7 +110,7 @@ export const usePhoneCallStore = defineStore({
                 janusMsg: {
                     chatroomID: chatroomID(this.route.params.eventKey),
                     msgType: 9,
-                    sender: 1, // 0:客服, 1:使用者
+                    sender: sender, // 0:客服, 1:使用者
                     msgContent: "",
                     time: unixTime(),
                     type: 2, //1:簡訊 2: 文字
@@ -132,9 +134,37 @@ export const usePhoneCallStore = defineStore({
                     },
                 },
             };
+            const otherPhoneObj = {
+                janusMsg: {
+                    chatroomID: chatroomID(this.route.params.eventKey),
+                    msgType: 9,
+                    sender: 1, // 0:客服, 1:使用者
+                    msgContent: "",
+                    time: unixTime(),
+                    type: 2, //1:簡訊 2: 文字
+                    format: {
+                        phoneType: 4,
+                        phoneTypeOther: type === 2 && this.isAccepted ? 4 : null,
+                        phoneTime: this.phoneTime,
+                    },
+                    config: {
+                        id: nanoid(),
+                        isReply: false,
+                        replyObj: "",
+                        currentDate: currentDate(),
+                        isExpire: false,
+                        isPlay: false,
+                        isRead: adminCount.value > 0 ? true : false,
+                        msgFunctionStatus: false,
+                        msgMoreStatus: false,
+                        recallPopUp: false,
+                        recallStatus: false,
+                    },
+                },
+            };
             messages.value.push(phoneObj);
             const sendMsgObj = {
-                msg: phoneObj,
+                msg: type === 1 ? otherPhoneObj : phoneObj,
                 textPlugin: textPlugin.value,
                 eventKey: this.route.params.eventKey,
                 msgParticipantList: participantList.value,
