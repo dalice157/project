@@ -13,12 +13,15 @@
 import { defineComponent, ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
+import axios from "axios";
 
 import { useApiStore } from "@/store/api.ts";
 import { useSearchStore } from "@/store/search.ts";
 import HamburgerBar from "@/components/HamburgerBar.vue";
 import ChatRoomList from "@/components/MoreChatRoom/ChatRoomList.vue";
 import SeachBar from "@/components/MoreChatRoom/SearchBar.vue";
+import config from "@/config/config";
+import { signature } from "@/util/deviceUtil";
 
 //router
 const route = useRoute();
@@ -26,10 +29,28 @@ const route = useRoute();
 // api store
 const apiStore = useApiStore();
 const { getEventListApi } = apiStore;
+const { isIllegalDevice } = storeToRefs(apiStore);
+
 const searchStore = useSearchStore();
 const { isResult, keyWord } = storeToRefs(searchStore);
-
-getEventListApi(route.params.eventKey);
+onMounted(() => {
+    axios({
+        method: "get",
+        url: `${config.serverUrl}/login/${route.params.eventKey}`,
+        headers: { Authorization: `Bearer ${signature}` },
+    })
+        .then((res: any) => {
+            isIllegalDevice.value = false;
+            getEventListApi(route.params.eventKey);
+        })
+        .catch((err: any) => {
+            console.error(err);
+            if (err.response.status === 401) {
+                isIllegalDevice.value = true;
+                return;
+            }
+        });
+});
 //漢堡選單
 const hamburgerBoolean = ref();
 const menuToggle = (menuBoolean: boolean) => {

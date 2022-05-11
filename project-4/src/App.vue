@@ -12,27 +12,69 @@
             </div>
         </div>
     </teleport>
+    <!-- 身份不可否認 新裝置彈窗 -->
+    <teleport to="body">
+        <div class="mask2" v-show="isIllegalDevice">
+            <div class="deviceCode">
+                <!-- 測試用 <div class="closeBtn" @[events].stop="onCloseIllegalDevice">
+                    <img :src="closeIcon" alt="關閉" />
+                </div> -->
+                <h2>請輸入原裝置之驗證碼</h2>
+                <n-form ref="formRef" label-width="auto" :model="formValue" :rules="rules">
+                    <n-form-item path="deviceCode">
+                        <n-config-provider :theme-overrides="themeOverrides">
+                            <n-input
+                                round
+                                v-model:value="formValue.deviceCode"
+                                type="text"
+                                placeholder="請輸入驗證碼"
+                            />
+                        </n-config-provider>
+                    </n-form-item>
+                    <n-button
+                        round
+                        size="medium"
+                        @click="onSendVcode"
+                        color="#ffb400"
+                        text-color="#fff"
+                        type="primary"
+                        >送出</n-button
+                    >
+                    <span v-if="errText" class="error">驗證碼錯誤</span>
+                </n-form>
+            </div>
+        </div>
+    </teleport>
 </template>
 
 <script setup lang="ts">
 import { onMounted, onUnmounted, ref, watchEffect } from "vue";
+import axios from "axios";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
-// import FingerprintJS from "@fingerprintjs/fingerprintjs";
 import vConsole from "@/plugin/vConsole";
-import Fingerprint from "@/assets/js/fingerprint";
-import java_hashcode from "@/assets/js/java_hashcode";
+import { NInput, NConfigProvider, NButton, NForm, NFormItem, NSpin } from "naive-ui";
 
-import NavBar from "@/components/Chat/NavBar.vue";
-import HamburgerBar from "@/components/HamburgerBar.vue";
+import config from "@/config/config";
 import UserInfoSider from "@/components/UserInfoSider.vue";
 import { useChatStore } from "@/store/chat";
-import { useSearchStore } from "@/store/search";
+import { useApiStore } from "@/store/api";
 import { txt } from "@/util/interfaceUtil";
+import { isMobile } from "@/util/commonUtil";
+import { signature, withCanvasDrawing } from "@/util/deviceUtil";
+import closeIcon from "@/assets/Images/common/close-round.svg";
+
+const events = ref(isMobile ? "touchstart" : "click");
+const route = useRoute();
 
 //chat store
 const chatStore = useChatStore();
 const { messages, inputFunctionBoolean } = storeToRefs(chatStore);
+
+// api store
+const apiStore = useApiStore();
+const { getBackendApi } = apiStore;
+const { isIllegalDevice, vCode, eventInfo } = storeToRefs(apiStore);
 
 //取消訊息功能泡泡
 const closeChatBubble = (): void => {
@@ -42,17 +84,69 @@ const closeChatBubble = (): void => {
     inputFunctionBoolean.value = false;
 };
 
+const onCloseIllegalDevice = () => {
+    isIllegalDevice.value = false;
+};
+const formRef = ref();
+const formValue = ref({
+    deviceCode: null,
+});
+const rules = {
+    deviceCode: {
+        required: true,
+        trigger: ["blur", "input"],
+        message: "驗證碼輸入錯誤",
+        validator: (rule, value) => {
+            console.log("code value:", /^\d+$/.test(value));
+            return /^\d{6}$/.test(value);
+        },
+    },
+};
+
+const themeOverrides = {
+    common: {},
+    Input: {
+        fontSize: "16px",
+        caretColor: "black",
+        borderHover: "transparent",
+        borderFocus: "transparent",
+        boxShadowFocus: "none",
+    },
+};
+const errText = ref(null);
+const onSendVcode = (e) => {
+    e.preventDefault();
+    const fd = new FormData();
+    fd.append("device", withCanvasDrawing);
+    fd.append("code", formValue.value.deviceCode);
+    formRef.value?.validate((errors) => {
+        console.log(formValue.value.deviceCode);
+
+        if (!errors) {
+            axios({
+                method: "post",
+                url: `${config.serverUrl}/vcode/${route.params.eventKey}`,
+                data: fd,
+                headers: { Authorization: `Bearer ${signature}` },
+            })
+                .then((res: any) => {
+                    vCode.value = res.data.code;
+                    isIllegalDevice.value = false;
+                    getBackendApi(route.params.eventKey);
+                })
+                .catch((err: any) => {
+                    console.log("err res", err.response);
+                    errText.value = err.response.data.msg;
+                });
+        } else {
+            console.log("errors", errors);
+        }
+    });
+};
+
 onMounted(() => {
+    // vconsole x 及 y 軸設定調整
     vConsole;
-    /***
-     * 參考
-     * https://github.com/artem0/canvas-fingerprinting
-     * https://www.wfublog.com/2020/11/js-track-user-device-browser-fingerprint.html
-     * var withCanvasDrawing = new Fingerprint({ canvas: true });
-     * var withoutCanvasDrawing = new Fingerprint({ canvas: false });
-     * */
-    let withCanvasDrawing = new Fingerprint({ hasher: java_hashcode });
-    console.log("withCanvasDrawing :", withCanvasDrawing.get());
     localStorage.setItem("vConsole_switch_x", JSON.stringify(0));
     localStorage.setItem("vConsole_switch_y", JSON.stringify(520));
 });
@@ -149,32 +243,6 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss">
-//橫屏時蓋板popup
-.mask2 {
-    display: block;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: rgba(0, 0, 0, 0.5);
-    z-index: 1000;
-    .popUp {
-        border-radius: 20px;
-        width: 342px;
-        height: 100px;
-        padding: 15px;
-        background-color: #ffffff;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-    }
-}
-
 .v-wrap {
     left: 300px !important;
 }
@@ -211,9 +279,89 @@ onUnmounted(() => {
 .viewer-one-to-one {
     display: none;
 }
+.deviceCode {
+    .n-button {
+        width: 80%;
+        margin: 0 auto;
+    }
+    .n-form {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .n-form-item .n-form-item-feedback-wrapper .n-form-item-feedback {
+        margin-top: 4px;
+        margin-bottom: 8px;
+    }
+}
 </style>
 <style lang="scss" scoped>
 @import "~@/assets/scss/var";
+@import "~@/assets/scss/extend";
+.error {
+    display: block;
+    text-align: center;
+    color: $danger;
+    font-size: $font-size-12;
+    margin-top: 8px;
+}
+//橫屏時蓋板popup
+.mask2 {
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    .popUp {
+        border-radius: 20px;
+        width: 342px;
+        height: 100px;
+        padding: 15px;
+        background-color: $white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .deviceCode {
+        border-radius: 20px;
+        width: 220px;
+        height: 200px;
+        padding: 15px;
+        background-color: $white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transform: translate(-50%, -50%);
+        .closeBtn {
+            position: absolute;
+            right: -5px;
+            top: -10px;
+            z-index: 100;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            background-color: $white;
+            border-radius: 50px;
+            img {
+                width: 100%;
+            }
+        }
+        h2 {
+            @extend %h2;
+        }
+    }
+}
 .all {
     width: 100%;
     height: 100%;
@@ -221,7 +369,7 @@ onUnmounted(() => {
     overflow: hidden;
     grid: "sidebar body" 1fr / 300px 1fr;
     gap: 0;
-    user-select: none;
+    // user-select: none;
     &.hide {
         display: none;
     }

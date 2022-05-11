@@ -7,7 +7,7 @@
         @[events]="closeAll"
         @scroll="chatroomToBottom($event)"
     >
-        <div class="background">
+        <div class="background" v-if="eventInfo !== null">
             <!-- 對話區塊 -->
             <div
                 class="dialog-box"
@@ -82,6 +82,12 @@
 
                 <!-- 聊天對話框樣板-->
                 <div class="dialog" v-else>
+                    <div
+                        class="resendMsg"
+                        v-if="text.janusMsg.config.deliveryStatusSuccess === false"
+                    >
+                        <img :src="resendIcon" alt="重傳訊息" />
+                    </div>
                     <div class="dialog-inner">
                         <div
                             class="msgFunction mobile"
@@ -201,7 +207,7 @@
                                 round
                                 :size="42"
                                 :src="`${config.fileUrl}${eventInfo.icon}`"
-                                @[events]="
+                                @click="
                                     showCompanyInfo({
                                         ...eventInfo,
                                         eventKey: route.params.eventKey,
@@ -494,7 +500,7 @@ import { nanoid } from "nanoid";
 import dayjs from "dayjs";
 import Compressor from "compressorjs";
 import { PlayCircleSharp, PauseCircleSharp, ArrowDownCircle } from "@vicons/ionicons5";
-import { NConfigProvider, NEllipsis, NAvatar, NIcon } from "naive-ui";
+import { NSpin, NEllipsis, NAvatar, NIcon } from "naive-ui";
 import { useRoute } from "vue-router";
 
 import { useApiStore } from "@/store/api";
@@ -521,6 +527,8 @@ import googleMap from "@/assets/Images/chatroom/map.jpg";
 import audioIcon from "@/assets/Images/chatroom/audio.svg";
 import fileIcon from "@/assets/Images/chatroom/file-fill.svg";
 import phoneIcon from "@/assets/Images/chatroom/phone-fill-round-y.svg";
+import resendIcon from "@/assets/Images/chatroom/refresh-outline.svg";
+import { signature } from "@/util/deviceUtil";
 
 const events = ref(isMobile ? "touchstart" : "click");
 
@@ -661,6 +669,7 @@ const onUploadFile = (file: any) => {
                     method: "post",
                     url: `${config.serverUrl}/file/${route.params.eventKey}`,
                     data: fd,
+                    headers: { Authorization: `Bearer ${signature}` },
                 })
                     .then((res) => {
                         console.log("img res:", res);
@@ -736,6 +745,7 @@ const onUploadFile = (file: any) => {
             method: "post",
             url: `${config.serverUrl}/file/${route.params.eventKey}`,
             data: fd,
+            headers: { Authorization: `Bearer ${signature}` },
         })
             .then((res) => {
                 console.log("上傳 res:", res);
@@ -1113,12 +1123,12 @@ const themeOverrides = {
     }
 }
 * {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+    // -webkit-touch-callout: none;
+    // -webkit-user-select: none;
+    // -khtml-user-select: none;
+    // -moz-user-select: none;
+    // -ms-user-select: none;
+    // user-select: none;
 }
 
 //收回訊息確認的彈窗
@@ -1385,7 +1395,12 @@ const themeOverrides = {
             flex-direction: row-reverse;
             align-items: flex-end;
             position: relative;
-
+            // align-items: center;
+            .resendMsg {
+                width: 20px;
+                height: 20px;
+                margin-left: 5px;
+            }
             .dialog-inner {
                 display: inline-flex;
                 justify-content: flex-end;
@@ -1506,12 +1521,12 @@ const themeOverrides = {
                     flex-direction: column;
                     line-height: 1.5;
                     margin-left: 5px;
-                    -webkit-touch-callout: none;
-                    -webkit-user-select: none;
-                    -khtml-user-select: none;
-                    -moz-user-select: none;
-                    -ms-user-select: none;
-                    user-select: none;
+                    // -webkit-touch-callout: none;
+                    // -webkit-user-select: none;
+                    // -khtml-user-select: none;
+                    // -moz-user-select: none;
+                    // -ms-user-select: none;
+                    // user-select: none;
 
                     &.reply {
                         min-width: 70px;

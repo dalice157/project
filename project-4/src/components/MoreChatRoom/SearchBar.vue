@@ -34,7 +34,7 @@
     </div>
 </template>
 <script setup lang="ts">
-import { defineComponent, ref, watch } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import { useRoute } from "vue-router";
 import { NInput, NIcon, NAvatar, NEllipsis } from "naive-ui";
@@ -56,7 +56,6 @@ const { onSearchMoreImResult, clearMoreKeyWord } = searchStore;
 const { moreKeyWord } = storeToRefs(searchStore);
 
 const route = useRoute();
-getEventListApi(route.params.eventKey);
 </script>
 <style lang="scss">
 @import "~@/assets/scss/var";

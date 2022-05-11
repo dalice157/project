@@ -23,6 +23,12 @@
                 </li>
             </ul>
             <ul class="hamburgerMenu">
+                <li v-if="!isProduction" class="burgerKnow" @[events]="getMOCode">
+                    取得簡訊驗證碼
+                </li>
+                <li v-if="!isProduction" class="burgerKnow" @[events]="onOpenOldDevice">
+                    發送原手機驗證碼
+                </li>
                 <li class="burgerKnow" @[events]="onBurgerKnow">認識talkOD</li>
                 <li class="qa" @[events]="onQa">常見問題</li>
                 <li class="terms">
@@ -69,20 +75,55 @@
             </div>
         </div>
     </teleport>
+    <teleport to="body" v-if="isOldModel">
+        <div class="mask">
+            <div class="deviceCode">
+                <div class="closeBtn" @[events].stop="onCloseOldDevice">
+                    <img :src="closeIcon" alt="關閉" />
+                </div>
+                <h2>原裝置之驗證碼</h2>
+                <n-config-provider :theme-overrides="themeOverrides">
+                    <n-input round v-model:value="vOldCode" readonly type="text" />
+                </n-config-provider>
+            </div>
+        </div>
+    </teleport>
+    <teleport to="body" v-if="isMCodeModel">
+        <div class="mask">
+            <div class="deviceCode">
+                <div class="closeBtn" @[events].stop="onCloseMoMode">
+                    <img :src="closeIcon" alt="關閉" />
+                </div>
+                <h2>手機簡訊驗證碼</h2>
+                <n-config-provider :theme-overrides="themeOverrides">
+                    <n-input round v-model:value="mCode" readonly type="text" />
+                </n-config-provider>
+                <p class="psWord">請發送上列數字簡訊至<br />0912345678</p>
+            </div>
+        </div>
+    </teleport>
 </template>
 
 <script lang="ts">
 import { defineComponent, ref, watch, watchEffect, computed } from "vue";
+import axios from "axios";
 import { useRouter, useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
+import { NInput, NConfigProvider, NButton } from "naive-ui";
 
 import { useApiStore } from "@/store/api";
 import { useSearchStore } from "@/store/search";
 import { isMobile } from "@/util/commonUtil";
+import closeIcon from "@/assets/Images/common/close-round.svg";
+import { signature, withCanvasDrawing } from "@/util/deviceUtil";
+import config from "@/config/config";
 
 export default defineComponent({
     name: "HamburgerBar",
-    components: {},
+    components: {
+        NInput,
+        NConfigProvider,
+    },
     emits: ["menuToggle"],
     setup(_: any, ctx: any) {
         //漢堡選單
@@ -92,9 +133,21 @@ export default defineComponent({
             ctx.emit("menuToggle", isActive.value);
         };
 
+        const themeOverrides = {
+            common: {},
+            Input: {
+                fontSize: "16px",
+                caretColor: "black",
+                borderHover: "transparent",
+                borderFocus: "transparent",
+                boxShadowFocus: "none",
+            },
+        };
+
+        const isProduction = process.env.NODE_ENV == "production";
         // api store
         const apiStore = useApiStore();
-        const { eventInfo } = storeToRefs(apiStore);
+        const { eventInfo, vOldCode, isIllegalDevice, mCode } = storeToRefs(apiStore);
 
         //search store
         const searchStore = useSearchStore();
@@ -128,6 +181,49 @@ export default defineComponent({
 
         const events = ref(isMobile ? "touchstart" : "click");
 
+        const isOldModel = ref(false);
+        const isMCodeModel = ref(false);
+        const getMOCode = () => {
+            axios({
+                method: "get",
+                url: `${config.serverUrl}/mcode/${route.params.eventKey}?device=${withCanvasDrawing}`,
+                headers: { Authorization: `Bearer ${signature}` },
+            })
+                .then((res: any) => {
+                    mCode.value = res.data.code;
+                    isMCodeModel.value = true;
+                    isActive.value = false;
+                    ctx.emit("menuToggle", isActive.value);
+                })
+                .catch((err: any) => {
+                    console.error(err);
+                });
+        };
+
+        const onCloseMoMode = () => {
+            isMCodeModel.value = false;
+        };
+        const onOpenOldDevice = () => {
+            axios({
+                method: "get",
+                url: `${config.serverUrl}/vcode/${route.params.eventKey}`,
+                headers: { Authorization: `Bearer ${signature}` },
+            })
+                .then((res: any) => {
+                    vOldCode.value = res.data.code;
+                    isOldModel.value = true;
+                    isActive.value = false;
+                    ctx.emit("menuToggle", isActive.value);
+                })
+                .catch((err: any) => {
+                    console.error(err);
+                });
+        };
+
+        const onCloseOldDevice = () => {
+            isOldModel.value = false;
+        };
+
         return {
             isActive,
             hamburgerToggle,
@@ -145,10 +241,42 @@ export default defineComponent({
             onQa,
             showQaModal,
             events,
+            onOpenOldDevice,
+            isOldModel,
+            onCloseOldDevice,
+            closeIcon,
+            themeOverrides,
+            vOldCode,
+            isMCodeModel,
+            getMOCode,
+            onCloseMoMode,
+            mCode,
+            isProduction,
         };
     },
 });
 </script>
+
+<style lang="scss">
+@import "~@/assets/scss/var";
+@import "~@/assets/scss/extend";
+
+.deviceCode {
+    .n-button {
+        width: 80%;
+        margin: 0 auto;
+    }
+    .n-form {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .n-form-item .n-form-item-feedback-wrapper .n-form-item-feedback {
+        margin-top: 4px;
+        margin-bottom: 8px;
+    }
+}
+</style>
 
 <style lang="scss" scoped>
 @import "~@/assets/scss/var";
@@ -182,6 +310,43 @@ export default defineComponent({
             &:not(:first-child) {
                 margin-top: 15px;
             }
+        }
+    }
+    .deviceCode {
+        border-radius: 20px;
+        width: 220px;
+        height: 200px;
+        padding: 15px;
+        background-color: $white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transform: translate(-50%, -50%);
+        .psWord {
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+        .closeBtn {
+            position: absolute;
+            right: -5px;
+            top: -10px;
+            z-index: 100;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            background-color: $white;
+            border-radius: 50px;
+            img {
+                width: 100%;
+            }
+        }
+        h2 {
+            @extend %h2;
+            margin-bottom: 15px;
         }
     }
     .btnWrap {

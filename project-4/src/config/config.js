@@ -1,6 +1,9 @@
 const env = process.env.VUE_APP_config || "development";
 // api
 const SERVER_SITE = {
+    //驗證碼測試環境
+    // development: "http://10.110.199.191:80",
+    development: "https://t.talkod.im:443",
     develop: "https://t.talkod.im:443",
     staging: "https://tfapi.talkod.im",
     production: "https://fapi.talkod.im",
@@ -18,7 +21,7 @@ const FILE_SITE = {
 
 const setting = {
     development: {
-        serverUrl: SERVER_SITE.develop,
+        serverUrl: SERVER_SITE.development,
         janusUrl: JANUS_SITE.develop,
         fileUrl: FILE_SITE.develop,
     },

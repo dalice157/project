@@ -1,15 +1,18 @@
 <template>
     <!--搜尋交談結果-->
-    <div v-if="searcRecordMessages?.length > 0 && recordKeyWord !== ''" class="searchRecordMessage">
+    <div
+        v-if="eventInfo !== null && searcRecordMessages?.length > 0 && recordKeyWord !== ''"
+        class="searchRecordMessage"
+    >
         <div
             class="chatRoomBox"
-            @[events].stop="gotoChat(num.chatroomID)"
+            @click.stop="gotoChat(num.chatroomID)"
             v-for="num in searcRecordMessages"
             :key="num.chatroomID"
         >
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
-                <div class="avatar" @[events].stop="showCompanyInfo(num)">
+                <div class="avatar" @click.stop="showCompanyInfo(num)">
                     <n-avatar round :size="48" :src="`${config.fileUrl}${num.icon}`" />
                 </div>
                 <div class="chatRoomInfo">
@@ -37,7 +40,12 @@
     </div>
     <!-- 交談歷史紀錄 -->
     <div
-        v-if="changeList?.length > 0 && searcRecordMessages?.length === 0 && recordKeyWord === ''"
+        v-if="
+            eventInfo !== null &&
+            changeList?.length > 0 &&
+            searcRecordMessages?.length === 0 &&
+            recordKeyWord === ''
+        "
         class="chatRecordMessage"
     >
         <!-- @touchend.prevent="gotoChat(num.eventKey)" -->
@@ -46,11 +54,11 @@
             class="chatRoomBox"
             v-for="(num, index) in changeList"
             :key="num.chatroomID"
-            @[events].stop="gotoChat(num.chatroomID)"
+            @click.stop="gotoChat(num.chatroomID)"
         >
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
-                <div class="avatar" @[events].stop="showCompanyInfo(num)">
+                <div class="avatar" @click.stop="showCompanyInfo(num)">
                     <n-avatar round :size="48" :src="`${config.fileUrl}${num.icon}`" />
                     <img class="img" :src="pinIcon" alt="置頂" v-if="num.toTop" />
                 </div>
@@ -80,11 +88,11 @@
                     </div> -->
                 </div>
                 <div class="functionBoxMore">
-                    <img :src="moreIcon" alt="more" @[events].stop="openFunctionPopUp(num)" />
+                    <img :src="moreIcon" alt="more" @click.stop="openFunctionPopUp(num)" />
                     <div class="functionPopUp" v-show="num.isfunctionPopUp">
                         <ul class="ulList">
-                            <li @[events].stop="pin(num, index)" v-if="!num.toTop">開啟置頂</li>
-                            <li @[events].stop="unpin(num, index)" v-if="num.toTop">取消置頂</li>
+                            <li @click.stop="pin(num, index)" v-if="!num.toTop">開啟置頂</li>
+                            <li @click.stop="unpin(num, index)" v-if="num.toTop">取消置頂</li>
                             <!-- <li @touchend.stop="deletechatRoomBox(num)">刪除</li> -->
                         </ul>
                     </div>
@@ -103,7 +111,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watchEffect, onMounted, defineEmits, computed } from "vue";
+import { ref, watchEffect, onMounted, defineEmits, computed, reactive, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { NAvatar, NEllipsis, NModal, NCard } from "naive-ui";
 import { nanoid } from "nanoid";
@@ -112,7 +120,7 @@ import dayjs from "dayjs";
 import isYesterday from "dayjs/plugin/isYesterday";
 import isToday from "dayjs/plugin/isToday";
 
-import { isMobile } from "@/util/commonUtil";
+import { isMobile, resetSetItem } from "@/util/commonUtil";
 import { currentTime } from "@/util/dateUtil";
 import { useApiStore } from "@/store/api";
 import { useSearchStore } from "@/store/search";
@@ -135,7 +143,7 @@ const searchStore = useSearchStore();
 const { isResult, searcRecordMessages, recordKeyWord } = storeToRefs(searchStore);
 
 const apiStore = useApiStore();
-const { getEventListApi } = apiStore;
+const { getBackendApi } = apiStore;
 const { eventList, eventInfo } = storeToRefs(apiStore);
 
 const chatRecordStore = useChatRecordStore();
@@ -181,6 +189,7 @@ let i = ref(0);
 const recordMsgs = computed(() => {
     return JSON.parse(localStorage.getItem(`${route.params.eventKey}-record`) || "[]");
 });
+// 首次進入拿歷史紀錄
 const init: any = () => {
     let messages = JSON.parse(localStorage.getItem(route.params.eventKey as any) || "[]");
     if (eventList.value.length > 0) {
@@ -219,7 +228,7 @@ const init: any = () => {
 
     if (
         messages.length > 0 &&
-        eventInfo.value.messagelist.length > 0 &&
+        eventInfo.value?.messagelist.length > 0 &&
         !recordMessages.value.some((msg: any) => msg.chatroomID === route.params.eventKey)
     ) {
         let getObj = {
@@ -246,9 +255,9 @@ const init: any = () => {
     if (recordMsgs.value.length > 0) {
         recordMessages.value = [...recordMsgs.value, ...recordMessages.value];
     }
-    recordMessages.value.forEach((item: any) => {
-        item.key = i.value++;
-    });
+    // recordMessages.value.forEach((item: any) => {
+    //     item.key = i.value++;
+    // });
     changeList.value = recordMessages.value;
     changeList.value = changeList.value.reduce((unique, o) => {
         const hasRepeatId = unique.some((obj) => {
@@ -259,17 +268,80 @@ const init: any = () => {
         }
         return unique;
     }, []);
-    localStorage.setItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
+    resetSetItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
 };
 onMounted(() => {
     init();
 });
-// watchEffect(() => {
-//     console.log("watchEffect");
-//     if (!isDel.value) {
-//         init();
-//     }
-// });
+
+// 最後一筆訊息陣列
+const lastChatMessageArr = ref([]);
+let lastObj = reactive({
+    callable: true,
+    chatroomID: "",
+    description: "",
+    homeurl: "",
+    icon: "",
+    isfunctionPopUp: false,
+    janusMsg: {},
+    jid: 1,
+    key: 0,
+    messagelist: [],
+    name: "",
+    show: true,
+    sup: 0,
+    time: 0,
+    toTop: false,
+    unreadList: null,
+});
+// 即時更新拿取最後一筆歷史紀錄
+watchEffect(() => {
+    window.addEventListener(
+        "setItem",
+        () => {
+            lastChatMessageArr.value = JSON.parse(
+                localStorage.getItem(`${route.params.eventKey}` || "[]")
+            );
+
+            lastChatMessageArr.value = lastChatMessageArr.value.filter((item, idx, arr) => {
+                return !item.janusMsg.config.recallStatus;
+            });
+            lastChatMessageArr.value.forEach((item, idx, arr) => {
+                const infoLen = lastChatMessageArr.value.length;
+                const isInfoYesterday = dayjs(
+                    (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.config.currentDate
+                ).isYesterday();
+                const isInfoToday = dayjs(
+                    (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.config.currentDate
+                ).isToday();
+                lastObj = {
+                    ...eventInfo.value,
+                    ...arr[arr.length - 1],
+                    chatroomID: route.params.eventKey,
+                    toTop: false,
+                    show: true,
+                    isfunctionPopUp: false,
+                    time: isInfoToday
+                        ? (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.time
+                        : isInfoYesterday
+                        ? "昨天"
+                        : (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.config
+                              .currentDate,
+                    sup: lastChatMessageArr.value.length,
+                };
+            });
+            console.log("lastChatMessageArr", lastChatMessageArr.value);
+            console.log("lastObj", lastObj);
+            recordMessages.value = [];
+            recordMessages.value.push(lastObj);
+            // console.log("recordMessages", recordMessages.value);
+            changeList.value = recordMessages.value;
+            // console.log("changeList", changeList.value);
+            resetSetItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
+        },
+        false
+    );
+});
 //開啟功能列表
 const openFunctionPopUp = (num: any) => {
     changeList.value.forEach((item: any) => {
@@ -296,7 +368,7 @@ const openFunctionPopUp = (num: any) => {
 //         }
 //     });
 //     isDel.value = true;
-//     localStorage.setItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
+//    resetSetItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
 // };
 
 //置頂功能
@@ -312,7 +384,7 @@ const pin = (item: any, idx: any): void => {
         it.isfunctionPopUp = false;
     });
     changeList.value = lists;
-    localStorage.setItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
+    resetSetItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
     console.log("新增置頂nums.value:", changeList.value);
 };
 
@@ -337,7 +409,7 @@ const unpin = (item: any, index: any): void => {
         })
         .sort((a, b) => a.key > b.key);
     changeList.value = [...toTopLists, ...doNotTopLists];
-    localStorage.setItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
+    resetSetItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
     console.log("取消nums.value:", changeList.value);
 };
 

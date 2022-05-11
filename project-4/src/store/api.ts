@@ -1,39 +1,58 @@
 import axios from "axios";
 import { defineStore, storeToRefs } from "pinia";
 import dayjs from "dayjs";
+import Janus from "@/assets/js/janus";
+import adapter from "webrtc-adapter";
 
 import config from "@/config/config";
 import { useChatStore } from "@/store/chat";
 import { localStorageMsg, eventID } from "@/util/commonUtil";
 import { randomString } from "@/util/chatUtil";
+import { signature } from "@/util/deviceUtil";
 
 export const useApiStore = defineStore({
     id: "api",
     state: () => ({
-        eventInfo: <any>{
-            name: "test",
-            callable: true,
-            jid: 1,
-            description: "hi",
-            homeurl: "http://e8d.tw/",
-            icon: "logo.png",
-            messagelist: [],
-            unreadList: null,
-        },
+        eventInfo: <any>null,
         eventList: <any>[],
         stickerList: <any>[],
         stickerUrl: <string>"",
+        isIllegalDevice: <boolean>false,
+        vOldCode: <any>null,
+        vCode: <any>null,
+        mCode: <any>null,
     }),
     getters: {},
     actions: {
-        // 1GdSC2wd
+        async logIn(chatToken) {
+            await axios({
+                method: "get",
+                url: `${config.serverUrl}/login/${chatToken}`,
+                headers: { Authorization: `Bearer ${signature}` },
+            })
+                .then((res: any) => {
+                    this.isIllegalDevice = false;
+                    this.getBackendApi(chatToken);
+                })
+                .catch((err: any) => {
+                    console.error(err);
+                    if (err.response.status === 401) {
+                        this.isIllegalDevice = true;
+                        return;
+                    }
+                });
+        },
         //發api拿取聊天資料
-        async getBackendApi(token: any) {
-            await axios
-                .get(`${config.serverUrl}/Event/${token}`)
+        async getBackendApi(chatToken: any) {
+            await axios({
+                method: "get",
+                url: `${config.serverUrl}/Event/${chatToken}`,
+                headers: { Authorization: `Bearer ${signature}` },
+            })
                 .then((res: any) => {
                     this.eventInfo = res.data.eventInfo;
-                    // console.log("this.eventInfo 的未讀訊息", this.eventInfo);
+                    this.getEventListApi(chatToken);
+                    this.getSticker(chatToken);
                     const chatStore = useChatStore();
                     const { messages } = storeToRefs(chatStore);
                     if (this.eventInfo.unreadList !== null) {
@@ -42,7 +61,7 @@ export const useApiStore = defineStore({
                                 const chatStore = useChatStore();
                                 const { messages } = storeToRefs(chatStore);
                                 messages.value = JSON.parse(
-                                    localStorage.getItem(`${token}`) || "[]"
+                                    localStorage.getItem(`${chatToken}`) || "[]"
                                 );
                                 messages.value.forEach((msg) => {
                                     if (msg.janusMsg.config.id === unReadMsg.janusMsg.config.id) {
@@ -57,10 +76,9 @@ export const useApiStore = defineStore({
                             ) {
                                 arr[0].janusMsg.config.isUnread = true;
                                 messages.value.push(unReadMsg);
-                                localStorageMsg(messages.value, token);
+                                localStorageMsg(messages.value, chatToken);
                             }
                         });
-
                         console.log("this.eventInfo.unreadList", this.eventInfo.unreadList);
                     }
                 })
@@ -74,17 +92,22 @@ export const useApiStore = defineStore({
         },
         //發api拿取交談紀錄聊天資料
         async getEventListApi(token: any) {
-            await axios
-                .get(`${config.serverUrl}/events/${token}`)
+            await axios({
+                method: "get",
+                url: `${config.serverUrl}/events/${token}`,
+                headers: { Authorization: `Bearer ${signature}` },
+            })
                 .then((res: any) => {
                     this.eventList = res.data.eventList;
+                    // console.log("拿eventlist");
+                    // console.log("getEventListApi res", res);
                 })
                 .catch((err: any) => {
                     console.error(err);
                 });
         },
         //拿貼圖
-        async getSticker() {
+        async getSticker(chatToken) {
             // api store
             const chatStore = useChatStore();
             const { handleStickckerGroup } = chatStore;
@@ -94,8 +117,11 @@ export const useApiStore = defineStore({
                 stickerItems.value = JSON.parse(window.localStorage.getItem("sticker"));
             }
             const isReloadTime = stickerItems.value.length > 0 ? 0 : 1;
-            await axios
-                .get(`${config.serverUrl}/sticker`)
+            await axios({
+                method: "get",
+                url: `${config.serverUrl}/sticker/${chatToken}`,
+                headers: { Authorization: `Bearer ${signature}` },
+            })
                 .then((res: any) => {
                     this.stickerList = res.data.stickerList;
                     this.stickerUrl = res.data.prefix;
@@ -122,6 +148,7 @@ export const useApiStore = defineStore({
                 method: "patch",
                 url: `${config.serverUrl}/message/${chatToken}`,
                 data: fd,
+                headers: { Authorization: `Bearer ${signature}` },
             })
                 .then((res: any) => {
                     const message: any = {
@@ -145,5 +172,6 @@ export const useApiStore = defineStore({
                     console.error(err);
                 });
         },
+        //取得換機驗證碼
     },
 });

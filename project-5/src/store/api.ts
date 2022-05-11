@@ -59,6 +59,9 @@ export const useApiStore = defineStore({
         inquireSMSShortMessageList: <any>[],
         inquireMMSShortMessageList: <any>[],
         accounts: <any>[],
+        phoneCallName: <any>"",
+        phoneCallIcon: <any>0,
+        phoneCallNumber: <any>null,
     }),
     getters: {},
     actions: {
@@ -243,21 +246,22 @@ export const useApiStore = defineStore({
                     },
                 })
                 .then((res: any) => {
-                    this.chatroomList = res.data.chatroomList.sort((a, b) => {
-                        return b.pinTop - a.pinTop;
-                    });
-                    // this.chatroomList.forEach((item) => {
-                    //     item.unread = 0;
-                    //     // console.log("chat list chatroomID:", item.chatroomID);
-                    //     // console.log("chat list getFrom:", getFrom);
-                    //     // if (item.chatroomID == getFrom) {
-                    //     //     item.unread = 1;
-                    //     // }
-                    // });
+                    this.chatroomList = res.data.chatroomList
+                        .sort((a, b) => {
+                            return b.time - a.time;
+                        })
+                        .sort((a, b) => {
+                            return b.pinTop - a.pinTop;
+                        });
                     console.log("chatroomList api:", this.chatroomList);
                     this.chatroomList.forEach((chatroom) => {
                         sessionStorage.setItem(`${chatroom.chatroomID}-lastChatMessage`, "[]");
                     });
+                    const arr = res.data.chatroomList.filter((item) => item.chatroomID === getFrom);
+                    // console.log("phopnecallperson Arr:", arr);
+                    this.phoneCallName = arr[0]?.name;
+                    this.phoneCallIcon = arr[0]?.icon;
+                    this.phoneCallNumber = arr[0]?.mobile;
                 })
                 .catch((err: any) => {
                     console.error(err);

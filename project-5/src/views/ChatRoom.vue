@@ -45,14 +45,14 @@
                 <UserInfo :info="userInfo" />
                 <div class="description">語音來電</div>
                 <ul class="call_container">
-                    <li @click="doHangup(2, chatRoomID, route.params.id)">
+                    <li @click="doHangup(2, yourUserChatroomID, route.params.id)">
                         <span class="icon"><img :src="hangUpIcon" alt="掛斷" /></span>
                         <h4 class="text">掛斷</h4>
                     </li>
                     <li>
                         <button
                             class="icon"
-                            @click="onIncomingCall(yourUsername, jsepMsg)"
+                            @click="onIncomingCall(yourUserChatroomID, jsepMsg)"
                         ></button>
                         <h4 class="text">接聽</h4>
                     </li>
@@ -104,7 +104,7 @@ const { eventInfo, userInfo, isInput, eventList, chatroomList } = storeToRefs(ap
 //phoneCall store
 const phoneCallStore = usePhoneCallStore();
 const { onIncomingCall, doHangup } = phoneCallStore;
-const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime } =
+const { callPlugin, yourUserChatroomID, jsepMsg, isIncomingCall, isAccepted, phoneTime } =
     storeToRefs(phoneCallStore);
 
 //chat store

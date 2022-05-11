@@ -26,9 +26,9 @@
                 >)
             </li>
             <li class="btnBg" v-if="isAdmin >= 1">
-                <router-link :to="`${eventID}` ? `/manage/${eventID}/SMSSend` : `/manage/SMSSend`"
-                    >管理功能</router-link
-                >
+                <router-link :to="`${eventID}` ? `/manage/${eventID}/SMSSend` : `/manage/SMSSend`">
+                    管理功能
+                </router-link>
             </li>
             <li class="btnBg myChatRoom">
                 <n-dropdown
@@ -40,12 +40,8 @@
                     <n-badge class="dot" :dot="hasUnread">頻道列表</n-badge>
                 </n-dropdown>
             </li>
-            <li v-if="!access_token">
-                <a href="/">登入</a>
-            </li>
-            <li class="chevron" v-if="access_token">
-                <a href="/">登出</a>
-            </li>
+            <li v-if="!access_token" @click="gotoLogIn">登入</li>
+            <li class="chevron" v-if="access_token" @click="gotoLogIn">登出</li>
         </ul>
     </n-layout-header>
     <teleport to="body" v-if="isFirstLogin">
@@ -146,7 +142,7 @@ const { textPlugin, participantList, onlineList, isOnline, messageFrom, messageF
 //phoneCall store
 const phoneCallStore = usePhoneCallStore();
 const { doHangup } = phoneCallStore;
-const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime, isMuted } =
+const { callPlugin, yourUserChatroomID, jsepMsg, isIncomingCall, isAccepted, phoneTime, isMuted } =
     storeToRefs(phoneCallStore);
 
 // api store
@@ -182,6 +178,10 @@ onBeforeMount(() => {
         location.href = "/";
     }
 });
+
+const gotoLogIn = () => {
+    location.href = "/";
+};
 
 // adminStatus: 0-客服, 1-管理者,
 const isAdmin: number | null = Number(localStorage.getItem("adminStatus"));
@@ -697,10 +697,11 @@ const attachVideocallPlugin = () => {
                     } else if (event === "incomingcall") {
                         // @ts-ignore
                         Janus.log("call-> Incoming call from " + result["username"] + "!");
-                        yourUsername.value = result["username"];
+                        yourUserChatroomID.value = result["username"];
                         jsepMsg.value = jsep;
                         isIncomingCall.value = true;
                         isAccepted.value = false;
+                        getChatroomlistApi(route.params.id, yourUserChatroomID.value);
                         // Notify user
                         //TODO 處理incomingcall event
                     } else if (event === "accepted") {
@@ -716,7 +717,7 @@ const attachVideocallPlugin = () => {
                             console.log("Call started!");
                         } else {
                             console.log(peer + " accepted the call!");
-                            yourUsername.value = peer;
+                            yourUserChatroomID.value = peer;
                         }
                         // Video call can start
                         if (jsep) callPlugin.value.handleRemoteJsep({ jsep: jsep });
@@ -823,7 +824,7 @@ const attachVideocallPlugin = () => {
         oncleanup: function () {
             // @ts-ignore
             Janus.log("call-> ::: Got a cleanup notification :::");
-            yourUsername.value = null;
+            yourUserChatroomID.value = null;
             simulcastStarted = false;
             isIncomingCall.value = false;
             phoneCallModal.value = false;

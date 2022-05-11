@@ -17,7 +17,7 @@
                 </n-dropdown>
             </li>
         </ul>
-        <div v-if="type === 'default'" class="userInfo">
+        <div v-if="type === 'default' && eventInfo !== null" class="userInfo">
             <div class="userPhoto">
                 <a :href="eventInfo.homeurl" target="_blank">
                     <n-avatar
@@ -62,13 +62,51 @@
             </div>
         </div>
     </teleport>
+    <teleport to="body" v-if="isOldModel">
+        <div class="mask">
+            <div class="deviceCode">
+                <div class="closeBtn" @[events].stop="onCloseOldDevice">
+                    <img :src="closeIcon" alt="關閉" />
+                </div>
+                <h2>原裝置之驗證碼</h2>
+                <n-config-provider :theme-overrides="themeOverrides">
+                    <n-input round v-model:value="vOldCode" readonly type="text" />
+                </n-config-provider>
+            </div>
+        </div>
+    </teleport>
+    <teleport to="body" v-if="isMCodeModel">
+        <div class="mask">
+            <div class="deviceCode">
+                <div class="closeBtn" @[events].stop="onCloseMoMode">
+                    <img :src="closeIcon" alt="關閉" />
+                </div>
+                <h2>手機簡訊驗證碼</h2>
+                <n-config-provider :theme-overrides="themeOverrides">
+                    <n-input round v-model:value="mCode" readonly type="text" />
+                </n-config-provider>
+                <p class="psWord">請發送上列數字簡訊至<br />0912345678</p>
+                <n-button
+                    @[events].stop="onCloseMoMode"
+                    color="#e4e4e4"
+                    text-color="#3e3e3e"
+                    round
+                    size="medium"
+                    strong
+                    secondary
+                    >關閉</n-button
+                >
+            </div>
+        </div>
+    </teleport>
 </template>
 
 <script lang="ts" setup>
 import { defineComponent, computed, ref } from "vue";
 import { storeToRefs } from "pinia";
-import { NAvatar, NDropdown } from "naive-ui";
+import { NAvatar, NDropdown, NInput, NConfigProvider, NButton } from "naive-ui";
 import { useRoute } from "vue-router";
+import axios from "axios";
 
 import config from "@/config/config";
 import { useApiStore } from "@/store/api";
@@ -78,10 +116,17 @@ import MoreList from "@/components/MoreChatRoom/ChatRoomList.vue";
 import ChatRecordSearch from "@/components/ChatRecord/SearchBar.vue";
 import ChatRecordList from "@/components/ChatRecord/ChatRecordMessage.vue";
 import moreIcon from "@/assets/Images/common/more.svg";
+import closeIcon from "@/assets/Images/common/close-round.svg";
+import { signature, withCanvasDrawing } from "@/util/deviceUtil";
+import { isMobile } from "@/util/commonUtil";
+
+const events = ref(isMobile ? "touchstart" : "click");
+
+const isProduction = process.env.NODE_ENV == "production";
 
 //api store
 const apiStore = useApiStore();
-const { eventInfo } = storeToRefs(apiStore);
+const { eventInfo, vOldCode, mCode, isIllegalDevice } = storeToRefs(apiStore);
 
 //router
 const route = useRoute();
@@ -90,6 +135,17 @@ const eventKey = computed(() => route.params.eventKey);
 const searchStore = useSearchStore();
 const { closeSearchBar } = searchStore;
 
+const themeOverrides = {
+    common: {},
+    Input: {
+        fontSize: "16px",
+        caretColor: "black",
+        borderHover: "transparent",
+        borderFocus: "transparent",
+        boxShadowFocus: "none",
+    },
+};
+
 const type = ref("default");
 const onLog = () => {
     type.value = "log";
@@ -97,31 +153,120 @@ const onLog = () => {
 const onMoreChat = () => {
     type.value = "moreChat";
 };
+const isOldModel = ref(false);
+const isMCodeModel = ref(false);
+const options = isProduction
+    ? [
+          {
+              label: "常見問題",
+              key: 3,
+              props: {
+                  onClick: () => {
+                      onQa();
+                  },
+              },
+          },
+          {
+              type: "divider",
+              key: "d1",
+          },
+          {
+              label: "服務條款",
+              key: 4,
+              props: {
+                  onClick: () => {
+                      open("https://www.teamplus.tech/every8d-agreement/");
+                  },
+              },
+          },
+      ]
+    : [
+          {
+              label: "取得簡訊驗證碼",
+              key: 1,
+              props: {
+                  onClick: () => {
+                      getMOCode();
+                  },
+              },
+          },
+          {
+              type: "divider",
+              key: "d1",
+          },
+          {
+              label: "發送原手機驗證碼",
+              key: 2,
+              props: {
+                  onClick: () => {
+                      onOpenOldDevice();
+                  },
+              },
+          },
+          {
+              type: "divider",
+              key: "d1",
+          },
+          {
+              label: "常見問題",
+              key: 3,
+              props: {
+                  onClick: () => {
+                      onQa();
+                  },
+              },
+          },
+          {
+              type: "divider",
+              key: "d1",
+          },
+          {
+              label: "服務條款",
+              key: 4,
+              props: {
+                  onClick: () => {
+                      open("https://www.teamplus.tech/every8d-agreement/");
+                  },
+              },
+          },
+      ];
+const getMOCode = () => {
+    axios({
+        method: "get",
+        url: `${config.serverUrl}/mcode/${route.params.eventKey}?device=${withCanvasDrawing}`,
+        headers: { Authorization: `Bearer ${signature}` },
+    })
+        .then((res: any) => {
+            mCode.value = res.data.code;
+            isMCodeModel.value = true;
+        })
+        .catch((err: any) => {
+            console.error(err);
+        });
+};
 
-const options = [
-    {
-        label: "常見問題",
-        key: 1,
-        props: {
-            onClick: () => {
-                onQa();
-            },
-        },
-    },
-    {
-        type: "divider",
-        key: "d1",
-    },
-    {
-        label: "服務條款",
-        key: 2,
-        props: {
-            onClick: () => {
-                open("https://www.teamplus.tech/every8d-agreement/");
-            },
-        },
-    },
-];
+const onCloseMoMode = () => {
+    isMCodeModel.value = false;
+};
+
+const onOpenOldDevice = () => {
+    axios({
+        method: "get",
+        url: `${config.serverUrl}/vcode/${route.params.eventKey}`,
+        headers: { Authorization: `Bearer ${signature}` },
+    })
+        .then((res: any) => {
+            vOldCode.value = res.data.code;
+            isOldModel.value = true;
+        })
+        .catch((err: any) => {
+            console.error(err);
+        });
+};
+
+const onCloseOldDevice = () => {
+    isOldModel.value = false;
+};
 
 const showQaModal: any = ref(false);
 const onQa = () => {
@@ -157,6 +302,44 @@ const onQa = () => {
     display: flex;
     justify-content: center;
     align-items: center;
+
+    .deviceCode {
+        border-radius: 20px;
+        width: 220px;
+        height: 200px;
+        padding: 15px;
+        background-color: $white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transform: translate(-50%, -50%);
+        .psWord {
+            margin-top: 10px;
+            line-height: 1.6;
+        }
+        .closeBtn {
+            position: absolute;
+            right: -5px;
+            top: -10px;
+            z-index: 100;
+            width: 28px;
+            height: 28px;
+            cursor: pointer;
+            background-color: $white;
+            border-radius: 50px;
+            img {
+                width: 100%;
+            }
+        }
+        h2 {
+            @extend %h2;
+            margin-bottom: 15px;
+        }
+    }
     .wrap {
         border-radius: 5px;
         width: 342px;

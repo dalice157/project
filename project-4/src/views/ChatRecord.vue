@@ -10,20 +10,23 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref } from "vue";
+import { defineComponent, ref, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
+import axios from "axios";
 
 import { useApiStore } from "@/store/api";
 import HamburgerBar from "@/components/HamburgerBar.vue";
 import ChatRecordSearch from "@/components/ChatRecord/SearchBar.vue";
 import ChatRecordMessage from "@/components/ChatRecord/ChatRecordMessage.vue";
+import config from "@/config/config";
+import { signature } from "@/util/deviceUtil";
 
 const apiStore = useApiStore();
 const { getEventListApi, getBackendApi } = apiStore;
+const { isIllegalDevice } = storeToRefs(apiStore);
 const route = useRoute();
-getEventListApi(route.params.eventKey);
-getBackendApi(route.params.eventKey);
+
 //漢堡選單
 const hamburgerBoolean = ref();
 const menuToggle = (menuBoolean: any) => {
@@ -36,6 +39,24 @@ const getChangeList = (lists: any) => {
         list.isfunctionPopUp = false;
     });
 };
+onMounted(() => {
+    axios({
+        method: "get",
+        url: `${config.serverUrl}/login/${route.params.eventKey}`,
+        headers: { Authorization: `Bearer ${signature}` },
+    })
+        .then((res: any) => {
+            isIllegalDevice.value = false;
+            getBackendApi(route.params.eventKey);
+        })
+        .catch((err: any) => {
+            console.error(err);
+            if (err.response.status === 401) {
+                isIllegalDevice.value = true;
+                return;
+            }
+        });
+});
 </script>
 <style lang="scss" scoped>
 @import "~@/assets/scss/var";

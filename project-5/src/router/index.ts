@@ -37,7 +37,7 @@ const routes: Array<RouteRecordRaw> = [
         meta: { show: true, home: false, keepAlive: true },
     },
     {
-        path: "/gallery/:id",
+        path: "/gallery/:id?",
         name: "Gallery",
         components: {
             container: Gallery,

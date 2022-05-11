@@ -90,7 +90,7 @@
             <span class="file-folder">
                 <input type="file" :accept="fileAcceptPC" @change="onUploadFilePC" ref="file" />
             </span>
-            <div class="textArea" id="textArea">
+            <div id="textAreaWeb">
                 <n-input
                     class="n-input-modify"
                     placeholder="Aa"
@@ -101,6 +101,34 @@
                     @focus="closeAll"
                     @input="focusMsg"
                     @keydown.enter.exact.prevent="addMsg"
+                    ref="inputRef"
+                    id="input"
+                >
+                </n-input>
+
+                <img
+                    @click="closeStickerBox"
+                    v-if="showStickerModal"
+                    :src="emojiEnabled"
+                    alt="表情貼圖"
+                />
+                <img
+                    @click="openStickerBox"
+                    v-if="!showStickerModal"
+                    :src="emojiIcon"
+                    alt="表情貼圖"
+                />
+            </div>
+            <div id="textAreaPhone">
+                <n-input
+                    class="n-input-modify"
+                    placeholder="Aa"
+                    type="textarea"
+                    size="small"
+                    :autosize="{ minRows: 1 }"
+                    v-model:value.trim="msg"
+                    @focus="closeAll"
+                    @input="focusMsg"
                     ref="inputRef"
                     id="input"
                 >
@@ -294,6 +322,7 @@ import reloadTimeIcon from "@/assets/Images/chatroom/reload-time.svg";
 import voiceDisabled from "@/assets/Images/chatroom/voice-fill-disabled.svg";
 import voiceEnabled from "@/assets/Images/chatroom/voice-fill-enabled.svg";
 import { isMobile } from "@/util/commonUtil";
+import { signature } from "@/util/deviceUtil";
 
 const events = ref(isMobile ? "touchend" : "click");
 
@@ -304,7 +333,7 @@ const { closeAll } = modelStore;
 // api store
 const apiStore = useApiStore();
 const { getSticker } = apiStore;
-const { eventInfo, stickerList, stickerUrl } = storeToRefs(apiStore);
+const { isIllegalDevice, stickerList, stickerUrl } = storeToRefs(apiStore);
 //store
 const chatStore = useChatStore();
 const inputRef: any = ref(null);
@@ -330,6 +359,7 @@ const {
     isOnline,
     adminCount,
     userMediaMicrophone,
+    janus,
 } = storeToRefs(chatStore);
 //router
 const route = useRoute();
@@ -384,9 +414,14 @@ const successCallback = (position: any) => {
     axios({
         method: "get",
         url: `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude.value},${longitude.value}&language=zh-TW&key=AIzaSyAx5g4E7tKTC_Q-ycGlbDMBH5UDOqa7-aY`,
-    }).then((res) => {
-        console.log("google geocode res:", res);
-    });
+        headers: { Authorization: `Bearer ${signature}` },
+    })
+        .then((res) => {
+            console.log("google geocode res:", res);
+        })
+        .catch((err) => {
+            console.error(err);
+        });
 };
 const errorCallback = (error: any) => {
     console.log("navigator.geolocation error:", error.message);
@@ -422,6 +457,7 @@ const shareMap = () => {
                 msgMoreStatus: false,
                 recallPopUp: false,
                 recallStatus: false,
+                deliveryStatusSuccess: true,
             },
         },
     };
@@ -595,6 +631,7 @@ const stopRecorder = (e: any) => {
         method: "post",
         url: `${config.serverUrl}/file/${route.params.eventKey}`,
         data: fd,
+        headers: { Authorization: `Bearer ${signature}` },
     })
         .then((res) => {
             console.log("audio:", res);
@@ -627,6 +664,7 @@ const stopRecorder = (e: any) => {
                         msgMoreStatus: false,
                         recallPopUp: false,
                         recallStatus: false,
+                        deliveryStatusSuccess: true,
                     },
                 },
             };
@@ -651,7 +689,7 @@ const clearRecorder = () => {
 };
 
 const focusMsg = () => {
-    const textArea = document.getElementById("textArea");
+    const textArea = document.getElementById("textAreaPhone");
     const str = msg.value.trim();
     if (str !== "") {
         textArea.classList.remove("small");
@@ -685,6 +723,7 @@ const addMsg = (): void => {
                 msgMoreStatus: false,
                 recallPopUp: false,
                 recallStatus: false,
+                deliveryStatusSuccess: true,
             },
         },
     };
@@ -705,7 +744,7 @@ const addMsg = (): void => {
     // 送出後清除 msg 及 replyMsg
     msg.value = null;
     replyHide();
-    const textArea = document.getElementById("textArea");
+    const textArea = document.getElementById("textAreaPhone");
     textArea.classList.add("small");
 };
 
@@ -731,6 +770,7 @@ const uploadImage = (e: any) => {
                 method: "post",
                 url: `${config.serverUrl}/file/${route.params.eventKey}`,
                 data: fd,
+                headers: { Authorization: `Bearer ${signature}` },
             })
                 .then((res) => {
                     console.log("img res:", res);
@@ -766,6 +806,7 @@ const uploadImage = (e: any) => {
                                     msgMoreStatus: false,
                                     recallPopUp: false,
                                     recallStatus: false,
+                                    deliveryStatusSuccess: true,
                                 },
                             },
                         };
@@ -826,6 +867,7 @@ const onUploadFilePC = (e: any) => {
                     method: "post",
                     url: `${config.serverUrl}/file/${route.params.eventKey}`,
                     data: fd,
+                    headers: { Authorization: `Bearer ${signature}` },
                 })
                     .then((res) => {
                         console.log("img res:", res);
@@ -863,6 +905,7 @@ const onUploadFilePC = (e: any) => {
                                         msgMoreStatus: false,
                                         recallPopUp: false,
                                         recallStatus: false,
+                                        deliveryStatusSuccess: true,
                                     },
                                 },
                             };
@@ -901,6 +944,7 @@ const onUploadFilePC = (e: any) => {
             method: "post",
             url: `${config.serverUrl}/file/${route.params.eventKey}`,
             data: fd,
+            headers: { Authorization: `Bearer ${signature}` },
         })
             .then((res) => {
                 console.log("上傳 res:", res);
@@ -937,6 +981,7 @@ const onUploadFilePC = (e: any) => {
                                 msgMoreStatus: false,
                                 recallPopUp: false,
                                 recallStatus: false,
+                                deliveryStatusSuccess: true,
                             },
                         },
                     };
@@ -978,6 +1023,7 @@ const onUploadFileMP = (e: any) => {
         method: "post",
         url: `${config.serverUrl}/file/${route.params.eventKey}`,
         data: fd,
+        headers: { Authorization: `Bearer ${signature}` },
     })
         .then((res) => {
             console.log("上傳 res:", res);
@@ -1014,6 +1060,7 @@ const onUploadFileMP = (e: any) => {
                             msgMoreStatus: false,
                             recallPopUp: false,
                             recallStatus: false,
+                            deliveryStatusSuccess: true,
                         },
                     },
                 };
@@ -1039,9 +1086,7 @@ const onUploadFileMP = (e: any) => {
         });
 };
 // 貼圖功能
-onMounted(() => {
-    getSticker();
-});
+
 const openStickerBox = () => {
     showRecorderModal.value = false;
     showStickerModal.value = true;
@@ -1079,6 +1124,7 @@ const addSticker = (sticker, id) => {
                 msgMoreStatus: false,
                 recallPopUp: false,
                 recallStatus: false,
+                deliveryStatusSuccess: true,
             },
         },
     };
@@ -1550,7 +1596,7 @@ watchEffect(() => {
                 border-color: $gray-8;
             }
         }
-        .textArea {
+        #textAreaWeb {
             width: 100%;
             padding: 4px;
             border-radius: 30px;
@@ -1567,6 +1613,35 @@ watchEffect(() => {
             img {
                 margin-right: 5px;
                 cursor: pointer;
+            }
+        }
+        @media (max-width: 768px) {
+            #textAreaWeb {
+                display: none;
+            }
+        }
+        #textAreaPhone {
+            width: 100%;
+            padding: 4px;
+            border-radius: 30px;
+            margin-right: 0;
+            margin-left: 7px;
+            background-color: $gray-7;
+            overflow-x: hidden;
+            display: none;
+            justify-content: space-between;
+            &.small {
+                height: 38px;
+                overflow: hidden;
+            }
+            img {
+                margin-right: 5px;
+                cursor: pointer;
+            }
+        }
+        @media (max-width: 768px) {
+            #textAreaPhone {
+                display: flex;
             }
         }
         .send {

@@ -31,7 +31,7 @@
     </n-modal>
     <!-- 使用者重覆蓋板popup -->
     <teleport to="body">
-        <div class="mask2" v-show="isAlreadyTaken">
+        <div class="mask2" v-show="isAlreadyTaken && !isIllegalDevice">
             <div class="popUp">
                 您已在其他設備使用, 請關閉其他設備後點選重整按鈕
                 <div class="btnWrap">
@@ -49,12 +49,11 @@ import { storeToRefs } from "pinia";
 import adapter from "webrtc-adapter";
 import Janus from "@/assets/js/janus";
 import { nanoid } from "nanoid";
+import axios from "axios";
 import { defineComponent, ref, onMounted, computed, watchEffect, watch, nextTick } from "vue";
 import { NModal, NCard, NButton } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
 import dayjs from "dayjs";
-import jwt from "jws";
-import crypto from "crypto-js";
 
 import { txt, ITransactions, IAttachPlugin, IMessageList } from "@/util/interfaceUtil";
 import {
@@ -87,6 +86,8 @@ import SearchBar from "@/components/Chat/SearchBar.vue";
 import Input from "@/components/Chat/Input";
 import UserInfo from "@/components/UserInfo.vue";
 import hangUpIcon from "@/assets/Images/common/close-round-red.svg";
+import config from "@/config/config";
+import { signature } from "@/util/deviceUtil";
 
 const events = ref(isMobile ? "touchstart" : "click");
 
@@ -97,7 +98,6 @@ let participants: any = {};
 // let callPlugin: any = null;
 let simulcastStarted: any = false;
 let welcomeStatus: any = ref(false);
-let audioenabled = false;
 
 //router
 const router = useRouter();
@@ -110,8 +110,8 @@ const { phoneCallModal } = storeToRefs(modelStore);
 
 // api store
 const apiStore = useApiStore();
-const { getEventListApi, getBackendApi } = apiStore;
-const { eventInfo } = storeToRefs(apiStore);
+const { getBackendApi } = apiStore;
+const { eventInfo, isIllegalDevice } = storeToRefs(apiStore);
 
 //Chat store
 const chatStore = useChatStore();
@@ -133,29 +133,12 @@ const { onIncomingCall, doHangup } = phoneCallStore;
 const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime } =
     storeToRefs(phoneCallStore);
 
-getEventListApi(route.params.eventKey);
-getBackendApi(route.params.eventKey);
-
 var isiOS = !!navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
-console.log("iOS platform:", isiOS);
-// if (isiOS) {
-//     //在页面刷新时将vuex里的信息保存到缓存里
-//     window.addEventListener("pagehide", () => {
-//         janus.value.destroy();
-//     });
-// } else {
-//     //在页面刷新时将vuex里的信息保存到缓存里
-//     window.addEventListener("beforeunload", () => {
-//         console.log("beforeunload");
-
-//         janus.value.destroy();
-//     });
-// }
 document.addEventListener("visibilitychange", (event) => {
     if (document.visibilityState === "hidden") {
         janus.value.destroy();
     }
-    if (document.visibilityState === "visible") {
+    if (document.visibilityState === "visible" && !isAlreadyTaken.value) {
         console.log("visible:", event);
         Janus.init({
             debug: "all",
@@ -168,7 +151,6 @@ document.addEventListener("visibilitychange", (event) => {
                     return;
                 }
                 connect();
-                getEventListApi(route.params.eventKey);
                 getBackendApi(route.params.eventKey);
             },
         });
@@ -189,7 +171,7 @@ watchEffect(() => {
 });
 const initWeclomeMsg = () => {
     let otherMsg: any = null;
-    if (!welcomeStatus.value) {
+    if (!welcomeStatus.value && eventInfo.value) {
         eventInfo.value.messagelist.forEach((item: any) => {
             // console.log("item:", item);
             otherMsg = {
@@ -214,6 +196,7 @@ const initWeclomeMsg = () => {
                         recallPopUp: false,
                         recallStatus: false,
                         isWelcomeMsg: true,
+                        deliveryStatusSuccess: true,
                     },
                 },
             };
@@ -248,55 +231,39 @@ watchEffect(() => {
 });
 onMounted(() => {
     initWeclomeMsg();
-    // const exp = res.data.expire;
-    const headers = {
-        alg: "ES256",
-        typ: "JWT",
-    };
-    const payload = {
-        dev: "iphone",
-    };
-    const secret = `-----BEGIN PRIVATE KEY-----
-MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg0eNx9nnYxs9Cfa5h
-ba4ubuWb6XFGUndrqosR4Kt2OuKhRANCAARQAzUzkgmcwoSVnRZpJABQlYU52jiH
-z57d5CNJzr6k1imyH1Cp+jQtdadp+HETir/ykCxF7AnOP0oRfhpsE50H
------END PRIVATE KEY-----`;
-    const signature = jwt.sign({
-        header: headers,
-        payload,
-        secret,
-    });
-    localStorage.setItem("access_token", signature);
-    // const signer = jwt.createSign({
-    //     header: headers,
-    //     payload,
-    // });
-    // console.log("signer", signer);
-    // const verifier = jwt.createVerify({
-    //     header: headers,
-    //     payload,
-    // });
-    // console.log("verifier", verifier);
 });
 
 //janus 初始值
 onMounted(() => {
-    nextTick(() => {
-        console.log("onMounted nextTick");
-        Janus.init({
-            debug: "all",
-            dependencies: Janus.useDefaultDependencies({
-                adapter: adapter,
-            }),
-            callback: () => {
-                if (!Janus.isWebrtcSupported()) {
-                    console.log("No WebRTC support... ");
-                    return;
-                }
-                connect();
-            },
+    axios({
+        method: "get",
+        url: `${config.serverUrl}/login/${route.params.eventKey}`,
+        headers: { Authorization: `Bearer ${signature}` },
+    })
+        .then((res: any) => {
+            isIllegalDevice.value = false;
+            getBackendApi(route.params.eventKey);
+            Janus.init({
+                debug: "all",
+                dependencies: Janus.useDefaultDependencies({
+                    adapter: adapter,
+                }),
+                callback: () => {
+                    if (!Janus.isWebrtcSupported()) {
+                        console.log("No WebRTC support... ");
+                        return;
+                    }
+                    connect();
+                },
+            });
+        })
+        .catch((err: any) => {
+            console.error(err);
+            if (err.response.status === 401) {
+                isIllegalDevice.value = true;
+                return;
+            }
         });
-    });
 });
 
 // 連線
@@ -313,14 +280,15 @@ const connect = () => {
         error: (error: any) => {
             onError("Failed to connect to janus server", error);
             janusConnectStatus.value = false;
-            if (!navigator.userAgent.match("CriOS")) {
-                // 判斷 Chrome for iOS
-                alert("連線中斷,按下確認重新連線");
-                window.location.reload();
-            }
+            // if (!navigator.userAgent.match("CriOS")) {
+            //     // 判斷 Chrome for iOS
+            //     alert("連線中斷,按下確認重新連線");
+            //     window.location.reload();
+            // }
         },
         destroyed: () => {
-            console.log("destroyed");
+            console.log("連線中斷,按下確認重新連線 destroyed");
+            // window.location.reload();
         },
     });
 };
@@ -580,7 +548,27 @@ const attachTextroomPlugin = () => {
                 // Room was destroyed, goodbye!
                 console.log("text-> The room has been destroyed!");
             } else if (what === "success") {
-                console.log("success:", data);
+                console.log("success 訊息確定發送成功:", data);
+            } else if (what === "error") {
+                console.log("error 房間註冊失敗", json);
+                let errorCode = json["error_code"];
+                let errorMsg = json["error"];
+                let parseErrorMsg = JSON.parse(errorMsg);
+                console.log("parseErrorMsg", parseErrorMsg);
+                // console.log("errorCode", errorCode);
+                if (errorCode === 901) {
+                    // console.log("訊息發送錯誤碼");
+                    const localMsg = JSON.parse(localStorage.getItem(`${route.params.eventKey}`));
+                    console.log("localMsg", localMsg);
+                    localMsg.forEach((item) => {
+                        if (parseErrorMsg.janusMsg.config.id === item.janusMsg.config.id) {
+                            item.janusMsg.config.deliveryStatusSuccess = false;
+                            console.log("更改重傳訊息狀態成功");
+                        }
+                    });
+                    localStorage.setItem(`${route.params.eventKey}`, JSON.stringify(localMsg));
+                    window.location.reload();
+                }
             }
 
             processDataEvent(data, route.params.eventKey);

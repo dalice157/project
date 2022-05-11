@@ -1,5 +1,5 @@
 <template>
-    <div class="navbar" @[events]="closeSearchBar">
+    <div v-if="eventInfo !== null" class="navbar" @[events]="closeSearchBar">
         <div class="navbarFuncitonbar">
             <div class="navbartitle">
                 <a class="back" @[events]="goToRecord">
@@ -41,7 +41,7 @@
 </template>
 
 <script setup lang="ts">
-import { defineComponent, ref, watch, watchEffect, computed } from "vue";
+import { defineComponent, ref, onMounted, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { NAvatar } from "naive-ui";
 import { useRouter, useRoute } from "vue-router";
@@ -89,7 +89,7 @@ const router = useRouter();
 const route = useRoute();
 const eventKey = computed(() => route.params.eventKey);
 
-const isProduction = process.env.NODE_ENV === "production";
+const isProduction = process.env.NODE_ENV == "production";
 
 const webPhoneCall = () => {
     phoneCallModal.value = true;
@@ -104,7 +104,8 @@ const phoneCall = () => {
 };
 
 const goToRecord = () => {
-    janus.value.destroy();
+    // janus.value.destroy();
+    // location.href = `/chatRecord/${eventKey.value}`;
     router.push(`/chatRecord/${eventKey.value}`);
 };
 

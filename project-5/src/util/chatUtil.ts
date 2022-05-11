@@ -113,6 +113,7 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
                     const msg = JSON.parse(data.msg);
                     const getFrom = msg.janusMsg.chatroomID;
                     messageFrom.value = getFrom;
+                    messageForm.value = msg;
                     // console.log("janus msg", msg);
                     // console.log("janus msg from", getFrom);
                     const lastChatMessageArr = JSON.parse(

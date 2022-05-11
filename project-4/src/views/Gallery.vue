@@ -1,5 +1,5 @@
 <template>
-    <div class="gallery">
+    <div v-if="eventInfo !== null" class="gallery">
         <div class="galleryHeader">
             <div class="galleryTitle">
                 <h1 class="name">
@@ -101,6 +101,7 @@ import { NEllipsis, NAvatar } from "naive-ui";
 import { useRoute } from "vue-router";
 import dayjs from "dayjs";
 import { api as viewerApi } from "v-viewer";
+import axios from "axios";
 
 import { useApiStore } from "@/store/api";
 import { useChatStore } from "@/store/chat";
@@ -110,6 +111,7 @@ import { isMobile } from "@/util/commonUtil";
 import closeIcon from "@/assets/Images/chatroom/close-round.svg";
 import picDisabled from "@/assets/Images/gallery/pic-disabled.svg";
 import fileIcon from "@/assets/Images/chatroom/file-fill.svg";
+import { signature } from "@/util/deviceUtil";
 
 const events = ref(isMobile ? "touchend" : "click");
 
@@ -120,7 +122,7 @@ const { pictures, isOpenGallery } = storeToRefs(chatStore);
 //api store
 const apiStore = useApiStore();
 const { getBackendApi } = apiStore;
-const { eventInfo } = storeToRefs(apiStore);
+const { eventInfo, isIllegalDevice } = storeToRefs(apiStore);
 
 //router
 const route = useRoute();
@@ -129,8 +131,23 @@ const eventKey = computed(() => route.params.eventKey);
 // const result: any = ref([]);
 const dateArr: any = ref([]);
 const picArr: any = ref([]);
-//拿取後端api
-getBackendApi(route.params.eventKey);
+
+axios({
+    method: "get",
+    url: `${config.serverUrl}/login/${route.params.eventKey}`,
+    headers: { Authorization: `Bearer ${signature}` },
+})
+    .then((res: any) => {
+        isIllegalDevice.value = false;
+        getBackendApi(route.params.eventKey);
+    })
+    .catch((err: any) => {
+        console.error(err);
+        if (err.response.status === 401) {
+            isIllegalDevice.value = true;
+            return;
+        }
+    });
 
 //獲取當天日期 判斷圖片及檔案是否失效
 watchEffect(() => {

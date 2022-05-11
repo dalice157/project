@@ -319,6 +319,7 @@ const addMsg = (): void => {
                 recallPopUp: false,
                 recallStatus: false,
                 userName: getUserName,
+                deliveryStatusSuccess: true,
             },
         },
     };
@@ -398,6 +399,7 @@ const uploadImage = (e: any) => {
                                     recallPopUp: false,
                                     recallStatus: false,
                                     userName: getUserName,
+                                    deliveryStatusSuccess: true,
                                 },
                             },
                         };
@@ -484,6 +486,7 @@ const onUploadFilePC = (e: any) => {
                                         recallPopUp: false,
                                         recallStatus: false,
                                         userName: getUserName,
+                                        deliveryStatusSuccess: true,
                                     },
                                 },
                             };
@@ -554,6 +557,7 @@ const onUploadFilePC = (e: any) => {
                                 recallPopUp: false,
                                 recallStatus: false,
                                 userName: getUserName,
+                                deliveryStatusSuccess: true,
                             },
                         },
                     };
@@ -692,6 +696,7 @@ const addSticker = (sticker, id) => {
                 recallPopUp: false,
                 recallStatus: false,
                 userName: getUserName,
+                deliveryStatusSuccess: true,
             },
         },
     };

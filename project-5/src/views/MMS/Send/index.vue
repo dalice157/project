@@ -35,7 +35,8 @@
                                 </n-icon>
                             </template>
                             <span class="pop">
-                                「訊息主旨」內容出現於訊息內文最上方，即為MMS訊息標題。字數限制：純英數為39字、中英數混合為15字。
+                                「訊息主旨」內容出現於訊息內文最上方，即為MMS訊息標題。字數限制：純英數為
+                                39 字、中英數混合為 15 字。
                             </span>
                         </n-popover>
                     </div>
@@ -109,7 +110,9 @@
                             </n-icon>
                         </template>
                         <span class="pop"
-                            >選擇罐頭片語後，將自動以文字方式(預設2至4個字)顯示於發送內容最末端，且罐頭片語後方自動嵌入聊天室專屬連結共17字元。</span
+                            >選擇罐頭片語後，將自動以文字方式（預設 2 至 4
+                            個字）顯示於發送內容最末端，且罐頭片語後方自動嵌入聊天室專屬連結共
+                            {{ config.wordLimit }} 字元。</span
                         >
                     </n-popover>
                     <n-select
@@ -151,6 +154,7 @@ import { useApiStore } from "@/store/api";
 import { useMmsStore } from "@/store/mmsStore";
 import deleteIcon from "@/assets/Images/manage/delete.svg";
 import { options } from "@/util/commonUtil";
+import config from "@/config/config";
 
 const router = useRouter();
 const route = useRoute();

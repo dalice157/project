@@ -1,5 +1,4 @@
 import config from "@/config/config";
-import { randomString } from "@/util/chatUtil";
 
 // 環境設定
 export const isProduction = process.env.NODE_ENV === "production";
@@ -30,9 +29,29 @@ export const scrollPageTo = (replyId: string | null) => {
     }, 1000);
 };
 
+//監聽localStorage
+export const resetSetItem = (key, newVal) => {
+    if (key !== null) {
+        // 创建一个StorageEvent事件
+        const newStorageEvent = document.createEvent("StorageEvent") as any;
+        const storage = {
+            setItem: function (k, val) {
+                localStorage.setItem(k, val);
+
+                // 初始化创建的事件
+                newStorageEvent.initStorageEvent("setItem", false, false, k, null, val, null, null);
+
+                // 派发对象
+                window.dispatchEvent(newStorageEvent);
+            },
+        };
+        return storage.setItem(key, newVal);
+    }
+};
+
 // 存取 localStorage
 export const localStorageMsg = (messageList: any, eventKey: any = "") => {
-    localStorage.setItem(`${eventKey}`, JSON.stringify(messageList));
+    resetSetItem(`${eventKey}`, JSON.stringify(messageList));
 };
 const MIMEMap: any = {
     "image/jpeg": "IMAGE",

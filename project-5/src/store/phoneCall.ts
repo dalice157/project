@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 import Janus from "@/assets/js/janus";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { nanoid } from "nanoid";
 import { storeToRefs } from "pinia";
 
@@ -9,6 +9,7 @@ import { useChatStore } from "@/store/chat";
 import { sendPrivateMsg } from "@/util/chatUtil";
 import { useModelStore } from "@/store/model";
 import { useApiStore } from "@/store/api";
+import router from "@/router";
 
 /**
  * phoneType 狀態
@@ -30,11 +31,12 @@ export const usePhoneCallStore = defineStore({
     id: "phoneCall",
     state: () => ({
         callPlugin: <any>null,
-        yourUsername: <any>"",
+        yourUserChatroomID: <any>"",
         jsepMsg: <any>null,
         isIncomingCall: <boolean>false,
         isAccepted: <boolean>false,
         route: <any>useRoute(),
+        router: <any>useRouter(),
         phoneType: <any>0,
         phoneTime: <any>"0:00",
         isMuted: <boolean>false,
@@ -74,14 +76,19 @@ export const usePhoneCallStore = defineStore({
                 },
             });
         },
-        //有電話進來
+        //有電話進來 接聽電話
         onIncomingCall(name: any, jsep: any) {
             console.log("有電話進來");
             console.log("name:", name);
             console.log("jsep:", jsep);
+            // api store
+            const apiStore = useApiStore();
+            const { phoneCallNumber } = storeToRefs(apiStore);
             //modal store
             const modelStore = useModelStore();
             const { phoneCallModal } = storeToRefs(modelStore);
+            const { gotoChat } = modelStore;
+            gotoChat(this.route.params.id, this.yourUserChatroomID, phoneCallNumber.value);
             phoneCallModal.value = true;
             this.isIncomingCall = false;
             // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -110,9 +117,15 @@ export const usePhoneCallStore = defineStore({
         doHangup(type: any, chatRoomID, eventID) {
             const chatstore = useChatStore();
             const { textPlugin, isOnline } = storeToRefs(chatstore);
-
             console.log("掛掉電話種類", type);
-            this.yourUsername = null;
+            // api store
+            const apiStore = useApiStore();
+            const { messageList, phoneCallNumber } = storeToRefs(apiStore);
+            // model store
+            const modelStore = useModelStore();
+            const { gotoChat } = modelStore;
+            gotoChat(eventID, this.yourUserChatroomID, phoneCallNumber.value);
+            this.yourUserChatroomID = null;
             const phoneObj = {
                 janusMsg: {
                     chatroomID: chatRoomID,
@@ -142,8 +155,7 @@ export const usePhoneCallStore = defineStore({
                     },
                 },
             };
-            const apiStore = useApiStore();
-            const { messageList } = storeToRefs(apiStore);
+
             messageList.value.push(phoneObj);
             const sendMsgObj = {
                 msg: phoneObj,

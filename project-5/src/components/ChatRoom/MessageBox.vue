@@ -497,7 +497,7 @@ import { useSearchStore } from "@/store/search";
 import { txt } from "@/util/interfaceUtil";
 import { sendPrivateMsg } from "@/util/chatUtil";
 import user_pic_defaul from "@/assets/Images/mugShot/User-round.svg";
-import { scrollPageTo, convertTime, imgList } from "@/util/commonUtil";
+import { scrollPageTo, convertTime, imgList, resetSetItem } from "@/util/commonUtil";
 import { unixTime, currentDate, dateFormat, currentTime } from "@/util/dateUtil";
 import config from "@/config/config";
 import moreIcon from "@/assets/Images/chatroom/more.svg";
@@ -952,6 +952,10 @@ const recallMsg = (msg): void => {
             lastChatMessageArr.splice(index, 1);
         }
     });
+    resetSetItem(
+        `${route.query.chatroomID}-lastChatMessage`,
+        JSON.stringify(lastChatMessageArr.slice(-10))
+    );
 };
 
 //收回彈窗

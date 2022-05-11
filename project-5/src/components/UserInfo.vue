@@ -3,24 +3,32 @@
         <n-avatar round :size="75" object-fit="cover" :fallback-src="user_pic_defaul" :src="img" />
     </div>
     <h3 class="userName">
-        {{ props.info.name }}
+        {{ userName }}
     </h3>
 </template>
 <script setup lang="ts">
-import { watchEffect, ref } from "vue";
+import { watchEffect, ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { NAvatar } from "naive-ui";
 
 import config from "@/config/config";
 import { imgList } from "@/util/commonUtil";
 import user_pic_defaul from "@/assets/Images/mugShot/User-round.svg";
+import { useApiStore } from "@/store/api";
 
 const props = defineProps({
     info: {
         type: Object,
     },
 });
-
+const apiStore = useApiStore();
+const { phoneCallName, phoneCallIcon } = storeToRefs(apiStore);
+const userName = computed(() => {
+    return phoneCallName.value;
+});
+// let img = computed(() => {
+//     return phoneCallIcon.value;
+// });
 const img = ref(null);
 // 環境設定
 const isProduction = process.env.NODE_ENV === "production";
@@ -32,8 +40,10 @@ watchEffect(() => {
             item.split("/")[getSplit] === "default.svg"
                 ? 0
                 : item.split("/")[getSplit].split(".")[0];
-        return icon == props.info.icon;
+        return icon == phoneCallIcon.value;
     });
+    console.log("props.info.icon", props.info.icon);
+    console.log("phoneCallIcon", phoneCallIcon.value);
 });
 </script>
 <style lang="scss" scoped>

@@ -66,9 +66,9 @@
             v-for="(num, index) in changeList"
             :key="num.chatroomID"
             @click.stop="route.query.chatroomID !== num.chatroomID ? goChat(num, index) : ''"
-            @mousedown="highlightRoom(num.chatroomID)"
             :class="{ active: num.chatroomID === highlightRoomID }"
         >
+            <!-- @mousedown="highlightRoom(num.chatroomID)" -->
             <div class="chatRoomList">
                 <!-- @click.stop="showCompanyInfo(num)" -->
                 <!-- {{ num.unread }} -->
@@ -162,6 +162,7 @@ import { useSearchStore } from "@/store/search";
 import { useChatRecordStore } from "@/store/chatRecord";
 import { useModelStore } from "@/store/model";
 import { useChatStore } from "@/store/chat";
+import { usePhoneCallStore } from "@/store/phoneCall";
 import UserInfoModel from "@/components/UserInfoModel.vue";
 import config from "@/config/config";
 import user_pic_default from "@/assets/Images/mugShot/User-round.svg";
@@ -192,9 +193,16 @@ const { textPlugin, isOnline, messageFrom, messageForm } = storeToRefs(chatStore
 const modelStore = useModelStore();
 const { showCompanyInfo, gotoChat } = modelStore;
 const { isInfoPop, info } = storeToRefs(modelStore);
+const phoneCallStore = usePhoneCallStore();
+const { yourUserChatroomID } = storeToRefs(phoneCallStore);
 const eventID: any = ref("");
 const adminStatus = localStorage.getItem("adminStatus");
 
+//highlight所在聊天室
+const highlightRoomID: any = ref("");
+onMounted(() => {
+    highlightRoomID.value = route.query.chatroomID;
+});
 onMounted(() => {
     watch(eventList, () => {
         eventID.value = route.params.id ? route.params.id : eventList.value[0].eventID;
@@ -221,6 +229,7 @@ watch(route, () => {
             },
         });
     }
+    highlightRoomID.value = route.query.chatroomID;
 });
 
 interface IObj {
@@ -255,25 +264,17 @@ let changeList: any = computed({
 });
 //進入聊天室
 const goChat = (num, index) => {
-    // changeList.value.forEach((msg) => {
-    //     if (num.chatroomID === msg.chatroomID) {
-    //         msg.unread = 0;
-    //     }
-    // });
+    changeList.value.forEach((msg) => {
+        if (num.chatroomID === msg.chatroomID) {
+            msg.unread = 0;
+        }
+    });
     gotoChat(eventID.value, num.chatroomID, num.mobile, index);
 };
 
-//highlight所在聊天室
-const highlightRoomID: any = ref("");
-onMounted(() => {
-    highlightRoomID.value = route.query.chatroomID;
-});
-const highlightRoom = (chatRoomID) => {
-    highlightRoomID.value = chatRoomID;
-};
 //最後一筆訊息陣列
 const lastChatMessageArr = ref([]);
-let lastObj = reactive({
+const lastObj = ref({
     janusMsg: {
         chatroomID: "",
         msgType: 1,
@@ -297,22 +298,17 @@ let lastObj = reactive({
         },
     },
 });
-//有即時訊息來更新左側聊天紀錄狀態
-onMounted(() => {
-    // window.addEventListener("setItem", () => {
-    //     // setTimeout(function () {
-    //     lastChatMessageArr.value = JSON.parse(
-    //         sessionStorage.getItem(`${messageFrom.value}-lastChatMessage` || "[]")
-    //     );
-    //     lastChatMessageArr.value?.forEach((item, idx, arr) => {
-    //         lastObj = arr[arr.length - 1];
-    //     });
-    //     console.log("messagefrom", messageFrom.value);
-    //     console.log("lastChatMessageArr", lastChatMessageArr.value);
-    //     console.log("lastObj", lastObj);
-    //     // }, 1000);
-    // });
+watch(messageForm, (newVal, oldVal) => {
+    changeList.value.forEach((msg) => {
+        if (newVal.janusMsg.chatroomID === msg.chatroomID) {
+            msg.unread = 1;
+            if (msg.chatroomID === route.query.chatroomID) {
+                msg.unread = 0;
+            }
+        }
+    });
 });
+//有即時訊息來更新左側聊天紀錄狀態
 watchEffect(() => {
     recordMessages.value = chatroomList.value;
     if (changeList.value.length <= 0) return;
@@ -320,34 +316,43 @@ watchEffect(() => {
     window.addEventListener(
         "setItem",
         () => {
-            lastChatMessageArr.value = JSON.parse(
-                sessionStorage.getItem(`${messageFrom.value}-lastChatMessage` || "[]")
-            );
-            lastChatMessageArr.value?.forEach((item, idx, arr) => {
-                lastObj = arr[arr.length - 1];
-            });
-            console.log("lastChatMessageArr", lastChatMessageArr.value);
-            console.log("lastObj", lastObj);
+            if (messageFrom.value !== "") {
+                // 對方收回 抓最後一筆
+                lastChatMessageArr.value = JSON.parse(
+                    sessionStorage.getItem(`${messageFrom.value}-lastChatMessage` || "[]")
+                );
+                lastChatMessageArr.value?.forEach((item, idx, arr) => {
+                    lastObj.value = arr[arr.length - 1];
+                });
+                console.log("lastChatMessageArr", lastChatMessageArr.value);
+                console.log("lastObj", lastObj);
+            } else {
+                // 自己收回 抓最後一筆
+                lastChatMessageArr.value = JSON.parse(
+                    sessionStorage.getItem(`${route.query.chatroomID}-lastChatMessage` || "[]")
+                );
+                lastChatMessageArr.value?.forEach((item, idx, arr) => {
+                    lastObj.value = arr[arr.length - 1];
+                });
+            }
 
             changeList.value.forEach((msg) => {
-                if (lastObj.janusMsg.chatroomID !== msg.chatroomID) return;
-                if (messageFrom.value !== "") {
-                    msg.chatroomID = lastObj.janusMsg.chatroomID;
-                    msg.unread = 1;
-                    msg.time = lastObj.janusMsg.time;
-                    msg.msgType = lastObj.janusMsg.msgType;
-                    msg.msg =
-                        lastObj.janusMsg.msgType === 1
-                            ? lastObj.janusMsg.msgContent
-                            : `傳送了${sendMsgTypeObj[lastObj.janusMsg.msgType]}`;
-                }
-                if (
-                    msg.chatroomID === route.query.chatroomID &&
-                    msg.chatroomID === messageFrom.value
-                ) {
-                    msg.unread = 0;
-                    messageFrom.value = "";
-                }
+                if (lastObj.value.janusMsg.chatroomID !== msg.chatroomID) return;
+                msg.chatroomID = lastObj.value.janusMsg.chatroomID;
+                msg.time = lastObj.value.janusMsg.time;
+                msg.msgType = lastObj.value.janusMsg.msgType;
+                msg.msg =
+                    lastObj.value.janusMsg.msgType === 1
+                        ? lastObj.value.janusMsg.msgContent
+                        : `傳送了${sendMsgTypeObj[lastObj.value.janusMsg.msgType]}`;
+                // msg.unread = 1;
+                // if (
+                //     msg.chatroomID === route.query.chatroomID &&
+                //     msg.chatroomID === messageFrom.value
+                // ) {
+                //     msg.unread = 0;
+                //     messageFrom.value = "";
+                // }
             });
             changeList.value.sort((a, b) => b.time - a.time).sort((a, b) => b.pinTop - a.pinTop);
         },

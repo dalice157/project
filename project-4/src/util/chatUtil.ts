@@ -35,7 +35,7 @@ export const sendPrivateMsg = ({
     textPlugin.data({
         text: JSON.stringify(message),
         error: function (reason: any) {
-            console.log("error:", reason);
+            console.log("訊息丟janus error:", reason);
         },
         success: function () {
             const data = {
@@ -95,7 +95,7 @@ export const processDataEvent = (data: any, eventKey: any) => {
             console.log("刪除房間->", data);
         },
         send: () => {
-            console.log("發送訊息->", data);
+            console.log("發送訊息!!!!->", data);
             // getCompanyMsg(data);
         },
         error: () => {

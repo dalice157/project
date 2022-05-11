@@ -55,11 +55,16 @@
                     <div class="contentPopUp">
                         <h3><span>*</span>&ensp;發送內容</h3>
                     </div>
-
-                    <div class="storeCommonMessage" @click="storeToCommonMsg" v-show="storeBoolean">
-                        <p>儲存至常用簡訊</p>
+                    <div class="commonBtn">
+                        <div
+                            class="storeCommonMessage"
+                            @click="storeToCommonMsg"
+                            v-show="storeBoolean"
+                        >
+                            <p>儲存至常用簡訊</p>
+                        </div>
+                        <div class="commonMessage" @click="getCommonList">+常用簡訊</div>
                     </div>
-                    <div class="commonMessage" @click="getCommonList">+常用簡訊</div>
                 </div>
 
                 <div class="inputWrap">
@@ -91,7 +96,11 @@
                                 </n-icon>
                             </template>
                             <span class="pop">
-                                一則SMS簡訊限定70字元，此處將於發送文字最末端自動嵌入聊天室專屬連結共17字元(發送內容不顯示於連結，請於發送後至「發送查詢」取得連結)，若欲以一則簡訊發送，其字數請設定53字元以內。
+                                一則SMS簡訊限定 70
+                                字元，此處將於發送文字最末端自動嵌入聊天室專屬連結共
+                                {{ config.wordLimit }}
+                                字元(發送內容不顯示於連結，請於發送後至「發送查詢」取得連結)，若欲以一則簡訊發送，其字數請設定
+                                53 字元以內。
                             </span>
                         </n-popover>
                     </div>
@@ -763,8 +772,8 @@ const themeOverrides = {
         display: block;
     }
     .edit {
-        width: 18px;
-        height: 18px;
+        width: 25px;
+        height: 25px;
         cursor: pointer;
     }
 }
@@ -932,12 +941,14 @@ const themeOverrides = {
             display: flex;
             justify-content: space-between;
             align-items: center;
+
             h3 {
                 font-size: $font-size-14;
                 font-weight: 400;
                 color: $gray-1;
                 font-family: $font-family;
             }
+
             .commonMessage {
                 width: 72px;
                 height: 25px;
@@ -1129,6 +1140,13 @@ const themeOverrides = {
                 display: flex;
                 justify-content: space-between;
                 align-items: center;
+                .commonBtn {
+                    display: flex;
+                    justify-content: space-between;
+                    div + div {
+                        margin-left: 8px;
+                    }
+                }
                 .contentPopUp {
                     display: flex;
                     align-items: center;
