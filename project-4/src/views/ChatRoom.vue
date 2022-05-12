@@ -55,16 +55,8 @@ import { NModal, NCard, NButton } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
 import dayjs from "dayjs";
 
-import { txt, ITransactions, IAttachPlugin, IMessageList } from "@/util/interfaceUtil";
-import {
-    processDataEvent,
-    onRegistered,
-    onCalling,
-    onAccepted,
-    onHangup,
-    onError,
-    randomString,
-} from "@/util/chatUtil";
+import { ITransactions, IAttachPlugin } from "@/util/interfaceUtil";
+import { processDataEvent, onError, randomString } from "@/util/chatUtil";
 import { useApiStore } from "@/store/api";
 import { useChatStore } from "@/store/chat";
 import { usePhoneCallStore } from "@/store/phoneCall";
