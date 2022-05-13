@@ -126,7 +126,7 @@ const lastTimeStart: any = () => {
         lastTime.value = `${dayjs(userInfo.value.lastVisit / 1000000).fromNow()}上線`;
     }, 1000);
 };
-getChatroomUserInfoApi(chatroomID.value);
+
 watchEffect(() => {
     if (isOnline.value && route.path.split("/")[1] === "chat" && route.query) {
         messageList.value = messageList.value.map((item) => {

@@ -49,9 +49,7 @@
                 </div>
                 <!-- 未讀訊息樣板 -->
                 <div v-if="text.janusMsg.config.isUnread" class="date">
-                    <div>
-                        {{ "以下為未讀訊息" }}
-                    </div>
+                    <div>以下為未讀訊息</div>
                 </div>
                 <!-- <n-checkbox-group
                     v-model:value="deleteGroup"
@@ -221,6 +219,7 @@
                             class="content"
                             :class="{
                                 reply: text.janusMsg.config.isReply,
+                                textMsgSelect: text.janusMsg.msgType === 1,
                             }"
                             v-if="text.janusMsg.msgType === 1"
                             @touchstart="gtouchstart(text)"
@@ -302,7 +301,15 @@
                             </div>
                             <!-- 文字訊息 -->
                             <div class="originalMsg">
-                                <p>{{ text.janusMsg.msgContent }}</p>
+                                <a
+                                    v-if="validURL(text.janusMsg.msgContent)"
+                                    :href="text.janusMsg.msgContent"
+                                    target="_blank"
+                                    >{{ text.janusMsg.msgContent }}</a
+                                >
+                                <p v-else>
+                                    {{ text.janusMsg.msgContent }}
+                                </p>
                             </div>
                         </div>
                         <!-- google maps -->
@@ -527,7 +534,7 @@ import phoneIcon from "@/assets/Images/chatroom/phone-fill-round-y.svg";
 import resendIcon from "@/assets/Images/chatroom/refresh-outline.svg";
 import { signature } from "@/util/deviceUtil";
 
-const events = ref(isMobile ? "touchstart" : "click");
+const events = ref(isMobile ? "touchend" : "click");
 
 const apiStore = useApiStore();
 const { getBackendApi, recallAPI } = apiStore;
@@ -541,7 +548,8 @@ const { showModal, phoneCallModal } = storeToRefs(modelStore);
 
 //phone store
 const phoneCallStore = usePhoneCallStore();
-const { doCall, phoneTime } = phoneCallStore;
+const { doCall } = phoneCallStore;
+const { sender } = storeToRefs(phoneCallStore);
 
 //router
 const route = useRoute();
@@ -567,7 +575,8 @@ let {
 } = storeToRefs(chatStore);
 
 const onPhoneCallModal = () => {
-    console.log("web");
+    console.log("對方已離線");
+    sender.value = 1;
     if (isOnline.value === true) {
         showModal.value = false;
         phoneCallModal.value = true;
@@ -611,6 +620,15 @@ onMounted(() => {
         msg.janusMsg.config.isUnread = false;
     });
 });
+
+const validURL = (str) => {
+    try {
+        new URL(str);
+    } catch (_) {
+        return false;
+    }
+    return true;
+};
 
 watch(adminCount, () => {
     if (adminCount.value > 0) {
@@ -1535,15 +1553,23 @@ const themeOverrides = {
                     flex-direction: column;
                     line-height: 1.5;
                     margin-left: 5px;
-                    // -webkit-touch-callout: none;
-                    // -webkit-user-select: none;
-                    // -khtml-user-select: none;
-                    // -moz-user-select: none;
-                    // -ms-user-select: none;
-                    // user-select: none;
+                    -webkit-touch-callout: none;
+                    -webkit-user-select: none;
+                    -khtml-user-select: none;
+                    -moz-user-select: none;
+                    -ms-user-select: none;
+                    user-select: none;
 
                     &.reply {
                         min-width: 70px;
+                    }
+                    &.textMsgSelect {
+                        -webkit-touch-callout: text;
+                        -webkit-user-select: text;
+                        -khtml-user-select: text;
+                        -moz-user-select: text;
+                        -ms-user-select: text;
+                        user-select: text;
                     }
                     &.audio {
                         display: flex;

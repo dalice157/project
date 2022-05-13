@@ -81,7 +81,7 @@ import hangUpIcon from "@/assets/Images/common/close-round-red.svg";
 import config from "@/config/config";
 import { signature } from "@/util/deviceUtil";
 
-const events = ref(isMobile ? "touchstart" : "click");
+const events = ref(isMobile ? "touchend" : "click");
 
 let myid: any = null;
 let myusername: any = null;
@@ -283,11 +283,9 @@ const connect = () => {
         error: (error: any) => {
             onError("Failed to connect to janus server", error);
             janusConnectStatus.value = false;
-            if (!navigator.userAgent.match("CriOS")) {
-                // 判斷 Chrome for iOS
-                alert("連線中斷,按下確認重新連線");
-                window.location.reload();
-            }
+            // 判斷 Chrome for iOS
+            alert("連線中斷,按下確認重新連線");
+            window.location.reload();
         },
         destroyed: () => {
             console.log("聊天室已被銷毀");

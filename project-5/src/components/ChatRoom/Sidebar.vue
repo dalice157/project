@@ -1,6 +1,6 @@
 <template>
     <div class="logo">
-        <div class="logoImg"></div>
+        <img class="logoImg" :src="logo" alt="talkOD" />
     </div>
     <div class="search">
         <ChatRecordSearch />
@@ -18,6 +18,7 @@ import { useApiStore } from "@/store/api";
 import { useSearchStore } from "@/store/search";
 import ChatRecordSearch from "@/components/ChatRecord/SearchBar.vue";
 import ChatRecordList from "@/components/ChatRecord/ChatRecordMessage.vue";
+import logo from "@/assets/Images/talkOD-logo.svg";
 //api store
 const apiStore = useApiStore();
 const { eventInfo } = storeToRefs(apiStore);
@@ -49,11 +50,7 @@ const { closeSearchBar } = searchStore;
     .logoImg {
         width: 125px;
         height: 40px;
-        background: url("~@/assets/Images/talkOD-logo.png") center no-repeat;
-        background-size: 100%;
-        text-indent: -9999px;
-        white-space: nowrap;
-        line-height: 0;
+        cursor: pointer;
     }
 }
 </style>

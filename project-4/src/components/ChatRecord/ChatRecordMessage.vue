@@ -6,13 +6,13 @@
     >
         <div
             class="chatRoomBox"
-            @click.stop="gotoChat(num.chatroomID)"
+            @[events].prevent="logGotoChat(num.chatroomID)"
             v-for="num in searcRecordMessages"
             :key="num.chatroomID"
         >
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
-                <div class="avatar" @click.stop="showCompanyInfo(num)">
+                <div class="avatar" @[events].stop="showCompanyInfo(num)">
                     <n-avatar round :size="48" :src="`${config.fileUrl}${num.icon}`" />
                 </div>
                 <div class="chatRoomInfo">
@@ -54,11 +54,11 @@
             class="chatRoomBox"
             v-for="(num, index) in changeList"
             :key="num.chatroomID"
-            @click.stop="gotoChat(num.chatroomID)"
+            @[events].prevent="logGotoChat(num.chatroomID)"
         >
             <!-- v-show="num.show" -->
             <div class="chatRoomList">
-                <div class="avatar" @click.stop="showCompanyInfo(num)">
+                <div class="avatar" @[events].stop="showCompanyInfo(num)">
                     <n-avatar round :size="48" :src="`${config.fileUrl}${num.icon}`" />
                     <img class="img" :src="pinIcon" alt="置頂" v-if="num.toTop" />
                 </div>
@@ -88,11 +88,11 @@
                     </div> -->
                 </div>
                 <div class="functionBoxMore">
-                    <img :src="moreIcon" alt="more" @click.stop="openFunctionPopUp(num)" />
+                    <img :src="moreIcon" alt="more" @[events].stop="openFunctionPopUp(num)" />
                     <div class="functionPopUp" v-show="num.isfunctionPopUp">
                         <ul class="ulList">
-                            <li @click.stop="pin(num, index)" v-if="!num.toTop">開啟置頂</li>
-                            <li @click.stop="unpin(num, index)" v-if="num.toTop">取消置頂</li>
+                            <li @[events].stop="pin(num, index)" v-if="!num.toTop">開啟置頂</li>
+                            <li @[events].stop="unpin(num, index)" v-if="num.toTop">取消置頂</li>
                             <!-- <li @touchend.stop="deletechatRoomBox(num)">刪除</li> -->
                         </ul>
                     </div>
@@ -150,11 +150,11 @@ const chatRecordStore = useChatRecordStore();
 const { recordMessages } = storeToRefs(chatRecordStore);
 
 const modelStore = useModelStore();
-const { showCompanyInfo, gotoChat, gotoPhone } = modelStore;
+const { showCompanyInfo, logGotoChat, gotoPhone } = modelStore;
 const { isInfoPop, info } = storeToRefs(modelStore);
 
 let changeList = ref();
-let list = ref([]);
+let list: any = ref([]);
 
 const emit = defineEmits(["getChangeList"]);
 
@@ -292,10 +292,14 @@ onMounted(() => {
 const lastChatMessageArr: any = ref([]);
 
 setInterval(() => {
+    const isToTop = JSON.parse(localStorage.getItem(`${route.params.eventKey}-record` || "[]"))[0]
+        .toTop;
     lastChatMessageArr.value = JSON.parse(localStorage.getItem(`${route.params.eventKey}` || "[]"));
     lastChatMessageArr.value = lastChatMessageArr.value.filter((item, idx, arr) => {
         return !item.janusMsg.config.recallStatus;
     });
+    console.log();
+
     lastChatMessageArr.value.forEach((item, idx, arr) => {
         const infoLen = lastChatMessageArr.value.length;
         const isInfoYesterday = dayjs(
@@ -308,7 +312,7 @@ setInterval(() => {
             ...eventInfo.value,
             ...arr.at(-1),
             chatroomID: route.params.eventKey,
-            toTop: false,
+            toTop: isToTop,
             show: true,
             isfunctionPopUp: false,
             time: isInfoToday
@@ -371,7 +375,7 @@ const pin = (item: any, idx: any): void => {
         it.isfunctionPopUp = false;
     });
     changeList.value = lists;
-    resetSetItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
+    localStorage.setItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
     console.log("新增置頂nums.value:", changeList.value);
 };
 
@@ -396,7 +400,7 @@ const unpin = (item: any, index: any): void => {
         })
         .sort((a, b) => a.key > b.key);
     changeList.value = [...toTopLists, ...doNotTopLists];
-    resetSetItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
+    localStorage.setItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
     console.log("取消nums.value:", changeList.value);
 };
 

@@ -70,7 +70,7 @@ import closeIcon from "@/assets/Images/chatroom/close-round-red.svg";
 import notificationDisabled from "@/assets/Images/chatroom/notification-fill-disabled.svg";
 import notificationEnalbed from "@/assets/Images/chatroom/notification-fill-enabled.svg";
 
-const events = ref(isMobile ? "touchstart" : "click");
+const events = ref(isMobile ? "touchend" : "click");
 
 // api store
 const apiStore = useApiStore();

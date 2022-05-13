@@ -91,7 +91,7 @@ import searchIcon from "@/assets/Images/chatroom/search.svg";
 import closeIcon from "@/assets/Images/chatroom/round-fill_close.svg";
 import userIcon from "@/assets/Images/chatroom/User-round.svg";
 
-const events = ref(isMobile ? "touchstart" : "click");
+const events = ref(isMobile ? "touchend" : "click");
 
 // api store
 const apiStore = useApiStore();

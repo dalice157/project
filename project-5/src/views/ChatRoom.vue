@@ -125,22 +125,21 @@ onMounted(() => {
 
 // 監聽route query change寫法 2
 const initData = () => {
-    console.log("initData");
+    console.log("initData ChatRoom");
     getChatroomUserInfoApi(route.query.chatroomID);
     getHistoryApi(route.query.chatroomID, eventID.value);
 };
-if (Object.keys(route.query).length > 0) {
-    isInput.value = true;
-    initData();
-}
 
 watch(
     () => route.query,
     (val) => {
-        if (Object.keys(val).length > 0) {
+        if (Object.keys(val).length > 1 && route.name == "ChatRoom") {
             isInput.value = true;
             initData();
         }
+    },
+    {
+        immediate: true,
     }
 );
 

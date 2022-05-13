@@ -1,17 +1,15 @@
 <template>
-    <n-modal
-        class="chatRecordCard"
-        @[events].prevent="closeModal"
-        v-model:show="showModal"
-        preset="card"
-    >
-        <n-card :bordered="false" size="huge" class="container">
-            <div class="closeBtn" @[events].stop="closeModal">
-                <img :src="closeIcon" alt="關閉" />
-            </div>
-            <UserInfo :info="info" />
-            <div class="description">{{ info.description }}</div>
-            <!-- <ul class="call_container">
+    <teleport to="body" v-if="showModal">
+        <div class="mask">
+            <div class="deviceCode">
+                <div class="closeBtn" @[events].stop="closeModal">
+                    <img :src="closeIcon" alt="關閉" />
+                </div>
+                <UserInfo :info="info" />
+                <div class="description">
+                    {{ info.description }}
+                </div>
+                <!-- <ul class="call_container">
                 <li
                     v-if="eventInfo.callable === true"
                     class="call-phone"
@@ -25,8 +23,9 @@
                     <p class="text">傳送訊息</p>
                 </li>
             </ul> -->
-        </n-card>
-    </n-modal>
+            </div>
+        </div>
+    </teleport>
 </template>
 <script setup lang="ts">
 import { defineComponent, ref, toRef, watchEffect, computed } from "vue";
@@ -44,7 +43,7 @@ import { isMobile } from "@/util/commonUtil";
 import UserInfo from "@/components/UserInfo.vue";
 import closeIcon from "@/assets/Images/common/close-round.svg";
 
-const events = ref(isMobile ? "touchstart" : "click");
+const events = ref(isMobile ? "touchend" : "click");
 
 const route = useRoute();
 //model store
@@ -77,7 +76,6 @@ const onPhoneCallModal = () => {
 <style lang="scss">
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
-
 .chatRecordCard.n-modal {
     .n-card {
         background: transparent;
@@ -139,30 +137,60 @@ const onPhoneCallModal = () => {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
-.chatRecordCard.n-card.n-modal {
-    width: 300px;
-    border-radius: 4px;
-    background: $white url("~@/assets/Images/chatRecord/lightboxHeader.svg") no-repeat center top;
-    background-size: 100% auto;
-    .description {
-        width: 100%;
-        text-align: center;
-        margin: 1em auto;
-        color: $gray-1;
-        font-size: $font-size-16;
-        font-weight: 500;
-        line-height: 1.6;
-    }
-    .call_container {
-        margin-top: 30px;
+.mask {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    .deviceCode {
+        border-radius: 4px;
+        width: 280px;
+        min-height: 200px;
+        padding: 20px;
+        background-color: $white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
         display: flex;
-        justify-content: space-around;
-        .call-phone {
-            display: block;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        transform: translate(-50%, -50%);
+        background: $white url("~@/assets/Images/chatRecord/lightboxHeader.svg") no-repeat center
+            top;
+        background-size: 100% auto;
+        .psWord {
+            margin-top: 10px;
+            line-height: 1.6;
         }
-        li {
-            text-align: center;
+        .description {
+            padding-top: 15px;
+            width: 90%;
+            margin: auto;
+            word-wrap: break-word;
+            line-height: 1.5;
+        }
+        .closeBtn {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            z-index: 100;
+            width: 28px;
+            height: 28px;
             cursor: pointer;
+            img {
+                width: 100%;
+            }
+        }
+        h2 {
+            @extend %h2;
+            margin-bottom: 15px;
         }
     }
 }

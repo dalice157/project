@@ -2,14 +2,30 @@
     <div class="addAutoReply">
         <div class="autoReplySubject">
             <h1>標題</h1>
-            <n-input placeholder="請輸入標題(僅作為識別用，不會顯示於用戶端)"></n-input>
+            <n-input
+                placeholder="請輸入標題(僅作為識別用，不會顯示於用戶端)"
+                v-model:value="autoReplySubject"
+            ></n-input>
+        </div>
+        <div class="activateStatus">
+            <div>
+                <h1>啟用狀態</h1>
+            </div>
+            <n-radio-group class="autoReplyRadioGroup" v-model:value="statusRadio">
+                <div class="active">
+                    <n-radio :value="1">啟用</n-radio>
+                </div>
+                <div class="deactive">
+                    <n-radio :value="0">停用</n-radio>
+                </div>
+            </n-radio-group>
         </div>
         <div class="addAutoReplyTime">
             <div>
                 <h1>適用日期時間</h1>
                 <h1>(UTC+8)</h1>
             </div>
-            <n-radio-group class="autoReplyRadioGroup" v-model:value="radio">
+            <n-radio-group class="autoReplyRadioGroup" v-model:value="timeRadio">
                 <div class="agreedTime">
                     <n-radio :value="0">不指定日期時間</n-radio>
                 </div>
@@ -20,15 +36,50 @@
         </div>
         <div class="autoReplyTimePicker" v-show="timePopUp">
             <div class="dateRange">
-                <n-date-picker type="daterange" clearable></n-date-picker>
+                <div>
+                    <h1>指定日期區間</h1>
+                </div>
+                <n-date-picker
+                    type="daterange"
+                    v-model:value="dateRange"
+                    :disabled="disabled"
+                    clearable
+                ></n-date-picker>
+            </div>
+            <div class="weekdays">
+                <div>
+                    <h1>指定日期</h1>
+                </div>
+                <n-checkbox-group class="selectWeekdays" v-model:value="weekdays">
+                    <n-checkbox :value="1">一</n-checkbox>
+                    <n-checkbox :value="2">二</n-checkbox>
+                    <n-checkbox :value="3">三</n-checkbox>
+                    <n-checkbox :value="4">四</n-checkbox>
+                    <n-checkbox :value="5">五</n-checkbox>
+                    <n-checkbox :value="6">六</n-checkbox>
+                    <n-checkbox :value="7">日</n-checkbox>
+                </n-checkbox-group>
             </div>
             <div class="selectTime">
+                <div>
+                    <h1>指定時間區間</h1>
+                </div>
                 <div class="startTime">
-                    <n-time-picker placeholder="開始時間" format="h:mm" clearable></n-time-picker>
+                    <n-time-picker
+                        placeholder="開始時間"
+                        v-model:value="startTime"
+                        format="HH:mm"
+                        clearable
+                    ></n-time-picker>
                 </div>
                 <p>至</p>
                 <div class="endTime">
-                    <n-time-picker placeholder="結束時間" format="h:mm" clearable></n-time-picker>
+                    <n-time-picker
+                        placeholder="結束時間"
+                        v-model:value="endTime"
+                        format="HH:mm"
+                        clearable
+                    ></n-time-picker>
                 </div>
             </div>
         </div>
@@ -45,7 +96,7 @@
                 >
             </n-popover>
             <div class="keyWordInput">
-                <n-dynamic-tags></n-dynamic-tags>
+                <n-dynamic-tags v-model:value="keyWord"></n-dynamic-tags>
             </div>
         </div>
         <div class="autoReplyContent">
@@ -111,15 +162,12 @@
                 "
                 >取消</router-link
             >
-            <router-link
-                class="channelStore"
-                :to="
+            <div class="channelStore" @click="confirmStore">確認儲存</div>
+            <!-- :to="
                     `${route.params.id}`
                         ? `/manage/${route.params.id}/activitySetting`
                         : `/manage/activitySetting`
-                "
-                >確認儲存</router-link
-            >
+                " -->
         </div>
     </div>
 </template>
@@ -129,6 +177,8 @@ import {
     NInput,
     NRadioGroup,
     NRadio,
+    NCheckboxGroup,
+    NCheckbox,
     NDatePicker,
     NTimePicker,
     NDynamicTags,
@@ -148,15 +198,32 @@ import fileIcon from "@/assets/Images/common/file.svg";
 import delIcon from "@/assets/Images/manage/delete.svg";
 import picIcon from "@/assets/Images/chatroom/pic.svg";
 import { fileAccept, imgAccept } from "@/util/commonUtil";
+import { useApiStore } from "@/store/api";
+import router from "@/router";
 
+const apiStore = useApiStore();
+const { autoReplyMsgAPI } = apiStore;
 //router 設定
 const route = useRoute();
 const params = route.params;
 
-const radio = ref(0);
+// v-model
+const autoReplySubject = ref("");
+const dateRange = ref(null);
+const disabled = ref(false);
+const statusRadio = ref(1);
+const timeRadio = ref(0);
+const weekdays = ref([]);
+const startTime = ref(null);
+const endTime = ref(null);
 const timePopUp = ref(false);
+const keyWord = ref([]);
+
 watchEffect(() => {
-    if (radio.value === 1) {
+    // console.log("weekdays", weekdays.value);
+    // console.log("keyWord", keyWord.value);
+
+    if (timeRadio.value === 1) {
         timePopUp.value = true;
     } else {
         timePopUp.value = false;
@@ -165,6 +232,7 @@ watchEffect(() => {
 //自動回覆訊息陣列
 const autoReplyMsgCount = ref([]);
 let autoReplyMsg = reactive({});
+
 //新增自動回覆訊息
 const addAutoReplyMsg = () => {
     autoReplyMsg = {
@@ -338,6 +406,39 @@ const autoReplyMsgFile = (e: any, index: any) => {
         });
     autoReplyMsgCount.value.splice(index, 1, autoReplyMsg);
 };
+// 確認除除
+const confirmStore = () => {
+    console.log("eventID", route.query.eventID);
+    console.log("標題", autoReplySubject.value);
+    console.log("啟用狀態", statusRadio.value);
+    // console.log("適用日期時間", timeRadio.value);
+    console.log("開始日期", dateRange.value === null ? 0 : dateRange.value[0] * 1000000);
+    console.log("結束日期", dateRange.value === null ? 0 : dateRange.value[1] * 1000000);
+    console.log("開始時間", startTime.value * 1000000);
+    console.log("結束時間", endTime.value * 1000000);
+    console.log(
+        "指定日期",
+        weekdays.value.length === 0 ? 0 : weekdays.value.toString().replace(/,/gi, "")
+    );
+    console.log("關鍵字", keyWord.value);
+    console.log("回覆內容", autoReplyMsgCount.value);
+    const autoReplyData = {
+        subject: autoReplySubject.value,
+        status: statusRadio.value,
+        startDate: dateRange.value === null ? 0 : dateRange.value[0] * 1000000,
+        endDate: dateRange.value === null ? 0 : dateRange.value[1] * 1000000,
+        startTime: startTime.value * 1000000,
+        endTime: endTime.value * 1000000,
+        keyWord: keyWord.value,
+        msg: autoReplyMsgCount.value,
+        weekday: weekdays.value.length === 0 ? 0 : weekdays.value.toString().replace(/,/gi, ""),
+        eventID: route.query.eventID,
+    };
+    autoReplyMsgAPI(autoReplyData);
+    route.params.id
+        ? router.push(`/manage/${route.params.id}/activitySetting`)
+        : router.push(`/manage/activitySetting`);
+};
 </script>
 <style lang="scss">
 .n-popover {
@@ -364,6 +465,25 @@ const autoReplyMsgFile = (e: any, index: any) => {
             width: 50%;
         }
     }
+    .activateStatus {
+        display: flex;
+        margin-bottom: 20px;
+        > div {
+            margin-right: 63px;
+            h1 {
+                margin-bottom: 5px;
+            }
+        }
+        .autoReplyRadioGroup {
+            display: flex;
+            flex-direction: column;
+            .active {
+                margin-bottom: 20px;
+            }
+            .deactive {
+            }
+        }
+    }
     .addAutoReplyTime {
         display: flex;
         > div {
@@ -383,16 +503,35 @@ const autoReplyMsgFile = (e: any, index: any) => {
         }
     }
     .autoReplyTimePicker {
-        width: 50%;
+        width: 65%;
         margin-left: 123px;
         margin-top: 20px;
         .dateRange {
+            display: flex;
+            align-items: center;
+            > div {
+                margin-right: 5px;
+            }
+        }
+        .weekdays {
+            display: flex;
+            align-items: center;
+            margin-top: 20px;
+            > div {
+                margin-right: 5px;
+            }
+            .selectWeekdays {
+                margin-left: 28px;
+            }
         }
         .selectTime {
             display: flex;
-            justify-content: center;
+            // justify-content: center;
             align-items: center;
             margin-top: 20px;
+            > div {
+                margin-right: 5px;
+            }
             p {
                 margin-left: 5px;
                 margin-right: 5px;

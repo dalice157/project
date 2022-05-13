@@ -8,7 +8,7 @@ import { useSmsStore } from "@/store/smsStore";
 import { useMmsStore } from "@/store/mmsStore";
 import { currentTime, currentDate } from "@/util/dateUtil";
 import { randomString } from "@/util/chatUtil";
-import { resetSetItem } from "@/util/commonUtil";
+import { resetSetItem, tokenExpireToLogin } from "@/util/commonUtil";
 import dayjs from "dayjs";
 
 export const useApiStore = defineStore({
@@ -88,7 +88,8 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     isMmsSend.value = false;
-                    console.error("sendMMSMsg error:", err.response);
+                    // console.error("sendMMSMsg error:", err.response);
+                    tokenExpireToLogin(err);
                 });
         },
         //取得使用者資訊
@@ -107,6 +108,7 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err);
+                    tokenExpireToLogin(err);
                 });
         },
         // 編輯使用者資訊
@@ -135,6 +137,7 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err);
+                    tokenExpireToLogin(err);
                 });
         },
         // 置頂
@@ -158,6 +161,7 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err);
+                    tokenExpireToLogin(err);
                 });
         },
         // 聊天室歷史內容
@@ -239,6 +243,9 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err);
+                    // if (err.response.status === 401) {
+                    //     location.href = `/`;
+                    // }
                 });
         },
         //取得聊天室左側列表
@@ -270,6 +277,9 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err);
+                    // if (err.response.status === 401) {
+                    //     location.href = `/`;
+                    // }
                 });
         },
         //取得活動資訊
@@ -291,6 +301,7 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err);
+                    tokenExpireToLogin(err);
                 });
         },
         //取得活動資訊列表
@@ -309,6 +320,7 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err);
+                    tokenExpireToLogin(err);
                 });
         },
         //拿貼圖api
@@ -357,6 +369,7 @@ export const useApiStore = defineStore({
                         this.staffList.events = [];
                         console.error(err);
                     }
+                    tokenExpireToLogin(err);
                 });
         },
         // 取得活動客服人員列表
@@ -377,6 +390,10 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.log("cs err:", err);
+                    if (err.response.status === 401) {
+                        // location.href = `/`;
+                        console.log("取得活動客服人員列表出錯");
+                    }
                 });
         },
         // 取得活動資訊
@@ -394,6 +411,10 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.log("channel event err:", err);
+                    if (err.response.status === 401) {
+                        // location.href = `/`;
+                        console.log("取的活動資訊 出錯");
+                    }
                 });
         },
         // 編輯活動
@@ -425,6 +446,7 @@ export const useApiStore = defineStore({
                 .catch((err: any) => {
                     this.isDisabled = false;
                     console.error(err);
+                    tokenExpireToLogin(err);
                 });
         },
         //刪除活動
@@ -446,6 +468,7 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err);
+                    tokenExpireToLogin(err);
                 });
         },
         // 拿取sms簡訊table
@@ -466,6 +489,7 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err);
+                    tokenExpireToLogin(err);
                 });
         },
         //獲取點數
@@ -508,6 +532,7 @@ export const useApiStore = defineStore({
                             this.adminList = [];
                         }
                     }
+                    tokenExpireToLogin(err);
                 });
         },
         //新增管理者list
@@ -527,6 +552,7 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err);
+                    tokenExpireToLogin(err);
                 });
         },
         //刪除管理者list
@@ -546,6 +572,7 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err);
+                    tokenExpireToLogin(err);
                 });
         },
         // 取得編輯服務人員
@@ -569,6 +596,7 @@ export const useApiStore = defineStore({
                         };
                     }
                     console.log("events err:", err);
+                    tokenExpireToLogin(err);
                 });
         },
 
@@ -592,6 +620,7 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err);
+                    tokenExpireToLogin(err);
                 });
         },
         //excel電話號碼驗證
@@ -617,6 +646,7 @@ export const useApiStore = defineStore({
                     if (err.response) {
                         console.log("excel err:", err.response);
                     }
+                    tokenExpireToLogin(err);
                 });
         },
         //取得常用簡訊列表
@@ -632,6 +662,7 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err);
+                    tokenExpireToLogin(err);
                 });
         },
         //新增常用簡訊
@@ -652,6 +683,7 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err);
+                    tokenExpireToLogin(err);
                 });
         },
         //刪除常用簡訊
@@ -671,6 +703,7 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err);
+                    tokenExpireToLogin(err);
                 });
         },
         //編輯常用簡訊
@@ -692,6 +725,7 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err);
+                    tokenExpireToLogin(err);
                 });
         },
         //收回訊息api
@@ -742,6 +776,7 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err.response);
+                    tokenExpireToLogin(err);
                 });
         },
         //查詢簡訊api
@@ -771,6 +806,7 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err.response);
+                    tokenExpireToLogin(err);
                 });
         },
         //取消預約簡訊
@@ -792,6 +828,7 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.error(err.response);
+                    tokenExpireToLogin(err);
                 });
         },
         // 取得所有子帳號清單
@@ -815,7 +852,41 @@ export const useApiStore = defineStore({
                     if (err.response && err.response.data.msg === "沒有管理人員") {
                         this.accounts = [];
                     }
-                    console.log("events err:", err);
+                    if (err.response.status === 401) {
+                        console.log("取得子清單出錯");
+                        // location.href = `/`;
+                    }
+                    // console.log("events err:", err);
+                });
+        },
+        //自動回覆訊息api
+        async autoReplyMsgAPI(data) {
+            const getToken = localStorage.getItem("access_token");
+            const fd = new FormData();
+            fd.append("eventID", data.eventID);
+            fd.append("subject", data.subject);
+            fd.append("status", data.status);
+            fd.append("startDate", data.startDate);
+            fd.append("endDate", data.endDate);
+            fd.append("startTime", data.startTime);
+            fd.append("endTime", data.endTime);
+            fd.append("weekday", data.weekday);
+            fd.append("keyword", data.keyWord);
+            fd.append("msg", JSON.stringify(data.msg));
+            await axios({
+                method: "post",
+                url: `${config.serverUrl}/v1/addchatbot`,
+                data: fd,
+                headers: { Authorization: `Bearer ${getToken}` },
+            })
+                .then((res: any) => {
+                    console.log("autoReplyMsgAPI res", res);
+                })
+                .catch((err: any) => {
+                    console.error(err);
+                    // if (err.response.status === 401) {
+                    //     location.href = `/`;
+                    // }
                 });
         },
     },

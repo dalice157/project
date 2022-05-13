@@ -18,7 +18,7 @@ export const useModelStore = defineStore({
     getters: {},
     actions: {
         showCompanyInfo(msg: any): void {
-            console.log("msg:", msg);
+            console.log("showCompanyInfo:", msg);
 
             this.info = msg;
             this.isInfoPop = true;
@@ -30,7 +30,12 @@ export const useModelStore = defineStore({
         gotoChat(eventKey: string | null) {
             setTimeout(function () {
                 document.location.href = `/${eventKey}`;
-            }, 250);
+            }, 300);
+        },
+        logGotoChat(eventKey: string | null) {
+            setTimeout(function () {
+                document.location.href = `/${eventKey}`;
+            }, 300);
         },
         gotoPhone(eventKey: string | null) {
             this.router.push(`/phone/${eventKey}`);

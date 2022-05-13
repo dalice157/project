@@ -19,7 +19,7 @@
                     <router-link :to="`/moreChatRoom/${eventKey}`"> 更多聊天室 </router-link>
                 </li>
                 <li class="burgerChatHistory" @[events]="goChatRecord">
-                    <a :href="`/chatRecord/${eventKey}`">交談紀錄</a>
+                    <router-link :to="`/chatRecord/${eventKey}`">交談紀錄</router-link>
                 </li>
             </ul>
             <ul class="hamburgerMenu">
@@ -179,7 +179,7 @@ export default defineComponent({
             showQaModal.value = true;
         };
 
-        const events = ref(isMobile ? "touchstart" : "click");
+        const events = ref(isMobile ? "touchend" : "click");
 
         const isOldModel = ref(false);
         const isMCodeModel = ref(false);

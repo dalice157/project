@@ -2,7 +2,7 @@
     <n-layout class="manage" has-sider @click="closeChatRoomBubble">
         <n-layout-sider bordered content-style="padding: 20px 0;">
             <div class="logo">
-                <div class="logoImg" @click="goHome"></div>
+                <img class="logoImg" @click="goHome" :src="logo" alt="talkOD" />
             </div>
             <div class="sms">
                 <h1>SMS</h1>
@@ -92,6 +92,7 @@ import { useApiStore } from "@/store/api";
 import { useSmsStore } from "@/store/smsStore";
 import { useMmsStore } from "@/store/mmsStore";
 import { storeToRefs } from "pinia";
+import logo from "@/assets/Images/talkOD-logo.svg";
 
 //store
 
@@ -167,11 +168,6 @@ const goHome = () => {
                 .logoImg {
                     width: 125px;
                     height: 40px;
-                    background: url("~@/assets/Images/talkOD-logo.png") center no-repeat;
-                    background-size: 100%;
-                    text-indent: -9999px;
-                    white-space: nowrap;
-                    line-height: 0;
                     cursor: pointer;
                 }
             }

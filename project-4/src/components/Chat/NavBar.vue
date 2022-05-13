@@ -61,7 +61,7 @@ import phoneIcon from "@/assets/Images/chatroom/phone.svg";
 import galleryIcon from "@/assets/Images/chatroom/list.svg";
 import searchIcon from "@/assets/Images/chatroom/search.svg";
 
-const events = ref(isMobile ? "touchstart" : "click");
+const events = ref(isMobile ? "touchend" : "click");
 
 // api store
 const apiStore = useApiStore();

@@ -105,7 +105,6 @@
                     id="input"
                 >
                 </n-input>
-
                 <img
                     @click="closeStickerBox"
                     v-if="showStickerModal"
@@ -176,7 +175,9 @@
                     <li
                         v-if="stickerItems.length > 0"
                         class="reload-time"
-                        @[events].prevent="stickerGroupID == 0 ? '' : handleStickckerGroup(0)"
+                        @[eventsSticker].prevent="
+                            stickerGroupID == 0 ? '' : handleStickckerGroup(0)
+                        "
                         :class="{
                             active: stickerGroupID == 0,
                         }"
@@ -187,7 +188,7 @@
                     <li
                         v-for="tab in stickerList"
                         :key="tab.stickerPackID"
-                        @[events].prevent="
+                        @[eventsSticker].prevent="
                             stickerGroupID == tab.stickerPackID
                                 ? ''
                                 : handleStickckerGroup(tab.stickerPackID)
@@ -205,7 +206,7 @@
                     <n-grid-item
                         v-for="(item, index) in stickerItems"
                         :key="index"
-                        @[events].prevent="addSticker(item, item.stickerFileID)"
+                        @[eventsSticker].stop="addSticker(item, item.stickerFileID)"
                     >
                         <div class="stickerIcon">
                             <img
@@ -224,7 +225,7 @@
                     <n-grid-item
                         v-for="tab in stickerGroup.stickerList"
                         :key="tab"
-                        @[events].prevent="addSticker(stickerGroup, tab)"
+                        @[eventsSticker].prevent="addSticker(stickerGroup, tab)"
                         :class="{ hide: tab == 'tab' || tab == 'main' }"
                     >
                         <div class="stickerIcon">
@@ -325,6 +326,7 @@ import { isMobile } from "@/util/commonUtil";
 import { signature } from "@/util/deviceUtil";
 
 const events = ref(isMobile ? "touchend" : "click");
+const eventsSticker = ref(isMobile ? "touchstart" : "click");
 
 // model sotre
 const modelStore = useModelStore();
@@ -702,6 +704,7 @@ const focusMsg = () => {
 //發送訊息
 const addMsg = (): void => {
     const str = msg.value.trim();
+
     let textObj: any = {
         janusMsg: {
             chatroomID: chatroomID(route.params.eventKey),
@@ -1153,7 +1156,6 @@ const addSticker = (sticker, id) => {
     window.localStorage.setItem("sticker", JSON.stringify(stickerItems.value));
     sendPrivateMsg(sendMsgObj);
     localStorageMsg(messages.value, route.params.eventKey);
-    showStickerModal.value = false;
 };
 
 //功能欄開關

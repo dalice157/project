@@ -337,3 +337,10 @@ export const resetSetItem = (key, newVal) => {
         return storage.setItem(key, newVal);
     }
 };
+
+//token過期導至登入頁
+export const tokenExpireToLogin = (err) => {
+    if (err.response.status === 401) {
+        location.href = `/`;
+    }
+};

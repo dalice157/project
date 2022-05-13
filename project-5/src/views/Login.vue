@@ -55,8 +55,9 @@
 
                 <div class="loginService">
                     <div class="rememberAccount">
-                        <n-checkbox v-model:checked="rememberAccountPassword" />
-                        <span>記住帳號</span>
+                        <n-checkbox v-model:checked="rememberAccountPassword">
+                            記住帳號
+                        </n-checkbox>
                     </div>
                     <a
                         href="https://every8d.teamplus.tech/every8d30/Account/ForgotPwd.aspx"
@@ -64,9 +65,7 @@
                         >忘記密碼</a
                     >
                 </div>
-                <div id="submitTarget" class="loginBtn" @click.prevent="login">
-                    <p>登入</p>
-                </div>
+                <div id="submitTarget" class="loginBtn" @click="login">登入</div>
             </n-form>
         </div>
     </div>
@@ -223,7 +222,7 @@ const login = () => {
                     payload,
                     secret,
                 });
-    
+
                 localStorage.setItem("access_token", access_token);
                 localStorage.setItem("accountID", accountID);
                 localStorage.setItem("adminStatus", admin);
@@ -241,6 +240,11 @@ const login = () => {
 <style lang="scss">
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
+.rememberAccount {
+    .n-checkbox .n-checkbox__label {
+        color: $gray-3;
+    }
+}
 .login {
     .n-form-item .n-form-item-label {
         padding: 0;
@@ -300,7 +304,7 @@ const login = () => {
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
 .login {
-    background-color: #eee;
+    background-color: $gray-5;
     width: 100vw;
     height: 100vh;
     display: flex;
@@ -309,7 +313,7 @@ const login = () => {
     background-image: url("~@/assets/Images/login/login_backgroundImage.png");
     background-size: cover;
     .loginScreen {
-        background-color: #fff;
+        background-color: $white;
         width: 590px;
         height: 600px;
         border-radius: 4px;
@@ -332,7 +336,7 @@ const login = () => {
             }
         }
         .error {
-            color: #d03050;
+            color: $danger;
             font-size: 14px;
         }
 
@@ -345,14 +349,14 @@ const login = () => {
             .rememberAccount {
                 display: flex;
                 align-items: center;
-                span {
-                    margin-left: 15px;
-                    color: $gray-3;
-                }
             }
             a {
                 font-size: $font-size-14;
                 color: $gray-1;
+                &:hover {
+                    color: $gray-3;
+                    text-decoration: none;
+                }
             }
         }
         .loginBtn {
@@ -360,14 +364,14 @@ const login = () => {
             width: 300px;
             height: 36px;
             line-height: 36px;
+            margin-bottom: 55px;
             border-radius: 18px;
             background-color: $gray-1;
             text-align: center;
-            p {
-                font-size: $font-size-14;
-                font-weight: 400;
-                color: #fff;
-            }
+            font-size: $font-size-14;
+            font-weight: 400;
+            color: $white;
+            text-align: center;
         }
     }
 }

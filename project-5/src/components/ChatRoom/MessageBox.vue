@@ -272,7 +272,15 @@
                             </div>
                             <!-- 文字訊息 -->
                             <div class="originalMsg">
-                                <p>{{ text.janusMsg.msgContent }}</p>
+                                <a
+                                    v-if="validURL(text.janusMsg.msgContent)"
+                                    :href="text.janusMsg.msgContent"
+                                    target="_blank"
+                                    >{{ text.janusMsg.msgContent }}</a
+                                >
+                                <p v-else>
+                                    {{ text.janusMsg.msgContent }}
+                                </p>
                             </div>
                         </div>
                         <!-- google maps -->
@@ -520,6 +528,7 @@ const { info, phoneCallModal } = storeToRefs(modelStore);
 //phone store
 const phoneCallStore = usePhoneCallStore();
 const { doCall, phoneTime } = phoneCallStore;
+const { sender } = storeToRefs(phoneCallStore);
 
 //router
 const route = useRoute();
@@ -543,6 +552,7 @@ let {
 } = storeToRefs(chatStore);
 
 const onPhoneCallModal = (chatRoomID) => {
+    sender.value = 0;
     phoneCallModal.value = true;
     doCall(chatRoomID);
 };
@@ -591,6 +601,15 @@ const img = computed(() => {
     });
 });
 
+//判斷a連結
+const validURL = (str) => {
+    try {
+        new URL(str);
+    } catch (_) {
+        return false;
+    }
+    return true;
+};
 //開始按
 const gtouchstart = (msg: txt) => {
     timeOutEvent.value = setTimeout(function () {
@@ -1317,7 +1336,7 @@ const previewURL = (fileid: string): void => {
                         margin-right: 10px;
                     }
                     .content {
-                        max-width: 200px;
+                        max-width: 900px;
                         border-radius: 5px 20px 20px 20px;
                         margin-left: 0px;
                         margin-right: 10px;
@@ -1504,7 +1523,7 @@ const previewURL = (fileid: string): void => {
                     }
                 }
                 .content {
-                    max-width: 1000px;
+                    max-width: 900px;
                     word-wrap: break-word;
                     word-break: break-all;
                     white-space: pre-wrap;

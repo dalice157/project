@@ -28,7 +28,7 @@ import searchIcon from "@/assets/Images/search/search.svg";
 import closeIcon from "@/assets/Images/search/round-fill_close.svg";
 import { isMobile } from "@/util/commonUtil";
 
-const events = ref(isMobile ? "touchstart" : "click");
+const events = ref(isMobile ? "touchend" : "click");
 
 const searchStore = useSearchStore();
 const { onSearchRecordResult, onClickGoto, clearRecordKeyWord } = searchStore;

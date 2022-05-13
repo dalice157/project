@@ -295,6 +295,7 @@ const errorCallback = (error: any) => {
 //input v-model
 const addMsg = (): void => {
     const str = msg.value.trim();
+   
     let textObj: any = {
         janusMsg: {
             chatroomID: chatRoomID.value,
@@ -318,6 +319,7 @@ const addMsg = (): void => {
                 recallStatus: false,
                 userName: getUserName,
                 deliveryStatusSuccess: true,
+              
             },
         },
     };
@@ -721,7 +723,6 @@ const addSticker = (sticker, id) => {
     window.localStorage.setItem("sticker-backend", JSON.stringify(stickerItems.value));
     sendPrivateMsg(sendMsgObj);
     messageList.value.push(stickerObj);
-    showStickerModal.value = false;
 };
 
 //功能欄開關

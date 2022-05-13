@@ -120,7 +120,7 @@ import closeIcon from "@/assets/Images/common/close-round.svg";
 import { signature, withCanvasDrawing } from "@/util/deviceUtil";
 import { isMobile } from "@/util/commonUtil";
 
-const events = ref(isMobile ? "touchstart" : "click");
+const events = ref(isMobile ? "touchend" : "click");
 
 const isProduction = process.env.NODE_ENV == "production";
 

@@ -34,10 +34,10 @@
                             <div class="channelPopUp">
                                 <ul class="channelUL" v-if="channel.popUpBoolean">
                                     <li @click="goEditChannel(channel.eventID)">編輯活動頻道</li>
-                                    <!-- <li @click="goAutoReply(channel.eventID)">自動回覆訊息</li>
+                                    <li @click="goAutoReply(channel.eventID)">自動回覆訊息</li>
                                     <li @click="goAutoReplyList(channel.eventID)">
                                         自動回覆訊息列表
-                                    </li> -->
+                                    </li>
                                 </ul>
                             </div>
                         </li>

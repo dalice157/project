@@ -68,7 +68,7 @@ import voiceDisabled from "@/assets/Images/chatroom/voice-fill-disabled.svg";
 import voiceEnabled from "@/assets/Images/chatroom/voice-fill-enabled.svg";
 import closeIcon from "@/assets/Images/chatroom/close-round-red.svg";
 
-const events = ref(isMobile ? "touchstart" : "click");
+const events = ref(isMobile ? "touchend" : "click");
 
 //route
 const route = useRoute();

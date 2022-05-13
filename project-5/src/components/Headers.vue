@@ -1,46 +1,41 @@
 <template>
     <n-layout-header class="header" bordered>
-        <h1
-            class="logo"
-            v-if="
-                route.path == `/chat` ||
-                route.path == `/chat/${eventID}` ||
-                route.path == `/gallery/${eventID}`
-            "
-        >
-            {{ eventInfo.name }}
-        </h1>
-        <h1 class="logo" v-else>
-            {{ showTitle() }}
+        <h1 class="logo">
+            {{ route.name !== "ChatRoom" ? titleObj[route.name] : eventInfo.name }}
         </h1>
         <ul class="pages">
             <li class="btnBg" v-if="isAdmin >= 1">
-                <p>使用者:{{ userName }}</p>
+                <p>使用者：{{ userName }}</p>
             </li>
             <li class="btnBg">
-                點數<span class="point">{{ point }}點</span>(<a
-                    class="store-value"
-                    href="https://www.teamplus.tech/product/every8d-prepaid/"
-                    target="_blank"
-                    >儲值</a
-                >)
+                <p>
+                    點數<span class="point">{{ point }}點</span>(<a
+                        class="store-value"
+                        href="https://www.teamplus.tech/product/every8d-prepaid/"
+                        target="_blank"
+                        >儲值</a
+                    >)
+                </p>
             </li>
             <li class="btnBg" v-if="isAdmin >= 1">
-                <router-link :to="`${eventID}` ? `/manage/${eventID}/SMSSend` : `/manage/SMSSend`">
+                <router-link
+                    class="link"
+                    :to="`${eventID}` ? `/manage/${eventID}/SMSSend` : `/manage/SMSSend`"
+                >
                     管理功能
                 </router-link>
             </li>
             <li class="btnBg myChatRoom">
                 <n-dropdown
                     class="dropdown"
-                    trigger="click"
+                    trigger="hover"
                     :options="options"
                     @select="handleSelect"
                 >
                     <n-badge class="dot" :dot="hasUnread">頻道列表</n-badge>
                 </n-dropdown>
             </li>
-            <li v-if="!access_token" @click="gotoLogIn">登入</li>
+            <li class="login" v-if="!access_token" @click="gotoLogIn">登入</li>
             <li class="chevron" v-if="access_token" @click="gotoLogIn">登出</li>
         </ul>
     </n-layout-header>
@@ -220,42 +215,18 @@ onMounted(() => {
     getPoint();
 });
 
-const showTitle = () => {
-    const managePath = eventID.value ? `/manage/${eventID.value}` : `/manage`;
-    if (route.path === `${managePath}/SMSSend` || route.path === `${managePath}/SMSSendPage2`) {
-        return "SMS發送";
-    }
-    if (route.path === `${managePath}/SMSInquire`) {
-        return "SMS發送查詢";
-    }
-    if (route.path === `${managePath}/MMSSend` || route.path === `${managePath}/MMSSendPage2`) {
-        return "MMS發送";
-    }
-    if (route.path === `${managePath}/MMSInquire`) {
-        return "MMS發送查詢";
-    }
-    if (route.path === `${managePath}/activitySetting`) {
-        return "活動頻道管理";
-    }
-
-    if (route.path === `${managePath}/activitySetting/addCustomService`) {
-        return "編輯客服人員";
-    }
-    if (route.path === `${managePath}/activitySetting/addChannel`) {
-        return "新增活動頻道";
-    }
-    if (route.path === `${managePath}/activitySetting/editChannel`) {
-        return "編輯活動頻道";
-    }
-    if (route.path === `${managePath}/activitySetting/addAutoReply`) {
-        return "建立自動回覆訊息";
-    }
-    if (route.path === `${managePath}/activitySetting/autoReplyList`) {
-        return "自動回覆訊息列表";
-    }
-    if (route.path === `${managePath}/manageSetting`) {
-        return "管理者設定";
-    }
+const titleObj = {
+    SMSSend: "SMS發送",
+    SMSInquire: "SMS發送查詢",
+    MMSSend: "MMS發送",
+    MMSInquire: "MMS發送查詢",
+    ActivitySetting: "活動頻道管理",
+    AddChannel: "新增活動頻道",
+    EditChannel: "編輯活動頻道",
+    AddCustomService: "編輯客服人員",
+    AddAutoReply: "建立自動回覆訊息",
+    AutoReplyList: "自動回覆訊息列表",
+    ManageSetting: "管理者設定",
 };
 
 let janus: any = null;
@@ -850,13 +821,21 @@ const attachVideocallPlugin = () => {
 <style lang="scss">
 @import "~@/assets/scss/var";
 .n-dropdown-menu.dropdown.n-popover.n-dropdown {
-    margin-top: 13px !important;
+    margin-top: 10px !important;
 }
 .dropdown.n-popover {
     width: 100%;
 }
-.n-badge.dot {
-    color: $gray-1;
+.myChatRoom {
+    .n-badge.dot {
+        width: 100%;
+        color: $gray-1;
+        display: block;
+        padding: 10px 20px;
+        &:hover {
+            color: $gray-3;
+        }
+    }
 }
 </style>
 <style lang="scss" scoped>
@@ -970,7 +949,11 @@ $headerHeight: 80px;
     align-items: center;
     li {
         + li {
-            margin-left: 30px;
+            margin-left: 15px;
+        }
+        &.login,
+        &.chevron {
+            padding: 5px;
         }
         &.btnBg {
             &.myChatRoom {
@@ -979,10 +962,16 @@ $headerHeight: 80px;
             border-radius: 20px;
             box-shadow: $gray-6 1px 2px 4px 0;
             background-color: $primary-4;
-            padding: 10px 20px;
             @extend %h4;
             &:hover {
                 background-color: $primary-5;
+            }
+            p,
+            .link {
+                padding: 10px 20px;
+            }
+            .link {
+                display: block;
             }
         }
 

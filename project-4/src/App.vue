@@ -64,7 +64,6 @@ import { isMobile } from "@/util/commonUtil";
 import { signature, withCanvasDrawing } from "@/util/deviceUtil";
 import closeIcon from "@/assets/Images/common/close-round.svg";
 
-const events = ref(isMobile ? "touchstart" : "click");
 const route = useRoute();
 
 //chat store
