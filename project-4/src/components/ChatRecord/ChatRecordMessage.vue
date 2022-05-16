@@ -6,7 +6,8 @@
     >
         <div
             class="chatRoomBox"
-            @[events].prevent="logGotoChat(num.chatroomID)"
+            @touchend.stop="logGotoChat(num.chatroomID)"
+            @click.stop="logGotoChat(num.chatroomID)"
             v-for="num in searcRecordMessages"
             :key="num.chatroomID"
         >
@@ -50,14 +51,13 @@
     >
         <!-- @touchend.prevent="gotoChat(num.eventKey)" -->
         <!-- :href="`/?eventKey=${num.eventKey}`" -->
-        <a
-            class="chatRoomBox"
-            v-for="(num, index) in changeList"
-            :key="num.chatroomID"
-            @[events].prevent="logGotoChat(num.chatroomID)"
-        >
+        <a class="chatRoomBox" v-for="(num, index) in changeList" :key="num.chatroomID">
             <!-- v-show="num.show" -->
-            <div class="chatRoomList">
+            <div
+                class="chatRoomList"
+                @touchend.stop="logGotoChat(num.chatroomID)"
+                @click.stop="logGotoChat(num.chatroomID)"
+            >
                 <div class="avatar" @[events].stop="showCompanyInfo(num)">
                     <n-avatar round :size="48" :src="`${config.fileUrl}${num.icon}`" />
                     <img class="img" :src="pinIcon" alt="置頂" v-if="num.toTop" />
@@ -87,8 +87,8 @@
                         </div>
                     </div> -->
                 </div>
-                <div class="functionBoxMore">
-                    <img :src="moreIcon" alt="more" @[events].stop="openFunctionPopUp(num)" />
+                <div class="functionBoxMore" @[events].stop="openFunctionPopUp(num)">
+                    <img :src="moreIcon" alt="more" />
                     <div class="functionPopUp" v-show="num.isfunctionPopUp">
                         <ul class="ulList">
                             <li @[events].stop="pin(num, index)" v-if="!num.toTop">開啟置頂</li>
@@ -291,44 +291,44 @@ onMounted(() => {
 });
 const lastChatMessageArr: any = ref([]);
 
-setInterval(() => {
-    const isToTop = JSON.parse(localStorage.getItem(`${route.params.eventKey}-record` || "[]"))[0]
-        .toTop;
-    lastChatMessageArr.value = JSON.parse(localStorage.getItem(`${route.params.eventKey}` || "[]"));
-    lastChatMessageArr.value = lastChatMessageArr.value.filter((item, idx, arr) => {
-        return !item.janusMsg.config.recallStatus;
-    });
+// setInterval(() => {
+//     const isToTop = JSON.parse(localStorage.getItem(`${route.params.eventKey}-record` || "[]"))[0]
+//         .toTop;
+//     lastChatMessageArr.value = JSON.parse(localStorage.getItem(`${route.params.eventKey}` || "[]"));
+//     lastChatMessageArr.value = lastChatMessageArr.value.filter((item, idx, arr) => {
+//         return !item.janusMsg.config.recallStatus;
+//     });
 
-    lastChatMessageArr.value.forEach((item, idx, arr) => {
-        // console.log("arr 最後一項", arr[arr.length - 1]);
-        const infoLen = lastChatMessageArr.value.length;
-        const isInfoYesterday = dayjs(
-            (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.config.currentDate
-        ).isYesterday();
-        const isInfoToday = dayjs(
-            (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.config.currentDate
-        ).isToday();
-        lastObj = {
-            ...eventInfo.value,
-            ...arr.at(-1),
-            chatroomID: route.params.eventKey,
-            toTop: isToTop,
-            show: true,
-            isfunctionPopUp: false,
-            time: isInfoToday
-                ? (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.time
-                : isInfoYesterday
-                ? "昨天"
-                : (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.config.currentDate,
-            sup: lastChatMessageArr.value.length,
-        };
-    });
-    recordMessages.value = [];
-    recordMessages.value.push(lastObj);
-    changeList.value = recordMessages.value;
-    // console.log("changeList", changeList.value);
-    localStorage.setItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
-}, 5000);
+//     lastChatMessageArr.value.forEach((item, idx, arr) => {
+//         // console.log("arr 最後一項", arr[arr.length - 1]);
+//         const infoLen = lastChatMessageArr.value.length;
+//         const isInfoYesterday = dayjs(
+//             (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.config.currentDate
+//         ).isYesterday();
+//         const isInfoToday = dayjs(
+//             (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.config.currentDate
+//         ).isToday();
+//         lastObj = {
+//             ...eventInfo.value,
+//             ...arr.at(-1),
+//             chatroomID: route.params.eventKey,
+//             toTop: isToTop,
+//             show: true,
+//             isfunctionPopUp: false,
+//             time: isInfoToday
+//                 ? (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.time
+//                 : isInfoYesterday
+//                 ? "昨天"
+//                 : (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.config.currentDate,
+//             sup: lastChatMessageArr.value.length,
+//         };
+//     });
+//     // recordMessages.value = [];
+//     recordMessages.value.push(lastObj);
+//     changeList.value = recordMessages.value;
+//     // console.log("changeList", changeList.value);
+//     localStorage.setItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
+// }, 5000);
 
 onUnmounted(() => {
     clearInterval(lastChatMessageArr.value);
@@ -451,6 +451,8 @@ const unpin = (item: any, index: any): void => {
         display: flex;
         justify-content: space-between;
         text-decoration: none;
+        position: relative;
+        z-index: 1;
         + .chatRoomBox {
             border-top: 1px solid $border-line;
         }
@@ -461,18 +463,18 @@ const unpin = (item: any, index: any): void => {
             background-color: rgba(0, 0, 0, 0.03);
         }
         .chatRoomList {
-            max-width: 86%;
+            width: 86%;
             display: flex;
             align-items: center;
             padding: 15px;
             @media (max-width: 599px) {
-                max-width: 80%;
+                width: 80%;
             }
             @media (max-width: 380px) {
-                max-width: 78%;
+                width: 78%;
             }
             @media (max-width: 320px) {
-                max-width: 71%;
+                width: 71%;
             }
             .avatar {
                 margin-right: 15px;
@@ -565,18 +567,18 @@ const unpin = (item: any, index: any): void => {
             background-color: rgba(0, 0, 0, 0.03);
         }
         .chatRoomList {
-            max-width: 86%;
+            width: 50%;
             display: flex;
             align-items: center;
-            padding: 15px;
+            padding: 15px 10px 15px 15px;
             @media (max-width: 599px) {
-                max-width: 80%;
+                width: 80%;
             }
             @media (max-width: 380px) {
-                max-width: 78%;
+                width: 78%;
             }
             @media (max-width: 320px) {
-                max-width: 71%;
+                width: 71%;
             }
             .avatar {
                 margin-right: 15px;
@@ -620,7 +622,7 @@ const unpin = (item: any, index: any): void => {
                     text-align: right;
                     min-width: 68px;
                     color: $gray-3;
-                    font-size: $font-size-16;
+                    font-size: $font-size-14;
                     font-weight: 500;
                 }
                 .badge {
@@ -643,6 +645,7 @@ const unpin = (item: any, index: any): void => {
             .functionBoxMore {
                 margin: auto 5px auto 12px;
                 position: relative;
+                z-index: 100;
                 .functionPopUp {
                     position: absolute;
                     box-shadow: 0 2px 4px 0 rgba(209, 209, 209, 0.5);

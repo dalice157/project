@@ -48,6 +48,7 @@ onMounted(() => {
         .then((res: any) => {
             isIllegalDevice.value = false;
             getBackendApi(route.params.eventKey);
+            getEventListApi(route.params.eventKey);
         })
         .catch((err: any) => {
             console.error(err);

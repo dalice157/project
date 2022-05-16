@@ -71,6 +71,7 @@ import {
     chatroomID,
     convertTime,
     isMobile,
+    htmlRegx,
 } from "@/util/commonUtil";
 import NavBar from "@/components/Chat/NavBar.vue";
 import MessageBox from "@/components/Chat/MessageBox";
@@ -157,6 +158,7 @@ document.addEventListener("visibilitychange", (event) => {
             },
             success: function () {},
         });
+        getBackendApi(route.params.eventKey);
         return;
     }
 });
@@ -224,6 +226,13 @@ const initWeclomeMsg = () => {
     localStorage.setItem(`${route.params.eventKey}-pictures`, JSON.stringify(pictures.value));
     localStorageMsg(messages.value, route.params.eventKey);
     messages.value = JSON.parse(localStorage.getItem(`${route.params.eventKey}`) || ([] as any));
+    messages.value.forEach((msg) => {
+        msg.janusMsg.msgContent = msg.janusMsg.msgContent.replace(
+            htmlRegx,
+            "<a target='_blank' href='$1'>$1</a>"
+        );
+        msg.janusMsg.config.isUnread = false;
+    });
     welcomeStatus.value = JSON.parse(
         localStorage.getItem(`${route.params.eventKey}-welcomeStatus`) || "false"
     );

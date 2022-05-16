@@ -620,12 +620,12 @@ onMounted(() => {
 });
 
 watch(adminCount, () => {
-    if (adminCount.value > 0) {
-        messages.value = messages.value.map((item) => {
-            item.janusMsg.config.isRead = true;
-            return item;
-        });
-    }
+    messages.value.forEach((msg) => {
+        msg.janusMsg.msgContent = msg.janusMsg.msgContent.replace(
+            htmlRegx,
+            "<a target='_blank' href='$1'>$1</a>"
+        );
+    });
     localStorage.setItem(`${route.params.eventKey}`, JSON.stringify(messages.value));
 });
 
