@@ -87,6 +87,7 @@
                     ref="photo"
                 />
             </span>
+
             <span class="file-folder">
                 <input type="file" :accept="fileAcceptPC" @change="onUploadFilePC" ref="file" />
             </span>
@@ -206,7 +207,9 @@
                     <n-grid-item
                         v-for="(item, index) in stickerItems"
                         :key="index"
-                        @[eventsSticker].stop="addSticker(item, item.stickerFileID)"
+                        @[eventsSticker]="addSticker(item, item.stickerFileID)"
+                        @touchmove="gtouchmove()"
+                        @touchend="gtouchend()"
                     >
                         <div class="stickerIcon">
                             <img
@@ -225,7 +228,9 @@
                     <n-grid-item
                         v-for="tab in stickerGroup.stickerList"
                         :key="tab"
-                        @[eventsSticker].prevent="addSticker(stickerGroup, tab)"
+                        @[eventsSticker]="addSticker(stickerGroup, tab)"
+                        @touchmove="gtouchmove()"
+                        @touchend="gtouchend()"
                         :class="{ hide: tab == 'tab' || tab == 'main' }"
                     >
                         <div class="stickerIcon">
@@ -322,7 +327,7 @@ import reloadTimeEnabled from "@/assets/Images/chatroom/reload-time-enabled.svg"
 import reloadTimeIcon from "@/assets/Images/chatroom/reload-time.svg";
 import voiceDisabled from "@/assets/Images/chatroom/voice-fill-disabled.svg";
 import voiceEnabled from "@/assets/Images/chatroom/voice-fill-enabled.svg";
-import { isMobile } from "@/util/commonUtil";
+import { isMobile, htmlRegx } from "@/util/commonUtil";
 import { signature } from "@/util/deviceUtil";
 
 const events = ref(isMobile ? "touchend" : "click");
@@ -749,6 +754,12 @@ const addMsg = (): void => {
     replyHide();
     const textArea = document.getElementById("textAreaPhone");
     textArea.classList.add("small");
+    messages.value.forEach((msg) => {
+        msg.janusMsg.msgContent = msg.janusMsg.msgContent.replace(
+            htmlRegx,
+            "<a target='_blank' href='$1'>$1</a>"
+        );
+    });
 };
 
 //手機板發送圖片
@@ -1099,63 +1110,83 @@ const closeStickerBox = () => {
     showStickerModal.value = false;
 };
 
-const addSticker = (sticker, id) => {
-    let stickerObj: any = {
-        janusMsg: {
-            chatroomID: chatroomID(route.params.eventKey),
-            msgType: 3,
-            sender: 1, // 0:客服, 1:使用者
-            msgContent: "",
-            time: unixTime(),
-            type: 2, //1:簡訊 2: 文字
-            format: {
-                stickerPackID: sticker.stickerPackID,
-                stickerUrl: stickerUrl.value,
-                ext: sticker.ext,
-                stickerFileID: id,
-                title: `貼圖${sticker.stickerPackID}-${id}`,
-            },
-            config: {
-                id: nanoid(),
-                isReply: replyMsg.value ? true : false,
-                replyObj: replyMsg.value || "",
-                currentDate: currentDate(),
-                isExpire: false,
-                isPlay: false,
-                isRead: adminCount.value > 0 ? true : false,
-                msgFunctionStatus: false,
-                msgMoreStatus: false,
-                recallPopUp: false,
-                recallStatus: false,
-                deliveryStatusSuccess: true,
-            },
-        },
-    };
-    const stickers = {
-        stickerPackID: sticker.stickerPackID,
-        stickerUrl: stickerUrl.value,
-        ext: sticker.ext,
-        stickerFileID: id,
-        title: `貼圖${sticker.stickerPackID}-${id}`,
-    };
-    messages.value.push(stickerObj);
-    const sendMsgObj = {
-        msg: stickerObj,
-        textPlugin: textPlugin.value,
-        eventKey: route.params.eventKey,
-        msgParticipantList: participantList.value,
-        eventID: eventID(route.params.eventKey),
-    };
-    const isStickerPush = stickerItems.value.some((item) => {
-        return item.title === stickers.title;
-    });
-    if (!isStickerPush) {
-        stickerItems.value.push(stickers);
-    }
+const timeOutEvent = ref(0);
 
-    window.localStorage.setItem("sticker", JSON.stringify(stickerItems.value));
-    sendPrivateMsg(sendMsgObj);
-    localStorageMsg(messages.value, route.params.eventKey);
+//手釋放，如果在500毫秒内就釋放，則取消長按事件，此时可以執行onclick執行事件
+const gtouchend = () => {
+    clearInterval(timeOutEvent.value);
+    if (timeOutEvent.value != 0) {
+        console.log("點擊");
+    }
+    return false;
+};
+
+//如果手指有移動，則取消所有事件，此时說名用户只是要移動而不是長按
+const gtouchmove = () => {
+    clearTimeout(timeOutEvent.value); //清除定时器
+    timeOutEvent.value = 0;
+};
+
+const addSticker = (sticker, id) => {
+    timeOutEvent.value = setTimeout(function () {
+        let stickerObj: any = {
+            janusMsg: {
+                chatroomID: chatroomID(route.params.eventKey),
+                msgType: 3,
+                sender: 1, // 0:客服, 1:使用者
+                msgContent: "",
+                time: unixTime(),
+                type: 2, //1:簡訊 2: 文字
+                format: {
+                    stickerPackID: sticker.stickerPackID,
+                    stickerUrl: stickerUrl.value,
+                    ext: sticker.ext,
+                    stickerFileID: id,
+                    title: `貼圖${sticker.stickerPackID}-${id}`,
+                },
+                config: {
+                    id: nanoid(),
+                    isReply: replyMsg.value ? true : false,
+                    replyObj: replyMsg.value || "",
+                    currentDate: currentDate(),
+                    isExpire: false,
+                    isPlay: false,
+                    isRead: adminCount.value > 0 ? true : false,
+                    msgFunctionStatus: false,
+                    msgMoreStatus: false,
+                    recallPopUp: false,
+                    recallStatus: false,
+                    deliveryStatusSuccess: true,
+                },
+            },
+        };
+        const stickers = {
+            stickerPackID: sticker.stickerPackID,
+            stickerUrl: stickerUrl.value,
+            ext: sticker.ext,
+            stickerFileID: id,
+            title: `貼圖${sticker.stickerPackID}-${id}`,
+        };
+        messages.value.push(stickerObj);
+        const sendMsgObj = {
+            msg: stickerObj,
+            textPlugin: textPlugin.value,
+            eventKey: route.params.eventKey,
+            msgParticipantList: participantList.value,
+            eventID: eventID(route.params.eventKey),
+        };
+        const isStickerPush = stickerItems.value.some((item) => {
+            return item.title === stickers.title;
+        });
+        if (!isStickerPush) {
+            stickerItems.value.push(stickers);
+        }
+
+        window.localStorage.setItem("sticker", JSON.stringify(stickerItems.value));
+        sendPrivateMsg(sendMsgObj);
+        localStorageMsg(messages.value, route.params.eventKey);
+    }, 80);
+    return false;
 };
 
 //功能欄開關
@@ -1441,7 +1472,7 @@ watchEffect(() => {
             display: none;
             min-width: 24px;
             height: 24px;
-            margin: 3px 6px 3px 0;
+            margin: 3px 0.5em 3px 0;
             background-image: url("~@/assets/Images/chatroom/add-round.svg");
             background-size: 24px;
             cursor: pointer;
@@ -1450,7 +1481,7 @@ watchEffect(() => {
             display: none;
             min-width: 24px;
             height: 24px;
-            margin: 3px 6px 3px 0;
+            margin: 3px 0.5em 3px 0;
             background-image: url("~@/assets/Images/chatroom/close-round.svg");
             background-size: 24px;
             cursor: pointer;
@@ -1458,9 +1489,15 @@ watchEffect(() => {
 
         @media (max-width: 768px) {
             .attachOpen {
+                min-width: 20px;
+                height: 20px;
+                background-size: 20px;
                 display: block;
             }
             .attachClose {
+                min-width: 20px;
+                height: 20px;
+                background-size: 20px;
                 display: block;
             }
         }
@@ -1486,19 +1523,19 @@ watchEffect(() => {
         @media (max-width: 768px) {
             .camera {
                 display: block;
-                min-width: 24px;
-                height: 24px;
-                margin: 3px 6px 3px 0;
+                min-width: 20px;
+                height: 20px;
+                margin: 3px 0.6em 3px 0;
                 background-image: url("~@/assets/Images/chatroom/Photo.svg");
-                background-size: 24px;
+                background-size: 20px;
                 // cursor: pointer;
                 // outline: 1px solid red;
                 input {
                     opacity: 0;
                     box-sizing: border-box;
                     border: 12px solid #00a;
-                    width: 24px;
-                    height: 24px;
+                    width: 20px;
+                    height: 20px;
                     cursor: pointer;
                     position: relative;
                     z-index: 10;
@@ -1525,19 +1562,19 @@ watchEffect(() => {
         @media (max-width: 768px) {
             .photo {
                 display: block;
-                min-width: 24px;
-                height: 24px;
-                margin: 3px 6px 3px 0;
+                min-width: 20px;
+                height: 20px;
+                margin: 3px 0 3px 0;
                 background-image: url("~@/assets/Images/chatroom/pic.svg");
-                background-size: 24px;
+                background-size: 20px;
                 // cursor: pointer;
                 // outline: 1px solid red;
                 input {
                     opacity: 0;
                     box-sizing: border-box;
                     border: 12px solid #00a;
-                    width: 24px;
-                    height: 24px;
+                    width: 20px;
+                    height: 20px;
                     cursor: pointer;
                     position: relative;
                     z-index: 10;

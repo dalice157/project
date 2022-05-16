@@ -134,3 +134,6 @@ export const isObjToBeZero = (obj: any) => {
 export const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
     navigator.userAgent.toLowerCase()
 );
+
+// html 正規表達
+export const htmlRegx = new RegExp(/((http:|https:)\/\/[\w.\\/]+)(?![^<]+>)/gi);

@@ -10,6 +10,9 @@ export const MY_ROOM = 1234; //Demo room
 export const JANUS_URL: any = `${config.janusUrl}/janus`;
 
 export const isProduction = process.env.NODE_ENV === "production";
+
+// html 正規表達
+export const htmlRegx = new RegExp(/((http:|https:)\/\/[\w.\\/]+)(?![^<]+>)/gi);
 // export let JANUS_URL: any = "";
 // if (window.location.protocol === "http:") {
 //     // server = "http://" + window.location.hostname + ":8088/janus";

@@ -298,9 +298,9 @@ setInterval(() => {
     lastChatMessageArr.value = lastChatMessageArr.value.filter((item, idx, arr) => {
         return !item.janusMsg.config.recallStatus;
     });
-    console.log();
 
     lastChatMessageArr.value.forEach((item, idx, arr) => {
+        // console.log("arr 最後一項", arr[arr.length - 1]);
         const infoLen = lastChatMessageArr.value.length;
         const isInfoYesterday = dayjs(
             (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.config.currentDate
@@ -326,6 +326,7 @@ setInterval(() => {
     recordMessages.value = [];
     recordMessages.value.push(lastObj);
     changeList.value = recordMessages.value;
+    // console.log("changeList", changeList.value);
     localStorage.setItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
 }, 5000);
 

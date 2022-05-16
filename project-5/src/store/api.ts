@@ -8,7 +8,7 @@ import { useSmsStore } from "@/store/smsStore";
 import { useMmsStore } from "@/store/mmsStore";
 import { currentTime, currentDate } from "@/util/dateUtil";
 import { randomString } from "@/util/chatUtil";
-import { resetSetItem, tokenExpireToLogin } from "@/util/commonUtil";
+import { resetSetItem, tokenExpireToLogin, htmlRegx } from "@/util/commonUtil";
 import dayjs from "dayjs";
 
 export const useApiStore = defineStore({
@@ -209,6 +209,10 @@ export const useApiStore = defineStore({
                         return unique;
                     }, []);
                     this.messageList.forEach((msg) => {
+                        msg.janusMsg.msgContent = msg.janusMsg.msgContent.replace(
+                            htmlRegx,
+                            "<a target='_blank' href='$1'>$1</a>"
+                        );
                         if (msg.janusMsg.sender == 1 && msg.janusMsg.format.phoneType == 1) {
                             msg.janusMsg.format.phoneType = 4;
                         }
@@ -390,10 +394,7 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.log("cs err:", err);
-                    if (err.response.status === 401) {
-                        // location.href = `/`;
-                        console.log("取得活動客服人員列表出錯");
-                    }
+                    tokenExpireToLogin(err);
                 });
         },
         // 取得活動資訊
@@ -411,10 +412,7 @@ export const useApiStore = defineStore({
                 })
                 .catch((err: any) => {
                     console.log("channel event err:", err);
-                    if (err.response.status === 401) {
-                        // location.href = `/`;
-                        console.log("取的活動資訊 出錯");
-                    }
+                    tokenExpireToLogin(err);
                 });
         },
         // 編輯活動
@@ -852,11 +850,7 @@ export const useApiStore = defineStore({
                     if (err.response && err.response.data.msg === "沒有管理人員") {
                         this.accounts = [];
                     }
-                    if (err.response.status === 401) {
-                        console.log("取得子清單出錯");
-                        // location.href = `/`;
-                    }
-                    // console.log("events err:", err);
+                    tokenExpireToLogin(err);
                 });
         },
         //自動回覆訊息api
@@ -883,10 +877,24 @@ export const useApiStore = defineStore({
                     console.log("autoReplyMsgAPI res", res);
                 })
                 .catch((err: any) => {
-                    console.error(err);
-                    // if (err.response.status === 401) {
-                    //     location.href = `/`;
-                    // }
+                    // console.error(err);
+                    console.log("autoReplyMsgAPI err", err);
+                });
+        },
+        //自動回覆訊息一覽表
+        async autoReplyMsgList(eventID) {
+            const getToken = localStorage.getItem("access_token");
+            await axios({
+                method: "get",
+                url: `${config.serverUrl}/v1/chatbots/${eventID}`,
+                headers: { Authorization: `Bearer ${getToken}` },
+            })
+                .then((res: any) => {
+                    console.log("autoReplyMsgList res", res);
+                })
+                .catch((err: any) => {
+                    // console.error(err);
+                    console.log("autoReplyMsgList err", err);
                 });
         },
     },

@@ -34,8 +34,13 @@
                             <div class="channelPopUp">
                                 <ul class="channelUL" v-if="channel.popUpBoolean">
                                     <li @click="goEditChannel(channel.eventID)">編輯活動頻道</li>
-                                    <li @click="goAutoReply(channel.eventID)">自動回覆訊息</li>
-                                    <li @click="goAutoReplyList(channel.eventID)">
+                                    <li v-if="!isProduction" @click="goAutoReply(channel.eventID)">
+                                        自動回覆訊息
+                                    </li>
+                                    <li
+                                        v-if="!isProduction"
+                                        @click="goAutoReplyList(channel.eventID)"
+                                    >
                                         自動回覆訊息列表
                                     </li>
                                 </ul>
@@ -95,9 +100,10 @@
 import { ref, computed } from "vue";
 import { NInput, NConfigProvider, NGrid, NGridItem } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
+import { storeToRefs } from "pinia";
 
 import { useApiStore } from "@/store/api";
-import { storeToRefs } from "pinia";
+import { isProduction } from "@/util/commonUtil";
 import config from "@/config/config";
 import addIcon from "@/assets/Images/chatroom/add-circle.svg";
 import searchIcon from "@/assets/Images/manage/search.svg";
@@ -105,7 +111,7 @@ import moreIcon from "@/assets/Images/manage/more.svg";
 import editIcon from "@/assets/Images/manage/edit-round.svg";
 
 const apiStore = useApiStore();
-const { getCustomServiceStaffList, getEventListApi } = apiStore;
+const { getCustomServiceStaffList, getEventListApi, autoReplyMsgList } = apiStore;
 const { staffList, eventList } = storeToRefs(apiStore);
 
 //router
@@ -156,9 +162,11 @@ const goAutoReply = (eventID) => {
 };
 //前往自動回覆訊息列表
 const goAutoReplyList = (eventID) => {
-    params.id
-        ? router.push(`/manage/${route.params.id}/activitySetting/autoReplyList?eventID=${eventID}`)
-        : router.push(`/manage/activitySetting/autoReplyList?eventID=${eventID}`);
+    const accountId = localStorage.getItem("accountID");
+    autoReplyMsgList(eventID);
+    // params.id
+    //     ? router.push(`/manage/${route.params.id}/activitySetting/autoReplyList?eventID=${eventID}`)
+    //     : router.push(`/manage/activitySetting/autoReplyList?eventID=${eventID}`);
 };
 //頻道開關
 const channelPopUp = (channel) => {
