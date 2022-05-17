@@ -71,7 +71,6 @@ import {
     chatroomID,
     convertTime,
     isMobile,
-    htmlRegx,
 } from "@/util/commonUtil";
 import NavBar from "@/components/Chat/NavBar.vue";
 import MessageBox from "@/components/Chat/MessageBox";
@@ -227,10 +226,6 @@ const initWeclomeMsg = () => {
     localStorageMsg(messages.value, route.params.eventKey);
     messages.value = JSON.parse(localStorage.getItem(`${route.params.eventKey}`) || ([] as any));
     messages.value.forEach((msg) => {
-        msg.janusMsg.msgContent = msg.janusMsg.msgContent.replace(
-            htmlRegx,
-            "<a target='_blank' href='$1'>$1</a>"
-        );
         msg.janusMsg.config.isUnread = false;
     });
     welcomeStatus.value = JSON.parse(
@@ -290,10 +285,9 @@ const connect = () => {
             janusConnectStatus.value = true;
         },
         error: (error: any) => {
-            onError("Failed to connect to janus server", error);
             janusConnectStatus.value = false;
-            // 判斷 Chrome for iOS
-            alert("連線中斷,按下確認重新連線");
+            const errMsg = onError("Failed to connect to janus server", error);
+            alert(`連線中斷,按下確認重新連線 ${errMsg}`);
             window.location.reload();
         },
         destroyed: () => {
@@ -635,8 +629,10 @@ const attachVideocallPlugin = () => {
         onmessage: function (msg: any, jsep: any) {
             console.log("call-> ::: Got a message :::", msg);
             let result = msg["result"];
-            console.log("call-> result:", result);
-
+            console.log("call-> result:", msg["error_code"]);
+            if (msg["error_code"] === 475) {
+                alert("客服人員皆忙線中,請稍後再撥!!");
+            }
             if (result) {
                 if (result["list"]) {
                     let list = result["list"];

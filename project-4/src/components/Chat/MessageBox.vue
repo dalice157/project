@@ -301,7 +301,9 @@
                             </div>
                             <!-- 文字訊息 -->
                             <div class="originalMsg">
-                                <p v-html="text.janusMsg.msgContent" />
+                                <p v-linkify:options="{ target: '_blank' }">
+                                    {{ text.janusMsg.msgContent }}
+                                </p>
                             </div>
                         </div>
                         <!-- google maps -->
@@ -525,7 +527,6 @@ import fileIcon from "@/assets/Images/chatroom/file-fill.svg";
 import phoneIcon from "@/assets/Images/chatroom/phone-fill-round-y.svg";
 import resendIcon from "@/assets/Images/chatroom/refresh-outline.svg";
 import { signature } from "@/util/deviceUtil";
-import { htmlRegx } from "@/util/commonUtil";
 
 const events = ref(isMobile ? "touchend" : "click");
 
@@ -611,21 +612,11 @@ const viewImgs: any = ref([]);
 //未讀訊息顯示條消失
 onMounted(() => {
     messages.value.forEach((msg) => {
-        msg.janusMsg.msgContent = msg.janusMsg.msgContent.replace(
-            htmlRegx,
-            "<a target='_blank' href='$1'>$1</a>"
-        );
         msg.janusMsg.config.isUnread = false;
     });
 });
 
 watch(adminCount, () => {
-    messages.value.forEach((msg) => {
-        msg.janusMsg.msgContent = msg.janusMsg.msgContent.replace(
-            htmlRegx,
-            "<a target='_blank' href='$1'>$1</a>"
-        );
-    });
     localStorage.setItem(`${route.params.eventKey}`, JSON.stringify(messages.value));
 });
 

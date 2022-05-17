@@ -8,7 +8,7 @@ import { useSmsStore } from "@/store/smsStore";
 import { useMmsStore } from "@/store/mmsStore";
 import { currentTime, currentDate } from "@/util/dateUtil";
 import { randomString } from "@/util/chatUtil";
-import { resetSetItem, tokenExpireToLogin, htmlRegx } from "@/util/commonUtil";
+import { resetSetItem, tokenExpireToLogin } from "@/util/commonUtil";
 import dayjs from "dayjs";
 
 export const useApiStore = defineStore({
@@ -209,10 +209,6 @@ export const useApiStore = defineStore({
                         return unique;
                     }, []);
                     this.messageList.forEach((msg) => {
-                        msg.janusMsg.msgContent = msg.janusMsg.msgContent.replace(
-                            htmlRegx,
-                            "<a target='_blank' href='$1'>$1</a>"
-                        );
                         if (msg.janusMsg.sender == 1 && msg.janusMsg.format.phoneType == 1) {
                             msg.janusMsg.format.phoneType = 4;
                         }

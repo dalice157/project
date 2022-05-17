@@ -69,7 +69,7 @@ const { eventInfo } = storeToRefs(apiStore);
 
 // chat store
 const chatStore = useChatStore();
-const { participantList, textPlugin } = storeToRefs(chatStore);
+const { participantList, textPlugin, janus } = storeToRefs(chatStore);
 
 //search store
 const searchStore = useSearchStore();
@@ -105,8 +105,7 @@ const phoneCall = () => {
 };
 
 const goToRecord = () => {
-    // janus.value.destroy();
-    // location.href = `/chatRecord/${eventKey.value}`;
+    janus.value.destroy();
     router.push(`/chatRecord/${eventKey.value}`);
 };
 

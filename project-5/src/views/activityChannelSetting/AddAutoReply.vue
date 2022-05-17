@@ -434,7 +434,7 @@ const confirmStore = () => {
         weekday: weekdays.value.length === 0 ? 0 : weekdays.value.toString().replace(/,/gi, ""),
         eventID: route.query.eventID,
     };
-    // autoReplyMsgAPI(autoReplyData);
+    autoReplyMsgAPI(autoReplyData);
     // route.params.id
     //     ? router.push(`/manage/${route.params.id}/activitySetting`)
     //     : router.push(`/manage/activitySetting`);

@@ -50,7 +50,9 @@
                         $route.name === 'ActivitySetting' ||
                         $route.name === 'AddChannel' ||
                         $route.name === 'AddCustomService' ||
-                        $route.name === 'EditChannel'
+                        $route.name === 'EditChannel' ||
+                        $route.name === 'AddAutoReply' ||
+                        $route.name === 'AutoReplyList'
                             ? 'active'
                             : ''
                     "

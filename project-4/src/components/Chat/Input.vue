@@ -176,9 +176,9 @@
                     <li
                         v-if="stickerItems.length > 0"
                         class="reload-time"
-                        @[eventsSticker].prevent="
-                            stickerGroupID == 0 ? '' : handleStickckerGroup(0)
-                        "
+                        @[eventsSticker]="stickerGroupID == 0 ? '' : handleStickckerGroup(0)"
+                        @touchmove="gtouchmove()"
+                        @touchend="gtouchend()"
                         :class="{
                             active: stickerGroupID == 0,
                         }"
@@ -189,11 +189,13 @@
                     <li
                         v-for="tab in stickerList"
                         :key="tab.stickerPackID"
-                        @[eventsSticker].prevent="
+                        @[eventsSticker]="
                             stickerGroupID == tab.stickerPackID
                                 ? ''
                                 : handleStickckerGroup(tab.stickerPackID)
                         "
+                        @touchmove="gtouchmove()"
+                        @touchend="gtouchend()"
                         :class="{
                             active: stickerList.length > 0 && stickerGroupID == tab.stickerPackID,
                         }"
@@ -327,7 +329,7 @@ import reloadTimeEnabled from "@/assets/Images/chatroom/reload-time-enabled.svg"
 import reloadTimeIcon from "@/assets/Images/chatroom/reload-time.svg";
 import voiceDisabled from "@/assets/Images/chatroom/voice-fill-disabled.svg";
 import voiceEnabled from "@/assets/Images/chatroom/voice-fill-enabled.svg";
-import { isMobile, htmlRegx } from "@/util/commonUtil";
+import { isMobile } from "@/util/commonUtil";
 import { signature } from "@/util/deviceUtil";
 
 const events = ref(isMobile ? "touchend" : "click");
@@ -754,12 +756,6 @@ const addMsg = (): void => {
     replyHide();
     const textArea = document.getElementById("textAreaPhone");
     textArea.classList.add("small");
-    messages.value.forEach((msg) => {
-        msg.janusMsg.msgContent = msg.janusMsg.msgContent.replace(
-            htmlRegx,
-            "<a target='_blank' href='$1'>$1</a>"
-        );
-    });
 };
 
 //手機板發送圖片
@@ -1721,11 +1717,10 @@ watchEffect(() => {
             height: 55px;
             display: block;
             overflow-x: auto;
+            overflow-y: hidden;
             white-space: nowrap;
         }
         .stickerTabs {
-            padding-top: 10px;
-            padding-bottom: 10px;
             li {
                 width: 35px;
                 height: 35px;

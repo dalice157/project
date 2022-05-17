@@ -132,7 +132,7 @@ export const onHangup = (): void => {
 };
 
 // 錯誤訊息
-export const onError = (message: string, error = "") => {
+export const onError: any = (message: string, error = "") => {
     console.log("onError message:", message);
     console.log("onError error:", error);
 

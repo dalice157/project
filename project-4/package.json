@@ -32,6 +32,7 @@
         "v-viewer": "^3.0.10",
         "vconsole": "^3.10.0",
         "vue": "^3.0.0",
+        "vue-3-linkify": "^1.1.0",
         "vue-clipboard3": "^1.0.1",
         "vue-router": "^4.0.0-0",
         "vue3-google-map": "^0.8.3",

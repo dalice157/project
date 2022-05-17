@@ -6,7 +6,7 @@ import adapter from "webrtc-adapter";
 
 import config from "@/config/config";
 import { useChatStore } from "@/store/chat";
-import { localStorageMsg, eventID, htmlRegx } from "@/util/commonUtil";
+import { localStorageMsg, eventID } from "@/util/commonUtil";
 import { randomString } from "@/util/chatUtil";
 import { signature } from "@/util/deviceUtil";
 
@@ -64,10 +64,6 @@ export const useApiStore = defineStore({
                                     localStorage.getItem(`${chatToken}`) || "[]"
                                 );
                                 messages.value.forEach((msg) => {
-                                    msg.janusMsg.msgContent = msg.janusMsg.msgContent.replace(
-                                        htmlRegx,
-                                        "<a target='_blank' href='$1'>$1</a>"
-                                    );
                                     if (msg.janusMsg.config.id === unReadMsg.janusMsg.config.id) {
                                         msg.janusMsg.config.recallStatus = true;
                                     }
@@ -86,10 +82,6 @@ export const useApiStore = defineStore({
                         console.log("this.eventInfo.unreadList", this.eventInfo.unreadList);
                     }
                     messages.value.forEach((msg) => {
-                        msg.janusMsg.msgContent = msg.janusMsg.msgContent.replace(
-                            htmlRegx,
-                            "<a target='_blank' href='$1'>$1</a>"
-                        );
                         if (msg.janusMsg.sender == 0 && msg.janusMsg.format.phoneType == 1) {
                             msg.janusMsg.format.phoneType = 4;
                         }

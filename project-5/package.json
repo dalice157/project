@@ -28,6 +28,7 @@
         "twitter-bootstrap": "^2.1.1",
         "v-viewer": "^3.0.10",
         "vue": "^3.2.19",
+        "vue-3-linkify": "^1.1.0",
         "vue-clipboard3": "^1.0.1",
         "vue-router": "^4.0.0-0",
         "webrtc-adapter": "^8.1.0"

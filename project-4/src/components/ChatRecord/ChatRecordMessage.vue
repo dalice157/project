@@ -284,51 +284,51 @@ const init: any = () => {
         }
         return unique;
     }, []);
-    localStorage.setItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
+    // localStorage.setItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
 };
 onMounted(() => {
     init();
 });
 const lastChatMessageArr: any = ref([]);
 
-// setInterval(() => {
-//     const isToTop = JSON.parse(localStorage.getItem(`${route.params.eventKey}-record` || "[]"))[0]
-//         .toTop;
-//     lastChatMessageArr.value = JSON.parse(localStorage.getItem(`${route.params.eventKey}` || "[]"));
-//     lastChatMessageArr.value = lastChatMessageArr.value.filter((item, idx, arr) => {
-//         return !item.janusMsg.config.recallStatus;
-//     });
+setInterval(() => {
+    const isToTop = JSON.parse(localStorage.getItem(`${route.params.eventKey}-record` || "[]"))[0]
+        .toTop;
+    lastChatMessageArr.value = JSON.parse(localStorage.getItem(`${route.params.eventKey}` || "[]"));
+    lastChatMessageArr.value = lastChatMessageArr.value.filter((item, idx, arr) => {
+        return !item.janusMsg.config.recallStatus;
+    });
 
-//     lastChatMessageArr.value.forEach((item, idx, arr) => {
-//         // console.log("arr 最後一項", arr[arr.length - 1]);
-//         const infoLen = lastChatMessageArr.value.length;
-//         const isInfoYesterday = dayjs(
-//             (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.config.currentDate
-//         ).isYesterday();
-//         const isInfoToday = dayjs(
-//             (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.config.currentDate
-//         ).isToday();
-//         lastObj = {
-//             ...eventInfo.value,
-//             ...arr.at(-1),
-//             chatroomID: route.params.eventKey,
-//             toTop: isToTop,
-//             show: true,
-//             isfunctionPopUp: false,
-//             time: isInfoToday
-//                 ? (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.time
-//                 : isInfoYesterday
-//                 ? "昨天"
-//                 : (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.config.currentDate,
-//             sup: lastChatMessageArr.value.length,
-//         };
-//     });
-//     // recordMessages.value = [];
-//     recordMessages.value.push(lastObj);
-//     changeList.value = recordMessages.value;
-//     // console.log("changeList", changeList.value);
-//     localStorage.setItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
-// }, 5000);
+    lastChatMessageArr.value.forEach((item, idx, arr) => {
+        // console.log("arr 最後一項", arr[arr.length - 1]);
+        const infoLen = lastChatMessageArr.value.length;
+        const isInfoYesterday = dayjs(
+            (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.config.currentDate
+        ).isYesterday();
+        const isInfoToday = dayjs(
+            (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.config.currentDate
+        ).isToday();
+        lastObj = {
+            ...eventInfo.value,
+            ...arr.at(-1),
+            chatroomID: route.params.eventKey,
+            toTop: isToTop,
+            show: true,
+            isfunctionPopUp: false,
+            time: isInfoToday
+                ? (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.time
+                : isInfoYesterday
+                ? "昨天"
+                : (lastChatMessageArr.value[infoLen - 1] as any).janusMsg.config.currentDate,
+            sup: lastChatMessageArr.value.length,
+        };
+    });
+    recordMessages.value = [];
+    recordMessages.value.push(lastObj);
+    changeList.value = recordMessages.value;
+    // console.log("changeList", changeList.value);
+    localStorage.setItem(`${route.params.eventKey}-record`, JSON.stringify(changeList.value));
+}, 5000);
 
 onUnmounted(() => {
     clearInterval(lastChatMessageArr.value);

@@ -272,7 +272,9 @@
                             </div>
                             <!-- 文字訊息 -->
                             <div class="originalMsg">
-                                <p v-html="text.janusMsg.msgContent" />
+                                <p v-linkify:options="{ target: '_blank' }">
+                                    {{ text.janusMsg.msgContent }}
+                                </p>
                             </div>
                         </div>
                         <!-- google maps -->
@@ -493,7 +495,7 @@ import { useSearchStore } from "@/store/search";
 import { txt } from "@/util/interfaceUtil";
 import { sendPrivateMsg } from "@/util/chatUtil";
 import user_pic_defaul from "@/assets/Images/mugShot/User-round.svg";
-import { scrollPageTo, convertTime, imgList, resetSetItem, htmlRegx } from "@/util/commonUtil";
+import { scrollPageTo, convertTime, imgList, resetSetItem } from "@/util/commonUtil";
 import { unixTime, currentDate, dateFormat, currentTime } from "@/util/dateUtil";
 import config from "@/config/config";
 import moreIcon from "@/assets/Images/chatroom/more.svg";
@@ -558,13 +560,7 @@ const mobile: any = computed(() => route.query.mobile);
 
 const messageArray: any = computed({
     get() {
-        return messageList.value.map((msg) => {
-            msg.janusMsg.msgContent = msg.janusMsg.msgContent.replace(
-                htmlRegx,
-                "<a target='_blank' href='$1'>$1</a>"
-            );
-            return msg;
-        });
+        return messageList.value;
     },
     set(val) {
         messageList.value = val;

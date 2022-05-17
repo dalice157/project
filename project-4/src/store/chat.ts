@@ -1,6 +1,6 @@
 import { defineStore, storeToRefs } from "pinia";
 
-import { localStorageMsg, htmlRegx } from "@/util/commonUtil";
+import { localStorageMsg } from "@/util/commonUtil";
 import { useApiStore } from "@/store/api";
 
 export const useChatStore = defineStore({
@@ -102,10 +102,6 @@ export const useChatStore = defineStore({
             this.messages.push(messagesParse);
             localStorageMsg(this.messages, eventKey);
             this.messages.forEach((element) => {
-                element.janusMsg.msgContent = element.janusMsg.msgContent.replace(
-                    htmlRegx,
-                    "<a target='_blank' href='$1'>$1</a>"
-                );
                 element.janusMsg.config.isRead = true;
                 if (element.janusMsg.sender == 0 && element.janusMsg.format.phoneType == 1) {
                     element.janusMsg.format.phoneType = 4;
