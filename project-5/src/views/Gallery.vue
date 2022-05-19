@@ -370,7 +370,7 @@ const previewURL = (fileid: string): void => {
     }
 }
 .noPicture {
-    height: calc(100vh - 80px);
+    min-height: calc(100vh - 80px);
     p {
         padding-top: 15%;
         font-size: $font-size-20;

@@ -324,8 +324,8 @@ watchEffect(() => {
                 lastChatMessageArr.value?.forEach((item, idx, arr) => {
                     lastObj.value = arr[arr.length - 1];
                 });
-                console.log("lastChatMessageArr", lastChatMessageArr.value);
-                console.log("lastObj", lastObj);
+                // console.log("lastChatMessageArr", lastChatMessageArr.value);
+                // console.log("lastObj", lastObj);
             } else {
                 // 自己收回 抓最後一筆
                 lastChatMessageArr.value = JSON.parse(
@@ -355,6 +355,7 @@ watchEffect(() => {
                 // }
             });
             changeList.value.sort((a, b) => b.time - a.time).sort((a, b) => b.pinTop - a.pinTop);
+            console.log("changeList", changeList.value);
         },
         false
     );

@@ -11,6 +11,11 @@ export const JANUS_URL: any = `${config.janusUrl}/janus`;
 
 export const isProduction = process.env.NODE_ENV === "production";
 
+// 判斷是否是手機
+export const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
+    navigator.userAgent.toLowerCase()
+);
+
 // export let JANUS_URL: any = "";
 // if (window.location.protocol === "http:") {
 //     // server = "http://" + window.location.hostname + ":8088/janus";

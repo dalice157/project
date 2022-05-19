@@ -161,7 +161,7 @@ const onSend = () => {
 .SMSSendPage2 {
     position: relative;
     display: flex;
-    height: calc(100vh - 80px);
+    min-height: calc(100vh - 80px);
     background-color: $bg;
     padding: 15px;
     .smsPage2Content {

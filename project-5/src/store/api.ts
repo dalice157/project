@@ -62,6 +62,7 @@ export const useApiStore = defineStore({
         phoneCallName: <any>"",
         phoneCallIcon: <any>0,
         phoneCallNumber: <any>null,
+        autoReplyList: <any>[],
     }),
     getters: {},
     actions: {
@@ -211,6 +212,9 @@ export const useApiStore = defineStore({
                     this.messageList.forEach((msg) => {
                         if (msg.janusMsg.sender == 1 && msg.janusMsg.format.phoneType == 1) {
                             msg.janusMsg.format.phoneType = 4;
+                        }
+                        if (msg.janusMsg.sender === 1 && msg.janusMsg.msgType === 9) {
+                            delete msg.janusMsg.config.userName;
                         }
                     });
                     const lastChatMessage = this.messageList
@@ -849,7 +853,7 @@ export const useApiStore = defineStore({
                     tokenExpireToLogin(err);
                 });
         },
-        //自動回覆訊息api
+        //新增自動回覆訊息api
         async autoReplyMsgAPI(data) {
             const getToken = localStorage.getItem("access_token");
             const fd = new FormData();
@@ -882,15 +886,62 @@ export const useApiStore = defineStore({
             const getToken = localStorage.getItem("access_token");
             await axios({
                 method: "get",
-                url: `${config.serverUrl}/v1/chatbots/${eventID}`,
+                url: `${config.serverUrl}/v1/chatbots/${eventID}/0`,
                 headers: { Authorization: `Bearer ${getToken}` },
             })
                 .then((res: any) => {
-                    console.log("autoReplyMsgList res", res);
+                    console.log("autoReplyMsgList res", res.data);
+                    this.autoReplyList = res.data.chatbotrule;
                 })
                 .catch((err: any) => {
                     // console.error(err);
                     console.log("autoReplyMsgList err", err);
+                });
+        },
+        //查詢單一自動回覆訊息
+        async inquireAutoReplyMsg(eventID, autoID) {
+            const getToken = localStorage.getItem("access_token");
+            await axios({
+                method: "get",
+                url: `${config.serverUrl}/v1/chatbots/${eventID}/${autoID}`,
+                headers: { Authorization: `Bearer ${getToken}` },
+            })
+                .then((res: any) => {
+                    console.log("inquireAutoReplyMsg res", res.data);
+                    this.autoReplyList = res.data.chatbotrule;
+                })
+                .catch((err: any) => {
+                    // console.error(err);
+                    console.log("inquireAutoReplyMsg err", err);
+                });
+        },
+        // 修改自動回覆訊息
+        async editAutoReplyMsg(data) {
+            const getToken = localStorage.getItem("access_token");
+            const fd = new FormData();
+            fd.append("eventID", data.eventID);
+            fd.append("subject", data.subject || "");
+            fd.append("status", data.status);
+            fd.append("startDate", data.startDate);
+            fd.append("endDate", data.endDate);
+            fd.append("startTime", data.startTime);
+            fd.append("endTime", data.endTime);
+            fd.append("weekday", data.weekday);
+            fd.append("keyword", data.keyWord);
+            fd.append("msg", JSON.stringify(data.msg));
+            fd.append("autoID", data.autoID);
+            await axios({
+                method: "patch",
+                url: `${config.serverUrl}/v1/chatbots`,
+                data: fd,
+                headers: { Authorization: `Bearer ${getToken}` },
+            })
+                .then((res: any) => {
+                    console.log("editAutoReplyMsg res", res);
+                })
+                .catch((err: any) => {
+                    // console.error(err);
+                    console.log("editAutoReplyMsg err", err);
                 });
         },
     },

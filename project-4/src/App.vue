@@ -19,7 +19,10 @@
                 <!-- 測試用 <div class="closeBtn" @[events].stop="onCloseIllegalDevice">
                     <img :src="closeIcon" alt="關閉" />
                 </div> -->
-                <h2>請輸入原裝置之驗證碼</h2>
+                <p class="notes">
+                    若要使用這個裝置打開 talkOD，請到原裝置的 talkOD
+                    聊天室內取得驗證碼，輸入驗證碼後即可使用。
+                </p>
                 <n-form ref="formRef" label-width="auto" :model="formValue" :rules="rules">
                     <n-form-item path="deviceCode">
                         <n-config-provider :theme-overrides="themeOverrides">
@@ -131,11 +134,12 @@ const onSendVcode = (e) => {
                 .then((res: any) => {
                     vCode.value = res.data.code;
                     isIllegalDevice.value = false;
-                    getBackendApi(route.params.eventKey);
+                    location.reload();
                 })
                 .catch((err: any) => {
                     console.log("err res", err.response);
                     errText.value = err.response.data.msg;
+                    location.reload();
                 });
         } else {
             console.log("errors", errors);
@@ -292,6 +296,10 @@ onUnmounted(() => {
         margin-top: 4px;
         margin-bottom: 8px;
     }
+
+    .n-form-item.n-form-item--top-labelled {
+        --label-height: 10px !important;
+    }
 }
 </style>
 <style lang="scss" scoped>
@@ -331,7 +339,7 @@ onUnmounted(() => {
     .deviceCode {
         border-radius: 20px;
         width: 220px;
-        height: 200px;
+        height: auto;
         padding: 15px;
         background-color: $white;
         position: absolute;
@@ -342,6 +350,13 @@ onUnmounted(() => {
         align-items: center;
         justify-content: center;
         transform: translate(-50%, -50%);
+        .notes {
+            font-size: $font-size-14;
+            margin: 10px auto;
+            color: $gray-1;
+            line-height: 1.5;
+            width: 96%;
+        }
         .closeBtn {
             position: absolute;
             right: -5px;

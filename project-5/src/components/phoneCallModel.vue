@@ -19,8 +19,19 @@
                 </div>
             </div>
             <h1 class="title">
-                {{ "+" + String(filterUserInfo.mobile).slice(0, 3) }}
-                {{ String(filterUserInfo.mobile).slice(-9) }}
+                {{
+                    filterUserInfo.name !== "" || filterUserInfo.name !== null
+                        ? filterUserInfo.name
+                        : null
+                }}
+                {{
+                    filterUserInfo.name == "" || filterUserInfo.name == null
+                        ? "+" +
+                          String(filterUserInfo.mobile).slice(0, 3) +
+                          " " +
+                          String(filterUserInfo.mobile).slice(-9)
+                        : null
+                }}
             </h1>
             <div v-if="!isAccepted" class="phoneStatus">
                 <p>撥號中</p>

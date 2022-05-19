@@ -11,7 +11,7 @@
         <n-data-table
             class="autoReply_table"
             :bordered="false"
-            :scroll-x="1200"
+            :scroll-x="800"
             :columns="createColumns"
             :data="data"
             :pagination="pagination"
@@ -20,14 +20,31 @@
     </div>
 </template>
 <script lang="ts" setup>
-import { ref, h } from "vue";
+import { ref, h, computed, watchEffect, onMounted } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useApiStore } from "@/store/api";
 import { NButton, NDataTable, NSwitch } from "naive-ui";
+import { storeToRefs } from "pinia";
+import { parse } from "date-fns";
+import { currentTime } from "@/util/dateUtil";
 
+//api atroe
+const apiStore = useApiStore();
+const { autoReplyMsgList, inquireAutoReplyMsg } = apiStore;
+const { autoReplyList } = storeToRefs(apiStore);
 //router 資訊
 const router = useRouter();
 const route = useRoute();
 
+onMounted(() => {
+    autoReplyMsgList(route.query.eventID);
+});
+const goToEditChannel = (eventID, autoID) => {
+    inquireAutoReplyMsg(eventID, autoID);
+    router.push(
+        `/manage/${route.params.id}/activitySetting/EditAutoReply?eventID=${eventID}&autoID=${autoID}`
+    );
+};
 const pagination = {
     pageSize: 6,
 };
@@ -41,62 +58,107 @@ const createColumns = [
     },
     {
         title: "關鍵字",
-        key: "tags",
+        key: "keyword",
         align: "center",
         width: 100,
+        render(row) {
+            return h("p", row.keyword);
+        },
     },
     {
         title: "回應內容",
-        key: "content",
+        key: "msg",
+        render(row, index) {
+            const parseMsg = JSON.parse(row.msg);
+            const msgLength = parseMsg.length;
+            let str = "";
+            if (parseMsg[0].janusMsg.msgType === 1) {
+                str += parseMsg[0].janusMsg.msgContent;
+            } else if (parseMsg[0].janusMsg.msgType === 6) {
+                str += parseMsg[0].janusMsg.format.ShowName;
+            }
+            return h(
+                "p",
+                {
+                    class: "link hover",
+                    onClick: () => goToEditChannel(row.eventID, row.autoID),
+                },
+                `${str}(${msgLength})`
+            );
+        },
     },
     {
         title: "指定日期時間",
         key: "time",
         align: "center",
+        render(row, index) {
+            let str = "星期";
+            let weekDayArr = row.weekday.split("");
+            const chineseWeekday = computed(() => {
+                if (weekDayArr.length <= 0) {
+                    return (str = "");
+                }
+                if (row.weekday !== "") {
+                    const weekdayObj = {
+                        1: "一,",
+                        2: "二,",
+                        3: "三,",
+                        4: "四,",
+                        5: "五,",
+                        6: "六,",
+                        7: "日,",
+                    };
+
+                    weekDayArr.forEach((item) => {
+                        str += weekdayObj[item];
+                    });
+                    str = str.slice(0, -1);
+                }
+
+                return str;
+            });
+            const startTime = computed(() => {
+                return currentTime(row.statTime / 1000);
+            });
+            const endTime = computed(() => {
+                return currentTime(row.endTime / 1000);
+            });
+            return h(
+                "p",
+                {
+                    class: "link",
+                },
+                `
+                ${chineseWeekday.value}\n
+                ${startTime.value}~${endTime.value}
+                
+                `
+            );
+        },
     },
     {
         title: "狀態",
-        key: "state",
+        key: "status",
         align: "center",
         render(row, index) {
+            console.log("列表狀態開關", row.status);
             return h(NSwitch, {
                 checkedValue: "1",
                 uncheckedValue: "0",
-                defaultValue: row.state,
+                defaultValue: row.status,
                 onUpdate: (value) => {
-                    row.state = value;
+                    row.status = value;
                 },
             });
         },
     },
 ] as any;
-
-const data = ref([
-    {
-        key: 0,
-        title: "週年慶優惠活動",
-        tags: "+1、加一、加加",
-        content: "最新優惠活動優惠活動快截止了，要買要快喔  http://e8d.tw/sample",
-        time: "2021/12/11 15:14:20",
-        state: "0",
-    },
-    {
-        key: 1,
-        title: "下班時間回應",
-        tags: "+1、加一、加加、加一",
-        content: "週年慶優惠活動週年慶優惠活動週年慶優惠活動",
-        time: "2021/12/11 15:14:20",
-        state: "1",
-    },
-    {
-        key: 2,
-        title: "禮盒活動",
-        tags: "+1、加一、加加",
-        content: "禮盒活動禮盒活動禮盒活動",
-        time: "2021/12/11 15:14:20",
-        state: "1",
-    },
-]);
+const data = computed(() => {
+    return autoReplyList.value;
+});
+watchEffect(() => {
+    // console.log("data", data.value);
+});
 
 const gotoAutoReply = () => {
     route.params.id
@@ -144,6 +206,32 @@ const gotoChannelList = () => {
     }
     .deduction {
         color: $danger;
+    }
+    .link {
+        color: $gray-1;
+        &:hover {
+            color: $primary-1;
+        }
+        &:visited {
+            color: $primary-1;
+        }
+    }
+    .hover {
+        cursor: pointer;
+    }
+    .subject {
+        width: 110px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+    }
+    .time {
+        width: 200px;
+        // display: -webkit-box;
+        // -webkit-box-orient: vertical;
+        // -webkit-line-clamp: 2;
+        // overflow: hidden;
     }
 }
 </style>

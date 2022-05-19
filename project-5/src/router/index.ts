@@ -17,6 +17,7 @@ import AddChannel from "@/views/activityChannelSetting/AddChannel.vue";
 import EditChannel from "@/views/activityChannelSetting/EditChannel.vue";
 import AddCustomService from "@/views/activityChannelSetting/AddCustomService.vue";
 import AddAutoReply from "@/views/activityChannelSetting/AddAutoReply.vue";
+import EditAutoReply from "@/views/activityChannelSetting/EditAutoReply.vue";
 import AutoReplyList from "@/views/activityChannelSetting/AutoReplyList.vue";
 
 const routes: Array<RouteRecordRaw> = [
@@ -128,6 +129,13 @@ const routes: Array<RouteRecordRaw> = [
                 name: "AddAutoReply",
                 components: {
                     manage: AddAutoReply,
+                },
+            },
+            {
+                path: "/manage/:id?/activitySetting/EditAutoReply",
+                name: "EditAutoReply",
+                components: {
+                    manage: EditAutoReply,
                 },
             },
             {

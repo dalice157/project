@@ -39,6 +39,9 @@ export const sendPrivateMsg = ({
         console.log("Insert a message to send on the DataChannel");
         return;
     }
+    if (msg.janusMsg.sender === 1 && msg.janusMsg.msgType === 9) {
+        delete msg.janusMsg.config.userName;
+    }
     const message: any = {
         textroom: "message",
         transaction: randomString(12),
@@ -83,6 +86,8 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
         [key: string]: any;
     }
     const { what, whisper } = data;
+
+    const getUserName = localStorage.getItem("userName");
 
     const whatStatus: whatType = {
         message: () => {
@@ -152,6 +157,12 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
                         return obj.janusMsg.config.id === o.janusMsg.config.id;
                     });
                     if (!hasRepeatId) {
+                        if (o.janusMsg.sender === 0 && o.janusMsg.msgType === 9) {
+                            o.janusMsg.config = {
+                                ...o.janusMsg.config,
+                                userName: getUserName,
+                            };
+                        }
                         if (isOnline.value) {
                             o.janusMsg.config.isRead = true;
                         }
@@ -159,8 +170,8 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
                     }
                     return unique;
                 }, []);
-                console.log("messageList.value:", messageList.value);
 
+                // console.log("messageList.value:", messageList.value);
                 return;
             }
             console.log("Public message->", data);

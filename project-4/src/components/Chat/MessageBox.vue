@@ -574,14 +574,14 @@ const onPhoneCallModal = () => {
     if (isOnline.value === true) {
         showModal.value = false;
         phoneCallModal.value = true;
-        const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
+        const getCutomer = participantList.value[0];
         doCall(getCutomer);
     } else {
         alert("對方已離線,電話無法撥通!!!");
     }
 };
 const callAgain = () => {
-    const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
+    const getCutomer = participantList.value[0];
     doCall(getCutomer);
 };
 const resendMsg = (msg) => {
@@ -1006,10 +1006,10 @@ const previewURL = (fileid: string): void => {
         }
     });
 
-    console.log(
-        "viewImgs",
-        viewImgs.value.map((img) => img.split("/"))
-    );
+    // console.log(
+    //     "viewImgs",
+    //     viewImgs.value.map((img) => img.split("/"))
+    // );
     const getSplit = isProduction ? 3 : 4;
     const viewIndex = viewImgs.value
         .map((img: any) => Math.floor(img.split("/")[getSplit].split(".")[0]))

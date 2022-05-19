@@ -52,7 +52,8 @@
                         $route.name === 'AddCustomService' ||
                         $route.name === 'EditChannel' ||
                         $route.name === 'AddAutoReply' ||
-                        $route.name === 'AutoReplyList'
+                        $route.name === 'AutoReplyList' ||
+                        $route.name === 'EditAutoReply'
                             ? 'active'
                             : ''
                     "

@@ -53,6 +53,7 @@
         <!-- :href="`/?eventKey=${num.eventKey}`" -->
         <a class="chatRoomBox" v-for="(num, index) in changeList" :key="num.chatroomID">
             <!-- v-show="num.show" -->
+            <!-- {{ num }} -->
             <div
                 class="chatRoomList"
                 @touchend.stop="logGotoChat(num.chatroomID)"
@@ -143,7 +144,7 @@ const searchStore = useSearchStore();
 const { isResult, searcRecordMessages, recordKeyWord } = storeToRefs(searchStore);
 
 const apiStore = useApiStore();
-const { getBackendApi } = apiStore;
+const { getBackendApi, getEventListApi } = apiStore;
 const { eventList, eventInfo } = storeToRefs(apiStore);
 
 const chatRecordStore = useChatRecordStore();
@@ -162,6 +163,10 @@ const getChangeList = () => {
     const getList = changeList.value;
     emit("getChangeList", getList);
 };
+onMounted(() => {
+    getBackendApi(route.params.eventKey);
+    getEventListApi(route.params.eventKey);
+});
 
 interface IObj {
     [propName: string]: any;
@@ -184,8 +189,30 @@ const sendMsgTypeObj: ISendMsgTypeObj = {
     8: "地圖",
     9: "語音通話",
 };
-const isDel = ref(false);
-let i = ref(0);
+// const myRecordMsg = computed({
+//     get() {
+//         const arr = ref([]);
+//         arr.value.push(eventInfo.value);
+//         return arr.value;
+//     },
+//     set(val) {
+//         eventInfo.value = val;
+//     },
+// });
+// const otherRecordMsgList = computed({
+//     get() {
+//         return eventList.value;
+//     },
+//     set(val) {
+//         eventList.value = val;
+//     },
+// });
+// watchEffect(() => {
+//     console.log("myRecordMsg", myRecordMsg.value);
+//     console.log("otherRecordMsgList", otherRecordMsgList.value);
+// });
+// const isDel = ref(false);
+// let i = ref(0);
 const recordMsgs = computed(() => {
     return JSON.parse(localStorage.getItem(`${route.params.eventKey}-record`) || "[]");
 });
@@ -211,39 +238,39 @@ let lastObj = reactive({
 // 首次進入拿歷史紀錄
 const init: any = () => {
     let messages = JSON.parse(localStorage.getItem(route.params.eventKey as any) || "[]");
-    if (eventList.value.length > 0) {
-        eventList.value.forEach((item: any) => {
-            list.value = JSON.parse(localStorage.getItem(item.chatToken) || "[]");
-            console.log("list:", list.value);
+    // if (eventList.value.length > 0) {
+    //     eventList.value.forEach((item: any) => {
+    //         list.value = JSON.parse(localStorage.getItem(item.chatToken) || "[]");
+    //         console.log("list:", list.value);
 
-            if (list.value.length > 0) {
-                const infoLen = list.value.length;
-                const isInfoYesterday = dayjs(
-                    (list.value[infoLen - 1] as any).janusMsg.config.currentDate
-                ).isYesterday();
-                const isInfoToday = dayjs(
-                    (list.value[infoLen - 1] as any).janusMsg.config.currentDate
-                ).isToday();
-                const lastObj: IObj = {
-                    ...item,
-                    ...list.value[infoLen - 1],
-                    chatroomID: item.chatToken,
-                    toTop: false,
-                    show: true,
-                    isfunctionPopUp: false,
-                    time: isInfoToday
-                        ? (list.value[infoLen - 1] as any).janusMsg.time
-                        : isInfoYesterday
-                        ? "昨天"
-                        : (list.value[infoLen - 1] as any).janusMsg.config.currentDate,
-                    sup: list.value.length,
-                };
-                if (!recordMessages.value.some((msg: any) => msg.eventKey === item.eventKey)) {
-                    recordMessages.value.push(lastObj);
-                }
-            }
-        });
-    }
+    //         if (list.value.length > 0) {
+    //             const infoLen = list.value.length;
+    //             const isInfoYesterday = dayjs(
+    //                 (list.value[infoLen - 1] as any).janusMsg.config.currentDate
+    //             ).isYesterday();
+    //             const isInfoToday = dayjs(
+    //                 (list.value[infoLen - 1] as any).janusMsg.config.currentDate
+    //             ).isToday();
+    //             const lastObj: IObj = {
+    //                 ...item,
+    //                 ...list.value[infoLen - 1],
+    //                 chatroomID: item.chatToken,
+    //                 toTop: false,
+    //                 show: true,
+    //                 isfunctionPopUp: false,
+    //                 time: isInfoToday
+    //                     ? (list.value[infoLen - 1] as any).janusMsg.time
+    //                     : isInfoYesterday
+    //                     ? "昨天"
+    //                     : (list.value[infoLen - 1] as any).janusMsg.config.currentDate,
+    //                 sup: list.value.length,
+    //             };
+    //             if (!recordMessages.value.some((msg: any) => msg.eventKey === item.eventKey)) {
+    //                 recordMessages.value.push(lastObj);
+    //             }
+    //         }
+    //     });
+    // }
 
     if (
         messages.length > 0 &&
@@ -292,8 +319,8 @@ onMounted(() => {
 const lastChatMessageArr: any = ref([]);
 
 setInterval(() => {
-    const isToTop = JSON.parse(localStorage.getItem(`${route.params.eventKey}-record` || "[]"))[0]
-        .toTop;
+    // const isToTop = JSON.parse(localStorage.getItem(`${route.params.eventKey}-record` || "[]"))[0]
+    //     .toTop;
     lastChatMessageArr.value = JSON.parse(localStorage.getItem(`${route.params.eventKey}` || "[]"));
     lastChatMessageArr.value = lastChatMessageArr.value.filter((item, idx, arr) => {
         return !item.janusMsg.config.recallStatus;
@@ -312,7 +339,7 @@ setInterval(() => {
             ...eventInfo.value,
             ...arr.at(-1),
             chatroomID: route.params.eventKey,
-            toTop: isToTop,
+            // toTop: isToTop,
             show: true,
             isfunctionPopUp: false,
             time: isInfoToday

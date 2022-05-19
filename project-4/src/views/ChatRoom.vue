@@ -125,42 +125,50 @@ const { onIncomingCall, doHangup } = phoneCallStore;
 const { callPlugin, yourUsername, jsepMsg, isIncomingCall, isAccepted, phoneTime } =
     storeToRefs(phoneCallStore);
 
-var isiOS = !!navigator.userAgent.match(/\(i[^;]+;( U;)? CPU.+Mac OS X/); //ios终端
-document.addEventListener("visibilitychange", (event) => {
-    let transaction = randomString(12);
-    if (document.visibilityState === "hidden") {
-        let leave = {
-            textroom: "leave",
-            transaction: transaction,
-            room: Number(eventID(route.params.eventKey)),
-        };
-        textPlugin.value.data({
-            text: JSON.stringify(leave),
-            error: function (reason: any) {
-                console.log("error leave:", reason);
-            },
-            success: function () {},
-        });
-    }
-    if (document.visibilityState === "visible" && !isAlreadyTaken.value) {
-        let join = {
-            textroom: "join",
-            transaction: transaction,
-            room: Number(eventID(route.params.eventKey)),
-            username: myid,
-            display: "user",
-        };
-        textPlugin.value.data({
-            text: JSON.stringify(join),
-            error: function (reason: any) {
-                console.log("error join:", reason);
-            },
-            success: function () {},
-        });
-        getBackendApi(route.params.eventKey);
-        return;
-    }
-});
+if (isMobile) {
+    // 當前裝置是移動裝置
+    document.addEventListener("visibilitychange", (event) => {
+        let transaction = randomString(12);
+        if (document.visibilityState === "hidden") {
+            let leave = {
+                textroom: "leave",
+                transaction: transaction,
+                room: Number(eventID(route.params.eventKey)),
+            };
+            textPlugin.value.data({
+                text: JSON.stringify(leave),
+                error: function (reason: any) {
+                    console.log("error leave:", reason);
+                },
+                success: function () {},
+            });
+        }
+        if (document.visibilityState === "visible" && !isAlreadyTaken.value) {
+            let join = {
+                textroom: "join",
+                transaction: transaction,
+                room: Number(eventID(route.params.eventKey)),
+                username: myid,
+                display: "user",
+            };
+            textPlugin.value.data({
+                text: JSON.stringify(join),
+                error: function (reason: any) {
+                    console.log("error join:", reason);
+                },
+                success: function () {
+                    let participants = {
+                        request: "listparticipants",
+                        room: Number(eventID(route.params.eventKey)),
+                    };
+                    textPlugin.value.send({ message: participants });
+                },
+            });
+            getBackendApi(route.params.eventKey);
+            return;
+        }
+    });
+}
 
 watchEffect(() => {
     messages.value = JSON.parse(localStorage.getItem(`${route.params.eventKey}`) || "[]");
@@ -347,9 +355,11 @@ const registerUsername = (username: undefined | string) => {
                 [key]: participants[key],
             };
         });
+        console.log("key arr:", participantList.value);
 
         participantList.value = participantList.value.filter((item, index) => {
             const keyName: any = Object.keys(participantList.value[index])[0];
+            console.log("keyName arr:", keyName);
             return item[keyName] === "admin";
         });
 
@@ -364,6 +374,13 @@ const registerUsername = (username: undefined | string) => {
     };
     textPlugin.value.data({
         text: JSON.stringify(register),
+        success: function () {
+            let participants = {
+                request: "listparticipants",
+                room: Number(eventID(route.params.eventKey)),
+            };
+            textPlugin.value.send({ message: participants });
+        },
         error: function (reason: any) {
             console.log(reason);
             //TODO do something
@@ -373,7 +390,7 @@ const registerUsername = (username: undefined | string) => {
 const isAlreadyTaken = ref(false);
 const onReload = () => {
     isAlreadyTaken.value = false;
-    window.location.reload();
+    location.href = `/${eventKey.value}`;
 };
 // attach textroom plugin
 const attachTextroomPlugin = () => {
@@ -442,17 +459,40 @@ const attachTextroomPlugin = () => {
             console.log("text-> We got data from the DataChannel!", item);
 
             let json = JSON.parse(item);
-            console.log("error:", json);
+            console.log("text-> json:", json);
             if (json.error == "Username already taken") {
                 isAlreadyTaken.value = true;
             }
             let transaction = json["transaction"];
-
             if (transactions[transaction]) {
                 // Someone was waiting for this
                 transactions[transaction](json);
                 delete transactions[transaction];
                 return;
+            }
+            let participantlist = json["participants"];
+            if (participantlist?.length > 0) {
+                participantlist = participantlist
+                    .filter((item) => {
+                        return item.username !== myid;
+                    })
+                    .map((key) => {
+                        return {
+                            [key.username]: key.display,
+                        };
+                    });
+                participantlist = participantlist.filter((item, index) => {
+                    const chatToken: any = Object.keys(participantlist[index])[0];
+                    console.log("text-> chatToken:", chatToken);
+                    return item[chatToken] === "admin";
+                });
+                participantList.value = participantlist.map((display) => {
+                    return Object.keys(display)[0];
+                });
+                if (participantList.value.length > 0) {
+                    isOnline.value = true;
+                }
+                console.log("text-> participants:", participantList.value);
             }
             let what = json["textroom"];
             let data: any = { what: what };

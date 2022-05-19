@@ -69,20 +69,20 @@
             </n-form>
         </div>
     </div>
+    <Loading :isLoading="isLoading" />
 </template>
 
 <script lang="ts" setup>
 import { ref, onMounted, onBeforeMount, reactive, watchEffect } from "vue";
-import { NConfigProvider } from "naive-ui";
-import { NInput, NCheckbox, NForm, NFormItem } from "naive-ui";
+import { NInput, NCheckbox, NForm, NFormItem, NIcon } from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
 import axios from "axios";
 import jwt from "jws";
-import { NIcon } from "naive-ui";
 import { RefreshOutline, EyeOutline, EyeOffOutline } from "@vicons/ionicons5";
 
 import config from "@/config/config";
 import identify from "@/components/imageCode.vue";
+import Loading from "@/components/LoadingPage.vue";
 
 //密碼變為文字
 const passwordShow = ref("password");
@@ -97,6 +97,7 @@ onMounted(() => {
 });
 //刷新驗證碼
 const changeCode = () => {
+    isLoading.value = false;
     identifyCode.value = "";
     makeCode(identifyCodes, 4);
 };
@@ -166,7 +167,7 @@ const rules = {
     },
 };
 watchEffect(() => {
-    console.log("rules", rules);
+    // console.log("rules", rules);
 });
 
 //登入發送api
@@ -180,7 +181,10 @@ onMounted(() => {
     localStorage.removeItem("userName");
 });
 
+const isLoading = ref(false);
+
 const login = () => {
+    isLoading.value = true;
     //登入是否記住帳密
     if (rememberAccountPassword.value === true) {
         localStorage.setItem("是否記住帳號", "true");
@@ -228,6 +232,7 @@ const login = () => {
                 localStorage.setItem("adminStatus", admin);
                 localStorage.setItem("userName", res.data.name);
                 location.href = `/chat`;
+                isLoading.value = false;
             })
             .catch((err) => {
                 console.error("err", err);

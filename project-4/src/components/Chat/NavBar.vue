@@ -94,13 +94,8 @@ let transaction = randomString(12);
 const webPhoneCall = () => {
     sender.value = 1;
     phoneCallModal.value = true;
-    console.log("participantList phone", participantList.value);
-    const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
-    doCall(getCutomer);
-};
-const phoneCall = () => {
-    console.log("participantList phone", participantList.value);
-    const getCutomer = participantList.value.filter((item) => !item.includes("DA1"))[0];
+    const getCutomer = participantList.value[0];
+    console.log("participantList phone", getCutomer);
     doCall(getCutomer);
 };
 

@@ -110,7 +110,7 @@
                     <div
                         class="welcomeInput"
                         v-for="(item, index) in welcomeMsgCount"
-                        :key="item.id"
+                        :key="item.janusMsg.config.id"
                     >
                         <div v-if="item.janusMsg.msgType === 1">
                             <n-input
@@ -142,6 +142,7 @@
                                 alt="del"
                                 @click="deleteWelcomeMsg(item.janusMsg.config.id)"
                             />
+
                             <div class="welcomeFunctionBarUpload">
                                 <span
                                     :src="fileIcon"
@@ -165,6 +166,18 @@
                                         :accept="imgAccept"
                                     />
                                 </span>
+                                <img
+                                    v-show="index !== 0"
+                                    :src="upward"
+                                    alt="向上移"
+                                    @click="moveUp(index)"
+                                />
+                                <img
+                                    v-show="index !== welcomeMsgCount.length - 1"
+                                    :src="downward"
+                                    alt="向下移"
+                                    @click="moveDown(index)"
+                                />
                             </div>
                         </div>
                     </div>
@@ -266,6 +279,8 @@ import closeIcon from "@/assets/Images/manage/round-fill_close.svg";
 import fileIcon from "@/assets/Images/common/file.svg";
 import delIcon from "@/assets/Images/manage/delete.svg";
 import picIcon from "@/assets/Images/chatroom/pic.svg";
+import upward from "@/assets/Images/manage/arrow-up-outline.svg";
+import downward from "@/assets/Images/manage/arrow-down-outline.svg";
 import { fileAccept, imgAccept } from "@/util/commonUtil";
 
 //router
@@ -619,6 +634,22 @@ const welcomeFile = (e: any, index: any) => {
             console.error(err);
         });
     welcomeMsgCount.value.splice(index, 1, welcomeMsg);
+};
+// 向上移
+const moveUp = (index) => {
+    welcomeMsgCount.value.forEach((item, i, arr) => {
+        if (i === index) {
+            [arr[i], arr[i - 1]] = [arr[i - 1], arr[i]];
+        }
+    });
+};
+// 向下移
+const moveDown = (index) => {
+    welcomeMsgCount.value.forEach((item, i, arr) => {
+        if (i === index) {
+            [arr[i], arr[i + 1]] = [arr[i + 1], arr[i]];
+        }
+    });
 };
 
 //前往活動管理頁面
@@ -1096,6 +1127,10 @@ const deleteChannel = () => {
                                     height: 24px;
                                     cursor: pointer;
                                 }
+                            }
+                            img {
+                                width: 24px;
+                                height: 24px;
                             }
                         }
                     }

@@ -113,7 +113,7 @@ import axios from "axios";
 
 import config from "@/config/config";
 import { useApiStore } from "@/store/api";
-import { OPAQUEID, MY_ROOM, JANUS_URL, convertTime } from "@/util/commonUtil";
+import { OPAQUEID, MY_ROOM, JANUS_URL, convertTime, isMobile } from "@/util/commonUtil";
 import { processDataEvent, onHangup, onError, randomString } from "@/util/chatUtil";
 import { ITransactions, IAttachPlugin } from "@/util/interfaceUtil";
 import { useChatStore } from "@/store/chat";
@@ -253,46 +253,48 @@ const handleSelect = (key: string | number) => {
     location.href = `/chat/${key}`;
 };
 
-var iOS = ["iPad", "iPhone", "iPod"].indexOf(navigator.platform) !== -1;
-var eventName = iOS ? "pagehide" : "beforeunload";
 const getEventID = computed(() => (route.params.id ? `/chat/${route.params.id}` : "/chat"));
 
-document.addEventListener("visibilitychange", (event) => {
-    let transaction = randomString(12);
-    if (route.path !== getEventID.value) return;
-    if (document.visibilityState === "hidden") {
-        let leave = {
-            textroom: "leave",
-            transaction: transaction,
-            room: Number(eventID.value),
-        };
-        textPlugin.value.data({
-            text: JSON.stringify(leave),
-            error: function (reason: any) {
-                console.log("error leave:", reason);
-            },
-            success: function () {},
-        });
-        return;
-    }
-    if (document.visibilityState === "visible") {
-        let join = {
-            textroom: "join",
-            transaction: transaction,
-            room: Number(eventID.value),
-            username: myid,
-            display: "admin",
-        };
-        textPlugin.value.data({
-            text: JSON.stringify(join),
-            error: function (reason: any) {
-                console.log("error join:", reason);
-            },
-            success: function () {},
-        });
-        return;
-    }
-});
+if (isMobile) {
+    // 當前裝置是移動裝置
+    document.addEventListener("visibilitychange", (event) => {
+        let transaction = randomString(12);
+        if (route.path !== getEventID.value) return;
+        if (document.visibilityState === "hidden") {
+            let leave = {
+                textroom: "leave",
+                transaction: transaction,
+                room: Number(eventID.value),
+            };
+            textPlugin.value.data({
+                text: JSON.stringify(leave),
+                error: function (reason: any) {
+                    console.log("error leave:", reason);
+                },
+                success: function () {},
+            });
+            return;
+        }
+        if (document.visibilityState === "visible") {
+            let join = {
+                textroom: "join",
+                transaction: transaction,
+                room: Number(eventID.value),
+                username: myid,
+                display: "admin",
+            };
+            textPlugin.value.data({
+                text: JSON.stringify(join),
+                error: function (reason: any) {
+                    console.log("error join:", reason);
+                },
+                success: function () {},
+            });
+            return;
+        }
+    });
+}
+
 // 連線
 const connect = () => {
     janus = new Janus({
@@ -556,7 +558,7 @@ const attachTextroomPlugin = () => {
                 if (chatRoomIDArr.includes(chatRoomID.value)) {
                     isOnline.value = true;
                 }
-                // console.log("participantList 處理後", participantList.value);
+                console.log("participantList 處理後", participantList.value);
             } else if (what === "leave") {
                 // Somebody left
                 let username = json["username"];
@@ -575,7 +577,6 @@ const attachTextroomPlugin = () => {
             } else if (what === "kicked") {
                 // Somebody was kicked
                 let username = json["username"];
-                let when = new Date();
                 delete participants[username];
                 if (username === myid) {
                     console.log("你被踢出房間");
@@ -670,6 +671,8 @@ const attachVideocallPlugin = () => {
                         callPlugin.value.send({ message: { request: "list" } });
                         // registerUsername(myusername);
                     } else if (event === "calling") {
+                        console.log("calling:", result);
+
                         // TODO Any ringtone?
                         calling.value = setTimeout(() => {
                             // 撥打超過15秒， 自動掛掉
@@ -774,7 +777,7 @@ const attachVideocallPlugin = () => {
             } else {
                 // FIXME Error?
                 let error = msg["error"];
-                console.error(error);
+                console.error("call -> error", error);
                 if (error.indexOf("already taken") > 0) {
                     // FIXME Use status codes...
                 }

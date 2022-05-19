@@ -1,8 +1,12 @@
 <template>
     <div class="navbar" @click="closeSearchBar">
         <h2 class="title">
-            {{ "+" + String(mobile).slice(0, 3) }}
-            {{ String(mobile).slice(-9) }}
+            {{ userInfo.name !== "" || userInfo.name !== null ? userInfo.name : null }}
+            {{
+                userInfo.name == "" || userInfo.name == null
+                    ? "+" + String(mobile).slice(0, 3) + " " + String(mobile).slice(-9)
+                    : null
+            }}
             <span class="lastTime">{{ lastTime }}</span>
             <n-badge :color="isOnline ? 'green' : 'grey'" dot> </n-badge>
             <!-- <span class="time"> 30分鐘前上線 </span> -->
@@ -16,7 +20,11 @@
                 切換發送文字
             </button>
             <a class="phone-web" v-if="eventInfo.callable === 1">
-                <img :src="phoneIcon" alt="撥打電話" @click="onPhoneCallModal(chatroomID)" />
+                <img
+                    :src="phoneIcon"
+                    alt="撥打電話"
+                    @click="onPhoneCallModal(route.query.chatroomID)"
+                />
                 <video
                     class="hide"
                     id="remotevideo"
@@ -213,9 +221,10 @@ watchEffect(() => {
                 display: block;
             }
         }
-        a {
+        a,
+        .search {
             background-color: transparent;
-            margin: 0 10px;
+            margin: 0 5px;
         }
     }
 }

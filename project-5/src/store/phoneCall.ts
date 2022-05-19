@@ -53,6 +53,8 @@ export const usePhoneCallStore = defineStore({
             }
             // eslint-disable-next-line @typescript-eslint/no-this-alias
             const that = this;
+
+            that.callPlugin.send({ message: { request: "list" } });
             // Call this user
             that.callPlugin.createOffer({
                 trickle: true,
@@ -127,6 +129,7 @@ export const usePhoneCallStore = defineStore({
             // model store
             const modelStore = useModelStore();
             const { gotoChat } = modelStore;
+            console.log("電話", phoneCallNumber.value);
             gotoChat(eventID, chatRoomID, phoneCallNumber.value);
             this.yourUserChatroomID = null;
             const phoneObj = {

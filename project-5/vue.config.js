@@ -28,7 +28,11 @@ module.exports = {
                 // remove debugger
                 args[0].terserOptions.compress.drop_debugger = true;
                 // 移除 console.log
-                args[0].terserOptions.compress.pure_funcs = ["console.log"];
+                args[0].terserOptions.compress.pure_funcs = [
+                    "console.log",
+                    "console.error",
+                    "console.warn",
+                ];
                 // 去掉註解, 如需要看chunk-verdors 部份插件, 可以註解掉
                 args[0].terserOptions.output = {
                     comments: false,

@@ -79,14 +79,13 @@ export const useApiStore = defineStore({
                                 localStorageMsg(messages.value, chatToken);
                             }
                         });
-                        console.log("this.eventInfo.unreadList", this.eventInfo.unreadList);
                     }
                     messages.value.forEach((msg) => {
                         if (msg.janusMsg.sender == 0 && msg.janusMsg.format.phoneType == 1) {
                             msg.janusMsg.format.phoneType = 4;
                         }
                     });
-                    console.log("api msg:", messages.value);
+                    // console.log("eventInfo", this.eventInfo);
                 })
                 .catch((err: any) => {
                     console.error("Event err:", err);
@@ -106,7 +105,7 @@ export const useApiStore = defineStore({
                 .then((res: any) => {
                     this.eventList = res.data.eventList;
                     // console.log("拿eventlist");
-                    console.log("getEventListApi res", res);
+                    // console.log("getEventListApi res", res);
                 })
                 .catch((err: any) => {
                     console.error(err);

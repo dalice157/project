@@ -41,6 +41,7 @@
                                         v-if="!isProduction"
                                         @click="goAutoReplyList(channel.eventID)"
                                     >
+                                        <!-- {{ channel.eventID }} -->
                                         自動回覆訊息列表
                                     </li>
                                 </ul>
@@ -162,11 +163,14 @@ const goAutoReply = (eventID) => {
 };
 //前往自動回覆訊息列表
 const goAutoReplyList = (eventID) => {
-    const accountId = localStorage.getItem("accountID");
     autoReplyMsgList(eventID);
-    // params.id
-    //     ? router.push(`/manage/${route.params.id}/activitySetting/autoReplyList?eventID=${eventID}`)
-    //     : router.push(`/manage/activitySetting/autoReplyList?eventID=${eventID}`);
+    setTimeout(() => {
+        params.id
+            ? router.push(
+                  `/manage/${route.params.id}/activitySetting/autoReplyList?eventID=${eventID}`
+              )
+            : router.push(`/manage/activitySetting/autoReplyList?eventID=${eventID}`);
+    }, 50);
 };
 //頻道開關
 const channelPopUp = (channel) => {
@@ -212,8 +216,6 @@ const themeOverrides = {
         background-color: $white;
         padding: 25px 0px;
         border-radius: 4px;
-        max-height: 650px;
-        overflow-y: auto;
         .activityChannelTitle {
             display: flex;
             justify-content: space-between;
@@ -251,6 +253,8 @@ const themeOverrides = {
         .mememberList {
             position: relative;
             z-index: 0;
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
             ul {
                 padding: 0 20px;
                 li {
@@ -364,12 +368,13 @@ const themeOverrides = {
         }
         .staffList {
             max-height: calc(100vh - 250px);
+            overflow-y: auto;
             .staffEmpty {
                 @extend %h2;
                 text-align: center;
                 padding: 35%;
                 width: 100%;
-                height: calc(100vh - 240px);
+                min-height: calc(100vh - 240px);
             }
             ul {
                 padding: 0 20px;

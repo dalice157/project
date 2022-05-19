@@ -1,5 +1,5 @@
 <template>
-    <div class="addAutoReply">
+    <div class="editAutoReply">
         <div class="autoReplySubject">
             <h1>標題</h1>
             <n-input
@@ -20,7 +20,7 @@
                 </div>
             </n-radio-group>
         </div>
-        <div class="addAutoReplyTime">
+        <div class="editAutoReplyTime">
             <div>
                 <h1>適用日期時間</h1>
                 <h1>(UTC+8)</h1>
@@ -106,6 +106,7 @@
                 v-for="(item, index) in autoReplyMsgCount"
                 :key="item.janusMsg.config.id"
             >
+                <!-- {{ item }} -->
                 <div v-if="item.janusMsg.msgType === 1">
                     <n-input
                         type="textarea"
@@ -167,16 +168,11 @@
                 >取消</router-link
             >
             <div class="channelStore" @click="confirmStore">確認儲存</div>
-            <!-- :to="
-                    `${route.params.id}`
-                        ? `/manage/${route.params.id}/activitySetting`
-                        : `/manage/activitySetting`
-                " -->
         </div>
     </div>
 </template>
 <script lang="ts" setup>
-import { ref, reactive, watchEffect, onMounted } from "vue";
+import { ref, reactive, watchEffect, onMounted, computed } from "vue";
 import {
     NInput,
     NRadioGroup,
@@ -204,29 +200,122 @@ import picIcon from "@/assets/Images/chatroom/pic.svg";
 import { fileAccept, imgAccept } from "@/util/commonUtil";
 import { useApiStore } from "@/store/api";
 import router from "@/router";
+import { storeToRefs } from "pinia";
 
 const apiStore = useApiStore();
-const { autoReplyMsgAPI } = apiStore;
+const { inquireAutoReplyMsg, editAutoReplyMsg } = apiStore;
+const { autoReplyList } = storeToRefs(apiStore);
+// 單一自動回覆訊息
+const eachAutoReplyMsg = computed({
+    get() {
+        let obj = {};
+        autoReplyList?.value.forEach((item, index, arr) => {
+            obj = arr[0];
+        });
+        return obj;
+    },
+    set(val) {
+        autoReplyList.value[0] = val;
+    },
+}) as any;
 //router 設定
 const route = useRoute();
 const params = route.params;
 
+onMounted(() => {
+    inquireAutoReplyMsg(route.query.eventID, route.query.autoID);
+});
+watchEffect(() => {
+    console.log("eachAutoReplyMsg ", eachAutoReplyMsg.value);
+});
 // v-model
 const autoReplySubject = ref("");
-const dateRange = ref(null);
+const dateRange = computed({
+    get() {
+        const arr = !eachAutoReplyMsg.value.startDate
+            ? null
+            : [eachAutoReplyMsg.value.startDate / 1000, eachAutoReplyMsg.value.endDate / 1000];
+        return arr;
+    },
+    set(val) {
+        // console.log("datarange", val);
+        let daterange = val === null ? null : [val[0], val[1]];
+        eachAutoReplyMsg.value.startDate = daterange === null ? 0 : daterange[0] * 1000;
+        eachAutoReplyMsg.value.endDate = daterange === null ? 0 : daterange[1] * 1000;
+    },
+}) as any;
 const disabled = ref(false);
-const statusRadio = ref(1);
-const timeRadio = ref(0);
-const weekdays = ref([]);
-const startTime = ref(null);
-const endTime = ref(null);
+const statusRadio = computed({
+    get() {
+        return +eachAutoReplyMsg.value.status;
+    },
+    set(val) {
+        eachAutoReplyMsg.value.status = val.toString();
+    },
+}) as any;
+const timeRadio = ref(1);
+const weekdays = computed({
+    get() {
+        let weekday = !eachAutoReplyMsg.value.weekday
+            ? []
+            : eachAutoReplyMsg.value.weekday.split("");
+        weekday = weekday.map((item) => {
+            return Number(item);
+        });
+        // console.log("weekday", weekday);
+        return weekday;
+    },
+    set(val: any) {
+        val = val.map((item) => {
+            return item.toString();
+        });
+        let str = "";
+        val.forEach((item) => {
+            str += item;
+        });
+        // console.log("val", str);
+        eachAutoReplyMsg.value.weekday = str;
+    },
+}) as any;
+const startTime = computed({
+    get() {
+        // console.log("eachAutoReplyMsg startTime", eachAutoReplyMsg.value.statTime / 1000);
+        const time = !eachAutoReplyMsg.value.statTime
+            ? null
+            : eachAutoReplyMsg.value.statTime / 1000;
+        return time;
+    },
+    set(val: any) {
+        eachAutoReplyMsg.value.statTime = val * 1000;
+    },
+}) as any;
+const endTime = computed({
+    get() {
+        // console.log("eachAutoReplyMsg endTime", eachAutoReplyMsg.value.endTime / 1000);
+        const time = !eachAutoReplyMsg.value.endTime ? null : eachAutoReplyMsg.value.endTime / 1000;
+        return time;
+    },
+    set(val: any) {
+        eachAutoReplyMsg.value.endTime = val * 1000;
+    },
+}) as any;
 const timePopUp = ref(false);
-const keyWord = ref([]);
+const keyWord = computed({
+    get() {
+        // console.log("eachAutoReplyMsg.value.keyword", eachAutoReplyMsg.value.keyword);
+        let keywordArr = !eachAutoReplyMsg.value.keyword
+            ? []
+            : eachAutoReplyMsg.value.keyword.split(",");
+
+        return keywordArr;
+    },
+    set(val) {
+        // console.log(" keyword val", val.toString());
+        eachAutoReplyMsg.value.keyword = val.toString();
+    },
+}) as any;
 
 watchEffect(() => {
-    // console.log("weekdays", weekdays.value);
-    // console.log("keyWord", keyWord.value);
-
     if (timeRadio.value === 1) {
         timePopUp.value = true;
     } else {
@@ -234,9 +323,21 @@ watchEffect(() => {
     }
 });
 //自動回覆訊息陣列
-const autoReplyMsgCount = ref([]);
-let autoReplyMsg = reactive({});
+// const autoReplyMsgCount = ref([]);
+const autoReplyMsgCount: any = computed({
+    get() {
+        let arr = ref([]);
+        arr.value = !eachAutoReplyMsg.value.msg ? [] : JSON.parse(eachAutoReplyMsg.value.msg);
+        // console.log("autoReplyMsgCount arr", arr.value);
+        return arr.value;
+    },
+    set(val) {
+        // console.log("自動回覆訊息set:", val);
+        eachAutoReplyMsg.value.msg = val;
+    },
+});
 
+let autoReplyMsg = reactive({});
 //新增自動回覆訊息
 const addAutoReplyMsg = () => {
     autoReplyMsg = {
@@ -413,10 +514,10 @@ const autoReplyMsgFile = (e: any, index: any) => {
 // 確認儲存
 const confirmStore = () => {
     console.log("eventID", route.query.eventID);
+    console.log("autoID", route.query.autoID);
     console.log("標題", autoReplySubject.value);
     console.log("啟用狀態", statusRadio.value);
     // console.log("適用日期時間", timeRadio.value);
-    console.log("datarange", dateRange.value);
     console.log("開始日期", dateRange.value === null ? 0 : dateRange.value[0] * 1000000);
     console.log("結束日期", dateRange.value === null ? 0 : dateRange.value[1] * 1000000);
     console.log("開始時間", startTime.value * 1000000);
@@ -438,8 +539,9 @@ const confirmStore = () => {
         msg: autoReplyMsgCount.value,
         weekday: weekdays.value.length === 0 ? 0 : weekdays.value.toString().replace(/,/gi, ""),
         eventID: route.query.eventID,
+        autoID: route.query.autoID,
     };
-    autoReplyMsgAPI(autoReplyData);
+    editAutoReplyMsg(autoReplyData);
     route.params.id
         ? router.push(`/manage/${route.params.id}/activitySetting`)
         : router.push(`/manage/activitySetting`);
@@ -456,7 +558,7 @@ const confirmStore = () => {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
-.addAutoReply {
+.editAutoReply {
     padding: 50px;
     .autoReplySubject {
         display: flex;
@@ -489,7 +591,7 @@ const confirmStore = () => {
             }
         }
     }
-    .addAutoReplyTime {
+    .editAutoReplyTime {
         display: flex;
         > div {
             margin-right: 35px;
