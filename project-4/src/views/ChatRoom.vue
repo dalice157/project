@@ -754,6 +754,11 @@ const attachVideocallPlugin = () => {
                                 result["reason"] +
                                 ")!"
                         );
+                        let participants = {
+                            request: "listparticipants",
+                            room: Number(eventID(route.params.eventKey)),
+                        };
+                        textPlugin.value.send({ message: participants });
                         if (result["reason"] === "User busy") {
                             alert("對方忙線中,請稍後再撥!!!");
                         }

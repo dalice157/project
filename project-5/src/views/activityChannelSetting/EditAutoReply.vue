@@ -84,7 +84,7 @@
             </div>
         </div>
         <div class="autoReplyKeyWord">
-            <h1>關鍵字</h1>
+            <h1><span>*</span>&thinsp;關鍵字</h1>
             <n-popover trigger="hover" placement="bottom">
                 <template #trigger>
                     <n-icon size="20">
@@ -100,7 +100,7 @@
             </div>
         </div>
         <div class="autoReplyContent">
-            <h1>回覆內容</h1>
+            <h1><span>*</span>&thinsp;回覆內容</h1>
             <div
                 class="autoReplyInput"
                 v-for="(item, index) in autoReplyMsgCount"
@@ -167,9 +167,21 @@
                 "
                 >取消</router-link
             >
+            <div class="channelDel" @click="showDelModal = true">刪除</div>
             <div class="channelStore" @click="confirmStore">確認儲存</div>
         </div>
     </div>
+    <teleport to="body">
+        <div class="mask1" v-show="showDelModal">
+            <div class="deleteChannelPopUp">
+                <div class="deleteChannelConfirm">您確定要刪除此自動回覆訊息!!</div>
+                <div class="buttonContainer">
+                    <div type="button" class="cancel" @click="showDelModal = false">取消</div>
+                    <div type="button" class="confirm" @click="deleteMsgAPI">確定</div>
+                </div>
+            </div>
+        </div>
+    </teleport>
 </template>
 <script lang="ts" setup>
 import { ref, reactive, watchEffect, onMounted, computed } from "vue";
@@ -203,16 +215,16 @@ import router from "@/router";
 import { storeToRefs } from "pinia";
 
 const apiStore = useApiStore();
-const { inquireAutoReplyMsg, editAutoReplyMsg } = apiStore;
+const { inquireAutoReplyMsg, editAutoReplyMsg, deleteAutoReplyMsgAPI } = apiStore;
 const { autoReplyList } = storeToRefs(apiStore);
 // 單一自動回覆訊息
 const eachAutoReplyMsg = computed({
     get() {
-        let obj = {};
+        const obj = ref({});
         autoReplyList?.value.forEach((item, index, arr) => {
-            obj = arr[0];
+            obj.value = arr[0];
         });
-        return obj;
+        return obj.value;
     },
     set(val) {
         autoReplyList.value[0] = val;
@@ -229,12 +241,21 @@ watchEffect(() => {
     console.log("eachAutoReplyMsg ", eachAutoReplyMsg.value);
 });
 // v-model
-const autoReplySubject = ref("");
+const showDelModal = ref(false);
+const autoReplySubject = computed({
+    get() {
+        return eachAutoReplyMsg.value.subject;
+    },
+    set(val) {
+        eachAutoReplyMsg.value.subject = val;
+    },
+}) as any;
 const dateRange = computed({
     get() {
-        const arr = !eachAutoReplyMsg.value.startDate
-            ? null
-            : [eachAutoReplyMsg.value.startDate / 1000, eachAutoReplyMsg.value.endDate / 1000];
+        const arr =
+            !eachAutoReplyMsg.value.startDate || eachAutoReplyMsg.value.startDate === "-28800000000"
+                ? null
+                : [eachAutoReplyMsg.value.startDate / 1000, eachAutoReplyMsg.value.endDate / 1000];
         return arr;
     },
     set(val) {
@@ -254,6 +275,13 @@ const statusRadio = computed({
     },
 }) as any;
 const timeRadio = ref(1);
+watchEffect(() => {
+    if (!eachAutoReplyMsg.value.weekday) {
+        timeRadio.value = 0;
+    } else {
+        timeRadio.value = 1;
+    }
+});
 const weekdays = computed({
     get() {
         let weekday = !eachAutoReplyMsg.value.weekday
@@ -280,9 +308,11 @@ const weekdays = computed({
 const startTime = computed({
     get() {
         // console.log("eachAutoReplyMsg startTime", eachAutoReplyMsg.value.statTime / 1000);
-        const time = !eachAutoReplyMsg.value.statTime
-            ? null
-            : eachAutoReplyMsg.value.statTime / 1000;
+        const time =
+            !eachAutoReplyMsg.value.statTime ||
+            eachAutoReplyMsg.value.statTime === "1652313600000000"
+                ? null
+                : eachAutoReplyMsg.value.statTime / 1000;
         return time;
     },
     set(val: any) {
@@ -292,7 +322,10 @@ const startTime = computed({
 const endTime = computed({
     get() {
         // console.log("eachAutoReplyMsg endTime", eachAutoReplyMsg.value.endTime / 1000);
-        const time = !eachAutoReplyMsg.value.endTime ? null : eachAutoReplyMsg.value.endTime / 1000;
+        const time =
+            !eachAutoReplyMsg.value.endTime || eachAutoReplyMsg.value.endTime === "1652313600000000"
+                ? null
+                : eachAutoReplyMsg.value.endTime / 1000;
         return time;
     },
     set(val: any) {
@@ -315,13 +348,6 @@ const keyWord = computed({
     },
 }) as any;
 
-watchEffect(() => {
-    if (timeRadio.value === 1) {
-        timePopUp.value = true;
-    } else {
-        timePopUp.value = false;
-    }
-});
 //自動回覆訊息陣列
 // const autoReplyMsgCount = ref([]);
 const autoReplyMsgCount: any = computed({
@@ -333,8 +359,15 @@ const autoReplyMsgCount: any = computed({
     },
     set(val) {
         // console.log("自動回覆訊息set:", val);
-        eachAutoReplyMsg.value.msg = val;
+        eachAutoReplyMsg.value.msg = JSON.stringify(val);
     },
+});
+watchEffect(() => {
+    if (timeRadio.value === 1) {
+        timePopUp.value = true;
+    } else {
+        timePopUp.value = false;
+    }
 });
 
 let autoReplyMsg = reactive({});
@@ -513,35 +546,57 @@ const autoReplyMsgFile = (e: any, index: any) => {
 };
 // 確認儲存
 const confirmStore = () => {
-    console.log("eventID", route.query.eventID);
-    console.log("autoID", route.query.autoID);
-    console.log("標題", autoReplySubject.value);
-    console.log("啟用狀態", statusRadio.value);
-    // console.log("適用日期時間", timeRadio.value);
-    console.log("開始日期", dateRange.value === null ? 0 : dateRange.value[0] * 1000000);
-    console.log("結束日期", dateRange.value === null ? 0 : dateRange.value[1] * 1000000);
-    console.log("開始時間", startTime.value * 1000000);
-    console.log("結束時間", endTime.value * 1000000);
-    console.log(
-        "指定日期",
-        weekdays.value.length === 0 ? 0 : weekdays.value.toString().replace(/,/gi, "")
-    );
-    console.log("關鍵字", keyWord.value);
-    console.log("回覆內容", autoReplyMsgCount.value);
-    const autoReplyData = {
-        subject: autoReplySubject.value,
-        status: statusRadio.value,
-        startDate: dateRange.value === null ? 0 : dateRange.value[0] * 1000000,
-        endDate: dateRange.value === null ? 0 : dateRange.value[1] * 1000000,
-        startTime: startTime.value * 1000000,
-        endTime: endTime.value * 1000000,
-        keyWord: keyWord.value,
-        msg: autoReplyMsgCount.value,
-        weekday: weekdays.value.length === 0 ? 0 : weekdays.value.toString().replace(/,/gi, ""),
-        eventID: route.query.eventID,
-        autoID: route.query.autoID,
-    };
-    editAutoReplyMsg(autoReplyData);
+    const invalid = ref(false);
+    if (autoReplyMsgCount.value.length === 0) {
+        invalid.value = true;
+    }
+    autoReplyMsgCount.value.forEach((msg) => {
+        if (msg.janusMsg.msgType === 1 && msg.janusMsg.msgContent === "") {
+            invalid.value = true;
+        }
+    });
+    if (keyWord.value.length === 0 || invalid.value === true) {
+        const keyWordAlert = keyWord.value.length === 0 ? "關鍵字、" : "";
+        const replyMsgAlert = invalid.value === true ? "回覆內容" : "";
+        alert(`尚有 ${keyWordAlert} ${replyMsgAlert} 欄位未填寫!!`);
+    } else {
+        console.log("eventID", route.query.eventID);
+        console.log("autoID", route.query.autoID);
+        console.log("標題", autoReplySubject.value);
+        console.log("啟用狀態", statusRadio.value);
+        // console.log("適用日期時間", timeRadio.value);
+        console.log("開始日期", dateRange.value === null ? 0 : dateRange.value[0] * 1000000);
+        console.log("結束日期", dateRange.value === null ? 0 : dateRange.value[1] * 1000000);
+        console.log("開始時間", startTime.value * 1000000);
+        console.log("結束時間", endTime.value * 1000000);
+        console.log(
+            "指定日期",
+            weekdays.value.length === 0 ? 0 : weekdays.value.toString().replace(/,/gi, "")
+        );
+        console.log("關鍵字", keyWord.value);
+        console.log("回覆內容", autoReplyMsgCount.value);
+        const autoReplyData = {
+            subject: autoReplySubject.value,
+            status: statusRadio.value,
+            startDate: dateRange.value === null ? 0 : dateRange.value[0] * 1000000,
+            endDate: dateRange.value === null ? 0 : dateRange.value[1] * 1000000,
+            startTime: startTime.value * 1000000,
+            endTime: endTime.value * 1000000,
+            keyWord: keyWord.value,
+            msg: autoReplyMsgCount.value,
+            weekday: weekdays.value.length === 0 ? 0 : weekdays.value.toString().replace(/,/gi, ""),
+            eventID: route.query.eventID,
+            autoID: route.query.autoID,
+        };
+        editAutoReplyMsg(autoReplyData);
+        route.params.id
+            ? router.push(`/manage/${route.params.id}/activitySetting`)
+            : router.push(`/manage/activitySetting`);
+    }
+};
+const deleteMsgAPI = () => {
+    deleteAutoReplyMsgAPI(route.query.autoID);
+    showDelModal.value = false;
     route.params.id
         ? router.push(`/manage/${route.params.id}/activitySetting`)
         : router.push(`/manage/activitySetting`);
@@ -558,6 +613,69 @@ const confirmStore = () => {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
+.mask1 {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    .deleteChannelPopUp {
+        border-radius: 5px;
+        width: 342px;
+        padding: 15px;
+        background-color: $white;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        .deleteChannelConfirm {
+            font-size: $font-size-16;
+            color: $gray-1;
+            letter-spacing: -0.1px;
+            min-width: 342px;
+            text-align: left;
+            line-height: 22px;
+        }
+        .buttonContainer {
+            margin-top: 20px;
+            text-align: right;
+            display: flex;
+            justify-content: flex-end;
+            & .cancel {
+                border-radius: 100px;
+                padding: 6px 16px;
+                cursor: pointer;
+                font-size: $font-size-16;
+                transition: background-color 0.2s linear;
+                line-height: 20px;
+                background-color: $white;
+                color: $gray-5;
+                margin-right: 16px;
+                &:hover,
+                &:active {
+                    background: $gray-4;
+                    color: $white;
+                }
+            }
+            & .confirm {
+                border-radius: 100px;
+                padding: 6px 16px;
+                cursor: pointer;
+                font-size: $font-size-16;
+                transition: background-color 0.2s linear;
+                line-height: 20px;
+                background-color: rgba(223, 54, 54, 0.7);
+                color: $white;
+                &:hover,
+                &:active {
+                    background-color: #df3636;
+                }
+            }
+        }
+    }
+}
 .editAutoReply {
     padding: 50px;
     .autoReplySubject {
@@ -649,7 +767,9 @@ const confirmStore = () => {
         display: flex;
         align-items: center;
         margin-top: 20px;
-
+        span {
+            color: red;
+        }
         .n-icon {
             margin-right: 60px;
         }
@@ -667,6 +787,9 @@ const confirmStore = () => {
         margin-top: 20px;
         h1 {
             margin-bottom: 20px;
+            span {
+                color: red;
+            }
         }
         .autoReplyInput {
             width: 50%;
@@ -769,6 +892,19 @@ const confirmStore = () => {
             cursor: pointer;
             text-decoration: none;
             color: $gray-1;
+        }
+        .channelDel {
+            text-align: center;
+            width: 100px;
+            border-radius: 50px;
+            padding: 10px 15px;
+            border: 1px solid $danger;
+            color: $danger;
+            margin-right: 15px;
+            cursor: pointer;
+            &:hover {
+                opacity: 0.7;
+            }
         }
 
         .channelStore {

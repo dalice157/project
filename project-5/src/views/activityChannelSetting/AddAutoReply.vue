@@ -84,7 +84,7 @@
             </div>
         </div>
         <div class="autoReplyKeyWord">
-            <h1>關鍵字</h1>
+            <h1><span>*</span>&thinsp;關鍵字</h1>
             <n-popover trigger="hover" placement="bottom">
                 <template #trigger>
                     <n-icon size="20">
@@ -100,7 +100,7 @@
             </div>
         </div>
         <div class="autoReplyContent">
-            <h1>回覆內容</h1>
+            <h1><span>*</span>&thinsp;回覆內容</h1>
             <div
                 class="autoReplyInput"
                 v-for="(item, index) in autoReplyMsgCount"
@@ -412,37 +412,52 @@ const autoReplyMsgFile = (e: any, index: any) => {
 };
 // 確認儲存
 const confirmStore = () => {
-    console.log("eventID", route.query.eventID);
-    console.log("標題", autoReplySubject.value);
-    console.log("啟用狀態", statusRadio.value);
-    // console.log("適用日期時間", timeRadio.value);
-    console.log("datarange", dateRange.value);
-    console.log("開始日期", dateRange.value === null ? 0 : dateRange.value[0] * 1000000);
-    console.log("結束日期", dateRange.value === null ? 0 : dateRange.value[1] * 1000000);
-    console.log("開始時間", startTime.value * 1000000);
-    console.log("結束時間", endTime.value * 1000000);
-    console.log(
-        "指定日期",
-        weekdays.value.length === 0 ? 0 : weekdays.value.toString().replace(/,/gi, "")
-    );
-    console.log("關鍵字", keyWord.value);
-    console.log("回覆內容", autoReplyMsgCount.value);
-    const autoReplyData = {
-        subject: autoReplySubject.value,
-        status: statusRadio.value,
-        startDate: dateRange.value === null ? 0 : dateRange.value[0] * 1000000,
-        endDate: dateRange.value === null ? 0 : dateRange.value[1] * 1000000,
-        startTime: startTime.value * 1000000,
-        endTime: endTime.value * 1000000,
-        keyWord: keyWord.value,
-        msg: autoReplyMsgCount.value,
-        weekday: weekdays.value.length === 0 ? 0 : weekdays.value.toString().replace(/,/gi, ""),
-        eventID: route.query.eventID,
-    };
-    autoReplyMsgAPI(autoReplyData);
-    route.params.id
-        ? router.push(`/manage/${route.params.id}/activitySetting`)
-        : router.push(`/manage/activitySetting`);
+    const invalid = ref(false);
+    if (autoReplyMsgCount.value.length === 0) {
+        invalid.value = true;
+    }
+    autoReplyMsgCount.value.forEach((msg) => {
+        if (msg.janusMsg.msgType === 1 && msg.janusMsg.msgContent === "") {
+            invalid.value = true;
+        }
+    });
+    if (keyWord.value.length === 0 || invalid.value === true) {
+        const keyWordAlert = keyWord.value.length === 0 ? "關鍵字、" : "";
+        const replyMsgAlert = invalid.value === true ? "回覆內容" : "";
+        alert(`尚有 ${keyWordAlert} ${replyMsgAlert} 欄位未填寫!!`);
+    } else {
+        console.log("eventID", route.query.eventID);
+        console.log("標題", autoReplySubject.value);
+        console.log("啟用狀態", statusRadio.value);
+        // console.log("適用日期時間", timeRadio.value);
+        console.log("datarange", dateRange.value);
+        console.log("開始日期", dateRange.value === null ? 0 : dateRange.value[0] * 1000000);
+        console.log("結束日期", dateRange.value === null ? 0 : dateRange.value[1] * 1000000);
+        console.log("開始時間", startTime.value * 1000000);
+        console.log("結束時間", endTime.value * 1000000);
+        console.log(
+            "指定日期",
+            weekdays.value.length === 0 ? 0 : weekdays.value.toString().replace(/,/gi, "")
+        );
+        console.log("關鍵字", keyWord.value);
+        console.log("回覆內容", autoReplyMsgCount.value);
+        const autoReplyData = {
+            subject: autoReplySubject.value,
+            status: statusRadio.value,
+            startDate: dateRange.value === null ? 0 : dateRange.value[0] * 1000000,
+            endDate: dateRange.value === null ? 0 : dateRange.value[1] * 1000000,
+            startTime: startTime.value === 0 ? 0 : startTime.value * 1000000,
+            endTime: endTime.value === 0 ? 0 : endTime.value * 1000000,
+            keyWord: keyWord.value,
+            msg: autoReplyMsgCount.value,
+            weekday: weekdays.value.length === 0 ? 0 : weekdays.value.toString().replace(/,/gi, ""),
+            eventID: route.query.eventID,
+        };
+        autoReplyMsgAPI(autoReplyData);
+        route.params.id
+            ? router.push(`/manage/${route.params.id}/activitySetting`)
+            : router.push(`/manage/activitySetting`);
+    }
 };
 </script>
 <style lang="scss">
@@ -547,7 +562,9 @@ const confirmStore = () => {
         display: flex;
         align-items: center;
         margin-top: 20px;
-
+        span {
+            color: red;
+        }
         .n-icon {
             margin-right: 60px;
         }
@@ -565,6 +582,9 @@ const confirmStore = () => {
         margin-top: 20px;
         h1 {
             margin-bottom: 20px;
+            span {
+                color: red;
+            }
         }
         .autoReplyInput {
             width: 50%;

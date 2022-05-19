@@ -1795,7 +1795,7 @@ const themeOverrides = {
                     }
                     .img {
                         width: 100%;
-                        height: 100px;
+                        height: 160px;
                         overflow: hidden;
                         display: inline-block;
                         border-radius: 6px;

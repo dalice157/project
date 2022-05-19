@@ -5,7 +5,7 @@ import { nanoid } from "nanoid";
 import { useChatStore } from "@/store/chat";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { IProcessData } from "@/util/interfaceUtil";
-import { MY_ROOM, YOU_USER_NAME, ME_USER_NAME } from "@/util/commonUtil";
+import { YOU_USER_NAME, ME_USER_NAME } from "@/util/commonUtil";
 
 //發送私人訊息
 export const sendPrivateMsg = ({

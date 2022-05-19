@@ -869,7 +869,7 @@ export const useApiStore = defineStore({
             fd.append("msg", JSON.stringify(data.msg));
             await axios({
                 method: "post",
-                url: `${config.serverUrl}/v1/addchatbot`,
+                url: `${config.serverUrl}/v1/chatbots`,
                 data: fd,
                 headers: { Authorization: `Bearer ${getToken}` },
             })
@@ -942,6 +942,25 @@ export const useApiStore = defineStore({
                 .catch((err: any) => {
                     // console.error(err);
                     console.log("editAutoReplyMsg err", err);
+                });
+        },
+        //刪除自動回覆訊息
+        async deleteAutoReplyMsgAPI(autoID) {
+            const getToken = localStorage.getItem("access_token");
+            const fd = new FormData();
+            fd.append("autoID", autoID);
+            await axios({
+                method: "delete",
+                url: `${config.serverUrl}/v1/chatbots`,
+                data: fd,
+                headers: { Authorization: `Bearer ${getToken}` },
+            })
+                .then((res: any) => {
+                    console.log("deleteAutoReplyMsgAPI res", res);
+                })
+                .catch((err: any) => {
+                    // console.error(err);
+                    console.log("deleteAutoReplyMsgAPI err", err);
                 });
         },
     },

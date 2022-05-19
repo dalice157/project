@@ -80,7 +80,8 @@
             <div class="functionBox">
                 <div class="timeBox">
                     <div class="time">
-                        {{ num.time === "昨天" ? num.time : currentTime(num.time / 1000000) }}
+                        {{ num.time }}
+                        <!-- {{ num.time === "昨天" ? num.time : currentTime(num.time / 1000) }} -->
                     </div>
                     <!-- <div class="badge">
                         <div class="badgeBg">
@@ -189,6 +190,9 @@ const sendMsgTypeObj: ISendMsgTypeObj = {
     8: "地圖",
     9: "語音通話",
 };
+watchEffect(() => {
+    console.log("changeList", changeList.value);
+});
 // const myRecordMsg = computed({
 //     get() {
 //         const arr = ref([]);
@@ -543,7 +547,7 @@ const unpin = (item: any, index: any): void => {
             flex-direction: column;
             .time {
                 text-align: right;
-                min-width: 68px;
+                min-width: 80px;
                 color: $gray-3;
                 font-size: $font-size-16;
                 font-weight: 500;
@@ -647,7 +651,7 @@ const unpin = (item: any, index: any): void => {
             .timeBox {
                 .time {
                     text-align: right;
-                    min-width: 68px;
+                    min-width: 80px;
                     color: $gray-3;
                     font-size: $font-size-14;
                     font-weight: 500;

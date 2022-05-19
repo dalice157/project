@@ -312,7 +312,7 @@ watch(messageForm, (newVal, oldVal) => {
 watchEffect(() => {
     recordMessages.value = chatroomList.value;
     if (changeList.value.length <= 0) return;
-    console.log("watchEffect messagefrom", messageFrom.value);
+    // console.log("watchEffect messagefrom", messageFrom.value);
     window.addEventListener(
         "setItem",
         () => {

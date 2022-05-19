@@ -681,7 +681,7 @@ const goActivity = () => {
     });
     if (name.value === "" || inValid.value === true) {
         const channelName = name.value === "" ? "活動名稱、" : "";
-        const welcomeMsg = inValid.value ? "歡迎訊息" : "";
+        const welcomeMsg = inValid.value ? "預設訊息" : "";
         alert(`尚有 ${channelName}${welcomeMsg} 欄位未填寫!!`);
     } else {
         const bodyData = {

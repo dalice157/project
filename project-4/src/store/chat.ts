@@ -1,6 +1,6 @@
 import { defineStore, storeToRefs } from "pinia";
 
-import { localStorageMsg } from "@/util/commonUtil";
+import { localStorageMsg, eventID } from "@/util/commonUtil";
 import { useApiStore } from "@/store/api";
 
 export const useChatStore = defineStore({

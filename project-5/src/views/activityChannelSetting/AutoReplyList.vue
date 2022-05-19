@@ -52,7 +52,7 @@ const pagination = {
 const createColumns = [
     {
         title: "標題",
-        key: "title",
+        key: "subject",
         align: "center",
         width: 100,
     },
@@ -117,11 +117,27 @@ const createColumns = [
 
                 return str;
             });
+            // console.log("row.statTime", row.statTime);
             const startTime = computed(() => {
-                return currentTime(row.statTime / 1000);
+                if (row.statTime === "1652313600000000") {
+                    return "";
+                } else {
+                    return currentTime(row.statTime / 1000);
+                }
             });
             const endTime = computed(() => {
-                return currentTime(row.endTime / 1000);
+                if (row.endTime === "1652313600000000") {
+                    return "";
+                } else {
+                    return currentTime(row.endTime / 1000);
+                }
+            });
+            const noTimeText = computed(() => {
+                if (startTime.value === "") {
+                    return "無指定日期時間";
+                } else {
+                    return "~";
+                }
             });
             return h(
                 "p",
@@ -130,8 +146,8 @@ const createColumns = [
                 },
                 `
                 ${chineseWeekday.value}\n
-                ${startTime.value}~${endTime.value}
-                
+                ${startTime.value}${noTimeText.value}${endTime.value}
+
                 `
             );
         },
@@ -141,7 +157,7 @@ const createColumns = [
         key: "status",
         align: "center",
         render(row, index) {
-            console.log("列表狀態開關", row.status);
+            // console.log("列表狀態開關", row.status);
             return h(NSwitch, {
                 checkedValue: "1",
                 uncheckedValue: "0",

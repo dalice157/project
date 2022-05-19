@@ -562,7 +562,7 @@ const goActivityStore = () => {
     if (name.value === "" || inValid.value === true || avatarStatus.value !== 1) {
         const channelName = name.value === "" ? "活動名稱、" : "";
         const avatar = avatarStatus.value !== 1 ? "頭像、" : "";
-        const welcomeMsg = inValid.value ? "歡迎訊息" : "";
+        const welcomeMsg = inValid.value ? "預設訊息" : "";
         alert(`尚有 ${channelName}${avatar}${welcomeMsg} 欄位未填寫!!`);
     } else {
         const accountID = localStorage.getItem("accountID") || "[]";
