@@ -1,24 +1,20 @@
 <template>
     <!-- 搜尋bar -->
-    <div v-if="searchBoolean" class="searchBar">
-        <div class="searchArea">
-            <n-config-provider :theme-overrides="themeOverrides">
-                <n-input v-model:value="keyWord" type="text" placeholder="訊息">
-                    <template #prefix>
-                        <img :src="searchIcon" alt="search" />
-                    </template>
-                    <template #suffix>
-                        <img
-                            class="clearKeyWord"
-                            :src="closeIcon"
-                            v-if="keyWord"
-                            @[events]="clearResultKeyWord()"
-                            alt="close"
-                        />
-                    </template>
-                </n-input>
-            </n-config-provider>
-        </div>
+    <div v-if="searchBoolean" class="search-bar--chatRoom">
+        <n-input v-model:value="keyWord" type="text" placeholder="訊息">
+            <template #prefix>
+                <img :src="searchIcon" alt="search" />
+            </template>
+            <template #suffix>
+                <img
+                    class="clearKeyWord"
+                    :src="closeIcon"
+                    v-if="keyWord"
+                    @[events]="clearResultKeyWord()"
+                    alt="close"
+                />
+            </template>
+        </n-input>
         <div class="searchBtn" v-if="keyWord" @[events]="onSearchResult(keyWord)">搜尋</div>
         <div class="closeSearchBar" @[events]="closeSearchBar()" v-else>關閉</div>
     </div>
@@ -103,69 +99,21 @@ const { searchSwitch, onSearchResult, onClickGoto, clearResultKeyWord, closeSear
 const { searchBoolean, isResult, searcMessages, keyWord } = storeToRefs(searchStore);
 
 const route = useRoute();
-
-const themeOverrides = {
-    common: {},
-    Input: {
-        fontSize: "16px",
-        caretColor: "black",
-        borderHover: "transparent",
-        borderFocus: "transparent",
-        boxShadowFocus: "none",
-    },
-};
 </script>
+<style lang="scss">
+@import "~@/assets/scss/var";
+@import "~@/assets/scss/extend";
+@import "~@/assets/scss/common";
+</style>
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
-
-.searchBar {
-    font-family: $font-family;
-    padding: 10px 15px;
-    position: fixed;
-    width: calc(100% - $siderWidth);
-    height: 50px;
-    right: 0;
-    top: 66px;
-    z-index: 100;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    .searchArea {
-        width: calc(100% - 45px);
-        height: 35px;
-        img {
-            width: 16px;
-            height: 16px;
-        }
-        .clearKeyWord {
-            cursor: pointer;
-        }
-        .n-input {
-            background-color: $white;
-            box-shadow: 1px 1px 4px rgba(227, 227, 227, 0.5);
-            border-radius: 20px;
-            height: 36px;
-        }
-        .n-input__input-el {
-            outline-style: none;
-            margin: 0;
-        }
-        .n-input-wrapper {
-            height: 36px;
-        }
-        .n-input__suffix {
-            & .n-icon {
-                cursor: pointer;
-            }
-        }
-    }
+.search-bar--chatRoom {
     .closeSearchBar,
     .searchBtn {
         margin-left: 10px;
         cursor: pointer;
         text-align: center;
-        line-height: 35px;
         color: $gray-1;
         font-family: $font-family;
         @extend %h4;
@@ -236,15 +184,10 @@ const themeOverrides = {
     }
 }
 @media (max-width: 768px) {
-    .searchBar {
-        width: 100% !important;
-        top: 45px !important;
-        background-color: transparent !important;
-    }
     .result {
         width: 100% !important;
-        top: 97px !important;
-        height: calc(100% - 97px) !important;
+        top: 88px !important;
+        height: calc(100% - 88px) !important;
         z-index: 100;
         .numOfsearchMessage {
             margin-left: 15px;

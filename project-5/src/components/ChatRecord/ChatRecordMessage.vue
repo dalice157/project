@@ -1,8 +1,8 @@
 <template>
     <!--搜尋交談結果-->
-    <div v-if="searcRecordMessages?.length > 0 && recordKeyWord !== ''" class="searchRecordMessage">
+    <div v-if="searcRecordMessages?.length > 0 && recordKeyWord !== ''" class="chat-log--search">
         <div
-            class="chatRoomBox"
+            class="box"
             v-for="num in searcRecordMessages"
             :key="num.chatroomID"
             @click.stop="
@@ -12,7 +12,7 @@
             "
         >
             <!-- v-show="num.show" -->
-            <div class="chatRoomList">
+            <div class="box__item">
                 <!-- @click.stop="showCompanyInfo(num)" -->
                 <div class="avatar">
                     <n-avatar v-if="num.icon == 0" round :size="48" :src="user_pic_default" />
@@ -23,12 +23,12 @@
                         :src="`${config.fileUrl}icon/${num.icon}.png`"
                     />
                 </div>
-                <div class="chatRoomInfo">
-                    <h2 class="info_title" v-if="!num.name">
+                <div class="info">
+                    <h2 class="info__title" v-if="!num.name">
                         {{ "+" + String(num.mobile).slice(0, 3) }}
                         {{ String(num.mobile).slice(-9) }}
                     </h2>
-                    <h2 class="info_title" v-else>{{ num.name }}</h2>
+                    <h2 class="info__title" v-else>{{ num.name }}</h2>
                     <n-ellipsis
                         style="max-width: 600px"
                         :line-clamp="1"
@@ -38,8 +38,8 @@
                     </n-ellipsis>
                 </div>
             </div>
-            <div class="functionBox">
-                <div class="time">
+            <div class="function">
+                <div class="function__time">
                     {{
                         dayjs(num.time / 1000000).isToday()
                             ? dayjs(num.time / 1000000).format("A hh:mm")
@@ -47,8 +47,8 @@
                     }}
                 </div>
                 <div class="badge" v-if="num.unread === 1">
-                    <div class="badgeBg">
-                        <span class="badgeSup">未讀</span>
+                    <div class="badge__bg">
+                        <span class="badge__sup">未讀</span>
                     </div>
                 </div>
             </div>
@@ -59,17 +59,17 @@
 
     <div
         v-if="changeList?.length > 0 && searcRecordMessages?.length === 0 && recordKeyWord === ''"
-        class="chatRecordMessage"
+        class="chat-log"
     >
         <div
-            class="chatRoomBox"
+            class="box"
             v-for="(num, index) in changeList"
             :key="num.chatroomID"
             @click.stop="route.query.chatroomID !== num.chatroomID ? goChat(num, index) : ''"
-            :class="{ active: num.chatroomID === highlightRoomID }"
+            :class="{ 'box--active': num.chatroomID === highlightRoomID }"
         >
             <!-- @mousedown="highlightRoom(num.chatroomID)" -->
-            <div class="chatRoomList">
+            <div class="box__item">
                 <!-- @click.stop="showCompanyInfo(num)" -->
                 <!-- {{ num.unread }} -->
                 <div class="avatar">
@@ -87,13 +87,13 @@
                     />
                     <img class="img" :src="pinIcon" alt="置頂" v-if="num.pinTop" />
                 </div>
-                <div class="chatRoomInfo">
-                    <h2 class="info_title" v-if="!num.name">
+                <div class="info">
+                    <h2 class="info__title" v-if="!num.name">
                         {{ "+" + String(num.mobile).slice(0, 3) }}
                         {{ String(num.mobile).slice(-9) }}
                     </h2>
-                    <h2 class="info_title" v-else>{{ num.name }}</h2>
-                    <n-ellipsis class="messageEllipsis" :line-clamp="1" :tooltip="false">
+                    <h2 class="info__title" v-else>{{ num.name }}</h2>
+                    <n-ellipsis style="max-width: 150px" :line-clamp="1" :tooltip="false">
                         <!-- <p v-if="num.sender === 0 && num.recallStatus === true">您已收回訊息</p>
                         <p v-if="num.sender === 1 && num.recallStatus === true">對方以收回訊息</p> -->
                         <p v-if="num.msgType === 1 && num.msg !== ''">
@@ -105,9 +105,9 @@
                     </n-ellipsis>
                 </div>
             </div>
-            <div class="functionBox">
+            <div class="function">
                 <div>
-                    <div class="time">
+                    <div class="function__time">
                         {{
                             dayjs(num.time / 1000000).isToday()
                                 ? dayjs(num.time / 1000000).format("A hh:mm")
@@ -115,11 +115,14 @@
                         }}
                     </div>
 
-                    <div class="functionBoxMore" :class="{ show: num.isfunctionPopUp }">
+                    <div
+                        class="function__more"
+                        :class="{ 'function__more--show': num.isfunctionPopUp }"
+                    >
                         <img @click.stop="openFunctionPopUp(num)" :src="moreIcon" alt="more" />
 
-                        <div class="functionPopUp" v-show="num.isfunctionPopUp">
-                            <ul class="ulList">
+                        <div class="popUp" v-show="num.isfunctionPopUp">
+                            <ul class="popUp__ul">
                                 <li @click.stop="pin(num, index)" v-if="!num.pinTop">開啟置頂</li>
                                 <li @click.stop="unpin(num, index)" v-if="num.pinTop">取消置頂</li>
                                 <!-- <li @click.stop="deletechatRoomBox(num)">刪除</li> -->
@@ -127,9 +130,8 @@
                         </div>
                     </div>
                     <div class="badge" v-if="num.unread === 1">
-                        <!-- 1為未讀--->
-                        <div class="badgeBg">
-                            <span class="badgeSup">未讀</span>
+                        <div class="badge__bg">
+                            <span class="badge__sup">未讀</span>
                         </div>
                     </div>
                 </div>
@@ -138,7 +140,7 @@
     </div>
 
     <div
-        class="chatRecordNotFound"
+        class="chat-log--notFound"
         v-if="searcRecordMessages?.length === 0 && changeList?.length === 0"
     >
         尚無交談紀錄
@@ -410,244 +412,166 @@ const unpin = (item: any, index: any): void => {
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
 
-.description {
-    width: 100%;
-    text-align: center;
-    margin: 1em auto;
-    color: $gray-1;
-    @extend %h4;
-    line-height: 1.6;
-}
-.call_container {
-    margin-top: 30px;
+.badge {
     display: flex;
-    justify-content: space-around;
-    li {
+    justify-content: flex-end;
+    align-items: center;
+    margin-top: 10px;
+
+    &__bg {
+        padding: 4px 8px;
+        border-radius: 12px;
+        background: $primary-1;
+        width: auto;
+    }
+    &__sup {
+        @extend %h4;
+        color: $gray-1;
+    }
+}
+.chat-log {
+    height: calc(100% - 160px);
+    overflow-y: auto;
+    padding-top: 20px;
+    box-sizing: border-box;
+    &--search {
+        height: calc(100% - 160px);
+        overflow-y: auto;
+        padding-top: 20px;
+        box-sizing: border-box;
+    }
+    &--notFound {
+        @extend %h2;
+        margin-top: 120px;
         text-align: center;
     }
 }
-.chatRecordNotFound {
-    @extend %h2;
-    margin-top: 120px;
-    text-align: center;
-}
-.active {
-    background-color: $primary-4;
-}
-.searchRecordMessage {
-    height: calc(100% - 160px);
-    overflow-y: auto;
-    padding-top: 20px;
-    box-sizing: border-box;
-    .chatRoomBox {
-        cursor: pointer;
-        width: 100%;
-        height: 80px;
+.box {
+    cursor: pointer;
+    width: 100%;
+    height: 80px;
+    display: flex;
+    justify-content: space-between;
+    text-decoration: none;
+    + .box {
+        border-top: 1px solid $border-line;
+    }
+    &--active {
+        background-color: $primary-4;
+    }
+    &__item {
+        max-width: 86%;
         display: flex;
-        justify-content: space-between;
-        text-decoration: none;
-        + .chatRoomBox {
-            border-top: 1px solid $border-line;
-        }
-        &:last-child {
-            border-bottom: 1px solid $border-line;
-        }
-        &:hover {
-            background-color: rgba(0, 0, 0, 0.03);
-        }
-        .chatRoomList {
-            max-width: 86%;
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            .avatar {
-                margin-right: 15px;
-                position: relative;
-                .img {
-                    position: absolute;
-                    width: 20px;
-                    right: inherit;
-                    left: 35px;
-                    bottom: 0;
-                }
-            }
-            .chatRoomInfo {
-                h2.info_title {
-                    @extend %h2;
-                    margin-bottom: 6px;
-                    color: $gray-2;
-                }
-                .messageEllipsis {
-                    max-width: 150px;
-                }
-                p {
-                    @extend %h4;
-                    line-height: 1.2;
-                    color: $gray-3;
-                }
+        align-items: center;
+        padding: 15px;
+        .avatar {
+            margin-right: 15px;
+            position: relative;
+            .img {
+                position: absolute;
+                width: 20px;
+                right: inherit;
+                left: 35px;
+                bottom: 0;
             }
         }
-        .functionBox {
-            max-width: 120px;
-            padding-top: 15px;
-            padding-right: 15px;
-            display: flex;
-            flex-direction: column;
-            .time {
-                text-align: right;
-                min-width: 68px;
-                color: $gray-3;
-                font-size: $font-size-14;
-                font-weight: 500;
-            }
+    }
+    &:last-child {
+        border-bottom: 1px solid $border-line;
+    }
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+        .function {
             .badge {
+                display: none;
+            }
+            .function__more {
                 display: flex;
-                justify-content: flex-end;
-                align-items: center;
-                margin-top: 10px;
-
-                .badgeBg {
-                    padding: 4px 8px;
-                    border-radius: 12px;
-                    background: $primary-1;
-                    width: auto;
-                }
-                .badgeSup {
-                    @extend %h4;
-                    color: $gray-1;
-                }
             }
         }
     }
 }
-.chatRecordMessage {
-    height: calc(100% - 160px);
-    overflow-y: auto;
-    padding-top: 20px;
-    box-sizing: border-box;
-    .chatRoomBox {
-        cursor: pointer;
-        width: 100%;
-        height: 80px;
+.box__item {
+    max-width: 86%;
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    .avatar {
+        margin-right: 15px;
+        position: relative;
+        .img {
+            position: absolute;
+            width: 20px;
+            right: inherit;
+            left: 35px;
+            bottom: 0;
+        }
+    }
+}
+
+.info {
+    &__title {
+        @extend %h2;
+        margin-bottom: 6px;
+        color: $gray-2;
+    }
+    p {
+        @extend %h4;
+        line-height: 1.2;
+        color: $gray-3;
+    }
+}
+
+.function {
+    max-width: 120px;
+    padding-top: 15px;
+    padding-right: 15px;
+    display: flex;
+    flex-direction: column;
+    &__time {
+        text-align: right;
+        min-width: 68px;
+        color: $gray-3;
+        font-size: $font-size-14;
+        font-weight: 500;
+    }
+    &__more {
+        padding: 8px 5px 0 12px;
+        position: relative;
+        display: none;
+        justify-content: flex-end;
+        align-items: center;
+
+        img {
+            width: 25px;
+        }
+    }
+    &__more--show {
         display: flex;
-        justify-content: space-between;
-        text-decoration: none;
-        + .chatRoomBox {
-            border-top: 1px solid $border-line;
-        }
-        &:last-child {
-            border-bottom: 1px solid $border-line;
-        }
-        &:hover {
-            background-color: rgba(0, 0, 0, 0.03);
-            .functionBox {
-                .badge {
-                    display: none;
-                }
-                .functionBoxMore {
-                    display: flex;
-                }
-            }
-        }
-        .chatRoomList {
-            max-width: 86%;
+    }
+}
+.popUp {
+    position: absolute;
+    box-shadow: 0 2px 4px 0 rgba(209, 209, 209, 0.5);
+    border-radius: 4px;
+    top: 25px;
+    right: 0px;
+    z-index: 1;
+    &__ul {
+        background-color: $primary-4;
+        li {
+            width: 76px;
+            height: 50px;
+            padding: 10px 10px;
+            text-align: center;
             display: flex;
+            justify-content: center;
             align-items: center;
-            padding: 15px;
-            .avatar {
-                margin-right: 15px;
-                position: relative;
-                .img {
-                    position: absolute;
-                    width: 20px;
-                    right: inherit;
-                    left: 35px;
-                    bottom: 0;
-                }
-            }
-            .chatRoomInfo {
-                h2.info_title {
-                    @extend %h2;
-                    margin-bottom: 6px;
-                    color: $gray-2;
-                }
-                .messageEllipsis {
-                    max-width: 150px;
-                }
-                p {
-                    @extend %h4;
-                    line-height: 1.2;
-                    color: $gray-3;
-                }
-            }
+            color: $gray-1;
+            border-bottom: 1px solid $white;
         }
-        .functionBox {
-            max-width: 120px;
-            padding-top: 15px;
-            padding-right: 15px;
-            display: flex;
-            flex-direction: column;
-            .time {
-                text-align: right;
-                min-width: 68px;
-                color: $gray-3;
-                font-size: $font-size-14;
-                font-weight: 500;
-            }
-            .badge {
-                display: flex;
-                justify-content: flex-end;
-                align-items: center;
-                margin-top: 10px;
-                .badgeBg {
-                    padding: 4px 8px;
-                    border-radius: 12px;
-                    background: $primary-1;
-                    width: auto;
-                }
-                .badgeSup {
-                    @extend %h4;
-                    color: $gray-1;
-                }
-            }
-            .functionBoxMore {
-                padding: 8px 5px 0 12px;
-                position: relative;
-                display: none;
-                justify-content: flex-end;
-                align-items: center;
-                &.show {
-                    display: flex;
-                }
-                img {
-                    width: 25px;
-                }
-                .functionPopUp {
-                    position: absolute;
-                    box-shadow: 0 2px 4px 0 rgba(209, 209, 209, 0.5);
-                    border-radius: 4px;
-                    top: 25px;
-                    right: 0px;
-                    z-index: 1;
-                    .ulList {
-                        background-color: $primary-4;
-                        li {
-                            width: 76px;
-                            height: 50px;
-                            padding: 10px 10px;
-                            text-align: center;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            color: $gray-1;
-                            border-bottom: 1px solid $white;
-                        }
-                        li:last-child {
-                            border-bottom: 0px;
-                        }
-                    }
-                }
-            }
+        li:last-child {
+            border-bottom: 0px;
         }
     }
 }

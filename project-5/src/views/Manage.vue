@@ -146,7 +146,7 @@ const closeChatRoomBubble = () => {
 
 //點選logo回首頁
 const goHome = () => {
-    router.push(`/chat`);
+    router.push(`/chat/${route.params.id}`);
 };
 </script>
 

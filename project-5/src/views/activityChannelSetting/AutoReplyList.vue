@@ -1,6 +1,6 @@
 <template>
-    <div class="wrap">
-        <header class="header">
+    <div class="autoReplyList">
+        <header class="autoReplyList__header">
             <n-button type="primary" color="#ffb400" text-color="#fff" @click="gotoAutoReply"
                 >建立</n-button
             >
@@ -9,7 +9,7 @@
             >
         </header>
         <n-data-table
-            class="autoReply_table"
+            class="autoReplyList__table"
             :bordered="false"
             :scroll-x="800"
             :columns="createColumns"
@@ -30,7 +30,7 @@ import { currentTime } from "@/util/dateUtil";
 
 //api atroe
 const apiStore = useApiStore();
-const { autoReplyMsgList, inquireAutoReplyMsg } = apiStore;
+const { autoReplyMsgList, inquireAutoReplyMsg, editAutoReplyMsg } = apiStore;
 const { autoReplyList } = storeToRefs(apiStore);
 //router 資訊
 const router = useRouter();
@@ -41,9 +41,6 @@ onMounted(() => {
 });
 const goToEditChannel = (eventID, autoID) => {
     inquireAutoReplyMsg(eventID, autoID);
-    router.push(
-        `/manage/${route.params.id}/activitySetting/EditAutoReply?eventID=${eventID}&autoID=${autoID}`
-    );
 };
 const pagination = {
     pageSize: 6,
@@ -162,8 +159,24 @@ const createColumns = [
                 checkedValue: "1",
                 uncheckedValue: "0",
                 defaultValue: row.status,
-                onUpdate: (value) => {
+                onUpdateValue: (value) => {
                     row.status = value;
+                    // console.log("update status", value);
+                    console.log("row data", row);
+                    const innerData = {
+                        subject: row.subject === "" ? "" : row.subject,
+                        status: row.status,
+                        startDate: row.startDate === "-28800000000" ? 0 : row.startDate * 1000,
+                        endDate: row.endDate === "-28800000000" ? 0 : row.endDate * 1000,
+                        startTime: row.statTime === "1652313600000000" ? 0 : row.statTime * 1000,
+                        endTime: row.endTime === "1652313600000000" ? 0 : row.endTime * 1000,
+                        keyWord: row.keyword,
+                        msg: JSON.parse(row.msg),
+                        weekday: row.weekday === "" ? 0 : row.weekday,
+                        eventID: row.eventID,
+                        autoID: row.autoID,
+                    };
+                    editAutoReplyMsg(innerData);
                 },
             });
         },
@@ -192,7 +205,7 @@ const gotoChannelList = () => {
 <style lang="scss">
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
-.autoReply_table {
+.autoReplyList__table {
     &.n-data-table .n-data-table-thead {
         background-color: $primary-5;
     }
@@ -254,18 +267,18 @@ const gotoChannelList = () => {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
-.wrap {
+.autoReplyList {
     background-color: $bg;
     padding-top: 15px;
     padding-left: 15px;
     padding-right: 15px;
     min-height: calc(100% - 80px);
-}
-.header {
-    text-align: right;
-    margin-bottom: 10px;
-    button + button {
-        margin-left: 8px;
+    &__header {
+        text-align: right;
+        margin-bottom: 10px;
+        button + button {
+            margin-left: 8px;
+        }
     }
 }
 </style>

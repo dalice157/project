@@ -1,17 +1,17 @@
 <template>
-    <div class="chatRoomAll" v-if="moreKeyWord === ''">
+    <div class="more-chatRoom" v-if="moreKeyWord === ''">
         <a
-            class="chatRoomBox"
+            class="more-chatRoom__box"
             v-for="item in eventList"
             :key="item.chatToken"
             :href="`/${item.chatToken}`"
         >
-            <div class="chatRoomList">
+            <div class="more-chatRoom__list">
                 <div class="avatar">
                     <n-avatar round :size="50" :src="`${config.fileUrl}${item.icon}`" />
                 </div>
-                <div class="chatRoomInfo">
-                    <h3 class="name">{{ item.name }}</h3>
+                <div class="info">
+                    <h3 class="info__name">{{ item.name }}</h3>
                     <n-ellipsis :line-clamp="2" :tooltip="false">
                         <p>
                             {{ item.description }}
@@ -21,19 +21,19 @@
             </div>
         </a>
     </div>
-    <div class="chatRoomAll" v-if="searcMoreMessages?.length > 0 && moreKeyWord !== ''">
+    <div class="more-chatRoom" v-if="searcMoreMessages?.length > 0 && moreKeyWord !== ''">
         <a
-            class="chatRoomBox"
+            class="more-chatRoom__box"
             v-for="item in searcMoreMessages"
             :key="item.chatToken"
             :href="`/${item.chatToken}`"
         >
-            <div class="chatRoomList">
+            <div class="more-chatRoom__list">
                 <div class="avatar">
                     <n-avatar round :size="48" :src="`${config.fileUrl}${item.icon}`" />
                 </div>
-                <div class="chatRoomInfo">
-                    <h3 class="name" v-html="item.tagName"></h3>
+                <div class="info">
+                    <h3 class="info__name" v-html="item.tagName"></h3>
                     <n-ellipsis :line-clamp="2" :tooltip="false">
                         <p>
                             {{ item.description }}
@@ -68,8 +68,8 @@ watchEffect(() => {
 <style lang="scss" scoped>
 @import "~@/assets/scss/var";
 @import "~@/assets/scss/extend";
-.chatRoomAll {
-    .chatRoomBox {
+.more-chatRoom {
+    &__box {
         display: block;
         text-decoration: none;
         border-bottom: 1px solid $border-line;
@@ -77,35 +77,34 @@ watchEffect(() => {
         &:focus {
             background-color: $gray-7;
         }
-
-        .chatRoomList {
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            padding: 10px;
-            .avatar {
-                margin-right: 10px;
-                .n-avatar {
-                    border: 1px solid $border-line;
-                }
-            }
-            .chatRoomInfo {
-                .name {
-                    @extend %h3;
-                    color: $gray-2;
-                    margin-bottom: 6px;
-                }
-                p {
-                    font-size: $font-size-16;
-                    line-height: 1.5;
-                    color: $gray-3;
-                }
-            }
-        }
+    }
+    &__list {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 10px;
+    }
+}
+.avatar {
+    margin-right: 10px;
+    .n-avatar {
+        border: 1px solid $border-line;
+    }
+}
+.info {
+    &__name {
+        @extend %h3;
+        color: $gray-2;
+        margin-bottom: 6px;
+    }
+    p {
+        font-size: $font-size-16;
+        line-height: 1.5;
+        color: $gray-3;
     }
 }
 @media (max-width: 768px) {
-    .chatRoomAll {
+    .more-chatRoom {
         border-radius: 4px;
         width: 90%;
         margin: 15px auto;
@@ -116,11 +115,11 @@ watchEffect(() => {
         box-shadow: 2px 0px 4px $gray-6;
         background-color: $white;
         padding: 15px;
-        .chatRoomBox {
+        &__box {
             width: 100%;
             border: none;
         }
-        .chatRoomBox + .chatRoomBox {
+        .more-chatRoom__box + .more-chatRoom__box {
             margin-top: 10px;
         }
     }

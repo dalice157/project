@@ -1,8 +1,8 @@
 <template>
-    <div class="userPhoto">
+    <div class="user__photo">
         <n-avatar round :size="75" object-fit="cover" :fallback-src="user_pic_defaul" :src="img" />
     </div>
-    <h3 class="userName">
+    <h3 class="user__name">
         {{ userName }}
     </h3>
 </template>
@@ -49,14 +49,14 @@ watchEffect(() => {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
-.userPhoto {
+.user__photo {
     margin-bottom: 1em;
     text-align: center;
     .n-avatar {
         border: 1px solid $border-line;
     }
 }
-.userName {
+.user__name {
     text-align: center;
     @extend %h3;
 }

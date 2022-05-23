@@ -1,19 +1,19 @@
 <template>
     <div class="addCustomService">
         <!--客服人員 -->
-        <div class="customService">
-            <div class="customServiceTitle">
+        <div class="staff">
+            <div class="staff__title">
                 <h2>客服人員</h2>
                 <h2>{{ staffEvents.accountName }}</h2>
             </div>
-            <div class="csList" v-if="staffEvents.events.length > 0">
+            <div class="staff__cs-list" v-if="staffEvents.events.length > 0">
                 <ul>
                     <li v-for="channel in staffEvents.events" :key="channel.eventID">
-                        <div class="channelTitle">
+                        <div class="cs__title">
                             <img :src="`${config.fileUrl}${channel.icon}`" alt="" />
                             <p class="channelName">{{ channel.name }}</p>
                         </div>
-                        <div class="channelSetting" @click="onDelList(channel)">
+                        <div class="cs__del" @click="onDelList(channel)">
                             <n-icon size="16">
                                 <close-circle-sharp />
                             </n-icon>
@@ -21,17 +21,17 @@
                     </li>
                 </ul>
             </div>
-            <div class="noCslist" v-else>
+            <div class="staff__not-found" v-else>
                 <h2>此客服人員目前尚無管理頻道!!</h2>
             </div>
-            <div class="buttonGroup">
-                <div class="channelCancel" @click="goActivity">取消</div>
-                <div class="channelStore" @click="onSendList">確認儲存</div>
+            <div class="button-group">
+                <div class="button--Cancel" @click="goActivity">取消</div>
+                <div class="button--save" @click="onSendList">確認儲存</div>
             </div>
         </div>
         <!-- 管理頻道 -->
-        <div class="manageChannel">
-            <div class="manageChannelTitle">
+        <div class="manage-channels">
+            <div class="manage-channels__title">
                 <h2>新增管理頻道</h2>
             </div>
             <n-config-provider :theme-overrides="themeOverrides">
@@ -46,20 +46,20 @@
                     </template>
                 </n-input>
             </n-config-provider>
-            <div class="channelList" v-if="filterChannel.length > 0">
+            <div class="manage-channels__list" v-if="filterChannel.length > 0">
                 <ul>
                     <li v-for="channel in filterChannel" :key="channel.eventID">
-                        <div class="channelTitle">
+                        <div class="list__title">
                             <img :src="`${config.fileUrl}${channel.icon}`" alt="" />
-                            <p class="channelName">{{ channel.name }}</p>
+                            <p class="list__name">{{ channel.name }}</p>
                         </div>
-                        <div class="channelSetting" @click="addChannel(channel)">
+                        <div class="list__add" @click="addChannel(channel)">
                             <img :src="addIcon" alt="add" />
                         </div>
                     </li>
                 </ul>
             </div>
-            <div class="noChannelList" v-else>
+            <div class="manage-channels__not-found" v-else>
                 <h2>目前尚無管理頻道可新增!!</h2>
             </div>
         </div>
@@ -164,192 +164,195 @@ const themeOverrides = {
     display: flex;
     justify-content: space-between;
     min-height: calc(100% - 80px);
-    .customService {
-        width: 50%;
-        height: 100%;
-        background-color: $white;
-        padding: 25px 0px;
-        border-radius: 4px;
-        .customServiceTitle {
-            margin-bottom: 20px;
+}
+.manage-channels {
+    width: 50%;
+    height: 100%;
+    background-color: $white;
+    padding: 25px 0px;
+    margin-left: 15px;
+    border-radius: 4px;
+    &__title {
+        margin-bottom: 20px;
+        padding: 0 20px;
+
+        h2 {
+            font-family: $font-family;
+            @extend %h2;
+            color: $gray-1;
+        }
+        img {
+            width: 27px;
+            height: 27px;
+            cursor: pointer;
+        }
+    }
+    &__list {
+        ul {
             padding: 0 20px;
-
-            h2 {
-                font-family: $font-family;
-                @extend %h2;
-                color: $gray-1;
-                margin-bottom: 10px;
-            }
-        }
-        .csList {
-            margin-bottom: 30px;
-            ul {
-                padding: 0 20px;
-                max-height: calc(100vh - 295px);
-                overflow-y: auto;
-                background-color: #f9f9f9;
-                li {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    height: 68px;
-                    &:hover {
-                        background-color: $primary-5;
-                    }
-
-                    .channelTitle {
-                        display: flex;
-                        align-items: center;
-                        font-size: $font-size-14;
-                        font-weight: 600;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        white-space: nowrap;
-                        img {
-                            width: 48px;
-                            height: 48px;
-                            margin-right: 15px;
-                            border-radius: 50%;
-                        }
-                    }
-                    .channelSetting {
-                        display: flex;
-                        align-items: center;
-                        cursor: pointer;
-                    }
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            li {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                height: 68px;
+                &:hover {
+                    background-color: $primary-5;
                 }
-            }
-        }
-        .noCslist {
-            display: flex;
-            justify-content: center;
-            margin-top: 50px;
-            margin-bottom: 50px;
-            h2 {
-                font-family: $font-family;
-                @extend %h2;
-                color: $gray-1;
-                margin-bottom: 10px;
-            }
-        }
-        .buttonGroup {
-            display: flex;
-            justify-content: center;
-            .channelCancel {
-                width: 100px;
-                height: 36px;
-                line-height: 36px;
-                border: 1px solid $gray-1;
-                border-radius: 18px;
-                text-align: center;
-                margin: 0 15px;
-                cursor: pointer;
-            }
-            .channelStore {
-                width: 200px;
-                height: 36px;
-                line-height: 36px;
-                border: 1px solid $gray-1;
-                border-radius: 18px;
-                text-align: center;
-                color: $white;
-                background-color: $gray-1;
-                margin: 0 15px;
-                cursor: pointer;
             }
         }
     }
-    .manageChannel {
-        width: 50%;
-        height: 100%;
-        background-color: $white;
-        padding: 25px 0px;
-        margin-left: 15px;
-        border-radius: 4px;
-        .manageChannelTitle {
-            margin-bottom: 20px;
-            padding: 0 20px;
 
-            h2 {
-                font-family: $font-family;
-                @extend %h2;
-                color: $gray-1;
-            }
+    &__not-found {
+        display: flex;
+        justify-content: center;
+        margin-top: 50px;
+        margin-bottom: 50px;
+        h2 {
+            font-family: $font-family;
+            @extend %h2;
+            color: $gray-1;
+        }
+    }
+    .n-config-provider {
+        width: 95%;
+        margin: 0 auto;
+        .n-input {
+            box-shadow: 1px 2px 4px #e3e3e3;
+            font-size: $font-size-12;
+            width: 100%;
+            // margin-left: 30px;
+            margin-bottom: 10px;
+
             img {
-                width: 27px;
-                height: 27px;
-                cursor: pointer;
+                width: 14px;
+                height: 14px;
             }
         }
-        .n-config-provider {
-            width: 95%;
-            margin: 0 auto;
-            .n-input {
-                box-shadow: 1px 2px 4px #e3e3e3;
-                font-size: $font-size-12;
-                width: 100%;
-                // margin-left: 30px;
-                margin-bottom: 10px;
+    }
+}
+.list {
+    &__title {
+        display: flex;
+        align-items: center;
+        font-size: $font-size-14;
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        img {
+            width: 48px;
+            height: 48px;
+            margin-right: 15px;
+            border-radius: 50%;
+        }
+    }
+    &__add {
+        display: flex;
+        align-items: center;
+        img {
+            width: 20.5px;
+            height: 20.5px;
+            cursor: pointer;
+        }
+    }
+}
+.staff {
+    width: 50%;
+    height: 100%;
+    background-color: $white;
+    padding: 25px 0px;
+    border-radius: 4px;
+    &__title {
+        margin-bottom: 20px;
+        padding: 0 20px;
 
-                img {
-                    width: 14px;
-                    height: 14px;
+        h2 {
+            font-family: $font-family;
+            @extend %h2;
+            color: $gray-1;
+            margin-bottom: 10px;
+        }
+    }
+    &__cs-list {
+        margin-bottom: 30px;
+        ul {
+            padding: 0 20px;
+            max-height: calc(100vh - 295px);
+            overflow-y: auto;
+            background-color: #f9f9f9;
+            li {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                height: 68px;
+                &:hover {
+                    background-color: $primary-5;
                 }
             }
         }
-        .channelList {
-            ul {
-                padding: 0 20px;
-                max-height: calc(100vh - 250px);
-                overflow-y: auto;
-                background-color: #f9f9f9;
-                li {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    height: 68px;
-                    &:hover {
-                        background-color: $primary-5;
-                    }
-
-                    .channelTitle {
-                        display: flex;
-                        align-items: center;
-                        font-size: $font-size-14;
-                        font-weight: 600;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        white-space: nowrap;
-                        img {
-                            width: 48px;
-                            height: 48px;
-                            margin-right: 15px;
-                            border-radius: 50%;
-                        }
-                    }
-                    .channelSetting {
-                        display: flex;
-                        align-items: center;
-                        img {
-                            width: 20.5px;
-                            height: 20.5px;
-                            cursor: pointer;
-                        }
-                    }
-                }
-            }
+    }
+    &__not-found {
+        display: flex;
+        justify-content: center;
+        margin-top: 50px;
+        margin-bottom: 50px;
+        h2 {
+            font-family: $font-family;
+            @extend %h2;
+            color: $gray-1;
+            margin-bottom: 10px;
         }
-        .noChannelList {
-            display: flex;
-            justify-content: center;
-            margin-top: 50px;
-            margin-bottom: 50px;
-            h2 {
-                font-family: $font-family;
-                @extend %h2;
-                color: $gray-1;
-            }
+    }
+}
+.button-group {
+    display: flex;
+    justify-content: center;
+    .button--Cancel {
+        width: 100px;
+        height: 36px;
+        line-height: 36px;
+        border: 1px solid $gray-1;
+        border-radius: 18px;
+        text-align: center;
+        margin: 0 15px;
+        cursor: pointer;
+    }
+    .button--save {
+        width: 200px;
+        height: 36px;
+        line-height: 36px;
+        border: 1px solid $gray-1;
+        border-radius: 18px;
+        text-align: center;
+        color: $white;
+        background-color: $gray-1;
+        margin: 0 15px;
+        cursor: pointer;
+    }
+}
+.cs {
+    &__title {
+        display: flex;
+        align-items: center;
+        font-size: $font-size-14;
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        img {
+            width: 48px;
+            height: 48px;
+            margin-right: 15px;
+            border-radius: 50%;
         }
+    }
+    &__del {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
     }
 }
 </style>

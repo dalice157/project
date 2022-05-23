@@ -1,5 +1,5 @@
 <template>
-    <div class="moreChatRoom" :class="{ menuToggle: hamburgerBoolean }">
+    <div class="more-chat-room" :class="{ menuToggle: hamburgerBoolean }">
         <HamburgerBar @menuToggle="menuToggle" />
         <div class="main">
             <h1 v-if="!isResult || keyWord === ''" class="logo">talkOD</h1>
@@ -61,13 +61,13 @@ const menuToggle = (menuBoolean: boolean) => {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
-.moreChatRoom {
+.more-chat-room {
     height: 100%;
     grid-area: body;
     display: none;
 }
 @media (max-width: 768px) {
-    .moreChatRoom {
+    .more-chat-room {
         width: 100%;
         height: 100%;
         display: grid;

@@ -1,65 +1,55 @@
 <template>
-    <!-- <div
-        id="drop-area"
-        :class="{ dropActive: dropActive }"
-        class="chatroom-inner notMsg"
-        ref="findScrollHeight"
-        v-if="messageArray.length === 0"
-    >
-        尚無聊天訊息!!
-    </div> -->
     <div
         id="drop-area"
         :class="{ dropActive: dropActive }"
         class="chatroom-inner"
         ref="findScrollHeight"
-        @click="closeAll"
+        @[events]="closeAll"
         @scroll="chatroomToBottom($event)"
     >
-        <div class="background" v-if="messageArray.length > 0">
+        <div class="background" v-if="eventInfo !== null">
             <!-- 對話區塊 -->
-
             <div
                 class="dialog-box"
                 :class="{
-                    otherMsg: text.janusMsg.sender === 1,
-                    myMsg: text.janusMsg.sender === 0,
+                    myMsg: text.janusMsg.sender === 1,
+                    otherMsg: text.janusMsg.sender === 0,
                     mapMsg: text.janusMsg.msgType === 8,
-                    mobileMsg:
-                        text.janusMsg.msgType === 9 ||
-                        text.janusMsg.msgType === 5 ||
-                        text.janusMsg.msgType === 8,
+                    mobileMsg: text.janusMsg.msgType === 9,
                     delChoice: deleteBoolean,
                     recallChoice: text.janusMsg.config.recallStatus,
                     dateMsg:
                         index === 0 ||
                         (index > 0 &&
-                            dateFormat(text.janusMsg.config.currentDate) !==
-                                dateFormat(messageArray[index - 1].janusMsg.config.currentDate)),
+                            text.janusMsg.config.currentDate !==
+                                messages[index - 1].janusMsg.config.currentDate) ||
+                        text.janusMsg.config.isUnread,
                 }"
-                v-for="(text, index) in messageArray"
+                v-for="(text, index) in messages"
                 :key="index"
                 :id="text.janusMsg.config.id"
             >
-                <!-- {{ text }} -->
-
                 <!-- 日期樣板 -->
                 <div
                     v-if="
                         (index > 0 &&
-                            dateFormat(text.janusMsg.config.currentDate) !==
-                                dateFormat(messageArray[index - 1].janusMsg.config.currentDate)) ||
-                        (index === 0 && dateFormat(text.janusMsg.config.currentDate))
+                            text.janusMsg.config.currentDate !==
+                                messages[index - 1].janusMsg.config.currentDate) ||
+                        (index === 0 && text.janusMsg.config.currentDate)
                     "
                     class="date"
                 >
                     <div>
                         {{
-                            dateFormat(text.janusMsg.config.currentDate) === currentDate()
+                            text.janusMsg.config.currentDate === currentDate()
                                 ? "今天"
-                                : dateFormat(text.janusMsg.config.currentDate)
+                                : text.janusMsg.config.currentDate
                         }}
                     </div>
+                </div>
+                <!-- 未讀訊息樣板 -->
+                <div v-if="text.janusMsg.config.isUnread" class="date">
+                    <div>以下為未讀訊息</div>
                 </div>
                 <!-- <n-checkbox-group
                     v-model:value="deleteGroup"
@@ -73,38 +63,78 @@
                 </n-checkbox-group> -->
 
                 <!-- 收回訊息樣板 -->
-                <div
-                    class="recall"
-                    v-if="text.janusMsg.config.recallStatus && text.janusMsg.msgType !== 10"
-                >
-                    <!-- {{ text }} -->
+                <div class="recall" v-if="text.janusMsg.config.recallStatus">
                     <div>
-                        <p v-if="text.janusMsg.sender === 0">
+                        <p v-if="text.janusMsg.sender === 1 && text.janusMsg.msgContent">
                             您已收回訊息&emsp;
-                            <span
-                                v-if="text.janusMsg.msgContent"
-                                @click="reEdit(text.janusMsg.config.id)"
-                            >
+                            <span @[events]="reEdit(text.janusMsg.config.id)">
                                 <u>重新編輯</u>
                             </span>
                         </p>
-                        <p v-if="text.janusMsg.sender === 1">對方已收回訊息</p>
+                        <p v-if="text.janusMsg.sender === 1 && !text.janusMsg.msgContent">
+                            您已收回訊息
+                        </p>
+                        <p v-if="text.janusMsg.sender === 0">對方已收回訊息</p>
                     </div>
                 </div>
 
                 <!-- 聊天對話框樣板-->
                 <div class="dialog" v-else>
+                    <div
+                        class="resendMsg"
+                        v-if="text.janusMsg.config.deliveryStatusSuccess === false"
+                        @[events].stop="resendMsg(text)"
+                    >
+                        <img :src="resendIcon" alt="重傳訊息" />
+                    </div>
                     <div class="dialog-inner">
+                        <div
+                            class="msgFunction mobile"
+                            v-if="text.janusMsg.config.msgFunctionStatus"
+                        >
+                            <ul class="ulList">
+                                <li v-if="text.janusMsg.msgContent" @[events].stop="copyMsg(text)">
+                                    <span>複製</span>
+                                </li>
+                                <li
+                                    v-if="[6, 7].includes(text.janusMsg.msgType)"
+                                    @[events].stop="downloadImage(text)"
+                                >
+                                    <a
+                                        :href="`${config.serverUrl}/file/${route.params.eventKey}/${text.janusMsg.format.Fileid}`"
+                                        target="_blank"
+                                    >
+                                        下載
+                                    </a>
+                                </li>
+                                <!-- <li @[events].stop="deleteQuestion(text)"><span>刪除</span></li> -->
+                                <li
+                                    v-if="
+                                        text.janusMsg.sender === 1 &&
+                                        ![8, 9].includes(text.janusMsg.msgType)
+                                    "
+                                    @[events].stop="confirmRecallPopup(text)"
+                                >
+                                    <span>收回</span>
+                                </li>
+                                <li
+                                    v-if="[1, 3, 6].includes(text.janusMsg.msgType)"
+                                    @[events].stop="replyMsgEvent(text)"
+                                >
+                                    <span>回覆</span>
+                                </li>
+                            </ul>
+                        </div>
                         <!-- 收回訊息滿版 popup 出現 -->
                         <teleport to="body">
                             <div class="mask" v-if="text.janusMsg.config.recallPopUp">
-                                <div class="RecallPopUp">
+                                <div class="popUp">
                                     <div class="recallMsgConfirm">您確定要收回訊息嗎 ?</div>
                                     <div class="buttonContainer">
                                         <div
                                             type="button"
                                             class="cancel"
-                                            @click.stop="
+                                            @[events].stop="
                                                 text.janusMsg.config.recallPopUp =
                                                     !text.janusMsg.config.recallPopUp
                                             "
@@ -114,7 +144,7 @@
                                         <div
                                             type="button"
                                             class="confirm"
-                                            @click.stop="recallMsg(text)"
+                                            @[events].stop="recallMsg(text)"
                                         >
                                             確定
                                         </div>
@@ -126,8 +156,7 @@
                         <div
                             class="msg_more"
                             :class="{ show: text.janusMsg.config.msgFunctionStatus }"
-                            @click.stop="onBubble(text)"
-                            v-if="text.janusMsg.msgType !== 10"
+                            @[events].stop="closeBubble(text)"
                         >
                             <img :src="moreIcon" alt="more" />
                             <!-- 訊息功能框 -->
@@ -137,37 +166,34 @@
                             >
                                 <ul class="ulList">
                                     <li
-                                        v-if="text.janusMsg.msgType === 1"
-                                        @click.stop="copyMsg(text)"
+                                        v-if="text.janusMsg.msgContent"
+                                        @[events].stop="copyMsg(text)"
                                     >
                                         <span>複製</span>
                                     </li>
                                     <li
-                                        v-if="[7, 6].includes(text.janusMsg.msgType)"
-                                        @click.stop="downloadImage(text)"
+                                        v-if="[6, 7].includes(text.janusMsg.msgType)"
+                                        @[events].stop="downloadImage(text)"
                                     >
                                         <a
-                                            :href="`${config.serverUrl}/v1/file/${text.janusMsg.format.Fileid}`"
-                                            target="_blank"
+                                            :href="`${config.serverUrl}/file/${route.params.eventKey}/${text.janusMsg.format.Fileid}`"
                                         >
                                             下載
                                         </a>
                                     </li>
-                                    <!-- <li @click.stop="deleteQuestion(text)"><span>刪除</span></li> -->
+                                    <!-- <li @[events].stop="deleteQuestion(text)"><span>刪除</span></li> -->
                                     <li
                                         v-if="
-                                            text.janusMsg.sender === 0 && text.janusMsg.type !== 1
+                                            text.janusMsg.sender === 1 &&
+                                            ![8, 9].includes(text.janusMsg.msgType)
                                         "
-                                        @click.stop="confirmRecallPopup(text)"
+                                        @[events].stop="confirmRecallPopup(text)"
                                     >
                                         <span>收回</span>
                                     </li>
                                     <li
-                                        v-if="
-                                            [1, 3, 6].includes(text.janusMsg.msgType) &&
-                                            text.janusMsg.type === 2
-                                        "
-                                        @click.stop="replyMsgEvent(text)"
+                                        v-if="[1, 3, 6].includes(text.janusMsg.msgType)"
+                                        @[events].stop="replyMsgEvent(text)"
                                     >
                                         <span>回覆</span>
                                     </li>
@@ -175,14 +201,17 @@
                             </div>
                         </div>
                         <!-- 對方頭像 -->
-                        <div class="avatar" v-if="text.janusMsg.sender === 1 && !deleteBoolean">
+                        <div class="avatar" v-if="text.janusMsg.sender === 0 && !deleteBoolean">
                             <n-avatar
-                                class="userImg"
-                                :size="42"
                                 round
-                                object-fit="cover"
-                                :fallback-src="user_pic_defaul"
-                                :src="img"
+                                :size="42"
+                                :src="`${config.fileUrl}${eventInfo.icon}`"
+                                @click="
+                                    showCompanyInfo({
+                                        ...eventInfo,
+                                        eventKey: route.params.eventKey,
+                                    })
+                                "
                             />
                         </div>
                         <!-- 訊息 -->
@@ -190,6 +219,7 @@
                             class="content"
                             :class="{
                                 reply: text.janusMsg.config.isReply,
+                                textMsgSelect: text.janusMsg.msgType === 1,
                             }"
                             v-if="text.janusMsg.msgType === 1"
                             @touchstart="gtouchstart(text)"
@@ -203,7 +233,7 @@
                                     noMsgClick: !text.janusMsg.config.isReply,
                                 }"
                                 v-if="text.janusMsg.config.isReply"
-                                @click.prevent="
+                                @[events].prevent="
                                     text.janusMsg.config.isReply
                                         ? scrollPageTo(
                                               text.janusMsg.config.replyObj.janusMsg.config.id
@@ -211,37 +241,38 @@
                                         : null
                                 "
                             >
-                                <!-- <div
+                                <div
                                     class="info noMsg"
-                                    v-if="text.format.replyObj.msgContent === ''"
+                                    v-if="
+                                        text.janusMsg.config.replyObj.janusMsg.config.recallStatus
+                                    "
                                 >
                                     無法讀取原始訊息。
-                                </div> -->
+                                </div>
                                 <div
                                     class="info"
                                     :class="{
-                                        isImg:
-                                            text.janusMsg.config.replyObj.janusMsg?.msgType === 6,
+                                        isImg: text.janusMsg.config.replyObj.janusMsg.msgType === 6,
                                     }"
+                                    v-else
                                 >
-                                    <!-- {{ text.janusMsg.config.replyObj.janusMsg }} -->
+                                    <!--回覆對方訊息顯示名字 -->
                                     <div
                                         class="userName"
-                                        v-if="text.janusMsg.config.replyObj.janusMsg?.sender === 1"
+                                        v-if="text.janusMsg.config.replyObj.janusMsg.sender === 0"
                                     >
-                                        {{ "+" + String(mobile).slice(0, 3) }}
-                                        {{ String(mobile).slice(-9) }}
+                                        {{ eventInfo.name }}
                                     </div>
-                                    <!-- 回覆照片顯示照片 -->
+
+                                    <!-- 自己回覆照片顯示 -->
                                     <div
-                                        v-if="text.janusMsg.config.replyObj.janusMsg?.msgType === 6"
+                                        v-if="text.janusMsg.config.replyObj.janusMsg.msgType === 6"
                                     >
                                         [照片]
                                     </div>
-
-                                    <!-- 回覆訊息 -->
+                                    <!-- 回覆訊息格式 訊息過長顯示...-->
                                     <n-ellipsis
-                                        v-if="text.janusMsg.config.replyObj.janusMsg?.msgType === 1"
+                                        v-if="text.janusMsg.config.replyObj.janusMsg.msgType === 1"
                                         style="width: 100%"
                                         :line-clamp="2"
                                         :tooltip="false"
@@ -249,22 +280,20 @@
                                         {{ text.janusMsg.config.replyObj.janusMsg.msgContent }}
                                     </n-ellipsis>
                                 </div>
-                                <!-- 回覆貼圖格式 -->
+                                <!-- 回覆貼圖 -->
                                 <div
                                     class="replyImg"
-                                    v-if="text.janusMsg.config.replyObj.janusMsg?.msgType === 3"
+                                    v-if="text.janusMsg.config.replyObj.janusMsg.msgType === 3"
                                 >
                                     <img
                                         :src="`${text.janusMsg.config.replyObj.janusMsg.format.stickerUrl}${text.janusMsg.config.replyObj.janusMsg.format.stickerPackID}/${text.janusMsg.config.replyObj.janusMsg.format.stickerFileID}.${text.janusMsg.config.replyObj.janusMsg.format.ext}`"
                                     />
                                 </div>
-
                                 <!-- 回覆圖片格式 -->
                                 <div
                                     class="replyImg"
-                                    v-if="text.janusMsg.config.replyObj.janusMsg?.msgType === 6"
+                                    v-if="text.janusMsg.config.replyObj.janusMsg.msgType === 6"
                                 >
-                                    <!-- {{ text.janusMsg.config.replyObj.janusMsg.format }} -->
                                     <img
                                         :src="`${config.fileUrl}${text.janusMsg.config.replyObj.janusMsg.format.Fileid}${text.janusMsg.config.replyObj.janusMsg.format.ExtensionName}`"
                                     />
@@ -290,9 +319,7 @@
                                 target="_blank"
                                 rel="noopener noreferrer"
                             >
-                                <span class="img"
-                                    ><img :src="googleMapIcon" alt="google maps"
-                                /></span>
+                                <span class="img"><img :src="googleMap" alt="google maps" /></span>
                                 查看地圖
                             </a>
                         </div>
@@ -309,7 +336,7 @@
                                 />
                                 Your browser does not support the audio tag.
                             </audio>
-                            <n-icon @click="toggleAudio(text)" size="24">
+                            <n-icon @[events]="toggleAudio(text)" size="24">
                                 <pause-circle-sharp v-show="text.janusMsg.config.isPlay" />
                                 <play-circle-sharp v-show="!text.janusMsg.config.isPlay" />
                             </n-icon>
@@ -345,7 +372,7 @@
                             @touchmove="gtouchmove()"
                             @touchend="gtouchend()"
                         >
-                            <img :src="fileIcon" alt="檔案" />
+                            <img :src="fileIcon" />
                             <div class="fileDescription">
                                 <n-ellipsis
                                     class="ellipsisName"
@@ -368,11 +395,11 @@
                         <div
                             class="phoneMsg content"
                             v-else-if="text.janusMsg.msgType === 9"
-                            @touchend="doCall(chatRoomID)"
+                            @touchend="callAgain"
                         >
-                            <a class="phone-web" @click="onPhoneCallModal(chatRoomID)">
+                            <a class="phone-web" @[events]="onPhoneCallModal">
                                 <div class="phonePic">
-                                    <img :src="phoneIcon" alt="撥打電話" />
+                                    <img :src="phoneIcon" alt="phone" />
                                 </div>
                                 <div
                                     class="phoneStatus"
@@ -402,13 +429,9 @@
                         </div>
                     </div>
                     <!-- 時間戳記 -->
-                    <div
-                        class="timestamp"
-                        :class="{ yourTimeStamp: text.janusMsg.sender === 0 }"
-                        v-if="text.janusMsg.msgType !== 10"
-                    >
-                        <div class="mms" v-if="text.janusMsg.type === 1">以簡訊發送</div>
-                        <span v-if="text.janusMsg.config.isRead && text.janusMsg.sender === 0"
+                    <div class="timestamp" :class="{ yourTimeStamp: text.janusMsg.sender === 0 }">
+                        <span class="textMsg" v-if="text.janusMsg.type === 1">以簡訊發送</span>
+                        <span v-if="text.janusMsg.config.isRead && text.janusMsg.sender === 1"
                             >已讀</span
                         >
                         <span>{{ currentTime(text.janusMsg.time / 1000000) }}</span>
@@ -418,39 +441,34 @@
                     size="30"
                     class="scrollToBottom"
                     v-show="
-                        chatroomScrolltopAndWindowHeight < chatroomScrollHeight - 1 &&
-                        !text.janusMsg.config.replyObj &&
+                        chatroomScrolltopAndWindowHeight + 1 < chatroomScrollHeight &&
+                        !text.janusMsg.format.isReply &&
                         !isReplyBox &&
                         !inputFunctionBoolean &&
                         !showStickerModal &&
-                        !isResult
+                        !showRecorderModal
                     "
-                    @click="scrollToBottom"
+                    @[events]="scrollToBottom"
                 >
                     <arrow-down-circle />
                 </n-icon>
-                <div
-                    class="userName"
-                    v-if="text.janusMsg.config.userName && !text.janusMsg.config.recallStatus"
-                >
-                    由&thinsp;{{ text.janusMsg.config.userName }}&thinsp;所傳送
-                </div>
             </div>
         </div>
     </div>
+    <UserInfoModel />
     <!-- 刪除訊息滿版 poopup 出現
     <teleport to="body" v-if="deletePopUp">
         <div class="mask">
             <div class="popUp">
                 <div class="recallMsgConfirm">對方仍能看到你刪除的訊息</div>
                 <div class="buttonContainer">
-                    <div type="button" class="cancel" @click.stop="deletePopUp = !deletePopUp">
+                    <div type="button" class="cancel" @[events].stop="deletePopUp = !deletePopUp">
                         取消
                     </div>
                     <div
                         type="button"
                         class="confirm"
-                        @click.stop="confirmDelete($route.params.id)"
+                        @[events].stop="confirmDelete($route.params.eventKey)"
                     >
                         確定
                     </div>
@@ -459,22 +477,18 @@
         </div>
     </teleport> -->
 </template>
-<script lang="ts">
-export default {
-    name: "MessageBox",
-    inheritAttrs: false,
-};
-</script>
+
 <script setup lang="ts">
+import ScaleLoader from "vue-spinner/src/ScaleLoader.vue";
 import {
     ref,
     computed,
     onMounted,
     onUpdated,
     watch,
+    watchEffect,
     nextTick,
-    reactive,
-    onBeforeUnmount,
+    onBeforeUpdate,
 } from "vue";
 import useClipboard from "vue-clipboard3";
 import { api as viewerApi } from "v-viewer";
@@ -484,7 +498,7 @@ import { nanoid } from "nanoid";
 import dayjs from "dayjs";
 import Compressor from "compressorjs";
 import { PlayCircleSharp, PauseCircleSharp, ArrowDownCircle } from "@vicons/ionicons5";
-import { NEllipsis, NCheckboxGroup, NCheckbox, NAvatar, NIcon } from "naive-ui";
+import { NSpin, NEllipsis, NAvatar, NIcon } from "naive-ui";
 import { useRoute } from "vue-router";
 
 import { useApiStore } from "@/store/api";
@@ -494,116 +508,118 @@ import { usePhoneCallStore } from "@/store/phoneCall";
 import { useSearchStore } from "@/store/search";
 import { txt } from "@/util/interfaceUtil";
 import { sendPrivateMsg } from "@/util/chatUtil";
-import user_pic_defaul from "@/assets/Images/mugShot/User-round.svg";
-import { scrollPageTo, convertTime, imgList, resetSetItem } from "@/util/commonUtil";
-import { unixTime, currentDate, dateFormat, currentTime } from "@/util/dateUtil";
+import {
+    scrollPageTo,
+    localStorageMsg,
+    chatroomID,
+    convertTime,
+    isProduction,
+    eventID,
+    isMobile,
+} from "@/util/commonUtil";
+import { currentTime, currentDate, unixTime } from "@/util/dateUtil";
+import UserInfoModel from "@/components/UserInfoModel.vue";
 import config from "@/config/config";
 import moreIcon from "@/assets/Images/chatroom/more.svg";
-import googleMapIcon from "@/assets/Images/chatroom/map.jpg";
+import googleMap from "@/assets/Images/chatroom/map.jpg";
 import audioIcon from "@/assets/Images/chatroom/audio.svg";
 import fileIcon from "@/assets/Images/chatroom/file-fill.svg";
 import phoneIcon from "@/assets/Images/chatroom/phone-fill-round-y.svg";
+import resendIcon from "@/assets/Images/chatroom/refresh-outline.svg";
+import { signature } from "@/util/deviceUtil";
 
-const props = defineProps({
-    eventID: String,
-});
+const events = ref(isMobile ? "touchend" : "click");
 
-//api store
 const apiStore = useApiStore();
-const { getHistoryApi, recallAPI } = apiStore;
-const { messageList, msgStart, totalCount, userInfo, chatroomList } = storeToRefs(apiStore);
+const { getBackendApi, recallAPI } = apiStore;
+const { eventInfo } = storeToRefs(apiStore);
 const timeOutEvent = ref(0);
 
 // 彈窗 store
 const modelStore = useModelStore();
-const { showCompanyInfo, closeAll } = modelStore;
-const { info, phoneCallModal } = storeToRefs(modelStore);
+const { showCompanyInfo, gotoPhone, closeAll } = modelStore;
+const { showModal, phoneCallModal } = storeToRefs(modelStore);
 
 //phone store
 const phoneCallStore = usePhoneCallStore();
-const { doCall, phoneTime } = phoneCallStore;
+const { doCall } = phoneCallStore;
 const { sender } = storeToRefs(phoneCallStore);
 
 //router
 const route = useRoute();
 
-const getUserName = localStorage.getItem("userName");
 //chat store
 const chatStore = useChatStore();
-const { replyMsgEvent, deleteQuestion, closeRecorder } = chatStore;
+const { replyMsgEvent, confirmDelete, deleteQuestion, closeRecorder } = chatStore;
 let {
     messages,
     msg,
     deleteBoolean,
-    deleteGroup,
+    showRecorderModal,
     deletePopUp,
     replyMsg,
+    pictures,
     textPlugin,
     isReplyBox,
     inputFunctionBoolean,
+    participantList,
     showStickerModal,
     isOnline,
+    adminCount,
 } = storeToRefs(chatStore);
 
-const onPhoneCallModal = (chatRoomID) => {
-    sender.value = 0;
-    phoneCallModal.value = true;
-    doCall(chatRoomID);
+const onPhoneCallModal = () => {
+    console.log("對方已離線");
+    sender.value = 1;
+    if (isOnline.value === true) {
+        showModal.value = false;
+        phoneCallModal.value = true;
+        const getCutomer = participantList.value[0];
+        doCall(getCutomer);
+    } else {
+        alert("對方已離線,電話無法撥通!!!");
+    }
 };
-
+const callAgain = () => {
+    const getCutomer = participantList.value[0];
+    doCall(getCutomer);
+};
+const resendMsg = (msg) => {
+    // console.log(msg);
+    const sendMsgObj = {
+        msg: msg,
+        textPlugin: textPlugin.value,
+        eventKey: route.params.eventKey,
+        msgParticipantList: participantList.value,
+        eventID: eventID(route.params.eventKey),
+    };
+    sendPrivateMsg(sendMsgObj);
+    messages.value.forEach((item) => {
+        if (item.janusMsg.config.id === msg.janusMsg.config.id) {
+            item.janusMsg.config.deliveryStatusSuccess = true;
+        }
+    });
+    localStorage.setItem(`${route.params.eventKey}`, JSON.stringify(messages.value));
+};
 //search store
 const searchStore = useSearchStore();
 const { closeSearchBar } = searchStore;
-const { isResult } = storeToRefs(searchStore);
-const chatRoomID: any = computed(() => route.query.chatroomID);
-const mobile: any = computed(() => route.query.mobile);
-
-const messageArray: any = computed({
-    get() {
-        return messageList.value;
-    },
-    set(val) {
-        messageList.value = val;
-    },
-});
-
-const pictures: any = computed(() => {
-    return messageList.value.filter((item) => {
-        return item.janusMsg.msgType == 6;
-    });
-});
 
 //聊天室功能
 const preDate: any = ref([]);
 const viewImgs: any = ref([]);
 
-let getCurChatRoomId: any = reactive({});
-// 環境設定
-const isProduction = process.env.NODE_ENV === "production";
-const getSplit = isProduction ? 4 : 5;
-const img = computed(() => {
-    getCurChatRoomId = chatroomList.value.find((obj) => {
-        return obj.chatroomID === chatRoomID.value;
-    });
-    return imgList.find((item) => {
-        // console.log('save item.split("/"):', getCurChatRoomId.icon);
-        const icon =
-            item.split("/")[getSplit] === "default.svg"
-                ? 0
-                : item.split("/")[getSplit].split(".")[0];
-        return getCurChatRoomId?.icon ? icon == getCurChatRoomId.icon : "default.svg";
+//未讀訊息顯示條消失
+onMounted(() => {
+    messages.value.forEach((msg) => {
+        msg.janusMsg.config.isUnread = false;
     });
 });
 
-//判斷a連結
-const validURL = (str) => {
-    try {
-        new URL(str);
-    } catch (_) {
-        return false;
-    }
-    return true;
-};
+watch(adminCount, () => {
+    localStorage.setItem(`${route.params.eventKey}`, JSON.stringify(messages.value));
+});
+
 //開始按
 const gtouchstart = (msg: txt) => {
     timeOutEvent.value = setTimeout(function () {
@@ -629,7 +645,7 @@ const gtouchmove = () => {
 //真正長按後應該執行的内容
 const longPress = (msg: any) => {
     timeOutEvent.value = 0;
-    onBubble(msg);
+    closeBubble(msg);
 };
 
 //拖拽上傳
@@ -641,39 +657,13 @@ const dropEvent = (e: any) => {
     e.preventDefault();
     onUploadFile(e.dataTransfer.files);
 };
+//上傳檔案
 const dropFiles = ref();
 const image = ref();
-
-onMounted(() => {
-    watch(messageArray, () => {
-        if (messageArray.value.length > 0) {
-            const dropArea = document.getElementById("drop-area");
-
-            dropArea?.addEventListener("drop", dropEvent, false);
-            dropArea?.addEventListener("dragleave", (e: any) => {
-                e.stopPropagation();
-                e.preventDefault();
-                dropActive.value = false;
-            });
-            dropArea?.addEventListener("dragenter", (e: any) => {
-                e.stopPropagation();
-                e.preventDefault();
-                dropActive.value = true;
-            });
-            dropArea?.addEventListener("dragover", (e: any) => {
-                e.stopPropagation();
-                e.preventDefault();
-                dropActive.value = true;
-            });
-        }
-    });
-});
-
 const onUploadFile = (file: any) => {
     const fileArr = file[0];
     const fileArrType = file[0].type;
     const fileName = fileArr.name;
-    const getToken = localStorage.getItem("access_token");
     if (!fileArr) {
         return;
     }
@@ -684,26 +674,30 @@ const onUploadFile = (file: any) => {
             success(result) {
                 //呼叫api
                 const fd = new FormData();
+                console.log("file.name:", fileArr);
+
                 fd.append("file", new File([result], fileArr.name, { type: "image/*" }));
                 axios({
                     method: "post",
-                    url: `${config.serverUrl}/v1/file`,
+                    url: `${config.serverUrl}/file/${route.params.eventKey}`,
                     data: fd,
-                    headers: { Authorization: `Bearer ${getToken}` },
+                    headers: { Authorization: `Bearer ${signature}` },
                 })
                     .then((res) => {
+                        console.log("img res:", res);
+
                         const reader = new FileReader();
                         reader.readAsDataURL(fileArr);
                         reader.onload = (e: any) => {
                             image.value = e.target.result;
                             const imageObj: any = {
                                 janusMsg: {
-                                    chatroomID: chatRoomID.value,
+                                    chatroomID: chatroomID(route.params.eventKey),
                                     msgType: 6,
-                                    sender: 0,
+                                    sender: 1, // 0:客服, 1:使用者
                                     msgContent: "",
                                     time: unixTime(),
-                                    type: 2,
+                                    type: 2, //1:簡訊 2: 文字
                                     format: {
                                         Fileid: res.data.fileid,
                                         ShowName: fileName,
@@ -716,29 +710,35 @@ const onUploadFile = (file: any) => {
                                     config: {
                                         id: nanoid(),
                                         isReply: replyMsg.value ? true : false,
-                                        replyObj: replyMsg.value ? { ...replyMsg.value } : "",
+                                        replyObj: replyMsg.value || "",
                                         currentDate: currentDate(),
                                         isExpire: false,
                                         isPlay: false,
-                                        isRead: isOnline.value ? true : false,
+                                        isRead: adminCount.value > 0 ? true : false,
                                         msgFunctionStatus: false,
                                         msgMoreStatus: false,
                                         recallPopUp: false,
                                         recallStatus: false,
-                                        userName: getUserName,
                                     },
                                 },
                             };
 
+                            messages.value.push(imageObj);
                             const sendMsgObj = {
                                 msg: imageObj,
                                 textPlugin: textPlugin.value,
-                                chatRoomID: chatRoomID.value,
-                                eventID: route.params.id,
+                                eventKey: route.params.eventKey,
+                                msgParticipantList: participantList.value,
+                                eventID: eventID(route.params.eventKey),
                             };
                             sendPrivateMsg(sendMsgObj);
-                            messageList.value.push(imageObj);
+                            localStorageMsg(messages.value, route.params.eventKey);
+
                             pictures.value.push(imageObj);
+                            localStorage.setItem(
+                                `${route.params.eventKey}-pictures`,
+                                JSON.stringify(pictures.value)
+                            );
                         };
                     })
                     .catch((err) => {
@@ -751,31 +751,30 @@ const onUploadFile = (file: any) => {
         });
     } else {
         const fd = new FormData();
-        console.log("fileArr:", fileArr);
-
         fd.append("file", new File([fileArr], fileArr.name, { type: fileArr.type }));
 
         axios({
             method: "post",
-            url: `${config.serverUrl}/v1/file`,
+            url: `${config.serverUrl}/file/${route.params.eventKey}`,
             data: fd,
-            headers: { Authorization: `Bearer ${getToken}` },
+            headers: { Authorization: `Bearer ${signature}` },
         })
             .then((res) => {
+                console.log("上傳 res:", res);
                 const reader = new FileReader();
                 reader.readAsDataURL(fileArr);
                 reader.onload = (e: any) => {
-                    files.value = e.target.result;
+                    dropFiles.value = e.target.result;
 
                     let fileObj: any = {};
                     fileObj = {
                         janusMsg: {
-                            chatroomID: chatRoomID.value,
+                            chatroomID: chatroomID(route.params.eventKey),
                             msgType: 7,
-                            sender: 0,
+                            sender: 1, // 0:客服, 1:使用者
                             msgContent: "",
                             time: unixTime(),
-                            type: 2,
+                            type: 2, //1:簡訊 2: 文字
                             format: {
                                 Fileid: res.data.fileid,
                                 ShowName: fileArr.name,
@@ -790,24 +789,29 @@ const onUploadFile = (file: any) => {
                                 currentDate: currentDate(),
                                 isExpire: false,
                                 isPlay: false,
-                                isRead: isOnline.value ? true : false,
+                                isRead: adminCount.value > 0 ? true : false,
                                 msgFunctionStatus: false,
                                 msgMoreStatus: false,
                                 recallPopUp: false,
                                 recallStatus: false,
-                                userName: getUserName,
                             },
                         },
                     };
+                    messages.value.push(fileObj);
                     const sendMsgObj = {
                         msg: fileObj,
                         textPlugin: textPlugin.value,
-                        chatRoomID: chatRoomID.value,
-                        eventID: route.params.id,
+                        eventKey: route.params.eventKey,
+                        msgParticipantList: participantList.value,
+                        eventID: eventID(route.params.eventKey),
                     };
                     sendPrivateMsg(sendMsgObj);
-                    messageList.value.push(fileObj);
+                    localStorageMsg(messages.value, route.params.eventKey);
                     pictures.value.push(fileObj);
+                    localStorage.setItem(
+                        `${route.params.eventKey}-pictures`,
+                        JSON.stringify(pictures.value)
+                    );
                 };
             })
             .catch((err) => {
@@ -815,6 +819,26 @@ const onUploadFile = (file: any) => {
             });
     }
 };
+onMounted(() => {
+    //拖拽上傳
+    let dropArea = document.getElementById("drop-area");
+    dropArea?.addEventListener("drop", dropEvent, false);
+    dropArea?.addEventListener("dragleave", (e: any) => {
+        e.stopPropagation();
+        e.preventDefault();
+        dropActive.value = false;
+    });
+    dropArea?.addEventListener("dragenter", (e: any) => {
+        e.stopPropagation();
+        e.preventDefault();
+        dropActive.value = true;
+    });
+    dropArea?.addEventListener("dragover", (e: any) => {
+        e.stopPropagation();
+        e.preventDefault();
+        dropActive.value = true;
+    });
+});
 
 const track: any = ref();
 const newTime: any = ref("0:00");
@@ -851,12 +875,14 @@ const toggleAudio = (msg: any) => {
         msg.janusMsg.config.isPlay = false;
     }
 };
+
 onMounted(() => {
     scrollToBottom();
 });
 
 onUpdated(() => {
     scrollHeight.value = findScrollHeight.value.scrollHeight;
+    // console.log("scrollHeight:", scrollHeight.value);
 });
 
 const chatroomScrolltop = ref(0);
@@ -869,8 +895,6 @@ const chatroomToBottom = (e: any) => {
     chatroomWindowHeight.value = e.target.clientHeight;
     chatroomScrollHeight.value = e.target.scrollHeight;
     chatroomScrolltopAndWindowHeight.value = chatroomScrolltop.value + chatroomWindowHeight.value;
-    // console.log("視窗滾動高", chatroomScrollHeight.value);
-    // console.log("視窗離頂部距離+視窗高", chatroomScrolltopAndWindowHeight.value);
 };
 
 //聊天室置底功能
@@ -882,6 +906,9 @@ nextTick(() => {
     scrollToBottom();
 });
 
+onUpdated(() => {
+    scrollHeight.value = findScrollHeight.value.scrollHeight;
+});
 watch(scrollHeight, (newValue, oldValue) => {
     if (newValue > oldValue) {
         scrollToBottom();
@@ -891,27 +918,15 @@ watch(scrollHeight, (newValue, oldValue) => {
 //聊天室滾動條置底
 const scrollToBottom = (): void => {
     findScrollHeight.value.scrollTop = scrollHeight.value;
+    // console.log("findScorllHeight:", findScrollHeight.value.scrollTop);
 };
-//聊天室置頂時,刷api拿歷史資訊
-const handleScroll = (e) => {
-    if (e.target.scrollTop == 0) {
-        loadMore();
-    }
-};
-
-const loadMore = () => {
-    if (totalCount.value >= 30) {
-        msgStart.value = msgStart.value + 30 + 1;
-        getHistoryApi(chatRoomID.value, props.eventID);
-    }
-};
-window.addEventListener("scroll", handleScroll, true);
 
 //重新編輯
 const reEdit = (id: string): void => {
-    messageList.value.forEach((text: txt) => {
-        if (text.janusMsg.config.id !== id) return;
-        msg.value = text.janusMsg.msgContent;
+    messages.value.forEach((text: txt) => {
+        if (text.janusMsg.config.id === id) {
+            msg.value = text.janusMsg.msgContent;
+        }
     });
 };
 
@@ -926,17 +941,15 @@ const copyMsg = async (text: any) => {
     text.janusMsg.config.msgFunctionStatus = false;
 };
 
-//訊息功能泡泡
-const onBubble = (text: txt): void => {
-    let arr = messageList.value.map((item: txt) => {
-        if (item.janusMsg.config.id === text.janusMsg.config.id) {
+//取消訊息功能泡泡
+const closeBubble = (text: txt): void => {
+    messages.value.forEach((item: txt) => {
+        if (item === text) {
             text.janusMsg.config.msgFunctionStatus = !text.janusMsg.config.msgFunctionStatus;
         } else {
             item.janusMsg.config.msgFunctionStatus = false;
         }
-        return item;
     });
-    messageList.value = arr;
 };
 
 //下載圖片
@@ -946,55 +959,57 @@ const downloadImage = (text: txt): void => {
 
 //收回訊息
 const recallMsg = (msg): void => {
-    messageList.value.forEach((text: txt) => {
-        if (text.janusMsg.config.id !== msg.janusMsg.config.id) return;
-        text.janusMsg.config.recallStatus = true;
-        text.janusMsg.config.recallPopUp = false;
-    });
-    recallAPI(msg, route.params.id, chatRoomID.value);
-    const lastChatMessageArr = JSON.parse(
-        sessionStorage.getItem(`${route.query.chatroomID}-lastChatMessage`)
-    );
-    lastChatMessageArr.forEach((item, index) => {
-        if (msg.janusMsg.config.id === item.janusMsg.config.id) {
-            lastChatMessageArr.splice(index, 1);
+    messages.value.forEach((text: txt) => {
+        if (text.janusMsg.config.id === msg.janusMsg.config.id) {
+            text.janusMsg.config.recallStatus = true;
+        }
+        if (
+            text.janusMsg.config.isReply &&
+            text.janusMsg.config.replyObj.janusMsg.config.id === msg.janusMsg.config.id
+        ) {
+            text.janusMsg.config.replyObj.janusMsg.config.recallStatus = true;
         }
     });
-    resetSetItem(
-        `${route.query.chatroomID}-lastChatMessage`,
-        JSON.stringify(lastChatMessageArr.slice(-10))
-    );
+    localStorageMsg(messages.value, route.params.eventKey);
+    recallAPI(msg, route.params.eventKey);
 };
 
 //收回彈窗
 const confirmRecallPopup = (text: txt): void => {
-    messageList.value.forEach((item: txt) => {
-        if (item.janusMsg.config.id !== text.janusMsg.config.id) return;
-        text.janusMsg.config.msgFunctionStatus = false;
-        item.janusMsg.config.recallPopUp = !item.janusMsg.config.recallPopUp;
+    messages.value.forEach((item: txt) => {
+        if (item.janusMsg.config.id === text.janusMsg.config.id) {
+            text.janusMsg.config.msgFunctionStatus = false;
+            item.janusMsg.config.recallPopUp = !item.janusMsg.config.recallPopUp;
+        }
+        if (
+            item.janusMsg.config.isReply &&
+            item.janusMsg.config.replyObj.janusMsg.config.id === text.janusMsg.config.id
+        ) {
+            item.janusMsg.config.replyObj.janusMsg.config.recallPopUp =
+                !item.janusMsg.config.replyObj.janusMsg.config.recallPopUp;
+        }
     });
 };
+
 // 圖片展示
 const previewURL = (fileid: string): void => {
     pictures.value.forEach((img: any) => {
         if (
-            viewImgs.value.includes(
+            !viewImgs.value.includes(
                 `${config.fileUrl}${img.janusMsg.format.Fileid}${img.janusMsg.format.ExtensionName}`
-            )
-        )
-            return;
-        if (img.janusMsg.msgType === 6) {
+            ) &&
+            img.janusMsg.msgType === 6
+        ) {
             viewImgs.value.push(
                 `${config.fileUrl}${img.janusMsg.format.Fileid}${img.janusMsg.format.ExtensionName}`
             );
         }
     });
+
     // console.log(
     //     "viewImgs",
     //     viewImgs.value.map((img) => img.split("/"))
     // );
-    // 環境設定
-    const isProduction = process.env.NODE_ENV === "production";
     const getSplit = isProduction ? 3 : 4;
     const viewIndex = viewImgs.value
         .map((img: any) => Math.floor(img.split("/")[getSplit].split(".")[0]))
@@ -1007,11 +1022,10 @@ const previewURL = (fileid: string): void => {
             className: "v-wrap",
             viewed(e) {
                 const fileName = e.detail.originalImage.currentSrc.split("/").pop();
-                const fileId = fileName.substring(0, fileName.lastIndexOf("."));
                 const wrap = document.getElementsByClassName("v-wrap");
                 const div = document.createElement("div");
                 const a = document.createElement("a");
-                a.href = `${config.serverUrl}/v1/file/${fileId}`;
+                a.href = `${config.serverUrl}/file/${route.params.eventKey}/${fileid}`;
                 a.target = "_blank";
                 a.download = fileName;
                 a.className = "download";
@@ -1022,29 +1036,27 @@ const previewURL = (fileid: string): void => {
         images: viewImgs.value,
     });
 };
+
+//更改naive-ui 套件主題
+const themeOverrides = {
+    common: {},
+    Checkbox: {
+        size: "25px",
+        colorChecked: "#01bad4",
+        borderRadius: "50%",
+        border: "2px solid #01bad4",
+        borderChecked: "2px solid #01bad4",
+        borderFocus: "2px solid #01bad4",
+        boxShadowFocus: "0 0 0 1px #01bad4",
+    },
+};
 </script>
 <style lang="scss">
 @import "~@/assets/scss/var";
-.closeView {
-    position: fixed;
-    right: 0;
-    top: 0;
-    width: 40px;
-    height: 40px;
-    outline: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: rgba(0, 0, 0, 0.8);
-    .closeImg {
-        width: 80%;
-        height: 80%;
-    }
-}
 // 圖片預覽套件下載按鈕
 .download {
     position: fixed;
-    left: 0;
+    left: 330px;
     top: 0;
     width: 40px;
     height: 40px;
@@ -1122,13 +1134,13 @@ const previewURL = (fileid: string): void => {
         transform: translate3d(5px, 0, 0);
     }
 }
-*:not(input.field) {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
+* {
+    // -webkit-touch-callout: none;
+    // -webkit-user-select: none;
+    // -khtml-user-select: none;
+    // -moz-user-select: none;
+    // -ms-user-select: none;
+    // user-select: none;
 }
 
 //收回訊息確認的彈窗
@@ -1140,8 +1152,8 @@ const previewURL = (fileid: string): void => {
     right: 0;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
-    .RecallPopUp {
-        border-radius: 5px;
+    .popUp {
+        border-radius: 20px;
         width: 342px;
         padding: 15px;
         background-color: $white;
@@ -1150,7 +1162,7 @@ const previewURL = (fileid: string): void => {
         left: 50%;
         transform: translate(-50%, -50%);
         .recallMsgConfirm {
-            font-size: $font-size-16;
+            font-size: $font-size-18;
             color: $gray-1;
             letter-spacing: -0.1px;
             min-width: 342px;
@@ -1166,7 +1178,7 @@ const previewURL = (fileid: string): void => {
                 border-radius: 100px;
                 padding: 6px 16px;
                 cursor: pointer;
-                font-size: $font-size-16;
+                font-size: $font-size-18;
                 transition: background-color 0.2s linear;
                 line-height: 20px;
                 background-color: $white;
@@ -1182,10 +1194,10 @@ const previewURL = (fileid: string): void => {
                 border-radius: 100px;
                 padding: 6px 16px;
                 cursor: pointer;
-                font-size: $font-size-16;
+                font-size: $font-size-18;
                 transition: background-color 0.2s linear;
                 line-height: 20px;
-                background-color: $primary-3;
+                background-color: $primary-2;
                 color: $white;
                 &:hover,
                 &:active {
@@ -1234,23 +1246,18 @@ const previewURL = (fileid: string): void => {
 .chatroom-inner {
     width: 100%;
     position: absolute;
-    top: 46px;
-    bottom: 62px;
+    top: 120px;
+    bottom: 67px;
     overflow-y: scroll;
     height: auto;
+    background-color: $gray-8;
     box-sizing: border-box;
-    &.notMsg {
-        padding-top: 20%;
-        text-align: center;
-        @extend %h2;
-    }
     .background {
         padding-top: 0;
     }
     .dialog-box {
-        // display: flex;
-        // flex-direction: column;
-        // justify-content: flex-end;
+        display: flex;
+        justify-content: flex-end;
         padding: 10px 15px;
         &.mobileMsg {
             &:hover {
@@ -1292,7 +1299,8 @@ const previewURL = (fileid: string): void => {
                 }
             }
         }
-        &.recallChoice {
+        &.recallChoice,
+        &.recallChoice.otherMsg {
             justify-content: center;
         }
         &.myMsg {
@@ -1311,15 +1319,6 @@ const previewURL = (fileid: string): void => {
                 flex-direction: row;
                 justify-content: flex-start;
                 .dialog-inner {
-                    .replyMsg {
-                        border-bottom: 1px solid $gray-5;
-                        .info {
-                            color: $gray-4;
-                        }
-                        .userName {
-                            color: $gray-4;
-                        }
-                    }
                     .msgFunction {
                         left: initial;
                         right: 0px;
@@ -1327,9 +1326,11 @@ const previewURL = (fileid: string): void => {
                     }
                     .avatar {
                         margin-right: 10px;
+                        .n-avatar {
+                            cursor: pointer;
+                        }
                     }
                     .content {
-                        max-width: 900px;
                         border-radius: 5px 20px 20px 20px;
                         margin-left: 0px;
                         margin-right: 10px;
@@ -1362,7 +1363,7 @@ const previewURL = (fileid: string): void => {
                 display: block;
                 margin-bottom: 20px;
                 div {
-                    max-width: 100px;
+                    max-width: 110px;
                     height: 27px;
                     margin: 0 auto;
                     display: flex;
@@ -1406,10 +1407,14 @@ const previewURL = (fileid: string): void => {
             flex-direction: row-reverse;
             align-items: flex-end;
             position: relative;
-
+            // align-items: center;
+            .resendMsg {
+                width: 20px;
+                height: 20px;
+                margin-left: 5px;
+            }
             .dialog-inner {
                 display: inline-flex;
-                align-items: center;
                 justify-content: flex-end;
                 position: relative;
                 .msgFunction {
@@ -1424,9 +1429,9 @@ const previewURL = (fileid: string): void => {
                     left: 5px;
                     z-index: 1;
                     .ulList {
-                        background-color: $primary-4;
+                        background-color: $primary-3;
                         li {
-                            width: 58px;
+                            width: 63px;
                             height: 40px;
                             padding: 10px 15px 9px 15px;
                             text-align: center;
@@ -1434,11 +1439,11 @@ const previewURL = (fileid: string): void => {
                             color: $gray-1;
                             border-bottom: 1px solid $white;
                             span {
-                                font-size: $font-size-14;
+                                font-size: $font-size-16;
                                 font-weight: 500;
                             }
                             a {
-                                font-size: $font-size-14;
+                                font-size: $font-size-16;
                                 font-weight: 500;
                                 color: $gray-1;
                                 text-decoration: none;
@@ -1488,7 +1493,7 @@ const previewURL = (fileid: string): void => {
                         z-index: 1;
                         .ulList {
                             display: flex;
-                            background-color: $primary-4;
+                            background-color: $primary-3;
                             li {
                                 width: 58px;
                                 height: 40px;
@@ -1499,11 +1504,11 @@ const previewURL = (fileid: string): void => {
                                 border-right: 1px solid $white;
                                 border-bottom: 0;
                                 span {
-                                    font-size: $font-size-14;
+                                    font-size: $font-size-16;
                                     font-weight: 500;
                                 }
                                 a {
-                                    font-size: $font-size-14;
+                                    font-size: $font-size-16;
                                     font-weight: 500;
                                     color: $gray-1;
                                     text-decoration: none;
@@ -1516,26 +1521,35 @@ const previewURL = (fileid: string): void => {
                     }
                 }
                 .content {
-                    max-width: 900px;
+                    max-width: 800px;
                     word-wrap: break-word;
                     word-break: break-all;
                     white-space: pre-wrap;
-                    background-color: $primary-4;
+                    background-color: $primary-2;
                     border-radius: 20px 5px 20px 20px;
                     padding: 10px;
                     text-align: left;
                     align-items: center;
                     flex-direction: column;
                     line-height: 1.5;
-                    margin-left: 10px;
+                    margin-left: 5px;
                     -webkit-touch-callout: none;
                     -webkit-user-select: none;
                     -khtml-user-select: none;
                     -moz-user-select: none;
                     -ms-user-select: none;
                     user-select: none;
+
                     &.reply {
                         min-width: 70px;
+                    }
+                    &.textMsgSelect {
+                        -webkit-touch-callout: text;
+                        -webkit-user-select: text;
+                        -khtml-user-select: text;
+                        -moz-user-select: text;
+                        -ms-user-select: text;
+                        user-select: text;
                     }
                     &.audio {
                         display: flex;
@@ -1553,7 +1567,7 @@ const previewURL = (fileid: string): void => {
                             margin-right: 10px;
                         }
                         .totalTime {
-                            font-size: $font-size-14;
+                            font-size: $font-size-16;
                             font-weight: 500;
                             margin-right: 10px;
                         }
@@ -1648,23 +1662,19 @@ const previewURL = (fileid: string): void => {
                                 }
                             }
                         }
-                        @media (max-width: 768px) {
-                            > a.phone-web {
-                                display: none;
-                            }
-                        }
                     }
                 }
                 .originalMsg {
-                    font-size: $font-size-14;
-                    font-weight: 500;
+                    font-size: $font-size-16;
+                    font-weight: normal;
                     color: $gray-1;
                     display: flex;
                     justify-content: flex-start;
+                    line-height: 1.3;
                 }
 
                 .replyMsg {
-                    font-size: $font-size-14;
+                    font-size: $font-size-16;
                     color: #a37f29;
                     margin-left: -10px;
                     margin-right: -10px;
@@ -1674,7 +1684,7 @@ const previewURL = (fileid: string): void => {
                     align-items: center;
                     justify-content: space-between;
                     line-height: 1.5;
-                    border-bottom: 1px solid $primary-3;
+                    border-bottom: 1px solid $primary-2;
                     &:hover {
                         cursor: pointer;
                     }
@@ -1687,7 +1697,6 @@ const previewURL = (fileid: string): void => {
                         white-space: pre-wrap;
                         font-size: $font-size-12;
                         padding-left: 10px;
-                        padding-right: 10px;
                         margin-right: 5px;
                         &.noMsg {
                             color: $gray-2;
@@ -1697,17 +1706,18 @@ const previewURL = (fileid: string): void => {
                         }
                     }
                     .userName {
-                        font-weight: 600;
-                        font-size: $font-size-12;
+                        font-weight: 900;
+                        font-size: $font-size-16;
                     }
                     .replyImg {
-                        width: 40%;
+                        width: 50%;
                         height: 30%;
                         padding-right: 10px;
                         overflow: hidden;
                     }
                     img {
                         width: 100%;
+                        max-width: 150px;
                         object-fit: cover;
                     }
                 }
@@ -1755,7 +1765,7 @@ const previewURL = (fileid: string): void => {
                     /* IE */
                     *font-size: 135px; /* 200px * 0.9 = 180px */
                     overflow: hidden;
-                    background-color: $gray-7;
+                    background-color: $white;
                     &:hover {
                         cursor: pointer;
                     }
@@ -1780,7 +1790,7 @@ const previewURL = (fileid: string): void => {
                     border-radius: 8px;
                     a {
                         color: $gray-1;
-                        font-size: $font-size-14;
+                        font-size: $font-size-16;
                         text-decoration: none;
                     }
                     .img {
@@ -1796,14 +1806,32 @@ const previewURL = (fileid: string): void => {
                     }
                 }
             }
+            @media (max-width: 1300px) {
+                .content {
+                    max-width: 700px !important;
+                }
+            }
+            @media (max-width: 1150px) {
+                .content {
+                    max-width: 550px !important;
+                }
+            }
+            @media (max-width: 1300px) {
+                .msg_more {
+                    left: -80px !important;
+                }
+            }
+
+            @media (max-width: 768px) {
+                .content {
+                    max-width: 310px !important;
+                }
+            }
             .timestamp {
                 display: flex;
                 flex-direction: column;
-
-                .mms {
-                    font-size: $font-size-12;
-                    margin-bottom: 4px;
-                    color: $danger;
+                .textMsg {
+                    color: red;
                 }
                 span {
                     display: block;
@@ -1814,18 +1842,13 @@ const previewURL = (fileid: string): void => {
                 }
             }
         }
-        .userName {
-            color: $gray-4;
-            font-size: $font-size-10;
-            margin-top: 5px;
-        }
     }
     .scrollToBottom {
         position: fixed;
-        right: 285px;
+        right: 20px;
         bottom: 70px;
         border-radius: 50%;
-        z-index: 100;
+        z-index: 1;
         cursor: pointer;
     }
 }
@@ -1833,7 +1856,7 @@ const previewURL = (fileid: string): void => {
 @media screen and (max-width: 768px) {
     .chatroom-inner {
         position: absolute;
-        top: 140px;
+        top: 80px;
         bottom: 67px;
         overflow-y: scroll;
         height: auto;

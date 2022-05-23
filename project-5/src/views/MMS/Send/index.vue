@@ -46,6 +46,7 @@
                     v-model:value.trim="mmsSubject"
                     type="text"
                     placeholder="請輸入MMS訊息主旨(必填)"
+                    :maxlength="hasChinese(mmsSubject) ? 15 : 39"
                     @input="KBCount"
                 />
             </div>
@@ -53,7 +54,7 @@
                 <h3><span>*</span>&ensp;訊息圖檔</h3>
                 <n-upload
                     class="mmsImgUpload"
-                    :class="{ uploadFile: mmsUploadImgRef != null }"
+                    :class="{ uploadFile: mmsUploadImgRef !== null }"
                     ref="uploadImg"
                     @change="handleChange($event)"
                     accept="image/*"
@@ -153,7 +154,7 @@ import OptionSetting from "@/components/backend/OptionSetting.vue";
 import { useApiStore } from "@/store/api";
 import { useMmsStore } from "@/store/mmsStore";
 import deleteIcon from "@/assets/Images/manage/delete.svg";
-import { options } from "@/util/commonUtil";
+import { options, hasChinese } from "@/util/commonUtil";
 import config from "@/config/config";
 
 const router = useRouter();

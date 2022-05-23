@@ -1,7 +1,7 @@
 <template>
     <div v-if="eventInfo !== null" class="gallery">
-        <div class="galleryHeader">
-            <div class="galleryTitle">
+        <div class="gallery__header">
+            <div class="gallery__title">
                 <h1 class="name">
                     <n-avatar
                         round
@@ -19,19 +19,19 @@
                 </a>
             </div>
         </div>
-        <div class="picture-box">
+        <div class="gallery__picture">
             <div v-for="(pics, index) in picArr" :key="index">
                 <div class="date">
                     {{ dayjs(pics[0].janusMsg.config.currentDate).format("YYYY/MM") }}
                 </div>
                 <div class="picture">
                     <div
-                        class="picture-inner"
+                        class="picture__inner"
                         v-for="picture in pics"
                         :key="picture.janusMsg.config.id"
                     >
                         <div
-                            class="imgEnable"
+                            class="img--enable"
                             v-if="
                                 picture.janusMsg.msgType === 6 && !picture.janusMsg.config.isExpire
                             "
@@ -42,7 +42,7 @@
                             />
                         </div>
                         <div
-                            class="imgDisable"
+                            class="img--disable"
                             v-else-if="
                                 picture.janusMsg.msgType === 6 && picture.janusMsg.config.isExpire
                             "
@@ -51,7 +51,7 @@
                         </div>
 
                         <div
-                            class="picture-file-enable"
+                            class="picture-file--enable"
                             v-else-if="
                                 picture.janusMsg.msgType === 7 && !picture.janusMsg.config.isExpire
                             "
@@ -71,7 +71,7 @@
                             </a>
                         </div>
                         <div
-                            class="picture-file-disable"
+                            class="picture-file--disable"
                             v-else-if="
                                 picture.janusMsg.msgType === 7 && picture.janusMsg.config.isExpire
                             "
@@ -268,10 +268,8 @@ const goToChat = () => {
     top: 0;
     left: 300px;
     z-index: 1000;
-    .close {
-        cursor: pointer;
-    }
-    .galleryHeader {
+
+    &__header {
         width: calc(100% - 300px);
         // width: 100%;
         height: 125px;
@@ -281,30 +279,41 @@ const goToChat = () => {
         position: fixed;
         right: 0;
         top: 0;
-        .galleryTitle {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+    }
+    &__title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: relative;
+        padding: 0 30px;
+        a {
             position: relative;
-            padding: 0 30px;
-            a {
-                position: relative;
-                > img {
-                    width: 28px;
-                }
-            }
-            .name {
-                @extend %h1;
-                display: flex;
-                margin: 0;
-                color: $gray-1;
-                align-items: center;
-            }
-            .avatar {
-                display: inline-block;
-                margin-right: 15px;
+            > img {
+                width: 28px;
             }
         }
+        .name {
+            @extend %h1;
+            display: flex;
+            margin: 0;
+            color: $gray-1;
+            align-items: center;
+        }
+        .avatar {
+            display: inline-block;
+            margin-right: 15px;
+        }
+    }
+    &__picture {
+        max-width: calc(1100px - $siderWidth);
+        display: block;
+        margin: 125px auto 0;
+        overflow-y: auto;
+        box-sizing: border-box;
+    }
+
+    .close {
+        cursor: pointer;
     }
     .date {
         font-size: $font-size-18;
@@ -312,189 +321,176 @@ const goToChat = () => {
         margin-top: 20px;
         margin-bottom: 8px;
     }
-    .picture-box {
-        max-width: calc(1100px - $siderWidth);
-        display: block;
-        margin: 125px auto 0;
-        overflow-y: auto;
-        box-sizing: border-box;
-        .picture {
-            display: grid;
-            max-width: calc(1200px - $siderWidth);
-            grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
-            justify-items: center;
-            .picture-inner {
-                width: 112px;
-                height: 112px;
-                margin: 8px auto;
-                .imgEnable {
-                    cursor: pointer;
-                    width: 100%;
-                    height: 100%;
-                    background-color: $primary-3;
-                    border-radius: 4px;
+}
+.picture {
+    display: grid;
+    max-width: calc(1200px - $siderWidth);
+    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+    justify-items: center;
+    &__inner {
+        width: 112px;
+        height: 112px;
+        margin: 8px auto;
+    }
+}
 
-                    /* Firefox, Chrome */
-                    line-height: 110px;
-                    white-space: nowrap;
-                    text-align: center;
-
-                    /* IE */
-                    *font-size: 100px; /* 200px * 0.9 = 180px */
-                    overflow: hidden;
-                    &:after {
-                        content: ".";
-                        font-size: 0;
-                        -webkit-text-size-adjust: none;
-                    }
-                    img {
-                        width: 100%;
-                        vertical-align: middle;
-                    }
-                }
-                .imgDisable {
-                    cursor: no-drop;
-                    width: 112px;
-                    height: 112px;
-                    background-color: $gray-5;
-                    border-radius: 4px;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    img {
-                        width: 32px;
-                        height: 32px;
-                    }
-                }
-                .picture-file-enable {
-                    width: 112px;
-                    height: 112px;
-                    background-color: $primary-3;
-                    border-radius: 4px;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    a {
-                        text-decoration: none;
-                        padding: 5px 8px;
-                        display: flex;
-                        justify-content: space-between;
-                        img {
-                            width: 24px;
-                            height: 24px;
-                            background-color: transparent;
-                        }
-                        p {
-                            font-size: $font-size-12;
-                            font-weight: 500;
-                            font-family: $font-family;
-                            color: $gray-1;
-                            line-height: 1.6;
-                            margin-left: 4px;
-                            height: 100%;
-                            word-break: break-all;
-                        }
-                    }
-                }
-                .picture-file-disable {
-                    width: 112px;
-                    height: 112px;
-                    background-color: $gray-5;
-                    border-radius: 4px;
-                    cursor: no-drop;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    > div {
-                        width: 100%;
-                        padding: 5px 8px;
-                        display: flex;
-                        justify-content: space-between;
-                    }
-                    img {
-                        width: 24px;
-                        height: 24px;
-                        background-color: transparent;
-                    }
-                    p {
-                        font-size: $font-size-12;
-                        font-weight: 500;
-                        font-family: $font-family;
-                        color: $gray-1;
-                        line-height: 1.6;
-
-                        margin-left: 4px;
-                        height: 100%;
-                        word-break: break-all;
-                    }
-                }
+.picture-file {
+    &--enable {
+        width: 112px;
+        height: 112px;
+        background-color: $primary-3;
+        border-radius: 4px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        a {
+            text-decoration: none;
+            padding: 5px 8px;
+            display: flex;
+            justify-content: space-between;
+            img {
+                width: 24px;
+                height: 24px;
+                background-color: transparent;
+            }
+            p {
+                font-size: $font-size-12;
+                font-weight: 500;
+                font-family: $font-family;
+                color: $gray-1;
+                line-height: 1.6;
+                margin-left: 4px;
+                height: 100%;
+                word-break: break-all;
             }
         }
     }
-    .noPicture {
+    &--disable {
+        width: 112px;
+        height: 112px;
+        background-color: $gray-5;
+        border-radius: 4px;
+        cursor: no-drop;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        > div {
+            width: 100%;
+            padding: 5px 8px;
+            display: flex;
+            justify-content: space-between;
+        }
+        img {
+            width: 24px;
+            height: 24px;
+            background-color: transparent;
+        }
         p {
-            margin-top: 10em;
-            font-size: $font-size-20;
-            text-align: center;
+            font-size: $font-size-12;
+            font-weight: 500;
+            font-family: $font-family;
+            color: $gray-1;
+            line-height: 1.6;
+
+            margin-left: 4px;
+            height: 100%;
+            word-break: break-all;
         }
     }
 }
+
+.img {
+    &--enable {
+        cursor: pointer;
+        width: 100%;
+        height: 100%;
+        background-color: $primary-3;
+        border-radius: 4px;
+
+        /* Firefox, Chrome */
+        line-height: 110px;
+        white-space: nowrap;
+        text-align: center;
+
+        /* IE */
+        *font-size: 100px; /* 200px * 0.9 = 180px */
+        overflow: hidden;
+        &:after {
+            content: ".";
+            font-size: 0;
+            -webkit-text-size-adjust: none;
+        }
+        img {
+            width: 100%;
+            vertical-align: middle;
+        }
+    }
+    &--disable {
+        cursor: no-drop;
+        width: 112px;
+        height: 112px;
+        background-color: $gray-5;
+        border-radius: 4px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        img {
+            width: 32px;
+            height: 32px;
+        }
+    }
+}
+
 @media (max-width: 768px) {
     .gallery {
         height: 100%;
         width: 100%;
         left: 0;
-        .date {
-            font-size: $font-size-16;
-        }
-        .galleryHeader {
+        &__header {
             width: 100%;
             height: 120px;
             background: url("~@/assets/Images/gallery/gallery-bg.svg") no-repeat center top;
             background-size: cover;
             padding-top: 26px;
-            .galleryTitle {
-                display: flex;
-                align-items: center;
-                position: relative;
-                padding: 0;
-                a {
-                    position: absolute;
-                    margin-left: 15px;
-                    z-index: 1;
-                    > img {
-                        width: 21px;
-                    }
-                }
-                .name {
-                    display: block;
-                    margin: 0 auto;
-                    font-size: $font-size-18;
-                    font-weight: 600;
-                }
-                .avatar {
-                    display: none;
+        }
+        &__title {
+            display: flex;
+            align-items: center;
+            position: relative;
+            padding: 0;
+            a {
+                position: absolute;
+                margin-left: 15px;
+                z-index: 1;
+                > img {
+                    width: 21px;
                 }
             }
+            .name {
+                display: block;
+                margin: 0 auto;
+                font-size: $font-size-18;
+                font-weight: 600;
+            }
+            .avatar {
+                display: none;
+            }
         }
-        .picture-box {
+        &__picture {
             width: 100%;
             display: block;
             margin: 100px auto 20px;
             overflow-y: auto;
         }
-        .noPicture {
-            p {
-                margin-top: 8em;
-                font-size: $font-size-20;
-                text-align: center;
-            }
+
+        .date {
+            font-size: $font-size-16;
         }
     }
 }
 @media (max-width: 420px) {
     .gallery {
-        .picture-box {
+        &__picture {
             width: 95%;
             padding-bottom: 20px;
         }

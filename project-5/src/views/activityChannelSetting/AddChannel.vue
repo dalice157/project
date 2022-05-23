@@ -1,11 +1,11 @@
 <template>
     <div class="addChannel">
-        <div class="addChannelWrap">
-            <div class="addChannelSetting">
-                <div class="channelIntroduce">
+        <div class="addChannel__wrap">
+            <div class="container">
+                <div class="container__introduce">
                     <div class="setting">
-                        <div class="iconSetting">
-                            <div class="iconTitle">
+                        <div class="setting__icon">
+                            <div class="avatar">
                                 <h1><span>*</span>&ensp;頭像設定</h1>
                                 <p>(請上傳商標或形象圖以供辨識)</p>
                             </div>
@@ -14,15 +14,9 @@
                                 :accept="imgAccept"
                                 type="file"
                             >
-                                <div class="addChannelUploadImg">
+                                <div class="upload-avatar">
+                                    <img :src="photoIcon" alt="預設圖" v-if="avatarStatus === 0" />
                                     <img
-                                        class="avatarDefault"
-                                        :src="photoIcon"
-                                        alt="預設圖"
-                                        v-if="avatarStatus === 0"
-                                    />
-                                    <img
-                                        class="avatarUpload"
                                         :src="`${config.fileUrl}${avatar.fileid}${avatar.ext}`"
                                         :alt="avatar.fileName"
                                         v-else
@@ -30,7 +24,7 @@
                                 </div>
                             </n-upload>
                         </div>
-                        <div class="functionSetting">
+                        <div class="setting__function">
                             <h1>功能設定</h1>
                             <div class="freecall">
                                 <n-checkbox
@@ -42,7 +36,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="activityTitle">
+                    <div class="setting__title">
                         <h1><span>*</span>&ensp;活動名稱</h1>
                         <n-input
                             placeholder="請輸入活動名稱"
@@ -51,11 +45,11 @@
                             v-model:value="name"
                         ></n-input>
                     </div>
-                    <div class="homeURL">
+                    <div class="setting__URL">
                         <h1>活動網址</h1>
                         <n-input placeholder="請輸入活動網址" v-model:value="url"></n-input>
                     </div>
-                    <div class="introduction">
+                    <div class="setting__introduction">
                         <h1>簡介</h1>
                         <n-input
                             type="textarea"
@@ -70,15 +64,15 @@
                             v-model:value="description"
                         ></n-input>
                     </div>
-                    <div class="customerService">
-                        <div class="customerServiceTitle">
+                    <div class="setting__staff">
+                        <div class="staff__title">
                             <h1>客服人員</h1>
                             <h2 @click="popUp = !popUp">+新增客服人員</h2>
                         </div>
-                        <div class="customServiceTagArea">
+                        <div class="staff__tags">
                             <p v-show="addList.length === 0">請選擇客服人員</p>
                             <div
-                                class="staffTag"
+                                class="staff__tag"
                                 v-for="(item, index) in addList"
                                 :key="item.accountID"
                             >
@@ -89,12 +83,16 @@
                         </div>
                     </div>
                 </div>
-                <div class="welcomeStatus">
-                    <div class="welcomeTitle">
+                <div class="setting__welcomeMsg">
+                    <div class="welcome__title">
                         <h1><span>*</span>&ensp;預設訊息</h1>
                         <p>(最少一則，最多三則)</p>
                     </div>
-                    <div class="welcomeInput" v-for="(item, index) in welcomeMsgCount" :key="index">
+                    <div
+                        class="welcome__messages"
+                        v-for="(item, index) in welcomeMsgCount"
+                        :key="index"
+                    >
                         <div v-if="item.janusMsg.msgType === 1">
                             <n-input
                                 type="textarea"
@@ -105,13 +103,13 @@
                                 v-model:value="item.janusMsg.msgContent"
                             ></n-input>
                         </div>
-                        <div class="welcomeImg" v-else-if="item.janusMsg.msgType === 6">
+                        <div class="messages__img" v-else-if="item.janusMsg.msgType === 6">
                             <img
                                 :src="`${config.fileUrl}${item.janusMsg.format.Fileid}${item.janusMsg.format.ExtensionName}`"
                                 :alt="item.janusMsg.format.ShowName"
                             />
                         </div>
-                        <div class="welcomeFile" v-else-if="item.janusMsg.msgType === 7">
+                        <div class="messages__file" v-else-if="item.janusMsg.msgType === 7">
                             <div>
                                 <div>
                                     <img :src="fileIcon" />
@@ -119,13 +117,13 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="welcomeFunctionBar">
+                        <div class="messages__function-bar">
                             <img
                                 :src="delIcon"
                                 alt="del"
                                 @click="deleteWelcomeMsg(item.janusMsg.config.id)"
                             />
-                            <div class="welcomeFunctionBarUpload">
+                            <div class="function-bar__upload">
                                 <span
                                     :src="fileIcon"
                                     alt="file"
@@ -170,9 +168,9 @@
                     </h2>
                 </div>
             </div>
-            <div class="channelButtonGroup">
+            <div class="button-group">
                 <router-link
-                    class="channelCancel"
+                    class="button--cancel"
                     :to="
                         `${route.params.id}`
                             ? `/manage/${route.params.id}/activitySetting`
@@ -185,38 +183,32 @@
                     :name="name"
                     :avatar="avatarStatus === 1 && `${avatar.fileid}${avatar.ext}`"
                 />
-                <div v-if="!isDisabled" class="channelStore" @click="goActivityStore">確認儲存</div>
+                <div v-if="!isDisabled" class="button--save" @click="goActivityStore">確認儲存</div>
                 <div v-else class="channelStore disabled">確認儲存</div>
             </div>
         </div>
     </div>
     <teleport to="body">
         <div class="mask" v-show="popUp === true">
-            <div class="customService">
-                <div class="customServiceTitle">
+            <div class="staff-model">
+                <div class="staff-model__title">
                     <h2>客服人員列表</h2>
                 </div>
-                <n-checkbox-group v-model:value="addList" class="accounts">
+                <n-checkbox-group v-model:value="addList" class="staff-model__checkbox-group">
                     <ul>
                         <li v-for="(staff, index) in accounts" :key="index">
-                            <div class="staffData">
+                            <div class="staff__checkbox">
                                 <n-checkbox
                                     v-if="staff.accountID !== 0"
-                                    class="staff"
                                     :value="staff"
                                     :label="staff.name"
                                 />
-                                <n-checkbox
-                                    v-else
-                                    class="staff"
-                                    :value="staff"
-                                    :label="staff.nickname"
-                                />
+                                <n-checkbox v-else :value="staff" :label="staff.nickname" />
                             </div>
                         </li>
                     </ul>
                 </n-checkbox-group>
-                <div class="staffConfirm" @click="popUp = !popUp">確認</div>
+                <div class="staff-model__confirm" @click="popUp = !popUp">確認</div>
             </div>
         </div>
     </teleport>
@@ -643,10 +635,10 @@ const goActivityStore = () => {
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
 
-.staff {
-    margin-right: 10px;
+.staff__checkbox {
+    display: flex;
+    align-items: center;
 }
-
 .mask {
     position: absolute;
     top: 0;
@@ -658,59 +650,54 @@ const goActivityStore = () => {
     display: flex;
     justify-content: center;
     align-items: center;
-
-    .customService {
-        width: 400px;
-        background-color: $white;
-        border-radius: 5px;
-        padding: 25px 0px 10px;
-        .customServiceTitle {
-            display: flex;
-            align-items: center;
-            padding: 0 20px 10px;
-            h2 {
-                font-family: $font-family;
-                font-size: $font-size-16;
-                font-weight: 600;
-                color: $gray-1;
-            }
+}
+.staff-model {
+    width: 400px;
+    background-color: $white;
+    border-radius: 5px;
+    padding: 25px 0px 10px;
+    &__title {
+        display: flex;
+        align-items: center;
+        padding: 0 20px 10px;
+        h2 {
+            font-family: $font-family;
+            font-size: $font-size-16;
+            font-weight: 600;
+            color: $gray-1;
         }
-        .accounts {
-            overflow-y: auto;
-            min-height: 200px;
-            max-height: 350px;
-            ul {
-                li {
-                    padding: 20px;
-                    position: relative;
-                    .staffData {
-                        display: flex;
-                        align-items: center;
-                    }
+    }
+    &__checkbox-group {
+        overflow-y: auto;
+        min-height: 200px;
+        max-height: 350px;
+        ul {
+            li {
+                padding: 20px;
+                position: relative;
 
-                    &::after {
-                        position: absolute;
-                        content: "";
-                        width: 93%;
-                        height: 1px;
-                        bottom: 0;
-                        background-color: #eeeeee;
-                    }
+                &::after {
+                    position: absolute;
+                    content: "";
+                    width: 93%;
+                    height: 1px;
+                    bottom: 0;
+                    background-color: #eeeeee;
                 }
             }
         }
-        .staffConfirm {
-            width: 100px;
-            height: 36px;
-            line-height: 36px;
-            border: 1px solid $gray-1;
-            border-radius: 18px;
-            text-align: center;
-            color: $white;
-            background-color: $gray-1;
-            cursor: pointer;
-            margin: 30px auto;
-        }
+    }
+    &__confirm {
+        width: 100px;
+        height: 36px;
+        line-height: 36px;
+        border: 1px solid $gray-1;
+        border-radius: 18px;
+        text-align: center;
+        color: $white;
+        background-color: $gray-1;
+        cursor: pointer;
+        margin: 30px auto;
     }
 }
 
@@ -720,308 +707,311 @@ const goActivityStore = () => {
     padding-left: 15px;
     padding-right: 15px;
     min-height: calc(100% - 80px);
-    .addChannelWrap {
+    &__wrap {
         width: 90%;
         background-color: $white;
         margin: 0 auto;
         padding: 30px 50px;
+    }
+}
+.button-group {
+    display: flex;
+    justify-content: center;
+    .button--cancel {
+        width: 100px;
+        height: 36px;
+        line-height: 36px;
+        border: 1px solid $gray-1;
+        border-radius: 18px;
+        text-align: center;
+        margin: 0 15px;
+        cursor: pointer;
+        text-decoration: none;
+        color: $gray-1;
+    }
 
-        .addChannelSetting {
-            display: flex;
-            margin-bottom: 60px;
-            .channelIntroduce {
-                width: 640px;
-
-                .setting {
-                    display: flex;
-                    justify-content: space-between;
-                    margin-bottom: 30px;
-                    .iconSetting {
-                        .iconTitle {
-                            margin-bottom: 15px;
-                            h1 {
-                                font-family: $font-family;
-                                font-size: $font-size-16;
-                                font-weight: 400;
-                                color: $gray-1;
-                                margin-right: 10px;
-                                span {
-                                    color: red;
-                                }
-                            }
-                            p {
-                                font-family: $font-family;
-                                font-size: $font-size-14;
-                                font-weight: 400;
-                                color: $gray-3;
-                                margin-top: 8px;
-                            }
-                        }
-                        .n-upload {
-                            width: 80px;
-                            & .n-upload-trigger {
-                                width: 80px;
-                                border-radius: 50%;
-                                .addChannelUploadImg {
-                                    width: 80px;
-                                    height: 80px;
-                                    border: 1px dashed $gray-3;
-                                    background-color: $gray-8;
-                                    border-radius: 50%;
-                                    display: flex;
-                                    justify-content: center;
-                                    align-items: center;
-                                    cursor: pointer;
-                                    .avatarUpload {
-                                        width: 80px;
-                                        height: 80px;
-                                        border-radius: 50%;
-                                    }
-                                }
-                            }
-                            & .n-upload-file-list {
-                                display: none !important;
-                            }
-                        }
-                    }
-                    .functionSetting {
-                        h1 {
-                            font-family: $font-family;
-                            font-size: $font-size-16;
-                            font-weight: 400;
-                            color: $gray-1;
-                            margin-right: 10px;
-                            margin-bottom: 17px;
-                        }
-                        .freecall {
-                            display: flex;
-                            align-items: center;
-                            p {
-                                margin-left: 15px;
-                                font-family: $font-family;
-                                font-size: $font-size-14;
-                                font-weight: 400;
-                                color: $gray-3;
-                            }
-                        }
-                    }
-                }
-                .activityTitle {
-                    margin-bottom: 30px;
-                    h1 {
-                        margin-bottom: 15px;
-                        span {
-                            color: red;
-                        }
-                    }
-                }
-                .homeURL {
-                    margin-bottom: 30px;
-                    h1 {
-                        margin-bottom: 15px;
-                    }
-                }
-                .introduction {
-                    margin-bottom: 30px;
-                    h1 {
-                        margin-bottom: 15px;
-                    }
-                }
-                .customerService {
-                    .customerServiceTitle {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        h1 {
-                            margin-bottom: 15px;
-                        }
-                        h2 {
-                            color: $primary-1;
-                            cursor: pointer;
-                        }
-                    }
-                    .customServiceTagArea {
-                        display: flex;
-                        flex-wrap: wrap;
-                        align-items: center;
-                        border: 1px solid $gray-3;
-                        min-height: 34px;
-                        border-radius: 4px;
-                        padding: 0 5px;
-                        // overflow-y: auto;
-                        > p {
-                            margin-left: 5px;
-                            color: $gray-4;
-                        }
-                        .staffTag {
-                            background-color: $primary-4;
-                            height: 25px;
-                            display: flex;
-                            align-items: center;
-                            justify-content: space-between;
-                            border-radius: 20px;
-                            padding: 5px 10px;
-                            margin: 5px 5px;
-                            p {
-                                color: $gray-1;
-                            }
-                            img {
-                                margin-left: 5px;
-                                cursor: pointer;
-                            }
-                        }
-                    }
+    .button--save {
+        width: 200px;
+        height: 36px;
+        line-height: 36px;
+        border: 1px solid $gray-1;
+        border-radius: 18px;
+        text-align: center;
+        color: $white;
+        background-color: $gray-1;
+        margin: 0 15px;
+        cursor: pointer;
+    }
+    .button--disabled {
+        @extend .button--save;
+        background-color: $gray-4;
+        border: 1px solid $gray-4;
+        cursor: default;
+    }
+}
+.setting {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    &__icon {
+        .avatar {
+            margin-bottom: 15px;
+            h1 {
+                font-family: $font-family;
+                font-size: $font-size-16;
+                font-weight: 400;
+                color: $gray-1;
+                margin-right: 10px;
+                span {
+                    color: red;
                 }
             }
-            .welcomeStatus {
-                margin-left: 100px;
-                width: 45%;
-                .welcomeTitle {
-                    display: flex;
-                    h1 {
-                        font-family: $font-family;
-                        font-size: $font-size-16;
-                        font-weight: 400;
-                        color: $gray-1;
-                        margin-right: 10px;
-                        margin-bottom: 17px;
-                        span {
-                            color: red;
-                        }
-                    }
-                    p {
-                        margin-left: 15px;
-                        font-family: $font-family;
-                        font-size: $font-size-14;
-                        font-weight: 400;
-                        color: $gray-3;
-                    }
-                }
-                .welcomeInput {
-                    width: 100%;
-                    min-height: 100px;
-                    border: 1px solid $gray-3;
-                    margin-bottom: 15px;
-                    background-color: $gray-8;
-                    &:focus {
-                        outline: none;
-                    }
-                    &:empty:before {
-                        content: attr(data-placeholder);
-                        color: $gray-3;
-                    }
-                    .n-input {
-                        background-color: $gray-8;
-                        --border: transparent !important;
-                    }
-                    .welcomeImg {
-                        padding: 5px 5px;
-                        img {
-                            max-height: 80px;
-                        }
-                    }
-                    .welcomeFile {
-                        padding: 5px 5px;
-                        > div {
-                            height: 80px;
-                            > div {
-                                display: flex;
-                                align-items: center;
-                                img {
-                                    width: 24px;
-                                    height: 24px;
-                                }
-                            }
-                        }
-                    }
-                    .welcomeFunctionBar {
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        img {
-                            cursor: pointer;
-                        }
-                        .welcomeFunctionBarUpload {
-                            display: flex;
-                            span {
-                                display: block;
-                                width: 24px;
-                                height: 24px;
-                                background-image: url("~@/assets/Images/common/file.svg");
-                                background-size: 24px;
-
-                                input {
-                                    opacity: 0;
-                                    border: 12px solid #00a;
-                                    width: 24px;
-                                    height: 24px;
-                                    cursor: pointer;
-                                }
-                            }
-                            span + span {
-                                display: block;
-                                width: 24px;
-                                height: 24px;
-                                background-image: url("~@/assets/Images/chatroom/pic.svg");
-                                background-size: 24px;
-                                margin: 0 5px;
-
-                                input {
-                                    opacity: 0;
-                                    border: 12px solid #00a;
-                                    width: 24px;
-                                    height: 24px;
-                                    cursor: pointer;
-                                }
-                            }
-                            img {
-                                width: 24px;
-                                height: 24px;
-                            }
-                        }
-                    }
-                }
-                h2 {
-                    text-align: right;
-                    cursor: pointer;
-                    color: $primary-1;
-                }
+            p {
+                font-family: $font-family;
+                font-size: $font-size-14;
+                font-weight: 400;
+                color: $gray-3;
+                margin-top: 8px;
             }
         }
-        .channelButtonGroup {
+        .n-upload {
+            width: 80px;
+            & .n-upload-trigger {
+                width: 80px;
+                border-radius: 50%;
+                .upload-avatar {
+                    width: 80px;
+                    height: 80px;
+                    border: 1px dashed $gray-3;
+                    background-color: $gray-8;
+                    border-radius: 50%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    cursor: pointer;
+                    .avatarUpload {
+                        width: 80px;
+                        height: 80px;
+                        border-radius: 50%;
+                    }
+                }
+            }
+            & .n-upload-file-list {
+                display: none !important;
+            }
+        }
+    }
+    &__function {
+        h1 {
+            font-family: $font-family;
+            font-size: $font-size-16;
+            font-weight: 400;
+            color: $gray-1;
+            margin-right: 10px;
+            margin-bottom: 17px;
+        }
+        .freecall {
             display: flex;
-            justify-content: center;
-            .channelCancel {
-                width: 100px;
-                height: 36px;
-                line-height: 36px;
-                border: 1px solid $gray-1;
-                border-radius: 18px;
-                text-align: center;
-                margin: 0 15px;
+            align-items: center;
+            p {
+                margin-left: 15px;
+                font-family: $font-family;
+                font-size: $font-size-14;
+                font-weight: 400;
+                color: $gray-3;
+            }
+        }
+    }
+    &__title {
+        margin-bottom: 30px;
+        h1 {
+            margin-bottom: 15px;
+            span {
+                color: red;
+            }
+        }
+    }
+    &__URL {
+        margin-bottom: 30px;
+        h1 {
+            margin-bottom: 15px;
+        }
+    }
+    &__introduction {
+        margin-bottom: 30px;
+        h1 {
+            margin-bottom: 15px;
+        }
+    }
+    &__staff {
+        .staff__title {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            h1 {
+                margin-bottom: 15px;
+            }
+            h2 {
+                color: $primary-1;
                 cursor: pointer;
-                text-decoration: none;
+            }
+        }
+        .staff__tags {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            border: 1px solid $gray-3;
+            min-height: 34px;
+            border-radius: 4px;
+            padding: 0 5px;
+            // overflow-y: auto;
+            > p {
+                margin-left: 5px;
+                color: $gray-4;
+            }
+        }
+        .staff__tag {
+            background-color: $primary-4;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-radius: 20px;
+            padding: 5px 10px;
+            margin: 5px 5px;
+            p {
                 color: $gray-1;
             }
-
-            .channelStore {
-                width: 200px;
-                height: 36px;
-                line-height: 36px;
-                border: 1px solid $gray-1;
-                border-radius: 18px;
-                text-align: center;
-                color: $white;
-                background-color: $gray-1;
-                margin: 0 15px;
+            img {
+                margin-left: 5px;
                 cursor: pointer;
-                &.disabled {
-                    background-color: $gray-4;
-                    border: 1px solid $gray-4;
-                    cursor: default;
+            }
+        }
+    }
+    &__welcomeMsg {
+        margin-left: 100px;
+        width: 45%;
+        h2 {
+            text-align: right;
+            cursor: pointer;
+            color: $primary-1;
+        }
+    }
+}
+.container {
+    display: flex;
+    margin-bottom: 60px;
+    &__introduce {
+        width: 640px;
+    }
+}
+.welcome {
+    &__title {
+        display: flex;
+        h1 {
+            font-family: $font-family;
+            font-size: $font-size-16;
+            font-weight: 400;
+            color: $gray-1;
+            margin-right: 10px;
+            margin-bottom: 17px;
+            span {
+                color: red;
+            }
+        }
+        p {
+            margin-left: 15px;
+            font-family: $font-family;
+            font-size: $font-size-14;
+            font-weight: 400;
+            color: $gray-3;
+        }
+    }
+    &__messages {
+        width: 100%;
+        min-height: 100px;
+        border: 1px solid $gray-3;
+        margin-bottom: 15px;
+        background-color: $gray-8;
+        &:focus {
+            outline: none;
+        }
+        &:empty:before {
+            content: attr(data-placeholder);
+            color: $gray-3;
+        }
+        .n-input {
+            background-color: $gray-8;
+            --border: transparent !important;
+        }
+    }
+}
+.messages {
+    &__Img {
+        padding: 5px 5px;
+        img {
+            max-height: 80px;
+        }
+    }
+    &__file {
+        padding: 5px 5px;
+        > div {
+            height: 80px;
+            > div {
+                display: flex;
+                align-items: center;
+                img {
+                    width: 24px;
+                    height: 24px;
                 }
             }
         }
+    }
+    &__function-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        img {
+            cursor: pointer;
+        }
+    }
+}
+.function-bar__upload {
+    display: flex;
+    span {
+        display: block;
+        width: 24px;
+        height: 24px;
+        background-image: url("~@/assets/Images/common/file.svg");
+        background-size: 24px;
+
+        input {
+            opacity: 0;
+            border: 12px solid #00a;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+    }
+    span + span {
+        display: block;
+        width: 24px;
+        height: 24px;
+        background-image: url("~@/assets/Images/chatroom/pic.svg");
+        background-size: 24px;
+        margin: 0 5px;
+
+        input {
+            opacity: 0;
+            border: 12px solid #00a;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+    }
+    img {
+        width: 24px;
+        height: 24px;
     }
 }
 </style>

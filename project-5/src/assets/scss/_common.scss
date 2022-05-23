@@ -1,0 +1,97 @@
+@import "./var";
+.search-bar,
+.search-bar--chatRoom {
+    .n-input {
+        width: 100%;
+        background-color: $white;
+        height: 36px;
+        font-size: $font-size-16;
+    }
+    .n-input__input-el {
+        outline-style: none;
+        margin: 0;
+    }
+    .n-input-wrapper {
+        height: 36px;
+    }
+    .n-input__suffix {
+        & .n-icon {
+            cursor: pointer;
+        }
+    }
+    .n-input .n-input__border,
+    .n-input .n-input__state-border {
+        border: none;
+    }
+    .n-input:not(.n-input--disabled):hover .n-input__state-border {
+        border: none;
+    }
+    .n-input:not(.n-input--disabled).n-input--focus {
+        background-color: none;
+    }
+    .n-input:not(.n-input--disabled).n-input--focus .n-input__state-border {
+        border: none;
+        box-shadow: none;
+    }
+    .n-input .n-input__input-el,
+    .n-input .n-input__textarea-el {
+        caret-color: $gray-2;
+    }
+}
+.search-bar {
+    display: flex;
+    align-items: center;
+    border-radius: 20px;
+    background-color: $white;
+    padding: 0 6px;
+    height: 44px;
+    border: 1px solid $border-line;
+    box-shadow: 2px 0px 4px $gray-6;
+    position: sticky;
+    top: 60px;
+    z-index: 100;
+    &--chatRoom {
+        font-family: $font-family;
+        padding: 10px 15px;
+        position: fixed;
+        width: calc(100% - $siderWidth);
+        height: 50px;
+        right: 0;
+        top: 66px;
+        z-index: 100;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        .n-input {
+            width: 95%;
+            background-color: $white;
+            box-shadow: 1px 1px 4px rgba(227, 227, 227, 0.5);
+            border-radius: 20px;
+            height: 36px;
+        }
+    }
+}
+@media (max-width: 768px) {
+    .search-bar {
+        width: 93%;
+        margin: -60px auto 0;
+        display: flex;
+        &--chatRoom {
+            width: 100% !important;
+            top: 45px !important;
+            background-color: transparent !important;
+            .n-input {
+                width: 88%;
+            }
+        }
+    }
+}
+@media (max-width: 375px) {
+    .search-bar {
+        &--chatRoom {
+            .n-input {
+                width: 85%;
+            }
+        }
+    }
+}

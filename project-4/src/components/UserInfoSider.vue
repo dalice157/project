@@ -1,8 +1,8 @@
 <template>
-    <div class="siderWrap" @click="closeSearchBar">
-        <ul class="tabsNav">
+    <div class="userInfo-sider" @click="closeSearchBar">
+        <ul class="tabs-nav">
             <li class="log" :class="{ active: type === 'log' }" @click="onLog">交談紀錄</li>
-            <li class="moreChat" :class="{ active: type === 'moreChat' }" @click="onMoreChat">
+            <li class="more-chat" :class="{ active: type === 'moreChat' }" @click="onMoreChat">
                 更多聊天室
             </li>
             <li class="more">
@@ -18,7 +18,7 @@
             </li>
         </ul>
         <div v-if="type === 'default' && eventInfo !== null" class="userInfo">
-            <div class="userPhoto">
+            <div class="userInfo__photo">
                 <a :href="eventInfo.homeurl" target="_blank">
                     <n-avatar
                         round
@@ -29,18 +29,18 @@
                     />
                 </a>
             </div>
-            <h2 class="userName">
+            <h2 class="userInfo__name">
                 {{ eventInfo.name }}
             </h2>
             <div class="description">{{ eventInfo.description }}</div>
         </div>
-        <div class="log-content" v-if="type === 'log'">
+        <div class="log__content" v-if="type === 'log'">
             <div class="search">
                 <ChatRecordSearch />
             </div>
             <ChatRecordList />
         </div>
-        <div class="moreChat-content" v-if="type === 'moreChat'">
+        <div class="more-chat__content" v-if="type === 'moreChat'">
             <div class="search">
                 <MoreSeachBar />
             </div>
@@ -56,7 +56,7 @@
                 紀錄不會消失。只要在同一個裝置開啟連結，對話紀錄便不會消失！
                 <h2 class="title">Q3可以使用不同裝置開啟視窗連結嗎?</h2>
                 可以。但因應資安考量，之前裝置的聊天紀錄便會消失。
-                <div class="btnWrap">
+                <div class="button__wrap">
                     <button @click="showQaModal = false">關閉</button>
                 </div>
             </div>
@@ -64,8 +64,8 @@
     </teleport>
     <teleport to="body" v-if="isOldModel">
         <div class="mask">
-            <div class="deviceCode">
-                <div class="closeBtn" @[events].stop="onCloseOldDevice">
+            <div class="device-code">
+                <div class="close__button" @[events].stop="onCloseOldDevice">
                     <img :src="closeIcon" alt="關閉" />
                 </div>
                 <h2>原裝置之驗證碼</h2>
@@ -77,15 +77,15 @@
     </teleport>
     <teleport to="body" v-if="isMCodeModel">
         <div class="mask">
-            <div class="deviceCode">
-                <div class="closeBtn" @[events].stop="onCloseMoMode">
+            <div class="device-code">
+                <div class="close__button" @[events].stop="onCloseMoMode">
                     <img :src="closeIcon" alt="關閉" />
                 </div>
                 <h2>手機簡訊驗證碼</h2>
                 <n-config-provider :theme-overrides="themeOverrides">
                     <n-input round v-model:value="mCode" readonly type="text" />
                 </n-config-provider>
-                <p class="psWord">請發送上列數字簡訊至<br />0912345678</p>
+                <p class="ps__word">請發送上列數字簡訊至<br />0912345678</p>
                 <n-button
                     @[events].stop="onCloseMoMode"
                     color="#e4e4e4"
@@ -303,7 +303,7 @@ const onQa = () => {
     justify-content: center;
     align-items: center;
 
-    .deviceCode {
+    .device-code {
         border-radius: 20px;
         width: 220px;
         height: 200px;
@@ -317,11 +317,11 @@ const onQa = () => {
         align-items: center;
         justify-content: center;
         transform: translate(-50%, -50%);
-        .psWord {
+        .ps__word {
             margin-top: 10px;
             line-height: 1.6;
         }
-        .closeBtn {
+        .close__button {
             position: absolute;
             right: -5px;
             top: -10px;
@@ -360,7 +360,7 @@ const onQa = () => {
             }
         }
     }
-    .btnWrap {
+    .button__wrap {
         text-align: center;
         margin-top: 20px;
         button {
@@ -381,13 +381,13 @@ const onQa = () => {
         }
     }
 }
-.siderWrap {
+.userInfo-sider {
     grid-area: sidebar;
     .search {
         padding: 15px;
     }
 }
-.tabsNav {
+.tabs-nav {
     display: flex;
     justify-content: space-around;
     align-items: center;
@@ -409,7 +409,7 @@ const onQa = () => {
             &.log {
                 background-image: url("~@/assets/Images/common/log-hover.svg");
             }
-            &.moreChat {
+            &.more-chat {
                 background-image: url("~@/assets/Images/common/more-chat-hover.svg");
             }
         }
@@ -420,7 +420,7 @@ const onQa = () => {
                 background-image: url("~@/assets/Images/common/log-hover.svg");
             }
         }
-        &.moreChat {
+        &.more-chat {
             background: url("~@/assets/Images/common/more-chat.svg") no-repeat left center;
             background-size: 23px 23px;
             padding-left: 30px;
@@ -437,8 +437,8 @@ const onQa = () => {
     }
 }
 
-.moreChat-content,
-.log-content {
+.more-chat__content,
+.log__content {
     border-top-left-radius: 30px;
     border-top-right-radius: 30px;
     height: 100%;
@@ -448,7 +448,7 @@ const onQa = () => {
     border-top-right-radius: 30px;
     height: calc(100% - 106px);
     background: url("~@/assets/Images/common/sider-bg.svg") no-repeat center bottom;
-    .userPhoto {
+    &__Photo {
         display: block;
         padding-top: 50px;
         padding-bottom: 20px;
@@ -460,7 +460,7 @@ const onQa = () => {
             }
         }
     }
-    .userName {
+    &__name {
         text-align: center;
         @extend %h2;
     }
@@ -498,7 +498,7 @@ const onQa = () => {
     }
 }
 @media (max-width: 768px) {
-    .siderWrap {
+    .userInfo-sider {
         display: none;
     }
 }

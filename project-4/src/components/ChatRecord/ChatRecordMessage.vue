@@ -2,22 +2,22 @@
     <!--搜尋交談結果-->
     <div
         v-if="eventInfo !== null && searcRecordMessages?.length > 0 && recordKeyWord !== ''"
-        class="searchRecordMessage"
+        class="chat-log--search"
     >
         <div
-            class="chatRoomBox"
+            class="box"
             @touchend.stop="logGotoChat(num.chatroomID)"
             @click.stop="logGotoChat(num.chatroomID)"
             v-for="num in searcRecordMessages"
             :key="num.chatroomID"
         >
             <!-- v-show="num.show" -->
-            <div class="chatRoomList">
+            <div class="box__item">
                 <div class="avatar" @[events].stop="showCompanyInfo(num)">
                     <n-avatar round :size="48" :src="`${config.fileUrl}${num.icon}`" />
                 </div>
-                <div class="chatRoomInfo">
-                    <h2 class="info_title">{{ num.name }}</h2>
+                <div class="info">
+                    <h2 class="info__title">{{ num.name }}</h2>
                     <n-ellipsis
                         style="max-width: 600px"
                         :line-clamp="1"
@@ -27,15 +27,12 @@
                     </n-ellipsis>
                 </div>
             </div>
-            <div class="functionBox">
-                <div class="time">
-                    {{ num.time === "昨天" ? num.time : currentTime(num.time / 1000000) }}
-                </div>
-                <!-- <div class="badge">
-                    <div class="badgeBg">
-                        <span class="badgeSup">{{ num.sup > 999 ? "999+" : num.sup }}</span>
+            <div class="function">
+                <div class="function__time">
+                    <div class="time">
+                        {{ currentTime(num.time / 1000) }}
                     </div>
-                </div> -->
+                </div>
             </div>
         </div>
     </div>
@@ -47,15 +44,15 @@
             searcRecordMessages?.length === 0 &&
             recordKeyWord === ''
         "
-        class="chatRecordMessage"
+        class="chat-log"
     >
         <!-- @touchend.prevent="gotoChat(num.eventKey)" -->
         <!-- :href="`/?eventKey=${num.eventKey}`" -->
-        <a class="chatRoomBox" v-for="(num, index) in changeList" :key="num.chatroomID">
+        <a class="box" v-for="(num, index) in changeList" :key="num.chatroomID">
             <!-- v-show="num.show" -->
             <!-- {{ num }} -->
             <div
-                class="chatRoomList"
+                class="box__item"
                 @touchend.stop="logGotoChat(num.chatroomID)"
                 @click.stop="logGotoChat(num.chatroomID)"
             >
@@ -63,7 +60,7 @@
                     <n-avatar round :size="48" :src="`${config.fileUrl}${num.icon}`" />
                     <img class="img" :src="pinIcon" alt="置頂" v-if="num.toTop" />
                 </div>
-                <div class="chatRoomInfo">
+                <div class="info">
                     <h2 class="info_title">{{ num.name }}</h2>
                     <n-ellipsis class="messageEllipsis" :line-clamp="1" :tooltip="false">
                         <p v-if="num.janusMsg.msgContent">
@@ -77,22 +74,16 @@
                     </n-ellipsis>
                 </div>
             </div>
-            <div class="functionBox">
-                <div class="timeBox">
+            <div class="function">
+                <div class="function__time">
                     <div class="time">
-                        {{ num.time }}
-                        <!-- {{ num.time === "昨天" ? num.time : currentTime(num.time / 1000) }} -->
+                        {{ currentTime(num.time / 1000) }}
                     </div>
-                    <!-- <div class="badge">
-                        <div class="badgeBg">
-                            <span class="badgeSup">{{ num.sup > 999 ? "999+" : num.sup }}</span>
-                        </div>
-                    </div> -->
                 </div>
-                <div class="functionBoxMore" @[events].stop="openFunctionPopUp(num)">
+                <div class="function__more" @[events].stop="openFunctionPopUp(num)">
                     <img :src="moreIcon" alt="more" />
-                    <div class="functionPopUp" v-show="num.isfunctionPopUp">
-                        <ul class="ulList">
+                    <div class="popUp" v-show="num.isfunctionPopUp">
+                        <ul class="popUp__ul">
                             <li @[events].stop="pin(num, index)" v-if="!num.toTop">開啟置頂</li>
                             <li @[events].stop="unpin(num, index)" v-if="num.toTop">取消置頂</li>
                             <!-- <li @touchend.stop="deletechatRoomBox(num)">刪除</li> -->
@@ -104,7 +95,7 @@
     </div>
 
     <div
-        class="chatRecordNotFound"
+        class="chat-log--notFound"
         v-if="searcRecordMessages?.length === 0 && changeList?.length === 0"
     >
         尚無交談紀錄
@@ -451,105 +442,82 @@ const unpin = (item: any, index: any): void => {
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
 
-.description {
+.box {
+    cursor: pointer;
     width: 100%;
-    text-align: center;
-    margin: 1em auto;
-    color: $gray-1;
-    @extend %h4;
-    line-height: 1.6;
-}
-.call_container {
-    margin-top: 30px;
+    height: 80px;
     display: flex;
-    justify-content: space-around;
-    li {
-        text-align: center;
+    justify-content: space-between;
+    text-decoration: none;
+    position: relative;
+    z-index: 1;
+    + .box {
+        border-top: 1px solid $border-line;
     }
-}
-.chatRecordNotFound {
-    @extend %h2;
-    margin-top: 120px;
-    text-align: center;
-}
-.searchRecordMessage {
-    height: 100%;
-    overflow-y: auto;
-    .chatRoomBox {
-        cursor: pointer;
-        width: 100%;
-        height: 80px;
+    &:last-child {
+        border-bottom: 1px solid $border-line;
+    }
+    &:hover {
+        background-color: rgba(0, 0, 0, 0.03);
+    }
+    &__item {
+        width: 86%;
         display: flex;
-        justify-content: space-between;
-        text-decoration: none;
-        position: relative;
-        z-index: 1;
-        + .chatRoomBox {
-            border-top: 1px solid $border-line;
+        align-items: center;
+        padding: 15px;
+        @media (max-width: 599px) {
+            width: 80%;
         }
-        &:last-child {
-            border-bottom: 1px solid $border-line;
+        @media (max-width: 380px) {
+            width: 78%;
         }
-        &:hover {
-            background-color: rgba(0, 0, 0, 0.03);
+        @media (max-width: 320px) {
+            width: 71%;
         }
-        .chatRoomList {
-            width: 86%;
-            display: flex;
-            align-items: center;
-            padding: 15px;
-            @media (max-width: 599px) {
-                width: 80%;
-            }
-            @media (max-width: 380px) {
-                width: 78%;
-            }
-            @media (max-width: 320px) {
-                width: 71%;
-            }
-            .avatar {
-                margin-right: 15px;
-                position: relative;
-                .img {
-                    position: absolute;
-                    width: 20px;
-                    right: inherit;
-                    left: 35px;
-                    bottom: 0;
-                }
-            }
-            .chatRoomInfo {
-                h2.info_title {
-                    @extend %h2;
-                    margin-bottom: 6px;
-                    color: $gray-2;
-                }
-                .messageEllipsis {
-                    max-width: 150px;
-                }
-                p {
-                    @extend %h4;
-                    line-height: 1.2;
-                    color: $gray-3;
-                }
-            }
-            @media (max-width: 380px) {
-                .messageEllipsis {
-                    max-width: 150px;
-                }
+        .avatar {
+            margin-right: 15px;
+            position: relative;
+            .img {
+                position: absolute;
+                width: 20px;
+                right: inherit;
+                left: 35px;
+                bottom: 0;
             }
         }
-        .functionBox {
-            max-width: 120px;
-            padding-top: 15px;
-            padding-right: 15px;
-            display: flex;
-            flex-direction: column;
+        @media (max-width: 380px) {
+            .messageEllipsis {
+                max-width: 150px;
+            }
+        }
+    }
+
+    .info {
+        &__title {
+            @extend %h2;
+            margin-bottom: 6px;
+            color: $gray-2;
+        }
+        .messageEllipsis {
+            max-width: 150px;
+        }
+        p {
+            @extend %h4;
+            line-height: 1.2;
+            color: $gray-3;
+        }
+    }
+    .function {
+        // max-width: 120px;
+        padding-top: 15px;
+        padding-right: 15px;
+        display: flex;
+        &__time {
             .time {
                 text-align: right;
                 min-width: 80px;
                 color: $gray-3;
-                font-size: $font-size-16;
+                font-size: $font-size-14;
                 font-weight: 500;
             }
             .badge {
@@ -569,145 +537,61 @@ const unpin = (item: any, index: any): void => {
                 }
             }
         }
+        &__more {
+            margin: auto 5px auto 12px;
+            position: relative;
+            z-index: 100;
+        }
+    }
+    .popUp {
+        position: absolute;
+        box-shadow: 0 2px 4px 0 rgba(209, 209, 209, 0.5);
+        border-radius: 4px;
+        top: 25px;
+        right: 0px;
+        z-index: 1;
+        &__ul {
+            background-color: $primary-3;
+            li {
+                width: 90px;
+                height: 50px;
+                padding: 10px 10px;
+                text-align: center;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: $gray-1;
+                border-bottom: 1px solid $white;
+            }
+            li:last-child {
+                border-bottom: 0px;
+            }
+        }
     }
 }
-@media (max-width: 768px) {
-    .searchRecordMessage {
-        margin-top: 20px;
-    }
-}
-.chatRecordMessage {
+.chat-log {
     height: calc(100% - 160px);
     overflow-y: auto;
     padding-top: 20px;
     box-sizing: border-box;
-    .chatRoomBox {
-        cursor: pointer;
-        width: 100%;
-        height: 90px;
-        display: flex;
-        justify-content: space-between;
-        text-decoration: none;
-        + .chatRoomBox {
-            border-top: 1px solid $border-line;
-        }
-        &:last-child {
-            border-bottom: 1px solid $border-line;
-        }
-        &:hover {
-            background-color: rgba(0, 0, 0, 0.03);
-        }
-        .chatRoomList {
-            width: 50%;
-            display: flex;
-            align-items: center;
-            padding: 15px 10px 15px 15px;
-            @media (max-width: 599px) {
-                width: 80%;
-            }
-            @media (max-width: 380px) {
-                width: 78%;
-            }
-            @media (max-width: 320px) {
-                width: 71%;
-            }
-            .avatar {
-                margin-right: 15px;
-                position: relative;
-                .img {
-                    position: absolute;
-                    width: 20px;
-                    right: inherit;
-                    left: 35px;
-                    bottom: 0;
-                }
-            }
-            .chatRoomInfo {
-                h2.info_title {
-                    @extend %h2;
-                    margin-bottom: 6px;
-                    color: $gray-2;
-                }
-                .messageEllipsis {
-                    max-width: 150px;
-                }
-                p {
-                    @extend %h4;
-                    line-height: 1.2;
-                    color: $gray-3;
-                }
-            }
-            @media (max-width: 380px) {
-                .messageEllipsis {
-                    max-width: 150px;
-                }
-            }
-        }
-        .functionBox {
-            // max-width: 120px;
-            padding-top: 15px;
-            padding-right: 15px;
-            display: flex;
-            .timeBox {
-                .time {
-                    text-align: right;
-                    min-width: 80px;
-                    color: $gray-3;
-                    font-size: $font-size-14;
-                    font-weight: 500;
-                }
-                .badge {
-                    display: flex;
-                    justify-content: flex-end;
-                    align-items: center;
-                    margin-top: 10px;
-                    .badgeBg {
-                        padding: 4px 8px;
-                        border-radius: 12px;
-                        background: $primary-1;
-                        width: auto;
-                    }
-                    .badgeSup {
-                        @extend %h4;
-                        color: $gray-1;
-                    }
-                }
-            }
-            .functionBoxMore {
-                margin: auto 5px auto 12px;
-                position: relative;
-                z-index: 100;
-                .functionPopUp {
-                    position: absolute;
-                    box-shadow: 0 2px 4px 0 rgba(209, 209, 209, 0.5);
-                    border-radius: 4px;
-                    top: 25px;
-                    right: 0px;
-                    z-index: 1;
-                    .ulList {
-                        background-color: $primary-3;
-                        li {
-                            width: 90px;
-                            height: 50px;
-                            padding: 10px 10px;
-                            text-align: center;
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            color: $gray-1;
-                            border-bottom: 1px solid $white;
-                        }
-                        li:last-child {
-                            border-bottom: 0px;
-                        }
-                    }
-                }
-            }
+    &--search {
+        height: 100%;
+        overflow-y: auto;
+    }
+
+    &--notFound {
+        @extend %h2;
+        margin-top: 120px;
+        text-align: center;
+    }
+    @media (max-width: 768px) {
+        .chat-log--search {
+            margin-top: 20px;
         }
     }
 }
 @media (max-width: 768px) {
-    .chatRecordMessage {
+    .chat-log {
         height: 100%;
         padding-top: 20px;
     }

@@ -203,7 +203,7 @@ function getSplitMessage(message, charMax) {
 }
 
 //檢查是否有中文
-function hasChinese(str) {
+export function hasChinese(str) {
     let i;
     let ch, cch;
     if (str.length > 0) {

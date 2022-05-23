@@ -1,6 +1,6 @@
 <template>
     <!-- 搜尋bar -->
-    <div class="searchBar">
+    <div class="search-bar">
         <n-input v-model:value="recordKeyWord" type="text" placeholder="搜尋">
             <template #prefix>
                 <img :src="searchIcon" alt="search" />
@@ -39,84 +39,12 @@ const route = useRoute();
 <style lang="scss">
 @import "~@/assets/scss/var";
 @import "~@/assets/scss/extend";
-.searchBar {
-    .n-input {
-        width: 100%;
-        background-color: $white;
-        height: 36px;
-        font-size: $font-size-16;
-    }
-    .n-input__input-el {
-        outline-style: none;
-        margin: 0;
-    }
-    .n-input-wrapper {
-        height: 36px;
-    }
-    .n-input__suffix {
-        & .n-icon {
-            cursor: pointer;
-        }
-    }
-    .n-input .n-input__border,
-    .n-input .n-input__state-border {
-        border: none;
-    }
-    .n-input:not(.n-input--disabled):hover .n-input__state-border {
-        border: none;
-    }
-    .n-input:not(.n-input--disabled).n-input--focus {
-        background-color: none;
-    }
-    .n-input:not(.n-input--disabled).n-input--focus .n-input__state-border {
-        border: none;
-        box-shadow: none;
-    }
-    .n-input .n-input__input-el,
-    .n-input .n-input__textarea-el {
-        caret-color: $gray-2;
-    }
-}
+@import "~@/assets/scss/common";
 </style>
 <style lang="scss" scoped>
 @import "~@/assets/scss/var";
 @import "~@/assets/scss/extend";
-.searchBar {
-    display: flex;
-    align-items: center;
-    border-radius: 20px;
-    background-color: $white;
-    padding: 0 6px;
-    height: 44px;
-    border: 1px solid $border-line;
-    box-shadow: 2px 0px 4px $gray-6;
-    position: sticky;
-    top: 60px;
-    z-index: 100;
-    .search {
-        display: flex;
-        align-self: center;
-        margin-left: 8px;
-        img {
-            width: 16px;
-            height: 16px;
-        }
-    }
-    .clearBtn {
-        display: flex;
-        align-self: center;
-        margin-right: 8px;
-        cursor: pointer;
-    }
-}
 
-@media (max-width: 768px) {
-    .searchBar {
-        width: 93%;
-        margin: -60px auto 0;
-        display: flex;
-    }
-}
 .result {
     position: fixed;
     top: 188px;

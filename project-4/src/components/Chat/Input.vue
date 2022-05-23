@@ -5,67 +5,67 @@
         v-if="isReplyBox"
         @[events].prevent="scrollPageTo(replyMsg.janusMsg.config.id)"
     >
-        <div class="usertext">
-            <div class="replyText" v-if="replyMsg && replyMsg.janusMsg.msgType === 6">[照片]</div>
-            <div class="replyText" v-if="replyMsg && replyMsg.janusMsg.msgType === 3">[貼圖]</div>
+        <div class="reply__user-text">
+            <div class="reply__text" v-if="replyMsg && replyMsg.janusMsg.msgType === 6">[照片]</div>
+            <div class="reply__text" v-if="replyMsg && replyMsg.janusMsg.msgType === 3">[貼圖]</div>
             <n-ellipsis
                 v-if="replyMsg && replyMsg.janusMsg.msgContent"
                 style="width: 80%"
-                class="replyText"
+                class="reply__text"
                 :tooltip="false"
             >
                 {{ replyMsg.janusMsg.msgContent }}
             </n-ellipsis>
-            <div class="img" v-if="replyMsg && replyMsg.janusMsg.msgType === 6">
+            <div class="reply__img" v-if="replyMsg && replyMsg.janusMsg.msgType === 6">
                 <img
                     :src="`${config.fileUrl}${replyMsg.janusMsg.format.Fileid}${replyMsg.janusMsg.format.ExtensionName}`"
                 />
             </div>
-            <div class="img" v-if="replyMsg && replyMsg.janusMsg.msgType === 3">
+            <div class="reply__img" v-if="replyMsg && replyMsg.janusMsg.msgType === 3">
                 <img
                     :src="`${replyMsg.janusMsg.format.stickerUrl}${replyMsg.janusMsg.format.stickerPackID}/${replyMsg.janusMsg.format.stickerFileID}.${replyMsg.janusMsg.format.ext}`"
                 />
             </div>
-            <div @[events].stop="replyHide" class="closeBtn">
+            <div @[events].stop="replyHide" class="close-btn">
                 <img :src="closeIcon" alt="close" />
             </div>
         </div>
     </div>
     <!-- 功能欄視窗 -->
-    <div class="inputFunctionBar" v-if="inputFunctionBoolean">
-        <div class="file">
-            <label class="upload_cover">
+    <div class="input-function" v-if="inputFunctionBoolean">
+        <div class="input-function__file">
+            <label class="upload-cover">
                 <input
-                    class="upload_input"
+                    class="upload-cover__input"
                     type="file"
                     multiple
                     :accept="fileAcceptMP"
                     @change="onUploadFileMP"
                 />
-                <span class="upload_icon">文件</span>
+                <span class="upload-cover__icon">文件</span>
             </label>
         </div>
-        <div class="position" @[events]="handleFindMe()">
+        <div class="input-function__position" @[events]="handleFindMe()">
             <img :src="mapIcon" alt="map" />
             <p>位置</p>
         </div>
     </div>
     <!-- 使用者輸入框 -->
-    <div class="input">
-        <div class="deleteOption" v-if="deleteBoolean">
-            <div class="cancelBtn" @[events]="deleteBoolean = !deleteBoolean">取消</div>
-            <div class="deleteBtn" @[events]="confirmDeletePopup">
+    <div class="input-bar">
+        <div class="input-bar__delete" v-if="deleteBoolean">
+            <div class="cancel__button" @[events]="deleteBoolean = !deleteBoolean">取消</div>
+            <div class="delete__button" @[events]="confirmDeletePopup">
                 刪除{{ deleteGroup.length > 0 ? `(${deleteGroup.length})` : "" }}
             </div>
         </div>
-        <div class="input-inner" v-else>
+        <div class="input-bar__inner" v-else>
             <span
-                class="attachOpen"
+                class="attach--open"
                 @[events].prevent="inputFunctionOpen"
                 v-show="!inputFunctionBoolean"
             ></span>
             <span
-                class="attachClose"
+                class="attach--close"
                 @[events].prevent="inputFunctionClose"
                 v-show="inputFunctionBoolean"
             ></span>
@@ -91,9 +91,9 @@
             <span class="file-folder">
                 <input type="file" :accept="fileAcceptPC" @change="onUploadFilePC" ref="file" />
             </span>
-            <div id="textAreaWeb">
+            <div id="textArea--web">
                 <n-input
-                    class="n-input-modify"
+                    class="n-input--modify"
                     placeholder="Aa"
                     type="textarea"
                     size="small"
@@ -101,7 +101,7 @@
                     v-model:value.trim="msg"
                     @focus="closeAll"
                     @input="focusMsg"
-                    @keydown.enter.exact.prevent="addMsg"
+                    @keypress.enter.exact.prevent="addMsg"
                     ref="inputRef"
                     id="input"
                 >
@@ -119,9 +119,9 @@
                     alt="表情貼圖"
                 />
             </div>
-            <div id="textAreaPhone">
+            <div id="textArea--phone">
                 <n-input
-                    class="n-input-modify"
+                    class="n-input--modify"
                     placeholder="Aa"
                     type="textarea"
                     size="small"
@@ -155,14 +155,14 @@
                 v-show="msg"
             />
             <img
-                class="recorder"
-                :src="voiceIcon"
+                class="recorder--disabled"
+                :src="voiceIconDisabled"
                 alt="開啟錄音"
                 v-show="!msg && !showRecorderModal"
                 @[events]="openRecorder()"
             />
             <img
-                class="recorder"
+                class="recorder--enabled"
                 :src="voiceIconEnabled"
                 alt="關閉錄音"
                 v-show="!msg && showRecorderModal"
@@ -170,9 +170,9 @@
             />
         </div>
         <!-- 貼圖視窗 -->
-        <div class="stickerArea" v-show="showStickerModal">
-            <div class="stickerTabsArea">
-                <ul class="stickerTabs">
+        <div class="sticker" v-show="showStickerModal">
+            <div class="sticker__tabs">
+                <ul class="sticker__ul">
                     <li
                         v-if="stickerItems.length > 0"
                         class="reload-time"
@@ -204,7 +204,7 @@
                     </li>
                 </ul>
             </div>
-            <div class="stickerGroupID" v-show="stickerItems.length > 0 && stickerGroupID == 0">
+            <div class="sticker__group" v-show="stickerItems.length > 0 && stickerGroupID == 0">
                 <n-grid :x-gap="10" :y-gap="10" :cols="4">
                     <n-grid-item
                         v-for="(item, index) in stickerItems"
@@ -213,7 +213,7 @@
                         @touchmove="gtouchmove()"
                         @touchend="gtouchend()"
                     >
-                        <div class="stickerIcon">
+                        <div class="sticker__icon">
                             <img
                                 :src="`${item.stickerUrl}${item.stickerPackID}/${item.stickerFileID}.${item.ext}`"
                                 :alt="`${item.title}`"
@@ -223,7 +223,7 @@
                 </n-grid>
             </div>
             <div
-                class="stickerGroupID"
+                class="sticker__group"
                 v-show="stickerGroupID == stickerGroup.stickerPackID && stickerGroupID != 0"
             >
                 <n-grid :x-gap="10" :y-gap="10" :cols="4">
@@ -235,7 +235,7 @@
                         @touchend="gtouchend()"
                         :class="{ hide: tab == 'tab' || tab == 'main' }"
                     >
-                        <div class="stickerIcon">
+                        <div class="sticker__icon">
                             <img
                                 :src="`${stickerUrl}${stickerGroup.stickerPackID}/${tab}.${stickerGroup.ext}`"
                                 :alt="`${stickerGroup.stickerPackID}-${tab}`"
@@ -246,17 +246,15 @@
             </div>
         </div>
         <!-- 錄音視窗 -->
-        <div class="audioRecorderArea" v-show="showRecorderModal" @[events].prevent="clearRecorder">
+        <div class="recording" v-show="showRecorderModal" @[events].prevent="clearRecorder">
             <!--未錄音狀態  -->
-            <h1 class="recorderDescription" v-show="!isRecording">
-                放開即可傳送語音，左右滑動即可取消
-            </h1>
-            <div id="audio" class="audioMicrophoneDisable" v-show="!isRecording">
+            <h1 class="description" v-show="!isRecording">放開即可傳送語音，左右滑動即可取消</h1>
+            <div id="audio" class="audio-microphone--disable" v-show="!isRecording">
                 <img class="microphone" :src="voiceDisabled" alt="closeVoice" />
             </div>
             <!-- 錄音狀態 -->
-            <h1 class="recorderTime" v-show="isRecording">{{ recorderTime }}</h1>
-            <div class="audioMicrophoneEnable" v-show="isRecording">
+            <h1 class="time" v-show="isRecording">{{ recorderTime }}</h1>
+            <div class="audio-microphone--enable" v-show="isRecording">
                 <img :src="voiceEnabled" alt="open voice" />
             </div>
         </div>
@@ -323,7 +321,7 @@ import emojiEnabled from "@/assets/Images/chatroom/emoji-enabled.svg";
 import emojiIcon from "@/assets/Images/chatroom/emoji.svg";
 import sendIcon from "@/assets/Images/chatroom/send.svg";
 import config from "@/config/config";
-import voiceIcon from "@/assets/Images/chatroom/voice.svg";
+import voiceIconDisabled from "@/assets/Images/chatroom/voice.svg";
 import voiceIconEnabled from "@/assets/Images/chatroom/voice-enabled.svg";
 import reloadTimeEnabled from "@/assets/Images/chatroom/reload-time-enabled.svg";
 import reloadTimeIcon from "@/assets/Images/chatroom/reload-time.svg";
@@ -698,7 +696,7 @@ const clearRecorder = () => {
 };
 
 const focusMsg = () => {
-    const textArea = document.getElementById("textAreaPhone");
+    const textArea = document.getElementById("textArea--phone");
     const str = msg.value.trim();
     if (str !== "") {
         textArea.classList.remove("small");
@@ -754,7 +752,7 @@ const addMsg = (): void => {
     // 送出後清除 msg 及 replyMsg
     msg.value = null;
     replyHide();
-    const textArea = document.getElementById("textAreaPhone");
+    const textArea = document.getElementById("textArea--phone");
     textArea.classList.add("small");
 };
 
@@ -1218,7 +1216,7 @@ watchEffect(() => {
 <style lang="scss">
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
-.n-input-modify {
+.n-input--modify {
     width: 100%;
     background-color: $gray-7;
     &.n-input,
@@ -1256,38 +1254,49 @@ watchEffect(() => {
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
 
+.close-btn {
+    cursor: pointer;
+    img {
+        width: 20px;
+        height: 20px;
+    }
+}
+
 .n-card.map {
     width: 70%;
     > .n-card-header {
         padding: 1em;
     }
-    .googleMap {
-        width: 100%;
-        height: 300px;
-    }
     > .n-card__content,
     > .n-card__footer {
         padding: 0 1em 1em;
     }
-    .shareMap {
-        display: flex;
-        cursor: pointer;
-        &:hover,
-        &:focus {
-            color: $gray-4;
-            .n-icon.icon {
-                color: $gray-4 !important;
-            }
-        }
-        .n-icon.icon {
-            color: $gray-2 !important;
-            margin-left: 4px;
-        }
-    }
 }
+
 @media screen and (max-width: 450px) {
     .n-card.map {
         width: 90%;
+    }
+}
+
+.googleMap {
+    width: 100%;
+    height: 300px;
+}
+
+.shareMap {
+    display: flex;
+    cursor: pointer;
+    &:hover,
+    &:focus {
+        color: $gray-4;
+        .n-icon.icon {
+            color: $gray-4 !important;
+        }
+    }
+    .n-icon.icon {
+        color: $gray-2 !important;
+        margin-left: 4px;
     }
 }
 .card {
@@ -1303,6 +1312,59 @@ watchEffect(() => {
     }
 }
 
+#textArea {
+    &--web {
+        width: 100%;
+        padding: 4px;
+        border-radius: 30px;
+        margin-right: 0;
+        margin-left: 7px;
+        background-color: $gray-7;
+        overflow-x: hidden;
+        display: flex;
+        justify-content: space-between;
+        &.small {
+            height: 38px;
+            overflow: hidden;
+        }
+        img {
+            margin-right: 5px;
+            cursor: pointer;
+        }
+    }
+
+    &--phone {
+        width: 100%;
+        padding: 4px;
+        border-radius: 30px;
+        margin-right: 0;
+        margin-left: 7px;
+        background-color: $gray-7;
+        overflow-x: hidden;
+        display: none;
+        justify-content: space-between;
+        &.small {
+            height: 38px;
+            overflow: hidden;
+        }
+        img {
+            margin-right: 5px;
+            cursor: pointer;
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    #textArea {
+        &--web {
+            display: none;
+        }
+        &--phone {
+            display: flex;
+        }
+    }
+}
+
 .reply {
     width: calc(100% - 300px);
     background-color: $gray-7;
@@ -1310,32 +1372,19 @@ watchEffect(() => {
     cursor: pointer;
     position: fixed;
     bottom: 60px;
-    .avatar {
-        width: 40px;
-        height: 40px;
-        margin-left: 20px;
-        margin-top: 10px;
-    }
-    .usertext {
+    &__user-text {
         padding: 10px 15px;
         display: flex;
         align-items: center;
         justify-content: space-between;
         width: 100%;
-        .replyText {
-            width: 80%;
-            @extend %h4;
-            color: $gray-1;
-        }
     }
-    .closeBtn {
-        cursor: pointer;
-        img {
-            width: 20px;
-            height: 20px;
-        }
+    &__text {
+        width: 80%;
+        @extend %h4;
+        color: $gray-1;
     }
-    .img {
+    &__img {
         width: 100px;
         height: 50px;
         text-align: center;
@@ -1353,7 +1402,7 @@ watchEffect(() => {
         width: 100%;
     }
 }
-.inputFunctionBar {
+.input-function {
     position: fixed;
     bottom: 60px;
     width: calc(100% - 300px);
@@ -1362,42 +1411,11 @@ watchEffect(() => {
     display: flex;
     justify-content: space-around;
     box-shadow: -1px -1px 4px rgba(227, 227, 227, 0.5);
-    .audio {
-        cursor: pointer;
-        img {
-            width: 60px;
-        }
-        p {
-            text-align: center;
-        }
-    }
-    .file {
+    &__file {
         width: 40px;
         padding-top: 15px;
-        .upload_cover {
-            position: relative;
-            height: 69px;
-            background-image: url("~@/assets/Images/chatroom/file.svg");
-            background-position: center 0;
-            background-size: 24px;
-            background-repeat: no-repeat;
-            text-align: center;
-            cursor: pointer;
-            display: block;
-            .upload_input {
-                display: none;
-            }
-            .upload_icon {
-                width: 40px;
-                position: absolute;
-                @extend %h4;
-                cursor: pointer;
-                left: 0;
-                bottom: 20px;
-            }
-        }
     }
-    .position {
+    &__position {
         width: 40px;
         padding-top: 15px;
         cursor: pointer;
@@ -1413,25 +1431,48 @@ watchEffect(() => {
         }
     }
 }
+
 @media (max-width: 768px) {
-    .inputFunctionBar {
+    .input-function {
         width: 100%;
     }
 }
-.input {
+.upload-cover {
+    position: relative;
+    height: 69px;
+    background-image: url("~@/assets/Images/chatroom/file.svg");
+    background-position: center 0;
+    background-size: 24px;
+    background-repeat: no-repeat;
+    text-align: center;
+    cursor: pointer;
+    display: block;
+    &__input {
+        display: none;
+    }
+    &__icon {
+        width: 40px;
+        position: absolute;
+        @extend %h4;
+        cursor: pointer;
+        left: 0;
+        bottom: 20px;
+    }
+}
+.input-bar {
     position: fixed;
     bottom: 0;
     width: calc(100% - 300px);
     padding: 0 15px;
     background-color: $white;
     box-shadow: -1px -1px 4px $gray-6;
-    .deleteOption {
+    &__delete {
         height: 60px;
         display: flex;
         justify-content: flex-end;
         align-items: center;
 
-        .cancelBtn {
+        .cancel__button {
             color: $gray-4;
             font-size: $font-size-20;
             cursor: pointer;
@@ -1450,13 +1491,13 @@ watchEffect(() => {
         .line {
             color: $gray-4;
         }
-        .deleteBtn {
+        .delete__button {
             color: $primary-1;
             font-size: $font-size-20;
             cursor: pointer;
         }
     }
-    .input-inner {
+    &__inner {
         box-sizing: border-box;
         width: 100%;
         min-height: 60px;
@@ -1464,221 +1505,6 @@ watchEffect(() => {
         align-items: center;
         padding: 10px 0px;
 
-        .attachOpen {
-            display: none;
-            min-width: 24px;
-            height: 24px;
-            margin: 3px 0.5em 3px 0;
-            background-image: url("~@/assets/Images/chatroom/add-round.svg");
-            background-size: 24px;
-            cursor: pointer;
-        }
-        .attachClose {
-            display: none;
-            min-width: 24px;
-            height: 24px;
-            margin: 3px 0.5em 3px 0;
-            background-image: url("~@/assets/Images/chatroom/close-round.svg");
-            background-size: 24px;
-            cursor: pointer;
-        }
-
-        @media (max-width: 768px) {
-            .attachOpen {
-                min-width: 20px;
-                height: 20px;
-                background-size: 20px;
-                display: block;
-            }
-            .attachClose {
-                min-width: 20px;
-                height: 20px;
-                background-size: 20px;
-                display: block;
-            }
-        }
-        .camera {
-            display: none;
-            min-width: 24px;
-            height: 24px;
-            margin: 3px 6px 3px 0;
-            background-image: url("~@/assets/Images/chatroom/Photo.svg");
-            background-size: 24px;
-            // cursor: pointer;
-            input {
-                opacity: 0;
-                box-sizing: border-box;
-                // border: 12px solid #00a;
-                width: 24px;
-                height: 24px;
-                cursor: pointer;
-                position: relative;
-                z-index: 10;
-            }
-        }
-        @media (max-width: 768px) {
-            .camera {
-                display: block;
-                min-width: 20px;
-                height: 20px;
-                margin: 3px 0.6em 3px 0;
-                background-image: url("~@/assets/Images/chatroom/Photo.svg");
-                background-size: 20px;
-                // cursor: pointer;
-                // outline: 1px solid red;
-                input {
-                    opacity: 0;
-                    box-sizing: border-box;
-                    border: 12px solid #00a;
-                    width: 20px;
-                    height: 20px;
-                    cursor: pointer;
-                    position: relative;
-                    z-index: 10;
-                }
-            }
-        }
-        .photo {
-            display: none;
-            min-width: 24px;
-            height: 24px;
-            margin: 3px 6px 3px 0;
-            background-image: url("~@/assets/Images/chatroom/pic.svg");
-            background-size: 24px;
-            // cursor: pointer;
-            input {
-                opacity: 0;
-                box-sizing: border-box;
-                border: 12px solid #00a;
-                width: 24px;
-                height: 24px;
-                cursor: pointer;
-            }
-        }
-        @media (max-width: 768px) {
-            .photo {
-                display: block;
-                min-width: 20px;
-                height: 20px;
-                margin: 3px 0 3px 0;
-                background-image: url("~@/assets/Images/chatroom/pic.svg");
-                background-size: 20px;
-                // cursor: pointer;
-                // outline: 1px solid red;
-                input {
-                    opacity: 0;
-                    box-sizing: border-box;
-                    border: 12px solid #00a;
-                    width: 20px;
-                    height: 20px;
-                    cursor: pointer;
-                    position: relative;
-                    z-index: 10;
-                }
-            }
-        }
-        .file-folder {
-            display: block;
-            min-width: 24px;
-            height: 24px;
-            margin: 3px 6px 3px 0;
-            background-image: url("~@/assets/Images/chatroom/file.svg");
-            background-size: 24px;
-            cursor: pointer;
-            input {
-                opacity: 0;
-                box-sizing: border-box;
-                border: 12px solid #00a;
-                width: 24px;
-                height: 24px;
-                cursor: pointer;
-            }
-        }
-        @media (max-width: 768px) {
-            .file-folder {
-                display: none;
-                min-width: 24px;
-                height: 24px;
-                margin: 3px 6px 3px 0;
-                background-image: url("~@/assets/Images/chatroom/file.svg");
-                background-size: 24px;
-                cursor: pointer;
-                input {
-                    opacity: 0;
-                    box-sizing: border-box;
-                    border: 12px solid #00a;
-                    width: 24px;
-                    height: 24px;
-                    cursor: pointer;
-                }
-            }
-        }
-
-        .n-button.recorderBtn {
-            width: 100%;
-            background-color: $gray-8;
-            color: $gray-2;
-            height: 45px;
-            &:not(.n-button--disabled):hover,
-            &:not(.n-button--disabled):active {
-                color: $gray-1;
-                background-color: $gray-6;
-            }
-            .n-button__border {
-                border-color: $gray-8;
-            }
-            &:not(.n-button--disabled):hover .n-button__state-border {
-                border-color: $gray-8;
-            }
-        }
-        #textAreaWeb {
-            width: 100%;
-            padding: 4px;
-            border-radius: 30px;
-            margin-right: 0;
-            margin-left: 7px;
-            background-color: $gray-7;
-            overflow-x: hidden;
-            display: flex;
-            justify-content: space-between;
-            &.small {
-                height: 38px;
-                overflow: hidden;
-            }
-            img {
-                margin-right: 5px;
-                cursor: pointer;
-            }
-        }
-        @media (max-width: 768px) {
-            #textAreaWeb {
-                display: none;
-            }
-        }
-        #textAreaPhone {
-            width: 100%;
-            padding: 4px;
-            border-radius: 30px;
-            margin-right: 0;
-            margin-left: 7px;
-            background-color: $gray-7;
-            overflow-x: hidden;
-            display: none;
-            justify-content: space-between;
-            &.small {
-                height: 38px;
-                overflow: hidden;
-            }
-            img {
-                margin-right: 5px;
-                cursor: pointer;
-            }
-        }
-        @media (max-width: 768px) {
-            #textAreaPhone {
-                display: flex;
-            }
-        }
         .send {
             width: 28px;
             height: 28px;
@@ -1686,7 +1512,8 @@ watchEffect(() => {
                 cursor: pointer;
             }
         }
-        .recorder {
+        .recorder--disabled,
+        .recorder--enabled {
             display: none;
             width: 28px;
             height: 28px;
@@ -1701,7 +1528,8 @@ watchEffect(() => {
                 height: 24px;
                 margin-left: 9px;
             }
-            .recorder {
+            .recorder--disabled,
+            .recorder--enabled {
                 display: block;
                 width: 24px;
                 height: 24px;
@@ -1709,10 +1537,11 @@ watchEffect(() => {
             }
         }
     }
-    .stickerArea {
+
+    .sticker {
         padding-top: 0;
         padding-bottom: 10px;
-        .stickerTabsArea {
+        &__tabs {
             width: 100%;
             height: 55px;
             display: block;
@@ -1720,7 +1549,7 @@ watchEffect(() => {
             overflow-y: hidden;
             white-space: nowrap;
         }
-        .stickerTabs {
+        &__ul {
             li {
                 width: 35px;
                 height: 35px;
@@ -1746,7 +1575,7 @@ watchEffect(() => {
                 }
             }
         }
-        .stickerGroupID {
+        &__group {
             width: 100%;
             min-height: 150px;
             max-height: 140px;
@@ -1756,7 +1585,7 @@ watchEffect(() => {
                 display: none;
             }
         }
-        .stickerIcon {
+        &__icon {
             overflow: hidden;
             display: flex;
             justify-content: center;
@@ -1773,28 +1602,181 @@ watchEffect(() => {
             }
         }
         @media (max-width: 768px) {
-            .stickerIcon {
-                width: auto;
-                height: auto;
+            .sticker {
+                &__icon {
+                    width: auto;
+                    height: auto;
+                }
             }
         }
     }
-    .audioRecorderArea {
+    .recording {
         padding-top: 15px;
         padding-bottom: 15px;
         text-align: center;
 
-        .recorderDescription {
+        .description {
             @extend %h4;
             margin-bottom: 15px;
             color: $gray-1;
         }
-        .recorderTime {
+        .time {
             @extend %h1;
             margin-bottom: 15px;
             color: $primary-1;
         }
-        .audioMicrophoneDisable {
+    }
+    .attach--open {
+        display: none;
+        min-width: 24px;
+        height: 24px;
+        margin: 3px 0.5em 3px 0;
+        background-image: url("~@/assets/Images/chatroom/add-round.svg");
+        background-size: 24px;
+        cursor: pointer;
+    }
+    .attach--close {
+        display: none;
+        min-width: 24px;
+        height: 24px;
+        margin: 3px 0.5em 3px 0;
+        background-image: url("~@/assets/Images/chatroom/close-round.svg");
+        background-size: 24px;
+        cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+        .attach--open {
+            min-width: 20px;
+            height: 20px;
+            background-size: 20px;
+            display: block;
+        }
+        .attach--close {
+            min-width: 20px;
+            height: 20px;
+            background-size: 20px;
+            display: block;
+        }
+    }
+    .camera {
+        display: none;
+        min-width: 24px;
+        height: 24px;
+        margin: 3px 6px 3px 0;
+        background-image: url("~@/assets/Images/chatroom/Photo.svg");
+        background-size: 24px;
+        // cursor: pointer;
+        input {
+            opacity: 0;
+            box-sizing: border-box;
+            // border: 12px solid #00a;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            position: relative;
+            z-index: 10;
+        }
+    }
+    @media (max-width: 768px) {
+        .camera {
+            display: block;
+            min-width: 20px;
+            height: 20px;
+            margin: 3px 0.6em 3px 0;
+            background-image: url("~@/assets/Images/chatroom/Photo.svg");
+            background-size: 20px;
+            // cursor: pointer;
+            // outline: 1px solid red;
+            input {
+                opacity: 0;
+                box-sizing: border-box;
+                border: 12px solid #00a;
+                width: 20px;
+                height: 20px;
+                cursor: pointer;
+                position: relative;
+                z-index: 10;
+            }
+        }
+    }
+    .photo {
+        display: none;
+        min-width: 24px;
+        height: 24px;
+        margin: 3px 6px 3px 0;
+        background-image: url("~@/assets/Images/chatroom/pic.svg");
+        background-size: 24px;
+        // cursor: pointer;
+        input {
+            opacity: 0;
+            box-sizing: border-box;
+            border: 12px solid #00a;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+    }
+    @media (max-width: 768px) {
+        .photo {
+            display: block;
+            min-width: 20px;
+            height: 20px;
+            margin: 3px 0 3px 0;
+            background-image: url("~@/assets/Images/chatroom/pic.svg");
+            background-size: 20px;
+            // cursor: pointer;
+            // outline: 1px solid red;
+            input {
+                opacity: 0;
+                box-sizing: border-box;
+                border: 12px solid #00a;
+                width: 20px;
+                height: 20px;
+                cursor: pointer;
+                position: relative;
+                z-index: 10;
+            }
+        }
+    }
+    .file-folder {
+        display: block;
+        min-width: 24px;
+        height: 24px;
+        margin: 3px 6px 3px 0;
+        background-image: url("~@/assets/Images/chatroom/file.svg");
+        background-size: 24px;
+        cursor: pointer;
+        input {
+            opacity: 0;
+            box-sizing: border-box;
+            border: 12px solid #00a;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+    }
+    @media (max-width: 768px) {
+        .file-folder {
+            display: none;
+            min-width: 24px;
+            height: 24px;
+            margin: 3px 6px 3px 0;
+            background-image: url("~@/assets/Images/chatroom/file.svg");
+            background-size: 24px;
+            cursor: pointer;
+            input {
+                opacity: 0;
+                box-sizing: border-box;
+                border: 12px solid #00a;
+                width: 24px;
+                height: 24px;
+                cursor: pointer;
+            }
+        }
+    }
+    .audio-microphone {
+        &--disable {
             width: 80px;
             height: 80px;
             position: relative;
@@ -1808,7 +1790,7 @@ watchEffect(() => {
                 transform: translate(-50%, -50%);
             }
         }
-        .audioMicrophoneEnable {
+        &--enable {
             width: 80px;
             height: 80px;
             position: relative;
@@ -1825,7 +1807,7 @@ watchEffect(() => {
     }
 }
 @media (max-width: 768px) {
-    .input {
+    .input-bar {
         width: 100%;
     }
 }

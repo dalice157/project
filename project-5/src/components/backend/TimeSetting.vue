@@ -1,31 +1,29 @@
 <template>
-    <div class="timeSetting">
+    <div class="time-setting">
         <h2>發送時間設定</h2>
         <n-divider></n-divider>
-        <div class="settingRadio">
-            <n-radio-group v-model:value="radio" name="radioGroup" class="radioGroup">
-                <div class="immediate">
-                    <n-radio :value="0">
-                        <h3>立即發送</h3>
-                    </n-radio>
-                </div>
-                <div class="reserve">
-                    <n-radio :value="1">
-                        <h3>預約發送</h3>
-                    </n-radio>
-                    <n-date-picker
-                        placeholder="請選擇日期與時間"
-                        v-model:value="date"
-                        type="datetime"
-                        clearable
-                        :disabled="disabled"
-                        size="small"
-                        :default-value="Date.now()"
-                        :is-date-disabled="dateDisabled"
-                    />
-                </div>
-            </n-radio-group>
-        </div>
+        <n-radio-group v-model:value="radio" name="radioGroup" class="time-setting__radio">
+            <div class="immediate">
+                <n-radio :value="0">
+                    <h3>立即發送</h3>
+                </n-radio>
+            </div>
+            <div class="reserve">
+                <n-radio :value="1">
+                    <h3>預約發送</h3>
+                </n-radio>
+                <n-date-picker
+                    placeholder="請選擇日期與時間"
+                    v-model:value="date"
+                    type="datetime"
+                    clearable
+                    :disabled="disabled"
+                    size="small"
+                    :default-value="Date.now()"
+                    :is-date-disabled="dateDisabled"
+                />
+            </div>
+        </n-radio-group>
     </div>
 </template>
 <script lang="ts" setup>
@@ -106,7 +104,7 @@ watchEffect(() => {
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
 
-.timeSetting {
+.time-setting {
     h2 {
         margin-top: 30px;
         color: $gray-1;
@@ -117,27 +115,25 @@ watchEffect(() => {
         margin-top: 15px;
         margin-bottom: 15px;
     }
-    .settingRadio {
-        padding-top: 5px;
-        .radioGroup {
+    &__radio {
+        display: flex;
+        align-items: center;
+        margin-top: 5px;
+        h3 {
+            display: inline;
+            @extend %h3;
+            color: $gray-1;
+            font-family: $font-family;
+        }
+        .immediate {
+            margin-right: 60px;
+        }
+        .reserve {
             display: flex;
-            align-items: center;
-            h3 {
-                display: inline;
-                @extend %h3;
-                color: $gray-1;
-                font-family: $font-family;
-            }
-            .immediate {
-                margin-right: 60px;
-            }
-            .reserve {
+            .n-config-provider {
                 display: flex;
-                .n-config-provider {
-                    display: flex;
-                    .n-date-picker {
-                        margin-left: 20px;
-                    }
+                .n-date-picker {
+                    margin-left: 20px;
                 }
             }
         }

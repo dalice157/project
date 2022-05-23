@@ -1,6 +1,6 @@
 <template>
     <div class="phone">
-        <div class="keyVision">
+        <div class="phon__vision">
             <n-avatar
                 class="avatar"
                 round
@@ -9,25 +9,25 @@
                 fallback-src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
                 :src="`${config.fileUrl}${eventInfo.icon}`"
             />
-            <div class="clientName">
+            <div class="name">
                 <h1>{{ eventInfo.name }}</h1>
             </div>
-            <div v-if="!isAccepted" class="callStatus">
+            <div v-if="!isAccepted" class="call-status">
                 <p>撥號中</p>
                 <PulseLoader color="#ffb400" size="10px"></PulseLoader>
             </div>
-            <div v-if="isAccepted" class="callStatus">
+            <div v-if="isAccepted" class="call-status">
                 <p>{{ phoneTime }}</p>
                 <ScaleLoader class="scale" color="#ffb400" height="20px" width="3px"></ScaleLoader>
             </div>
         </div>
-        <div class="phoneFunctionbar">
-            <div class="phoneMicrophone">
-                <img :src="voiceFillDisabled" alt="voiceDisabled" />
+        <div class="phone__function-bar">
+            <div class="phone__microphone">
+                <img :src="voiceFillDisabled" alt="voice--disabled" />
                 <p>關閉</p>
                 <p>麥克風</p>
             </div>
-            <div class="phoneClose">
+            <div class="close">
                 <router-link :to="`/${eventKey}`">
                     <img
                         @[events]="doHangup(!isAccepted ? 2 : 3, eventID(route.params.eventKey))"
@@ -36,15 +36,19 @@
                     />
                 </router-link>
             </div>
-            <div class="phoneSpeaker" @[events]="speakerBoolean = !speakerBoolean">
+            <div class="phone__speaker" @[events]="speakerBoolean = !speakerBoolean">
                 <img
                     :src="notificationDisabled"
-                    alt="notificationDisabled"
+                    alt="notification--disabled"
                     v-show="!speakerBoolean"
                 />
                 <p v-show="!speakerBoolean">開啟</p>
                 <p v-show="!speakerBoolean">擴音</p>
-                <img :src="notificationEnalbed" alt="notificationEnalbed" v-show="speakerBoolean" />
+                <img
+                    :src="notificationEnalbed"
+                    alt="notification--enalbed"
+                    v-show="speakerBoolean"
+                />
                 <p v-show="speakerBoolean" style="color: #ffb400">關閉</p>
                 <p v-show="speakerBoolean" style="color: #ffb400">擴音</p>
             </div>
@@ -101,17 +105,13 @@ getBackendApi(eventKey.value);
     height: 100%;
     background: url("~@/assets/Images/phone/phone-bg.svg") no-repeat center top;
     position: relative;
-
-    .avatar {
-        margin: 0 auto;
-    }
-    .keyVision {
+    &__vision {
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
         align-items: center;
         padding-top: 50px;
-        .clientName {
+        .name {
             margin-top: 15px;
             h1 {
                 @extend %h1;
@@ -119,7 +119,7 @@ getBackendApi(eventKey.value);
                 color: $gray-1;
             }
         }
-        .callStatus {
+        .call-status {
             margin-top: 15px;
             p {
                 @extend %h4;
@@ -129,7 +129,8 @@ getBackendApi(eventKey.value);
             }
         }
     }
-    .phoneFunctionbar {
+
+    &__function-bar {
         width: 100%;
         padding-bottom: 50px;
         background-color: $white;
@@ -138,29 +139,32 @@ getBackendApi(eventKey.value);
         display: flex;
         justify-content: space-around;
         align-items: center;
-        .phoneMicrophone {
-            text-align: center;
-            p {
-                margin-top: 10px;
-                font-size: $font-size-10;
-                font-family: $font-family;
-                color: $gray-1;
-            }
-            p + p {
-                margin-top: 2px;
-            }
+    }
+    &__microphone {
+        text-align: center;
+        p {
+            margin-top: 10px;
+            font-size: $font-size-10;
+            font-family: $font-family;
+            color: $gray-1;
         }
-        .phoneSpeaker {
-            p {
-                margin-top: 10px;
-                font-size: $font-size-10;
-                font-family: $font-family;
-                color: $gray-1;
-            }
-            p + p {
-                margin-top: 2px;
-            }
+        p + p {
+            margin-top: 2px;
         }
+    }
+    &__speaker {
+        p {
+            margin-top: 10px;
+            font-size: $font-size-10;
+            font-family: $font-family;
+            color: $gray-1;
+        }
+        p + p {
+            margin-top: 2px;
+        }
+    }
+    .avatar {
+        margin: 0 auto;
     }
 }
 @media (max-width: 768px) {

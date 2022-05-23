@@ -1,19 +1,19 @@
 <template>
     <div v-if="eventInfo !== null" class="navbar" @[events]="closeSearchBar">
-        <div class="navbarFuncitonbar">
-            <div class="navbartitle">
+        <div class="navbar__funcitonbar">
+            <div class="navbar__title">
                 <a class="back" @[events]="goToRecord">
                     <img :src="arrowLeft" alt="回交談紀錄" />
                 </a>
                 <!-- NavBar 大頭貼 -->
-                <div class="navbarAvatar">
+                <div class="avatar">
                     <n-avatar round :size="42" :src="`${config.fileUrl}${eventInfo.icon}`" />
                 </div>
                 <!-- NavBar 標題 -->
                 <h1 class="title" v-show="route.meta.show">{{ eventInfo.name }}</h1>
             </div>
             <!-- 功能欄 -->
-            <div class="chatpane">
+            <div class="navbar__chatpane">
                 <a class="back" @[events]="goToRecord">
                     <img :src="commentIcon" alt="回交談紀錄" />
                 </a>
@@ -131,6 +131,20 @@ const goToGallery = () => {
 .gallery {
     cursor: pointer;
 }
+
+.back {
+    display: none;
+}
+
+//navbar 頭貼
+.avatar {
+    margin: 0 10px;
+}
+//navbar 標題
+.title {
+    color: $gray-1;
+    @extend %h4;
+}
 .navbar {
     width: calc(100% - 300px);
     height: 160px;
@@ -139,98 +153,85 @@ const goToGallery = () => {
     position: fixed;
     z-index: 100;
     top: 0;
-    .back {
-        display: none;
-    }
-    .navbarFuncitonbar {
+    &__funcitonbar {
         width: 100%;
         display: flex;
         justify-content: space-between;
         align-items: center;
         padding-top: 8px;
-        .navbartitle {
-            margin-left: 15px;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            .back {
-                display: none;
-                img {
-                    width: 24px;
-                    height: 24px;
-                }
-            }
-            @media (max-width: 768px) {
-                .back {
-                    display: block;
-                }
-            }
+    }
 
-            .hamburger {
-                display: none;
-                top: 0%;
+    &__title {
+        margin-left: 15px;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        .back {
+            display: none;
+            img {
+                width: 24px;
+                height: 24px;
+            }
+        }
+        @media (max-width: 768px) {
+            .back {
+                display: block;
+            }
+        }
+
+        .hamburger {
+            display: none;
+            top: 0%;
+            -webkit-transition: all 0.5s ease-in-out;
+            -o-transition: all 0.5s ease-in-out;
+            transition: all 0.5s ease-in-out;
+            padding: 20px 10px;
+            &:hover {
+                cursor: pointer;
+            }
+            .line:nth-child(odd) {
+                width: 20px;
+                height: 2px;
+                background-color: $gray-1;
+                display: block;
+                margin: 5px;
                 -webkit-transition: all 0.5s ease-in-out;
                 -o-transition: all 0.5s ease-in-out;
                 transition: all 0.5s ease-in-out;
-                padding: 20px 10px;
-                &:hover {
-                    cursor: pointer;
-                }
-                .line:nth-child(odd) {
-                    width: 20px;
-                    height: 2px;
-                    background-color: $gray-1;
-                    display: block;
-                    margin: 5px;
-                    -webkit-transition: all 0.5s ease-in-out;
-                    -o-transition: all 0.5s ease-in-out;
-                    transition: all 0.5s ease-in-out;
-                    position: relative;
-                    z-index: 2004;
-                }
-                .line:nth-child(even) {
-                    width: 14px;
-                    height: 2px;
-                    background-color: $gray-1;
-                    display: block;
-                    margin: 5px;
-                    -webkit-transition: all 0.5s ease-in-out;
-                    -o-transition: all 0.5s ease-in-out;
-                    transition: all 0.5s ease-in-out;
-                    position: relative;
-                    z-index: 2004;
-                }
+                position: relative;
+                z-index: 2004;
             }
-            @media (max-width: 768px) {
-                .hamburger {
-                    display: block;
-                }
-            }
-
-            //navbar 頭貼
-            .navbarAvatar {
-                margin: 0 10px;
-            }
-            //navbar 標題
-            .title {
-                color: $gray-1;
-                @extend %h4;
+            .line:nth-child(even) {
+                width: 14px;
+                height: 2px;
+                background-color: $gray-1;
+                display: block;
+                margin: 5px;
+                -webkit-transition: all 0.5s ease-in-out;
+                -o-transition: all 0.5s ease-in-out;
+                transition: all 0.5s ease-in-out;
+                position: relative;
+                z-index: 2004;
             }
         }
-        .chatpane {
-            margin-right: 10px;
-            display: flex;
-            .phone {
+        @media (max-width: 768px) {
+            .hamburger {
                 display: block;
-                cursor: pointer;
-            }
-            a {
-                background-color: transparent;
-                margin: 0 5px;
             }
         }
     }
-    //漢堡選單收放動畫
+    &__chatpane {
+        margin-right: 10px;
+        display: flex;
+        .phone {
+            display: block;
+            cursor: pointer;
+        }
+        a {
+            background-color: transparent;
+            margin: 0 5px;
+        }
+    }
 }
 @media (max-width: 768px) {
     .navbar {

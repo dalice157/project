@@ -1,7 +1,7 @@
 <template>
-    <div class="chatRecord" :class="{ menuToggle: hamburgerBoolean }">
+    <div class="chat-record" :class="{ 'menu--toggle': hamburgerBoolean }">
         <HamburgerBar @menuToggle="menuToggle" />
-        <div class="main">
+        <div class="chat-record__main">
             <!-- 聊天室交談紀錄列表 -->
             <ChatRecordSearch />
             <ChatRecordMessage @getChangeList="getChangeList" />
@@ -62,13 +62,13 @@ onMounted(() => {
 <style lang="scss" scoped>
 @import "~@/assets/scss/var";
 @import "~@/assets/scss/extend";
-.chatRecord {
+.chat-record {
     height: 100%;
     grid-area: body;
     display: none;
 }
 @media (max-width: 768px) {
-    .chatRecord {
+    .chat-record {
         width: 100%;
         min-height: 100%;
         display: grid;
@@ -80,15 +80,15 @@ onMounted(() => {
         -webkit-transition: all 0.7s ease-in-out;
         -o-transition: all 0.7s ease-in-out;
         transition: all 0.7s ease-in-out;
-        &.menuToggle {
+        &.menu--toggle {
             transform: translateX(250px);
             -webkit-transition: all 0.7s ease-in-out;
             -o-transition: all 0.7s ease-in-out;
             transition: all 0.7s ease-in-out;
         }
-    }
-    .main {
-        grid-area: main;
+        &__main {
+            grid-area: main;
+        }
     }
 }
 </style>

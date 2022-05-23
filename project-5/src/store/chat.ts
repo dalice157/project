@@ -92,7 +92,6 @@ export const useChatStore = defineStore({
         // 貼圖
         handleStickckerGroup(id: any) {
             console.log("id:", id);
-
             // api store
             const apiStore = useApiStore();
             const { stickerList } = storeToRefs(apiStore);

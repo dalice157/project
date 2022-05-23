@@ -1,13 +1,13 @@
 <template>
     <n-layout-header class="header" bordered>
-        <h1 class="logo">
+        <h1 class="header__logo">
             {{ route.name !== "ChatRoom" ? titleObj[route.name] : eventInfo.name }}
         </h1>
-        <ul class="pages">
-            <li class="btnBg" v-if="isAdmin >= 1">
+        <ul class="header__pages">
+            <li v-if="isAdmin >= 1">
                 <p>使用者：{{ userName }}</p>
             </li>
-            <li class="btnBg">
+            <li>
                 <p>
                     點數<span class="point">{{ point }}點</span>(<a
                         class="store-value"
@@ -17,7 +17,7 @@
                     >)
                 </p>
             </li>
-            <li class="btnBg" v-if="isAdmin >= 1">
+            <li v-if="isAdmin >= 1">
                 <router-link
                     class="link"
                     :to="`${eventID}` ? `/manage/${eventID}/SMSSend` : `/manage/SMSSend`"
@@ -25,7 +25,7 @@
                     管理功能
                 </router-link>
             </li>
-            <li class="btnBg myChatRoom">
+            <li class="my-chatRoom">
                 <n-dropdown
                     class="dropdown"
                     trigger="hover"
@@ -41,7 +41,7 @@
     </n-layout-header>
     <teleport to="body" v-if="isFirstLogin">
         <div class="mask">
-            <div class="previewWrap">
+            <div class="wrap">
                 <a @click="onCloseModel" class="close"><img :src="closeIcon" /></a>
                 <div v-if="currentStep == 1">
                     <p>
@@ -829,7 +829,7 @@ const attachVideocallPlugin = () => {
 .dropdown.n-popover {
     width: 100%;
 }
-.myChatRoom {
+.my-chatRoom {
     .n-badge.dot {
         width: 100%;
         color: $gray-1;
@@ -857,7 +857,7 @@ $headerHeight: 80px;
     display: flex;
     justify-content: center;
     align-items: center;
-    .previewWrap {
+    .wrap {
         position: relative;
         width: 600px;
         min-height: 200px;
@@ -941,33 +941,24 @@ $headerHeight: 80px;
     justify-content: space-between;
     padding: 0 20px;
     box-shadow: #d9d9d9 0 0 3px 0;
-}
-.logo {
-    display: flex;
-    align-items: center;
-    @extend %h1;
-}
-.pages {
-    display: flex;
-    align-items: center;
-    li {
-        + li {
-            margin-left: 15px;
-        }
-        &.login,
-        &.chevron {
-            padding: 5px;
-        }
-        &.btnBg {
-            &.myChatRoom {
-                cursor: pointer;
-            }
+    &__logo {
+        display: flex;
+        align-items: center;
+        @extend %h1;
+    }
+    &__pages {
+        display: flex;
+        align-items: center;
+        li {
             border-radius: 20px;
             box-shadow: $gray-6 1px 2px 4px 0;
             background-color: $primary-4;
             @extend %h4;
             &:hover {
                 background-color: $primary-5;
+            }
+            + li {
+                margin-left: 15px;
             }
             p,
             .link {
@@ -976,37 +967,46 @@ $headerHeight: 80px;
             .link {
                 display: block;
             }
-        }
-
-        a {
-            text-decoration: none;
-            color: $gray-1;
-            &:hover {
-                color: $gray-3;
+            &.login,
+            &.chevron {
+                background: transparent;
+                box-shadow: none;
+                padding: 5px;
             }
-
-            &.store-value {
-                text-decoration: underline;
+            &.my-chatRoom {
+                cursor: pointer;
             }
-        }
-        a.router-link-exact-active,
-        a.active {
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            text-align: center;
-            font-weight: bold;
-        }
-        &.chevron {
-            height: auto;
-            line-height: normal;
-            cursor: pointer;
-            .n-icon {
-                font-size: $font-size-24;
+            &.chevron {
+                height: auto;
+                line-height: normal;
+                cursor: pointer;
+                .n-icon {
+                    font-size: $font-size-24;
+                }
+            }
+            a {
+                text-decoration: none;
+                color: $gray-1;
+                &:hover {
+                    color: $gray-3;
+                }
+
+                &.store-value {
+                    text-decoration: underline;
+                }
+            }
+            a.router-link-exact-active,
+            a.active {
+                display: flex;
+                flex-direction: column;
+                position: relative;
+                text-align: center;
+                font-weight: bold;
             }
         }
     }
 }
+
 .point {
     color: $danger;
 }

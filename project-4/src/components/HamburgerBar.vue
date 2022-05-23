@@ -1,35 +1,37 @@
 <template>
     <!-- 漢堡選單 -->
     <div
-        class="chatroom-header"
+        class="menu-bar"
         :class="{
-            moreRoomBg: route.path === `/moreChatRoom/${route.params.eventKey}`,
-            recordBg: route.path === `/chatRecord/${route.params.eventKey}`,
+            'menu-bar--moreRoom-bg': route.path === `/moreChatRoom/${route.params.eventKey}`,
+            'menu-bar--chat-log-bg': route.path === `/chatRecord/${route.params.eventKey}`,
         }"
         v-show="route.meta.home"
     >
-        <div class="hamburger" @[events]="hamburgerToggle" :class="{ isActive: isActive }">
-            <span class="line"></span>
-            <span class="line"></span>
-            <span class="line"></span>
+        <div
+            class="hamburger"
+            @[events]="hamburgerToggle"
+            :class="{ 'hamburger--isActive': isActive }"
+        >
+            <span class="hamburger__line"></span>
+            <span class="hamburger__line"></span>
+            <span class="hamburger__line"></span>
         </div>
         <div class="container">
-            <ul class="hamburgerMenu">
-                <li class="moreChatRoom" @[events]="goMoreChatRoom">
+            <ul class="container__menu">
+                <li @[events]="goMoreChatRoom">
                     <router-link :to="`/moreChatRoom/${eventKey}`"> 更多聊天室 </router-link>
                 </li>
-                <li class="burgerChatHistory" @[events]="goChatRecord">
+                <li @[events]="goChatRecord">
                     <router-link :to="`/chatRecord/${eventKey}`">交談紀錄</router-link>
                 </li>
             </ul>
-            <ul class="hamburgerMenu">
-                <li v-if="!isProduction" class="burgerKnow" @[events]="getMOCode">
-                    取得簡訊驗證碼
-                </li>
-                <li v-if="!isProduction" class="burgerKnow" @[events]="onOpenOldDevice">
+            <ul class="container__menu">
+                <li v-if="!isProduction" class="device" @[events]="getMOCode">取得簡訊驗證碼</li>
+                <li v-if="!isProduction" class="device" @[events]="onOpenOldDevice">
                     發送原手機驗證碼
                 </li>
-                <li class="burgerKnow" @[events]="onBurgerKnow">認識talkOD</li>
+                <li class="device" @[events]="onBurgerKnow">認識talkOD</li>
                 <li class="qa" @[events]="onQa">常見問題</li>
                 <li class="terms">
                     <a href="https://www.teamplus.tech/every8d-agreement/" target="_blank"
@@ -37,13 +39,15 @@
                     >
                 </li>
             </ul>
-            <div class="title_container">
+            <div class="container__title">
                 <h2 class="title">talkOD</h2>
             </div>
         </div>
         <!-- NavBar 標題 -->
-        <h1 class="title" v-if="route.path === `/chatRecord/${route.params.eventKey}`">交談紀錄</h1>
-        <h1 class="title" v-if="route.path === `/moreChatRoom/${route.params.eventKey}`">
+        <h1 class="menu-bar__title" v-if="route.path === `/chatRecord/${route.params.eventKey}`">
+            交談紀錄
+        </h1>
+        <h1 class="menu-bar__title" v-if="route.path === `/moreChatRoom/${route.params.eventKey}`">
             更多聊天室
         </h1>
     </div>
@@ -370,124 +374,136 @@ export default defineComponent({
         }
     }
 }
-.chatroom-header {
+
+//漢堡選單收放動畫
+.hamburger {
+    display: none;
+    top: 0%;
+    -webkit-transition: all 0.5s ease-in-out;
+    -o-transition: all 0.5s ease-in-out;
+    transition: all 0.5s ease-in-out;
+    padding: 20px 10px;
+    &:hover {
+        cursor: pointer;
+    }
+    &__line:nth-child(odd) {
+        width: 20px;
+        height: 2px;
+        background-color: $gray-1;
+        display: block;
+        margin: 5px;
+        -webkit-transition: all 0.5s ease-in-out;
+        -o-transition: all 0.5s ease-in-out;
+        transition: all 0.5s ease-in-out;
+        position: relative;
+        z-index: 2004;
+    }
+    &__line:nth-child(even) {
+        width: 10px;
+        height: 2px;
+        background-color: $gray-1;
+        display: block;
+        margin: 5px;
+        -webkit-transition: all 0.5s ease-in-out;
+        -o-transition: all 0.5s ease-in-out;
+        transition: all 0.5s ease-in-out;
+        position: relative;
+        z-index: 2004;
+    }
+    &--isActive {
+        .hamburger__line:nth-child(2) {
+            opacity: 0;
+        }
+        .hamburger__line:nth-child(1) {
+            -webkit-transform: translateY(5px) rotate(45deg);
+            -ms-transform: translateY(5px) rotate(45deg);
+            -o-transform: translateY(5px) rotate(45deg);
+            transform: translateY(5px) rotate(45deg);
+        }
+        .hamburger__line:nth-child(3) {
+            -webkit-transform: translateY(-9px) rotate(-45deg);
+            -ms-transform: translateY(-9px) rotate(-45deg);
+            -o-transform: translateY(-9px) rotate(-45deg);
+            transform: translateY(-9px) rotate(-45deg);
+        }
+    }
+}
+@media (max-width: 768px) {
+    .hamburger {
+        display: block;
+        position: absolute;
+    }
+    .container {
+        transform: translateX(-108%);
+        -webkit-transition: all 0.7s ease-in-out;
+        -o-transition: all 0.7s ease-in-out;
+        transition: all 0.7s ease-in-out;
+        display: block;
+    }
+}
+.menu-bar {
     grid-area: header;
     background: no-repeat center top;
     background-size: cover;
     position: sticky;
     top: 0;
     z-index: 100;
-    &.recordBg {
+    &--chat-log-bg {
         background-image: url("~@/assets/Images/chatRecord/chatRecordBg.svg");
     }
-    &.moreRoomBg {
+    &--moreRoom-bg {
         background-image: url("~@/assets/Images/common/moreChatRoomBg.svg");
     }
-    //漢堡選單收放動畫
-    .hamburger {
-        display: none;
-        top: 0%;
-        -webkit-transition: all 0.5s ease-in-out;
-        -o-transition: all 0.5s ease-in-out;
-        transition: all 0.5s ease-in-out;
-        padding: 20px 10px;
-        &:hover {
+    //header 名字
+    &__title {
+        color: $gray-1;
+        @extend %h2;
+        text-align: center;
+        padding-top: 25px;
+    }
+
+    .chatpane {
+        margin-right: 0.5em;
+        .n-icon {
             cursor: pointer;
         }
-        .line:nth-child(odd) {
-            width: 20px;
-            height: 2px;
-            background-color: $gray-1;
-            display: block;
-            margin: 5px;
-            -webkit-transition: all 0.5s ease-in-out;
-            -o-transition: all 0.5s ease-in-out;
-            transition: all 0.5s ease-in-out;
-            position: relative;
-            z-index: 2004;
+        .phone {
+            background-color: transparent;
         }
-        .line:nth-child(even) {
-            width: 10px;
-            height: 2px;
-            background-color: $gray-1;
-            display: block;
-            margin: 5px;
-            -webkit-transition: all 0.5s ease-in-out;
-            -o-transition: all 0.5s ease-in-out;
-            transition: all 0.5s ease-in-out;
-            position: relative;
-            z-index: 2004;
+        .gallery {
+            background-color: transparent;
+        }
+        .n-icon {
+            margin-left: 0.4em;
+            &:hover {
+                opacity: 0.75;
+            }
+            a {
+                color: $white;
+            }
         }
     }
-    @media (max-width: 768px) {
-        .hamburger {
-            display: block;
-            position: absolute;
-        }
-        .container {
-            transform: translateX(-108%);
-            -webkit-transition: all 0.7s ease-in-out;
-            -o-transition: all 0.7s ease-in-out;
-            transition: all 0.7s ease-in-out;
-            display: block;
-        }
-    }
-
-    .hamburger.isActive .line:nth-child(2) {
-        opacity: 0;
-    }
-
-    .hamburger.isActive .line:nth-child(1) {
-        -webkit-transform: translateY(5px) rotate(45deg);
-        -ms-transform: translateY(5px) rotate(45deg);
-        -o-transform: translateY(5px) rotate(45deg);
-        transform: translateY(5px) rotate(45deg);
-    }
-
-    .hamburger.isActive .line:nth-child(3) {
-        -webkit-transform: translateY(-9px) rotate(-45deg);
-        -ms-transform: translateY(-9px) rotate(-45deg);
-        -o-transform: translateY(-9px) rotate(-45deg);
-        transform: translateY(-9px) rotate(-45deg);
-    }
-    //漢堡選單
-    .container {
-        width: 250px;
-        height: 100%;
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        z-index: 150;
-        background: url("~@/assets/Images/common/hambugerMenu.svg") no-repeat center bottom;
-        background-size: 100% auto;
-    }
-    .title_container {
-        position: absolute;
-        bottom: 40px;
-        width: 100%;
-        text-align: center;
-        h2.title {
-            margin: 0 auto;
-            width: 120px;
-            height: 40px;
-            background: url("~@/assets/Images/talkOD-logo.png") center no-repeat;
-            background-size: 100%;
-            text-indent: -9999px;
-            white-space: nowrap;
-            line-height: 0;
-        }
-    }
-    .hamburgerMenu {
+}
+.container {
+    width: 250px;
+    height: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    z-index: 150;
+    background: url("~@/assets/Images/common/hambugerMenu.svg") no-repeat center bottom;
+    background-size: 100% auto;
+    &__menu {
         padding-top: 60px;
         width: 220px;
-        + .hamburgerMenu {
+        + .container__menu {
             margin-top: 30px;
             padding-top: 30px;
             border-top: 1px solid $border-line;
         }
         li {
-            &.burgerKnow,
+            &.device,
             &.qa {
                 color: $gray-2;
                 @extend %h2;
@@ -521,35 +537,20 @@ export default defineComponent({
             margin-top: 20px;
         }
     }
-
-    //header 名字
-    h1.title {
-        color: $gray-1;
-        @extend %h2;
+    &__title {
+        position: absolute;
+        bottom: 40px;
+        width: 100%;
         text-align: center;
-        padding-top: 25px;
-        &.recordBg {
-        }
-    }
-    .chatpane {
-        margin-right: 0.5em;
-        .n-icon {
-            cursor: pointer;
-        }
-        .phone {
-            background-color: transparent;
-        }
-        .gallery {
-            background-color: transparent;
-        }
-        .n-icon {
-            margin-left: 0.4em;
-            &:hover {
-                opacity: 0.75;
-            }
-            a {
-                color: $white;
-            }
+        h2.title {
+            margin: 0 auto;
+            width: 120px;
+            height: 40px;
+            background: url("~@/assets/Images/talkOD-logo.png") center no-repeat;
+            background-size: 100%;
+            text-indent: -9999px;
+            white-space: nowrap;
+            line-height: 0;
         }
     }
 }

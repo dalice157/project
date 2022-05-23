@@ -1,17 +1,17 @@
 <template>
     <div class="editAutoReply">
-        <div class="autoReplySubject">
+        <div class="editAutoReply__subject">
             <h1>標題</h1>
             <n-input
                 placeholder="請輸入標題(僅作為識別用，不會顯示於用戶端)"
                 v-model:value="autoReplySubject"
             ></n-input>
         </div>
-        <div class="activateStatus">
+        <div class="editAutoReply__activate-status">
             <div>
                 <h1>啟用狀態</h1>
             </div>
-            <n-radio-group class="autoReplyRadioGroup" v-model:value="statusRadio">
+            <n-radio-group class="radio-group" v-model:value="statusRadio">
                 <div class="active">
                     <n-radio :value="1">啟用</n-radio>
                 </div>
@@ -20,12 +20,12 @@
                 </div>
             </n-radio-group>
         </div>
-        <div class="editAutoReplyTime">
+        <div class="editAutoReply__time">
             <div>
                 <h1>適用日期時間</h1>
                 <h1>(UTC+8)</h1>
             </div>
-            <n-radio-group class="autoReplyRadioGroup" v-model:value="timeRadio">
+            <n-radio-group class="radio-group" v-model:value="timeRadio">
                 <div class="agreedTime">
                     <n-radio :value="0">不指定日期時間</n-radio>
                 </div>
@@ -34,7 +34,7 @@
                 </div>
             </n-radio-group>
         </div>
-        <div class="autoReplyTimePicker" v-show="timePopUp">
+        <div class="editAutoReply__timePicker" v-show="timePopUp">
             <div class="dateRange">
                 <div>
                     <h1>指定日期區間</h1>
@@ -83,7 +83,7 @@
                 </div>
             </div>
         </div>
-        <div class="autoReplyKeyWord">
+        <div class="editAutoReply__keyWord">
             <h1><span>*</span>&thinsp;關鍵字</h1>
             <n-popover trigger="hover" placement="bottom">
                 <template #trigger>
@@ -99,7 +99,7 @@
                 <n-dynamic-tags v-model:value="keyWord"></n-dynamic-tags>
             </div>
         </div>
-        <div class="autoReplyContent">
+        <div class="editAutoReply__content">
             <h1><span>*</span>&thinsp;回覆內容</h1>
             <div
                 class="autoReplyInput"
@@ -157,9 +157,9 @@
             </div>
             <h2 @click="addAutoReplyMsg">+新增自動回覆訊息</h2>
         </div>
-        <div class="channelButtonGroup">
+        <div class="button-group">
             <router-link
-                class="channelCancel"
+                class="button--cancel"
                 :to="
                     `${route.params.id}`
                         ? `/manage/${route.params.id}/activitySetting`
@@ -167,17 +167,19 @@
                 "
                 >取消</router-link
             >
-            <div class="channelDel" @click="showDelModal = true">刪除</div>
-            <div class="channelStore" @click="confirmStore">確認儲存</div>
+            <div class="button--del" @click="showDelModal = true">刪除</div>
+            <div class="button--save" @click="confirmStore">確認儲存</div>
         </div>
     </div>
     <teleport to="body">
-        <div class="mask1" v-show="showDelModal">
-            <div class="deleteChannelPopUp">
-                <div class="deleteChannelConfirm">您確定要刪除此自動回覆訊息!!</div>
-                <div class="buttonContainer">
-                    <div type="button" class="cancel" @click="showDelModal = false">取消</div>
-                    <div type="button" class="confirm" @click="deleteMsgAPI">確定</div>
+        <div class="mask" v-show="showDelModal">
+            <div class="popUp">
+                <div class="popUp__Confirm">您確定要刪除此自動回覆訊息!!</div>
+                <div class="popUp__button-group">
+                    <div type="button" class="button--cancel" @click="showDelModal = false">
+                        取消
+                    </div>
+                    <div type="button" class="button--confirm" @click="deleteMsgAPI">確定</div>
                 </div>
             </div>
         </div>
@@ -613,7 +615,7 @@ const deleteMsgAPI = () => {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
-.mask1 {
+.mask {
     position: absolute;
     top: 0;
     bottom: 0;
@@ -621,7 +623,7 @@ const deleteMsgAPI = () => {
     right: 0;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
-    .deleteChannelPopUp {
+    .popUp {
         border-radius: 5px;
         width: 342px;
         padding: 15px;
@@ -638,12 +640,12 @@ const deleteMsgAPI = () => {
             text-align: left;
             line-height: 22px;
         }
-        .buttonContainer {
+        &__button-group {
             margin-top: 20px;
             text-align: right;
             display: flex;
             justify-content: flex-end;
-            & .cancel {
+            .button--cancel {
                 border-radius: 100px;
                 padding: 6px 16px;
                 cursor: pointer;
@@ -659,7 +661,7 @@ const deleteMsgAPI = () => {
                     color: $white;
                 }
             }
-            & .confirm {
+            .button--confirm {
                 border-radius: 100px;
                 padding: 6px 16px;
                 cursor: pointer;
@@ -676,9 +678,19 @@ const deleteMsgAPI = () => {
         }
     }
 }
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    .active {
+        margin-bottom: 20px;
+    }
+    .agreedTime {
+        margin-bottom: 20px;
+    }
+}
 .editAutoReply {
     padding: 50px;
-    .autoReplySubject {
+    &__subject {
         display: flex;
         align-items: center;
         margin-bottom: 40px;
@@ -690,7 +702,7 @@ const deleteMsgAPI = () => {
             width: 50%;
         }
     }
-    .activateStatus {
+    &__activateStatus {
         display: flex;
         margin-bottom: 20px;
         > div {
@@ -699,17 +711,8 @@ const deleteMsgAPI = () => {
                 margin-bottom: 5px;
             }
         }
-        .autoReplyRadioGroup {
-            display: flex;
-            flex-direction: column;
-            .active {
-                margin-bottom: 20px;
-            }
-            .deactive {
-            }
-        }
     }
-    .editAutoReplyTime {
+    &__time {
         display: flex;
         > div {
             margin-right: 35px;
@@ -717,17 +720,8 @@ const deleteMsgAPI = () => {
                 margin-bottom: 5px;
             }
         }
-        .autoReplyRadioGroup {
-            display: flex;
-            flex-direction: column;
-            .agreedTime {
-                margin-bottom: 20px;
-            }
-            .nonAgreedTime {
-            }
-        }
     }
-    .autoReplyTimePicker {
+    &__timePicker {
         width: 65%;
         margin-left: 123px;
         margin-top: 20px;
@@ -763,7 +757,7 @@ const deleteMsgAPI = () => {
             }
         }
     }
-    .autoReplyKeyWord {
+    &__KeyWord {
         display: flex;
         align-items: center;
         margin-top: 20px;
@@ -783,7 +777,7 @@ const deleteMsgAPI = () => {
             align-items: center;
         }
     }
-    .autoReplyContent {
+    &__content {
         margin-top: 20px;
         h1 {
             margin-bottom: 20px;
@@ -877,49 +871,50 @@ const deleteMsgAPI = () => {
             color: $primary-1;
         }
     }
-    .channelButtonGroup {
-        margin-top: 50px;
-        display: flex;
-        justify-content: center;
-        .channelCancel {
-            width: 100px;
-            height: 36px;
-            line-height: 36px;
-            border: 1px solid $gray-1;
-            border-radius: 18px;
-            text-align: center;
-            margin: 0 15px;
-            cursor: pointer;
-            text-decoration: none;
-            color: $gray-1;
+}
+.button-group {
+    margin-top: 50px;
+    display: flex;
+    justify-content: center;
+}
+.button {
+    &--cancel {
+        width: 100px;
+        height: 36px;
+        line-height: 36px;
+        border: 1px solid $gray-1;
+        border-radius: 18px;
+        text-align: center;
+        margin: 0 15px;
+        cursor: pointer;
+        text-decoration: none;
+        color: $gray-1;
+    }
+    &--del {
+        text-align: center;
+        width: 100px;
+        border-radius: 50px;
+        padding: 10px 15px;
+        border: 1px solid $danger;
+        color: $danger;
+        margin-right: 15px;
+        cursor: pointer;
+        &:hover {
+            opacity: 0.7;
         }
-        .channelDel {
-            text-align: center;
-            width: 100px;
-            border-radius: 50px;
-            padding: 10px 15px;
-            border: 1px solid $danger;
-            color: $danger;
-            margin-right: 15px;
-            cursor: pointer;
-            &:hover {
-                opacity: 0.7;
-            }
-        }
-
-        .channelStore {
-            text-decoration: none;
-            width: 200px;
-            height: 36px;
-            line-height: 36px;
-            border: 1px solid $gray-1;
-            border-radius: 18px;
-            text-align: center;
-            color: $white;
-            background-color: $gray-1;
-            margin: 0 15px;
-            cursor: pointer;
-        }
+    }
+    &--save {
+        text-decoration: none;
+        width: 200px;
+        height: 36px;
+        line-height: 36px;
+        border: 1px solid $gray-1;
+        border-radius: 18px;
+        text-align: center;
+        color: $white;
+        background-color: $gray-1;
+        margin: 0 15px;
+        cursor: pointer;
     }
 }
 </style>

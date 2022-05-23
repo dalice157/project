@@ -1,17 +1,17 @@
 <template>
     <div class="addAutoReply">
-        <div class="autoReplySubject">
+        <div class="addAutoReply__subject">
             <h1>標題</h1>
             <n-input
                 placeholder="請輸入標題(僅作為識別用，不會顯示於用戶端)"
                 v-model:value="autoReplySubject"
             ></n-input>
         </div>
-        <div class="activateStatus">
+        <div class="addAutoReply__status">
             <div>
                 <h1>啟用狀態</h1>
             </div>
-            <n-radio-group class="autoReplyRadioGroup" v-model:value="statusRadio">
+            <n-radio-group class="radio-group" v-model:value="statusRadio">
                 <div class="active">
                     <n-radio :value="1">啟用</n-radio>
                 </div>
@@ -20,12 +20,12 @@
                 </div>
             </n-radio-group>
         </div>
-        <div class="addAutoReplyTime">
+        <div class="addAutoReply__time">
             <div>
                 <h1>適用日期時間</h1>
                 <h1>(UTC+8)</h1>
             </div>
-            <n-radio-group class="autoReplyRadioGroup" v-model:value="timeRadio">
+            <n-radio-group class="radio-group" v-model:value="timeRadio">
                 <div class="agreedTime">
                     <n-radio :value="0">不指定日期時間</n-radio>
                 </div>
@@ -34,8 +34,8 @@
                 </div>
             </n-radio-group>
         </div>
-        <div class="autoReplyTimePicker" v-show="timePopUp">
-            <div class="dateRange">
+        <div class="addAutoReply__timePicker" v-show="timePopUp">
+            <div class="date-range">
                 <div>
                     <h1>指定日期區間</h1>
                 </div>
@@ -50,7 +50,7 @@
                 <div>
                     <h1>指定日期</h1>
                 </div>
-                <n-checkbox-group class="selectWeekdays" v-model:value="weekdays">
+                <n-checkbox-group class="weekdays__select-weekday" v-model:value="weekdays">
                     <n-checkbox :value="1">一</n-checkbox>
                     <n-checkbox :value="2">二</n-checkbox>
                     <n-checkbox :value="3">三</n-checkbox>
@@ -60,11 +60,11 @@
                     <n-checkbox :value="7">日</n-checkbox>
                 </n-checkbox-group>
             </div>
-            <div class="selectTime">
+            <div class="weekdays__select-time">
                 <div>
                     <h1>指定時間區間</h1>
                 </div>
-                <div class="startTime">
+                <div class="start-time">
                     <n-time-picker
                         placeholder="開始時間"
                         v-model:value="startTime"
@@ -73,7 +73,7 @@
                     ></n-time-picker>
                 </div>
                 <p>至</p>
-                <div class="endTime">
+                <div class="end-time">
                     <n-time-picker
                         placeholder="結束時間"
                         v-model:value="endTime"
@@ -83,7 +83,7 @@
                 </div>
             </div>
         </div>
-        <div class="autoReplyKeyWord">
+        <div class="addAutoReply__keyWord">
             <h1><span>*</span>&thinsp;關鍵字</h1>
             <n-popover trigger="hover" placement="bottom">
                 <template #trigger>
@@ -91,18 +91,18 @@
                         <help-circle />
                     </n-icon>
                 </template>
-                <span class="pop"
+                <span class="keyWord__pop"
                     >系統會在收到與關鍵字完全一致的訊息時自動回傳訊息，未輸入則在不符合其他關鍵字時自動回傳訊息。</span
                 >
             </n-popover>
-            <div class="keyWordInput">
+            <div class="keyWord__input">
                 <n-dynamic-tags v-model:value="keyWord"></n-dynamic-tags>
             </div>
         </div>
-        <div class="autoReplyContent">
+        <div class="addAutoReply__content">
             <h1><span>*</span>&thinsp;回覆內容</h1>
             <div
-                class="autoReplyInput"
+                class="content"
                 v-for="(item, index) in autoReplyMsgCount"
                 :key="item.janusMsg.config.id"
             >
@@ -116,13 +116,13 @@
                         v-model:value="item.janusMsg.msgContent"
                     ></n-input>
                 </div>
-                <div class="welcomeImg" v-else-if="item.janusMsg.msgType === 6">
+                <div class="content__img" v-else-if="item.janusMsg.msgType === 6">
                     <img
                         :src="`${config.fileUrl}${item.janusMsg.format.Fileid}${item.janusMsg.format.ExtensionName}`"
                         :alt="item.janusMsg.format.ShowName"
                     />
                 </div>
-                <div class="welcomeFile" v-else-if="item.janusMsg.msgType === 7">
+                <div class="content__file" v-else-if="item.janusMsg.msgType === 7">
                     <div>
                         <div>
                             <img :src="fileIcon" />
@@ -130,13 +130,13 @@
                         </div>
                     </div>
                 </div>
-                <div class="welcomeFunctionBar">
+                <div class="content__function-bar">
                     <img
                         :src="delIcon"
                         alt="del"
                         @click="deleteAutoReplyMsg(item.janusMsg.config.id)"
                     />
-                    <div class="welcomeFunctionBarUpload">
+                    <div class="function-bar__upload">
                         <span :src="fileIcon" alt="file" v-show="item.janusMsg.msgContent === ''">
                             <input
                                 type="file"
@@ -156,9 +156,9 @@
             </div>
             <h2 @click="addAutoReplyMsg">+新增自動回覆訊息</h2>
         </div>
-        <div class="channelButtonGroup">
+        <div class="button-group">
             <router-link
-                class="channelCancel"
+                class="button--cancel"
                 :to="
                     `${route.params.id}`
                         ? `/manage/${route.params.id}/activitySetting`
@@ -166,7 +166,7 @@
                 "
                 >取消</router-link
             >
-            <div class="channelStore" @click="confirmStore">確認儲存</div>
+            <div class="button--save" @click="confirmStore">確認儲存</div>
             <!-- :to="
                     `${route.params.id}`
                         ? `/manage/${route.params.id}/activitySetting`
@@ -463,17 +463,71 @@ const confirmStore = () => {
 <style lang="scss">
 .n-popover {
     width: 350px;
-    .pop {
-        line-height: 1.6;
-    }
 }
 </style>
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    .active {
+        margin-bottom: 20px;
+    }
+    .agreedTime {
+        margin-bottom: 20px;
+    }
+}
+
+.keyWord {
+    &__input {
+        width: 50%;
+        border: 1px solid $gray-3;
+        border-radius: 6px;
+        padding: 10px;
+        display: flex;
+        align-items: center;
+    }
+    &__pop {
+        line-height: 1.6;
+    }
+}
+
+.date-range {
+    display: flex;
+    align-items: center;
+    > div {
+        margin-right: 5px;
+    }
+}
+.weekdays {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    > div {
+        margin-right: 5px;
+    }
+    &__select-weekday {
+        margin-left: 28px;
+    }
+
+    &__select-time {
+        display: flex;
+        // justify-content: center;
+        align-items: center;
+        margin-top: 20px;
+        > div {
+            margin-right: 5px;
+        }
+        p {
+            margin-left: 5px;
+            margin-right: 5px;
+        }
+    }
+}
 .addAutoReply {
     padding: 50px;
-    .autoReplySubject {
+    &__subject {
         display: flex;
         align-items: center;
         margin-bottom: 40px;
@@ -485,7 +539,7 @@ const confirmStore = () => {
             width: 50%;
         }
     }
-    .activateStatus {
+    &__status {
         display: flex;
         margin-bottom: 20px;
         > div {
@@ -494,17 +548,8 @@ const confirmStore = () => {
                 margin-bottom: 5px;
             }
         }
-        .autoReplyRadioGroup {
-            display: flex;
-            flex-direction: column;
-            .active {
-                margin-bottom: 20px;
-            }
-            .deactive {
-            }
-        }
     }
-    .addAutoReplyTime {
+    &__time {
         display: flex;
         > div {
             margin-right: 35px;
@@ -512,53 +557,13 @@ const confirmStore = () => {
                 margin-bottom: 5px;
             }
         }
-        .autoReplyRadioGroup {
-            display: flex;
-            flex-direction: column;
-            .agreedTime {
-                margin-bottom: 20px;
-            }
-            .nonAgreedTime {
-            }
-        }
     }
-    .autoReplyTimePicker {
+    &__timePicker {
         width: 65%;
         margin-left: 123px;
         margin-top: 20px;
-        .dateRange {
-            display: flex;
-            align-items: center;
-            > div {
-                margin-right: 5px;
-            }
-        }
-        .weekdays {
-            display: flex;
-            align-items: center;
-            margin-top: 20px;
-            > div {
-                margin-right: 5px;
-            }
-            .selectWeekdays {
-                margin-left: 28px;
-            }
-        }
-        .selectTime {
-            display: flex;
-            // justify-content: center;
-            align-items: center;
-            margin-top: 20px;
-            > div {
-                margin-right: 5px;
-            }
-            p {
-                margin-left: 5px;
-                margin-right: 5px;
-            }
-        }
     }
-    .autoReplyKeyWord {
+    &__keyWord {
         display: flex;
         align-items: center;
         margin-top: 20px;
@@ -568,17 +573,8 @@ const confirmStore = () => {
         .n-icon {
             margin-right: 60px;
         }
-
-        .keyWordInput {
-            width: 50%;
-            border: 1px solid $gray-3;
-            border-radius: 6px;
-            padding: 10px;
-            display: flex;
-            align-items: center;
-        }
     }
-    .autoReplyContent {
+    &__content {
         margin-top: 20px;
         h1 {
             margin-bottom: 20px;
@@ -586,122 +582,118 @@ const confirmStore = () => {
                 color: red;
             }
         }
-        .autoReplyInput {
-            width: 50%;
-            min-height: 120px;
-            border: 1px solid $gray-3;
-            margin-bottom: 15px;
-            background-color: $gray-8;
-            // &:focus {
-            //     outline: none;
-            // }
-            // &:empty:before {
-            //     content: attr(data-placeholder);
-            //     color: $gray-3;
-            // }
-            .n-input {
-                background-color: $gray-8;
-                --border: transparent !important;
-            }
-            .welcomeImg {
-                padding: 5px 5px;
-                img {
-                    max-height: 80px;
-                }
-            }
-            .welcomeFile {
-                padding: 5px 5px;
-                > div {
-                    height: 80px;
-                    > div {
-                        display: flex;
-                        align-items: center;
-                        img {
-                            width: 24px;
-                            height: 24px;
-                        }
-                    }
-                }
-            }
-            .welcomeFunctionBar {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                padding: 8px;
-                img {
-                    cursor: pointer;
-                }
-                .welcomeFunctionBarUpload {
-                    display: flex;
-                    span {
-                        display: block;
-                        width: 24px;
-                        height: 24px;
-                        background-image: url("~@/assets/Images/common/file.svg");
-                        background-size: 24px;
 
-                        input {
-                            opacity: 0;
-                            border: 12px solid #00a;
-                            width: 24px;
-                            height: 24px;
-                            cursor: pointer;
-                        }
-                    }
-                    span + span {
-                        display: block;
-                        width: 24px;
-                        height: 24px;
-                        background-image: url("~@/assets/Images/chatroom/pic.svg");
-                        background-size: 24px;
-                        margin: 0 5px;
-
-                        input {
-                            opacity: 0;
-                            border: 12px solid #00a;
-                            width: 24px;
-                            height: 24px;
-                            cursor: pointer;
-                        }
-                    }
-                }
-            }
-        }
         h2 {
             cursor: pointer;
             color: $primary-1;
         }
     }
-    .channelButtonGroup {
-        margin-top: 50px;
+}
+.content {
+    width: 50%;
+    min-height: 120px;
+    border: 1px solid $gray-3;
+    margin-bottom: 15px;
+    background-color: $gray-8;
+    .n-input {
+        background-color: $gray-8;
+        --border: transparent !important;
+    }
+    &__img {
+        padding: 5px 5px;
+        img {
+            max-height: 80px;
+        }
+    }
+    &__file {
+        padding: 5px 5px;
+        > div {
+            height: 80px;
+            > div {
+                display: flex;
+                align-items: center;
+                img {
+                    width: 24px;
+                    height: 24px;
+                }
+            }
+        }
+    }
+    &__function-bar {
         display: flex;
-        justify-content: center;
-        .channelCancel {
-            width: 100px;
-            height: 36px;
-            line-height: 36px;
-            border: 1px solid $gray-1;
-            border-radius: 18px;
-            text-align: center;
-            margin: 0 15px;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        img {
             cursor: pointer;
-            text-decoration: none;
-            color: $gray-1;
         }
+    }
+}
+.function-bar__upload {
+    display: flex;
+    span {
+        display: block;
+        width: 24px;
+        height: 24px;
+        background-image: url("~@/assets/Images/common/file.svg");
+        background-size: 24px;
 
-        .channelStore {
-            text-decoration: none;
-            width: 200px;
-            height: 36px;
-            line-height: 36px;
-            border: 1px solid $gray-1;
-            border-radius: 18px;
-            text-align: center;
-            color: $white;
-            background-color: $gray-1;
-            margin: 0 15px;
+        input {
+            opacity: 0;
+            border: 12px solid #00a;
+            width: 24px;
+            height: 24px;
             cursor: pointer;
         }
+    }
+    span + span {
+        display: block;
+        width: 24px;
+        height: 24px;
+        background-image: url("~@/assets/Images/chatroom/pic.svg");
+        background-size: 24px;
+        margin: 0 5px;
+
+        input {
+            opacity: 0;
+            border: 12px solid #00a;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+    }
+}
+.button-group {
+    margin-top: 50px;
+    display: flex;
+    justify-content: center;
+}
+.button {
+    &--cancel {
+        width: 100px;
+        height: 36px;
+        line-height: 36px;
+        border: 1px solid $gray-1;
+        border-radius: 18px;
+        text-align: center;
+        margin: 0 15px;
+        cursor: pointer;
+        text-decoration: none;
+        color: $gray-1;
+    }
+
+    &--save {
+        text-decoration: none;
+        width: 200px;
+        height: 36px;
+        line-height: 36px;
+        border: 1px solid $gray-1;
+        border-radius: 18px;
+        text-align: center;
+        color: $white;
+        background-color: $gray-1;
+        margin: 0 15px;
+        cursor: pointer;
     }
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-    <div class="chatroom">
+    <div class="chat-room">
         <!--  聊天室主畫面  -->
         <NavBar />
         <SearchBar />
@@ -754,11 +754,6 @@ const attachVideocallPlugin = () => {
                                 result["reason"] +
                                 ")!"
                         );
-                        let participants = {
-                            request: "listparticipants",
-                            room: Number(eventID(route.params.eventKey)),
-                        };
-                        textPlugin.value.send({ message: participants });
                         if (result["reason"] === "User busy") {
                             alert("對方忙線中,請稍後再撥!!!");
                         }
@@ -863,7 +858,7 @@ const attachVideocallPlugin = () => {
     }
 }
 
-.chatroom {
+.chat-room {
     position: relative;
     box-sizing: border-box;
     height: 100%;

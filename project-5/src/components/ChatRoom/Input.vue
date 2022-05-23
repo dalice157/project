@@ -66,10 +66,11 @@
                         maxRows: 5,
                     }"
                     v-model:value="msg"
+                    @keypress.enter.exact.prevent="addMsg"
                     @focus="closeAll('input')"
-                    @keydown.enter.exact.prevent="addMsg"
                     ref="inputInstRef"
                 >
+                    <!-- @keydown.enter.exact="addMsg" -->
                 </n-input>
                 <img
                     @click.stop="closeStickerBox"
@@ -295,7 +296,7 @@ const errorCallback = (error: any) => {
 //input v-model
 const addMsg = (): void => {
     const str = msg.value.trim();
-   
+
     let textObj: any = {
         janusMsg: {
             chatroomID: chatRoomID.value,
@@ -319,7 +320,6 @@ const addMsg = (): void => {
                 recallStatus: false,
                 userName: getUserName,
                 deliveryStatusSuccess: true,
-              
             },
         },
     };

@@ -1,5 +1,6 @@
 import axios from "axios";
 import { defineStore, storeToRefs } from "pinia";
+import { useRoute, useRouter } from "vue-router";
 import { nanoid } from "nanoid";
 
 import config from "@/config/config";
@@ -14,6 +15,8 @@ import dayjs from "dayjs";
 export const useApiStore = defineStore({
     id: "api",
     state: () => ({
+        route: useRoute(),
+        router: useRouter(),
         eventInfo: <any>{
             name: "test",
             callable: 0,
@@ -892,10 +895,25 @@ export const useApiStore = defineStore({
                 .then((res: any) => {
                     console.log("autoReplyMsgList res", res.data);
                     this.autoReplyList = res.data.chatbotrule;
+                    this.route.params.id
+                        ? this.router.push(
+                              `/manage/${this.route.params.id}/activitySetting/autoReplyList?eventID=${eventID}`
+                          )
+                        : this.router.push(
+                              `/manage/activitySetting/autoReplyList?eventID=${eventID}`
+                          );
                 })
                 .catch((err: any) => {
                     // console.error(err);
                     console.log("autoReplyMsgList err", err);
+                    this.autoReplyList = [];
+                    this.route.params.id
+                        ? this.router.push(
+                              `/manage/${this.route.params.id}/activitySetting/autoReplyList?eventID=${eventID}`
+                          )
+                        : this.router.push(
+                              `/manage/activitySetting/autoReplyList?eventID=${eventID}`
+                          );
                 });
         },
         //查詢單一自動回覆訊息
@@ -909,6 +927,9 @@ export const useApiStore = defineStore({
                 .then((res: any) => {
                     console.log("inquireAutoReplyMsg res", res.data);
                     this.autoReplyList = res.data.chatbotrule;
+                    this.router.push(
+                        `/manage/${this.route.params.id}/activitySetting/EditAutoReply?eventID=${eventID}&autoID=${autoID}`
+                    );
                 })
                 .catch((err: any) => {
                     // console.error(err);

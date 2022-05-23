@@ -1,6 +1,6 @@
 <template>
     <n-modal
-        class="chatRecordCard"
+        class="userInfo-model"
         @click.prevent="closeModal"
         v-model:show="showModal"
         preset="card"
@@ -11,9 +11,9 @@
             </div>
             <UserInfo :info="info" />
             {{ info }}
-            <div class="description">{{ info.description }}</div>
-            <ul class="call_container">
-                <li class="call-web" @click.prevent="onPhoneCallModal(info.chatroomID)">
+            <div class="container__description">{{ info.description }}</div>
+            <ul class="container__call">
+                <li class="call--web" @click.prevent="onPhoneCallModal(info.chatroomID)">
                     <span class="icon"><img :src="phoneIcon" alt="語音通話" /></span>
                     <p class="text">語音通話</p>
                 </li>
@@ -61,12 +61,12 @@ const onPhoneCallModal = (chatroomID) => {
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
 
-.chatRecordCard.n-modal {
+.userInfo-model.n-modal {
     .n-card {
         background: transparent;
     }
 }
-.chatRecordCard.n-card {
+.userInfo-model.n-card {
     .closeBtn {
         position: absolute;
         right: -5px;
@@ -96,7 +96,7 @@ const onPhoneCallModal = (chatroomID) => {
         padding: 0 15px 15px;
     }
 }
-.chatRecordCard.n-card.n-modal {
+.userInfo-model.n-card.n-modal {
     width: 300px;
     border-radius: 4px;
     background: $white url("~@/assets/Images/chatRecord/lightboxHeader.svg") no-repeat center top;
@@ -114,7 +114,7 @@ const onPhoneCallModal = (chatroomID) => {
     }
 }
 @media (max-width: 768px) {
-    .chatRecordCard.n-card.n-modal {
+    .userInfo-model.n-card.n-modal {
         width: 70%;
     }
 }
@@ -122,12 +122,14 @@ const onPhoneCallModal = (chatroomID) => {
 <style lang="scss" scoped>
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
-.chatRecordCard.n-card.n-modal {
+.userInfo-model.n-card.n-modal {
     width: 300px;
     border-radius: 4px;
     background: $white url("~@/assets/Images/chatRecord/lightboxHeader.svg") no-repeat center top;
     background-size: 100% auto;
-    .description {
+}
+.container {
+    &__description {
         width: 100%;
         text-align: center;
         margin: 1em auto;
@@ -136,25 +138,12 @@ const onPhoneCallModal = (chatroomID) => {
         font-weight: 500;
         line-height: 1.6;
     }
-    .call_container {
+    &__call {
         margin-top: 30px;
         display: flex;
         justify-content: space-around;
-        .call-mobile {
-            display: none;
-        }
-        @media (max-width: 768px) {
-            .call-mobile {
-                display: block;
-            }
-        }
-        .call-web {
+        .call--web {
             display: block;
-        }
-        @media (max-width: 768px) {
-            .call-web {
-                display: none;
-            }
         }
         li {
             text-align: center;

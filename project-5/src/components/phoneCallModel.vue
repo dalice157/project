@@ -1,12 +1,12 @@
 <template>
     <n-modal
-        class="phoneCallModel"
+        class="phoneCall-model"
         v-model:show="phoneCallModal"
         preset="card"
         :mask-closable="false"
     >
-        <n-card :bordered="false" size="huge" class="phoneCallContainer">
-            <div class="phoneCallBackground">
+        <n-card :bordered="false" size="huge">
+            <div class="phoneCall-model__bg">
                 <div class="phoneCallAvatar">
                     <n-avatar
                         class="avatar"
@@ -18,7 +18,7 @@
                     />
                 </div>
             </div>
-            <h1 class="title">
+            <h1 class="phoneCall-model__title">
                 {{
                     filterUserInfo.name !== "" || filterUserInfo.name !== null
                         ? filterUserInfo.name
@@ -33,26 +33,26 @@
                         : null
                 }}
             </h1>
-            <div v-if="!isAccepted" class="phoneStatus">
+            <div v-if="!isAccepted" class="phoneCall-model__phoneStatus">
                 <p>撥號中</p>
                 <PulseLoader color="#ffb400" size="10px"></PulseLoader>
             </div>
-            <div v-if="isAccepted" class="phoneStatus">
+            <div v-if="isAccepted" class="phoneCall-model__phoneStatus">
                 <p>{{ phoneTime }}</p>
                 <ScaleLoader class="scale" color="#ffb400" height="20px" width="3px"></ScaleLoader>
             </div>
-            <div class="phoneCallModelFunctionBar">
-                <div class="phoneMicrophone disable" v-if="isDisabled">
+            <div class="phoneCall-model__function-bar">
+                <div class="microphone--disable" v-if="isDisabled">
                     <img :src="isMuted ? voiceDisabled : voiceEnabled" alt="#" />
                     <p>{{ isMuted ? "開啟" : "關閉" }}</p>
                     <p>麥克風</p>
                 </div>
-                <div class="phoneMicrophone" v-else @click="onVoice">
+                <div class="microphone" v-else @click="onVoice">
                     <img :src="isMuted ? voiceDisabled : voiceEnabled" alt="#" />
                     <p>{{ isMuted ? "開啟" : "關閉" }}</p>
                     <p>麥克風</p>
                 </div>
-                <div class="phoneClose">
+                <div class="phone--close">
                     <img
                         @click="doHangup(!isAccepted ? 2 : 3, chatRoomID, route.params.id, sender)"
                         :src="closeIcon"
@@ -143,7 +143,7 @@ const onVoice = () => {
 @import "~@/assets/scss/var";
 @import "~@/assets/scss/extend";
 
-.phoneCallModel {
+.phoneCall-model {
     width: 375px;
     height: 600px;
     .n-card-header {
@@ -154,50 +154,57 @@ const onVoice = () => {
         display: flex;
         flex-direction: column;
         align-items: center;
-        .phoneCallBackground {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 375px;
-            height: 180px;
-            background: url("~@/assets/Images/chatRecord/lightboxHeader.svg") no-repeat center top;
-            background-size: cover;
-        }
-        .title {
-            @extend %h1;
-            font-family: $font-family;
-        }
-        .phoneStatus {
-            margin-top: 10px;
-            p {
-                margin-bottom: 30px;
-            }
-        }
-        .phoneCallModelFunctionBar {
-            margin-top: 30px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            .phoneMicrophone {
-                &.disable {
-                    opacity: 0.5;
-                    cursor: not-allowed;
-                }
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                margin-top: 30px;
-                margin-bottom: 30px;
-                cursor: pointer;
-            }
-            .phoneClose {
-                cursor: pointer;
-            }
-        }
     }
     .n-card__content:first-child {
         padding-top: 0;
     }
+}
+</style>
+<style lang="scss" scoped>
+@import "~@/assets/scss/var";
+@import "~@/assets/scss/extend";
+.phoneCall-model {
+    &__bg {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 375px;
+        height: 180px;
+        background: url("~@/assets/Images/chatRecord/lightboxHeader.svg") no-repeat center top;
+        background-size: cover;
+    }
+    &__title {
+        @extend %h1;
+        font-family: $font-family;
+    }
+    &__phoneStatus {
+        margin-top: 10px;
+        p {
+            margin-bottom: 30px;
+        }
+    }
+    &__function-bar {
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+}
+.microphone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-top: 30px;
+    margin-bottom: 30px;
+    cursor: pointer;
+    &--disable {
+        opacity: 0.5;
+        cursor: not-allowed;
+        @extend .microphone;
+    }
+}
+.phone--close {
+    cursor: pointer;
 }
 </style>
