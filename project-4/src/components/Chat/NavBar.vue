@@ -1,23 +1,38 @@
 <template>
-    <div v-if="eventInfo !== null" class="navbar" @[events]="closeSearchBar">
+    <!-- @[events].stop="closeSearchBar" -->
+    <div class="navbar">
         <div class="navbar__funcitonbar">
             <div class="navbar__title">
-                <a class="back" @[events]="goToRecord">
-                    <img :src="arrowLeft" alt="回交談紀錄" />
-                </a>
+                <div class="back" @[events].stop="goToRecord">
+                    <img :src="chatLeft" alt="回交談紀錄" />
+                </div>
                 <!-- NavBar 大頭貼 -->
-                <div class="avatar">
+                <div class="avatar" v-if="chatroomType === 0 && eventInfo !== null">
                     <n-avatar round :size="42" :src="`${config.fileUrl}${eventInfo.icon}`" />
                 </div>
+                <div class="avatar" v-if="chatroomType === 1 && groupChatEvent !== null">
+                    <n-avatar round :size="42" :src="`${config.fileUrl}${groupChatEvent.icon}`" />
+                </div>
                 <!-- NavBar 標題 -->
-                <h1 class="title" v-show="route.meta.show">{{ eventInfo.name }}</h1>
+                <h1
+                    class="title"
+                    v-if="route.meta.show && chatroomType === 0 && eventInfo !== null"
+                >
+                    {{ eventInfo.name }}
+                </h1>
+                <h1
+                    class="title"
+                    v-if="route.meta.show && chatroomType === 1 && groupChatEvent !== null"
+                >
+                    {{ groupChatEvent.name }}
+                </h1>
             </div>
             <!-- 功能欄 -->
             <div class="navbar__chatpane">
-                <a class="back" @[events]="goToRecord">
+                <!-- <div class="back" @[events].stop="goToRecord">
                     <img :src="commentIcon" alt="回交談紀錄" />
-                </a>
-                <a class="phone" v-if="eventInfo.callable === true">
+                </div> -->
+                <div class="phone" v-if="chatroomType === 0 && eventInfo?.callable === true">
                     <video
                         class="hide"
                         id="remotevideo"
@@ -26,15 +41,15 @@
                         autoplay
                         playsinline
                     />
-                    <img :src="phoneIcon" alt="撥打電話" @[events]="webPhoneCall" />
-                </a>
+                    <img :src="phoneIcon" alt="撥打電話" @[events].stop="webPhoneCall" />
+                </div>
                 <phoneCallModel />
-                <a class="gallery" @[events]="goToGallery">
+                <div class="gallery" @[events].stop="goToGallery">
                     <img :src="galleryIcon" alt="進入相本" />
-                </a>
-                <router-link class="search" :to="`/${eventKey}`" @[events].stop="searchSwitch">
+                </div>
+                <div class="search" @[events].stop="searchSwitch">
                     <img :src="searchIcon" alt="搜尋" />
-                </router-link>
+                </div>
             </div>
         </div>
     </div>
@@ -45,6 +60,7 @@ import { defineComponent, ref, onMounted, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { NAvatar } from "naive-ui";
 import { useRouter, useRoute } from "vue-router";
+// import { Debugout } from "debugout.js";
 
 import { useApiStore } from "@/store/api";
 import { useChatStore } from "@/store/chat";
@@ -55,17 +71,18 @@ import { isMobile, eventID } from "@/util/commonUtil";
 import config from "@/config/config";
 import { randomString } from "@/util/chatUtil";
 import phoneCallModel from "@/components/phoneCallModel.vue";
-import arrowLeft from "@/assets/Images/chatroom/arrow-left.svg";
+import chatLeft from "@/assets/Images/chatroom/chat_left.svg";
 import commentIcon from "@/assets/Images/chatroom/comment.svg";
 import phoneIcon from "@/assets/Images/chatroom/phone.svg";
 import galleryIcon from "@/assets/Images/chatroom/list.svg";
 import searchIcon from "@/assets/Images/chatroom/search.svg";
 
 const events = ref(isMobile ? "touchend" : "click");
-
+// const bugout = new Debugout();
 // api store
 const apiStore = useApiStore();
-const { eventInfo } = storeToRefs(apiStore);
+const { logDiary } = apiStore;
+const { eventInfo, diaryLog, bugout, chatroomType, groupChatEvent } = storeToRefs(apiStore);
 
 // chat store
 const chatStore = useChatStore();
@@ -88,6 +105,7 @@ const { phoneCallModal } = storeToRefs(modelStore);
 //router
 const router = useRouter();
 const route = useRoute();
+
 const eventKey = computed(() => route.params.eventKey);
 let transaction = randomString(12);
 
@@ -100,25 +118,69 @@ const webPhoneCall = () => {
 };
 
 const goToRecord = () => {
-    janus.value.destroy();
-    router.push(`/chatRecord/${eventKey.value}`);
+    //一般聊天,群聊判斷
+    if (chatroomType.value === 0) {
+        // 不互動判斷
+        if (eventInfo.value.dialogue === 0) {
+            let leave = {
+                textroom: "leave",
+                transaction: transaction,
+                room: Number(eventID(eventKey.value)),
+            };
+            textPlugin.value.data({
+                text: JSON.stringify(leave),
+                error: function (reason: any) {
+                    console.log("error leave:", reason);
+                    window.location.reload();
+                },
+                success: function () {
+                    janus.value.destroy();
+                    router.push(`/chatRecord/${eventKey.value}`);
+                },
+            });
+        } else {
+            router.push(`/chatRecord/${eventKey.value}`);
+        }
+    } else {
+        let leave = {
+            textroom: "leave",
+            transaction: transaction,
+            room: Number(eventID(eventKey.value)),
+        };
+        textPlugin.value.data({
+            text: JSON.stringify(leave),
+            error: function (reason: any) {
+                console.log("error leave:", reason);
+                window.location.reload();
+            },
+            success: function () {
+                janus.value.destroy();
+                router.push(`/groupChatRecord/${eventKey.value}`);
+            },
+        });
+    }
 };
 
 const goToGallery = () => {
-    let leave = {
-        textroom: "leave",
-        transaction: transaction,
-        room: Number(eventID(eventKey.value)),
-    };
-    textPlugin.value.data({
-        text: JSON.stringify(leave),
-        error: function (reason: any) {
-            console.log("error leave:", reason);
-        },
-        success: function () {},
-    });
-    router.push(`/gallery/${eventKey.value}`);
-    // isOpenGallery.value = true;
+    if ((chatroomType.value === 0 && eventInfo.value.dialogue === 0) || chatroomType.value === 1) {
+        let leave = {
+            textroom: "leave",
+            transaction: transaction,
+            room: Number(eventID(eventKey.value)),
+        };
+        textPlugin.value.data({
+            text: JSON.stringify(leave),
+            error: function (reason: any) {
+                console.log("error leave:", reason);
+                window.location.reload();
+            },
+            success: function () {
+                router.push(`/gallery/${eventKey.value}`);
+            },
+        });
+    } else {
+        router.push(`/gallery/${eventKey.value}`);
+    }
 };
 </script>
 
@@ -138,7 +200,7 @@ const goToGallery = () => {
 
 //navbar 頭貼
 .avatar {
-    margin: 0 10px;
+    margin: 0 15px;
 }
 //navbar 標題
 .title {
@@ -146,10 +208,11 @@ const goToGallery = () => {
     @extend %h4;
 }
 .navbar {
-    width: calc(100% - 300px);
+    width: calc(100vw - 350px);
     height: 160px;
     background: transparent url("~@/assets/Images/chatroom/header-bg-pc.svg") no-repeat center top;
-    background-size: 100%;
+    background-size: cover;
+    background-position: 50%;
     position: fixed;
     z-index: 100;
     top: 0;
@@ -159,6 +222,7 @@ const goToGallery = () => {
         justify-content: space-between;
         align-items: center;
         padding-top: 8px;
+        // outline: 1px solid red;
     }
 
     &__title {
@@ -223,13 +287,17 @@ const goToGallery = () => {
     &__chatpane {
         margin-right: 10px;
         display: flex;
-        .phone {
-            display: block;
+        // .phone {
+        //     display: block;
+        //     cursor: pointer;
+        // }
+        .back,
+        .phone,
+        .gallery,
+        .search {
             cursor: pointer;
-        }
-        a {
             background-color: transparent;
-            margin: 0 5px;
+            margin: 0 6px;
         }
     }
 }
@@ -238,7 +306,8 @@ const goToGallery = () => {
         width: 100%;
         height: 112px;
         background: transparent url("~@/assets/Images/chatroom/header-bg.png") no-repeat center top;
-        background-size: 120% 150px;
+        background-size: cover;
+        background-position: 50%;
         .back {
             display: block;
         }
@@ -249,7 +318,8 @@ const goToGallery = () => {
         height: 102px;
         background: transparent url("~@/assets/Images/chatroom/header-bg-s.svg") no-repeat center
             center;
-        background-size: 100%;
+        background-size: cover;
+        background-position: 50%;
     }
 }
 </style>

@@ -8,6 +8,7 @@
     >
         尚無聊天訊息!!
     </div> -->
+    <!-- <n-scrollbar style="max-height: auto"> -->
     <div
         id="drop-area"
         :class="{ dropActive: dropActive }"
@@ -15,51 +16,54 @@
         ref="findScrollHeight"
         @click="closeAll"
         @scroll="chatroomToBottom($event)"
+        :style="messageOffset"
     >
         <div class="background" v-if="messageArray.length > 0">
             <!-- 對話區塊 -->
-
             <div
                 class="dialog-box"
                 :class="{
-                    otherMsg: text.janusMsg.sender === 1,
-                    myMsg: text.janusMsg.sender === 0,
-                    mapMsg: text.janusMsg.msgType === 8,
-                    mobileMsg:
-                        text.janusMsg.msgType === 9 ||
-                        text.janusMsg.msgType === 5 ||
-                        text.janusMsg.msgType === 8,
+                    clientMsg: text.janusMsg.sender === 1,
+                    staffMsg: text.janusMsg.sender === 0,
+                    noFunctionMsg: [9, 11].includes(text.janusMsg.msgType),
                     delChoice: deleteBoolean,
-                    recallChoice: text.janusMsg.config.recallStatus,
+                    recallMsg:
+                        text.janusMsg.config.recallStatus &&
+                        text.janusMsg.msgType !== 10 &&
+                        text.janusMsg.sender === 0,
                     dateMsg:
                         index === 0 ||
                         (index > 0 &&
-                            dateFormat(text.janusMsg.config.currentDate) !==
-                                dateFormat(messageArray[index - 1].janusMsg.config.currentDate)),
+                            chDateFormat(text.janusMsg.time) !==
+                                chDateFormat(messageArray[index - 1].janusMsg.time)) ||
+                        text.janusMsg.config.isUnread,
+                    SMSMsg: text.janusMsg.config.isSMS || text.janusMsg.type === 1,
                 }"
                 v-for="(text, index) in messageArray"
-                :key="index"
+                :key="text.janusMsg.config.id"
                 :id="text.janusMsg.config.id"
             >
-                <!-- {{ text }} -->
-
                 <!-- 日期樣板 -->
                 <div
                     v-if="
                         (index > 0 &&
-                            dateFormat(text.janusMsg.config.currentDate) !==
-                                dateFormat(messageArray[index - 1].janusMsg.config.currentDate)) ||
-                        (index === 0 && dateFormat(text.janusMsg.config.currentDate))
+                            chDateFormat(text.janusMsg.time) !==
+                                chDateFormat(messageArray[index - 1].janusMsg.time)) ||
+                        (index === 0 && chDateFormat(text.janusMsg.time))
                     "
                     class="date"
                 >
                     <div>
                         {{
-                            dateFormat(text.janusMsg.config.currentDate) === currentDate()
+                            chDateFormat(text.janusMsg.time) === currentDate()
                                 ? "今天"
-                                : dateFormat(text.janusMsg.config.currentDate)
+                                : chDateFormat(text.janusMsg.time)
                         }}
                     </div>
+                </div>
+                <!-- 未讀訊息樣板 -->
+                <div v-if="text.janusMsg.config.isUnread && index !== 0" class="date">
+                    <div>以下為未讀訊息</div>
                 </div>
                 <!-- <n-checkbox-group
                     v-model:value="deleteGroup"
@@ -72,14 +76,17 @@
                     </div>
                 </n-checkbox-group> -->
 
-                <!-- 收回訊息樣板 -->
+                <!-- 對方收回訊息樣板 -->
                 <div
                     class="recall"
-                    v-if="text.janusMsg.config.recallStatus && text.janusMsg.msgType !== 10"
+                    v-if="
+                        text.janusMsg.config.recallStatus &&
+                        text.janusMsg.msgType !== 10 &&
+                        text.janusMsg.sender === 1
+                    "
                 >
-                    <!-- {{ text }} -->
                     <div>
-                        <p v-if="text.janusMsg.sender === 0">
+                        <!-- <p v-if="text.janusMsg.sender === 0">
                             您已收回訊息&emsp;
                             <span
                                 v-if="text.janusMsg.msgContent"
@@ -87,8 +94,8 @@
                             >
                                 <u>重新編輯</u>
                             </span>
-                        </p>
-                        <p v-if="text.janusMsg.sender === 1">對方已收回訊息</p>
+                        </p> -->
+                        <p>對方已收回訊息</p>
                     </div>
                 </div>
 
@@ -127,9 +134,11 @@
                             class="msg_more"
                             :class="{ show: text.janusMsg.config.msgFunctionStatus }"
                             @click.stop="onBubble(text)"
-                            v-if="text.janusMsg.msgType !== 10"
+                            v-if="
+                                text.janusMsg.msgType !== 10 && !text.janusMsg.config.recallStatus
+                            "
                         >
-                            <img :src="moreIcon" alt="more" />
+                            <img :src="moreIcon" alt="more" draggable="false" />
                             <!-- 訊息功能框 -->
                             <div
                                 class="msgFunction"
@@ -143,20 +152,32 @@
                                         <span>複製</span>
                                     </li>
                                     <li
-                                        v-if="[7, 6].includes(text.janusMsg.msgType)"
-                                        @click.stop="downloadImage(text)"
+                                        v-if="
+                                            (text.janusMsg.type === 2 &&
+                                                [6, 7, 11].includes(text.janusMsg.msgType) &&
+                                                dayjs().isBefore(
+                                                    dayjs(text.janusMsg.format.expirationDate)
+                                                )) ||
+                                            (text.janusMsg.type === 2 &&
+                                                text.janusMsg.config.isWelcomeMsg &&
+                                                [6, 7, 11].includes(text.janusMsg.msgType)) ||
+                                            (text.janusMsg.type === 1 &&
+                                                [6, 7, 11].includes(text.janusMsg.msgType))
+                                        "
+                                        @click.stop="downloadFile(text)"
                                     >
-                                        <a
-                                            :href="`${config.serverUrl}/v1/file/${text.janusMsg.format.Fileid}`"
-                                            target="_blank"
-                                        >
-                                            下載
-                                        </a>
+                                        <span>下載</span>
                                     </li>
                                     <!-- <li @click.stop="deleteQuestion(text)"><span>刪除</span></li> -->
                                     <li
                                         v-if="
-                                            text.janusMsg.sender === 0 && text.janusMsg.type !== 1
+                                            text.janusMsg.sender === 0 &&
+                                            text.janusMsg.type !== 1 &&
+                                            parseInt(
+                                                (text.janusMsg.time + 120000000000) / 1000000
+                                            ) > Date.now() &&
+                                            !text.janusMsg.config.isSMS &&
+                                            !text.janusMsg.config.isWelcomeMsg
                                         "
                                         @click.stop="confirmRecallPopup(text)"
                                     >
@@ -165,11 +186,21 @@
                                     <li
                                         v-if="
                                             [1, 3, 6].includes(text.janusMsg.msgType) &&
-                                            text.janusMsg.type === 2
+                                            text.janusMsg.type === 2 &&
+                                            !text.janusMsg.config.isSMS
                                         "
                                         @click.stop="replyMsgEvent(text)"
                                     >
                                         <span>回覆</span>
+                                    </li>
+                                    <li
+                                        v-if="
+                                            text.janusMsg.sender === 0 &&
+                                            text.janusMsg.msgType === 1
+                                        "
+                                        @click.stop="transferSmsMsg(text)"
+                                    >
+                                        <span>發送傳統簡訊</span>
                                     </li>
                                 </ul>
                             </div>
@@ -256,6 +287,7 @@
                                 >
                                     <img
                                         :src="`${text.janusMsg.config.replyObj.janusMsg.format.stickerUrl}${text.janusMsg.config.replyObj.janusMsg.format.stickerPackID}/${text.janusMsg.config.replyObj.janusMsg.format.stickerFileID}.${text.janusMsg.config.replyObj.janusMsg.format.ext}`"
+                                        draggable="false"
                                     />
                                 </div>
 
@@ -267,14 +299,41 @@
                                     <!-- {{ text.janusMsg.config.replyObj.janusMsg.format }} -->
                                     <img
                                         :src="`${config.fileUrl}${text.janusMsg.config.replyObj.janusMsg.format.Fileid}${text.janusMsg.config.replyObj.janusMsg.format.ExtensionName}`"
+                                        draggable="false"
                                     />
                                 </div>
                             </div>
                             <!-- 文字訊息 -->
                             <div class="originalMsg">
-                                <p v-linkify:options="{ target: '_blank' }">
+                                <a
+                                    v-if="
+                                        /^[h|H][t|T][t|T][p|P][s|S]?:\/\/([a-zA-Z0-9]+\.)+[a-zA-Z0-9]+/.test(
+                                            text.janusMsg.msgContent
+                                        )
+                                    "
+                                    :href="`${text.janusMsg.msgContent}`"
+                                    target="_blank"
+                                >
+                                    {{ text.janusMsg.msgContent }}
+                                </a>
+                                <p v-else>
                                     {{ text.janusMsg.msgContent }}
                                 </p>
+                                <!-- 預覽連結meta -->
+                                <div class="urlpreview" v-if="text.janusMsg.config.isLink">
+                                    <h1 v-if="text.janusMsg.format.metaTitle !== ''">
+                                        {{ text.janusMsg.format.metaTitle }}
+                                    </h1>
+                                    <p v-if="text.janusMsg.format.metaDescription !== ''">
+                                        {{ text.janusMsg.format.metaDescription }}
+                                    </p>
+                                    <img
+                                        v-if="text.janusMsg.format.metaImgurl !== ''"
+                                        style="width: 50%; height: 50%"
+                                        :src="text.janusMsg.format.metaImgurl"
+                                        draggable="false"
+                                    />
+                                </div>
                             </div>
                         </div>
                         <!-- google maps -->
@@ -291,7 +350,7 @@
                                 rel="noopener noreferrer"
                             >
                                 <span class="img"
-                                    ><img :src="googleMapIcon" alt="google maps"
+                                    ><img :src="googleMapIcon" draggable="false" alt="google maps"
                                 /></span>
                                 查看地圖
                             </a>
@@ -319,6 +378,7 @@
                             </span>
                             <img
                                 class="audioWave"
+                                draggable="false"
                                 v-show="!text.janusMsg.config.isPlay"
                                 :src="audioIcon"
                             />
@@ -327,16 +387,38 @@
                         <div
                             class="picture"
                             v-if="text.janusMsg.msgType === 6"
-                            @click="previewURL(text.janusMsg.format.Fileid)"
+                            @click="previewURL(text)"
                             @touchstart="gtouchstart(text)"
                             @touchmove="gtouchmove()"
                             @touchend="gtouchend()"
                         >
                             <img
+                                draggable="false"
                                 :src="`${config.fileUrl}${text.janusMsg.format.Fileid}${text.janusMsg.format.ExtensionName}`"
+                                :style="`max-width:${
+                                    text.janusMsg.format.width > 250
+                                        ? 250 + 'px'
+                                        : text.janusMsg.format.width + 'px'
+                                };height:${
+                                    (text.janusMsg.format.height * 250) /
+                                        text.janusMsg.format.width +
+                                    'px'
+                                }`"
                             />
                         </div>
-
+                        <!-- 影片訊息 -->
+                        <video
+                            style="margin: 0 5px; background-color: black"
+                            controls
+                            controlsList="nodownload"
+                            playsinline
+                            width="200"
+                            v-if="text.janusMsg.msgType === 11"
+                        >
+                            <source
+                                :src="`${config.fileUrl}${text.janusMsg.format.Fileid}${text.janusMsg.format.ExtensionName}${iosVideoDefaultTag}`"
+                            />
+                        </video>
                         <!-- 文件訊息 -->
                         <div
                             class="content icon"
@@ -345,7 +427,7 @@
                             @touchmove="gtouchmove()"
                             @touchend="gtouchend()"
                         >
-                            <img :src="fileIcon" alt="檔案" />
+                            <img :src="fileIcon" alt="檔案" draggable="false" />
                             <div class="fileDescription">
                                 <n-ellipsis
                                     class="ellipsisName"
@@ -355,7 +437,7 @@
                                     {{ text.janusMsg.format.ShowName }}
                                 </n-ellipsis>
                                 <p>
-                                    檔案大小&thinsp;:&thinsp;{{ text.janusMsg.format.FileSize }}KB
+                                    檔案大小&thinsp;:&thinsp;{{ text.janusMsg.format.FileSize }}Byte
                                 </p>
                                 <p>
                                     下載期限&thinsp;:&thinsp;{{
@@ -372,7 +454,7 @@
                         >
                             <a class="phone-web" @click="onPhoneCallModal(chatRoomID)">
                                 <div class="phonePic">
-                                    <img :src="phoneIcon" alt="撥打電話" />
+                                    <img :src="phoneIcon" alt="撥打電話" draggable="false" />
                                 </div>
                                 <div
                                     class="phoneStatus"
@@ -397,6 +479,7 @@
                             @touchend="gtouchend()"
                         >
                             <img
+                                draggable="false"
                                 :src="`${text.janusMsg.format.stickerUrl}${text.janusMsg.format.stickerPackID}/${text.janusMsg.format.stickerFileID}.${text.janusMsg.format.ext}`"
                             />
                         </div>
@@ -406,38 +489,70 @@
                         class="timestamp"
                         :class="{ yourTimeStamp: text.janusMsg.sender === 0 }"
                         v-if="text.janusMsg.msgType !== 10"
+                        :id="text.janusMsg.config.id + 'time'"
                     >
-                        <div class="mms" v-if="text.janusMsg.type === 1">以簡訊發送</div>
-                        <span v-if="text.janusMsg.config.isRead && text.janusMsg.sender === 0"
-                            >已讀</span
-                        >
+                        <div class="mms">
+                            <p v-if="text.janusMsg.type === 1">以簡訊發送</p>
+                            <span v-if="text.janusMsg.config.isRead && text.janusMsg.sender === 0"
+                                >已讀</span
+                            >
+                        </div>
+
                         <span>{{ currentTime(text.janusMsg.time / 1000000) }}</span>
                     </div>
                 </div>
                 <n-icon
                     size="30"
                     class="scrollToBottom"
+                    :style="diffHeight"
                     v-show="
-                        chatroomScrolltopAndWindowHeight < chatroomScrollHeight - 1 &&
+                        chatroomScrolltopAndWindowHeight < chatroomScrollHeight - 30 &&
                         !text.janusMsg.config.replyObj &&
                         !isReplyBox &&
                         !inputFunctionBoolean &&
-                        !showStickerModal &&
-                        !isResult
+                        !isResult &&
+                        !newMsgHint
                     "
-                    @click="scrollToBottom"
+                    @click="scrollToBottom()"
                 >
                     <arrow-down-circle />
                 </n-icon>
+                <!-- 顯示傳送者 -->
                 <div
                     class="userName"
-                    v-if="text.janusMsg.config.userName && !text.janusMsg.config.recallStatus"
+                    v-if="text.janusMsg.config.userName && text.janusMsg.sender === 0"
                 >
                     由&thinsp;{{ text.janusMsg.config.userName }}&thinsp;所傳送
+                </div>
+                <div
+                    class="userName"
+                    v-if="text.janusMsg.config.isRobot && text.janusMsg.sender === 0"
+                >
+                    由&thinsp;{{ "機器人" }}&thinsp;所傳送
+                </div>
+                <div
+                    class="userName"
+                    v-if="text.janusMsg.config.isSMS && text.janusMsg.sender === 0"
+                >
+                    由&thinsp;{{ "簡訊" }}&thinsp;所傳送
+                </div>
+                <div
+                    class="userName"
+                    v-if="text.janusMsg.config.isWelcomeMsg && text.janusMsg.sender === 0"
+                >
+                    由&thinsp;{{ "系統" }}&thinsp;所傳送
+                </div>
+                <!-- 顯示被收回 -->
+                <div
+                    class="recallHint"
+                    v-if="text.janusMsg.config.recallStatus && text.janusMsg.sender === 0"
+                >
+                    <span>訊息已收回</span>
                 </div>
             </div>
         </div>
     </div>
+    <!-- </n-scrollbar> -->
     <!-- 刪除訊息滿版 poopup 出現
     <teleport to="body" v-if="deletePopUp">
         <div class="mask">
@@ -469,12 +584,14 @@ export default {
 import {
     ref,
     computed,
+    onBeforeMount,
     onMounted,
     onUpdated,
     watch,
+    watchEffect,
     nextTick,
     reactive,
-    onBeforeUnmount,
+    onUnmounted,
 } from "vue";
 import useClipboard from "vue-clipboard3";
 import { api as viewerApi } from "v-viewer";
@@ -484,7 +601,7 @@ import { nanoid } from "nanoid";
 import dayjs from "dayjs";
 import Compressor from "compressorjs";
 import { PlayCircleSharp, PauseCircleSharp, ArrowDownCircle } from "@vicons/ionicons5";
-import { NEllipsis, NCheckboxGroup, NCheckbox, NAvatar, NIcon } from "naive-ui";
+import { NEllipsis, NCheckboxGroup, NCheckbox, NAvatar, NIcon, NScrollbar } from "naive-ui";
 import { useRoute } from "vue-router";
 
 import { useApiStore } from "@/store/api";
@@ -495,8 +612,15 @@ import { useSearchStore } from "@/store/search";
 import { txt } from "@/util/interfaceUtil";
 import { sendPrivateMsg } from "@/util/chatUtil";
 import user_pic_defaul from "@/assets/Images/mugShot/User-round.svg";
-import { scrollPageTo, convertTime, imgList, resetSetItem } from "@/util/commonUtil";
-import { unixTime, currentDate, dateFormat, currentTime } from "@/util/dateUtil";
+import {
+    scrollPageTo,
+    convertTime,
+    imgList,
+    resetSetItem,
+    isProduction,
+    isStaging,
+} from "@/util/commonUtil";
+import { unixTime, currentDate, dateFormat, currentTime, chDateFormat } from "@/util/dateUtil";
 import config from "@/config/config";
 import moreIcon from "@/assets/Images/chatroom/more.svg";
 import googleMapIcon from "@/assets/Images/chatroom/map.jpg";
@@ -510,13 +634,13 @@ const props = defineProps({
 
 //api store
 const apiStore = useApiStore();
-const { getHistoryApi, recallAPI } = apiStore;
-const { messageList, msgStart, totalCount, userInfo, chatroomList } = storeToRefs(apiStore);
+const { getHistoryApi, recallAPI, download } = apiStore;
+const { messageList, msgStart, totalCount, userInfo, chatroomList, bugout } = storeToRefs(apiStore);
 const timeOutEvent = ref(0);
 
 // 彈窗 store
 const modelStore = useModelStore();
-const { showCompanyInfo, closeAll } = modelStore;
+const { closeAll } = modelStore;
 const { info, phoneCallModal } = storeToRefs(modelStore);
 
 //phone store
@@ -527,11 +651,12 @@ const { sender } = storeToRefs(phoneCallStore);
 //router
 const route = useRoute();
 
-const getUserName = localStorage.getItem("userName");
+const userName = localStorage.getItem("userName");
 //chat store
 const chatStore = useChatStore();
-const { replyMsgEvent, deleteQuestion, closeRecorder } = chatStore;
-let {
+const { replyMsgEvent, deleteQuestion, closeRecorder, scrollToBottom, smsMessageComputed } =
+    chatStore;
+const {
     messages,
     msg,
     deleteBoolean,
@@ -543,6 +668,9 @@ let {
     inputFunctionBoolean,
     showStickerModal,
     isOnline,
+    findScrollHeight,
+    newMsgHint,
+    isMmsSend,
 } = storeToRefs(chatStore);
 
 const onPhoneCallModal = (chatRoomID) => {
@@ -573,14 +701,20 @@ const pictures: any = computed(() => {
     });
 });
 
+// 未讀訊息顯示條消失
+onMounted(() => {
+    messageArray.value.forEach((msg) => {
+        msg.janusMsg.config.isUnread = false;
+    });
+});
+
 //聊天室功能
 const preDate: any = ref([]);
 const viewImgs: any = ref([]);
 
 let getCurChatRoomId: any = reactive({});
 // 環境設定
-const isProduction = process.env.NODE_ENV === "production";
-const getSplit = isProduction ? 4 : 5;
+const getSplit = isProduction || isStaging ? 4 : 5;
 const img = computed(() => {
     getCurChatRoomId = chatroomList.value.find((obj) => {
         return obj.chatroomID === chatRoomID.value;
@@ -641,9 +775,6 @@ const dropEvent = (e: any) => {
     e.preventDefault();
     onUploadFile(e.dataTransfer.files);
 };
-const dropFiles = ref();
-const image = ref();
-
 onMounted(() => {
     watch(messageArray, () => {
         if (messageArray.value.length > 0) {
@@ -669,7 +800,8 @@ onMounted(() => {
     });
 });
 
-const onUploadFile = (file: any) => {
+const imageReload = ref(0);
+const onUploadFile = async (file: any) => {
     const fileArr = file[0];
     const fileArrType = file[0].type;
     const fileName = fileArr.name;
@@ -678,24 +810,25 @@ const onUploadFile = (file: any) => {
         return;
     }
     //辨識上傳檔案
+    //圖片檔案
     if (fileArrType.includes("image")) {
-        new Compressor(fileArr, {
-            quality: 0.6,
-            success(result) {
-                //呼叫api
-                const fd = new FormData();
-                fd.append("file", new File([result], fileArr.name, { type: "image/*" }));
-                axios({
-                    method: "post",
-                    url: `${config.serverUrl}/v1/file`,
-                    data: fd,
-                    headers: { Authorization: `Bearer ${getToken}` },
-                })
-                    .then((res) => {
-                        const reader = new FileReader();
-                        reader.readAsDataURL(fileArr);
-                        reader.onload = (e: any) => {
-                            image.value = e.target.result;
+        if (fileName.split(".").pop() === "gif") {
+            // console.log("gif檔!!!");
+            const fd = new FormData();
+            fd.append("file", new File([fileArr], fileArr.name, { type: "image/*" }));
+            await axios({
+                method: "post",
+                url: `${config.serverUrl}/v1/file`,
+                data: fd,
+                headers: { Authorization: `Bearer ${getToken}` },
+            })
+                .then((res) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(fileArr);
+                    reader.onload = async (e: any) => {
+                        let image = new Image();
+                        image.src = e.target.result;
+                        image.onload = function () {
                             const imageObj: any = {
                                 janusMsg: {
                                     chatroomID: chatRoomID.value,
@@ -709,6 +842,8 @@ const onUploadFile = (file: any) => {
                                         ShowName: fileName,
                                         ExtensionName: res.data.ext,
                                         FileSize: fileArr.size,
+                                        width: image.width,
+                                        height: image.height,
                                         expirationDate: dayjs
                                             .unix(res.data.exp)
                                             .format("YYYY-MM-DD"),
@@ -716,7 +851,7 @@ const onUploadFile = (file: any) => {
                                     config: {
                                         id: nanoid(),
                                         isReply: replyMsg.value ? true : false,
-                                        replyObj: replyMsg.value ? { ...replyMsg.value } : "",
+                                        replyObj: replyMsg.value ? { ...replyMsg.value } : {},
                                         currentDate: currentDate(),
                                         isExpire: false,
                                         isPlay: false,
@@ -725,7 +860,7 @@ const onUploadFile = (file: any) => {
                                         msgMoreStatus: false,
                                         recallPopUp: false,
                                         recallStatus: false,
-                                        userName: getUserName,
+                                        userName: userName,
                                     },
                                 },
                             };
@@ -737,22 +872,190 @@ const onUploadFile = (file: any) => {
                                 eventID: route.params.id,
                             };
                             sendPrivateMsg(sendMsgObj);
-                            messageList.value.push(imageObj);
-                            pictures.value.push(imageObj);
                         };
+                    };
+                })
+                .catch((err) => {
+                    // console.error(err);
+                    bugout.value.error(`error-log${userName.value}`, err.response.status);
+                    bugout.value.error(`error-log${userName.value}`, err.response.data);
+                    bugout.value.error(
+                        `error-log${userName.value}`,
+                        err.response.request.responseURL
+                    );
+                });
+        } else {
+            // console.log("圖片非gif 檔!!!");
+            new Compressor(fileArr, {
+                quality: 0.6,
+                async success(result) {
+                    //呼叫api
+                    const fd = new FormData();
+                    fd.append("file", new File([result], fileArr.name, { type: "image/*" }));
+                    await axios({
+                        method: "post",
+                        url: `${config.serverUrl}/v1/file`,
+                        data: fd,
+                        headers: { Authorization: `Bearer ${getToken}` },
                     })
-                    .catch((err) => {
-                        console.error(err);
-                    });
-            },
-            error(err) {
-                console.error(err);
-            },
-        });
-    } else {
+                        .then((res) => {
+                            const reader = new FileReader();
+                            reader.readAsDataURL(fileArr);
+                            reader.onload = async (e: any) => {
+                                let image = new Image();
+                                image.src = e.target.result;
+                                image.onload = function () {
+                                    const imageObj: any = {
+                                        janusMsg: {
+                                            chatroomID: chatRoomID.value,
+                                            msgType: 6,
+                                            sender: 0,
+                                            msgContent: "",
+                                            time: unixTime(),
+                                            type: 2,
+                                            format: {
+                                                Fileid: res.data.fileid,
+                                                ShowName: fileName,
+                                                ExtensionName: res.data.ext,
+                                                FileSize: fileArr.size,
+                                                width: image.width,
+                                                height: image.height,
+                                                expirationDate: dayjs
+                                                    .unix(res.data.exp)
+                                                    .format("YYYY-MM-DD"),
+                                            },
+                                            config: {
+                                                id: nanoid(),
+                                                isReply: replyMsg.value ? true : false,
+                                                replyObj: replyMsg.value
+                                                    ? { ...replyMsg.value }
+                                                    : {},
+                                                currentDate: currentDate(),
+                                                isExpire: false,
+                                                isPlay: false,
+                                                isRead: isOnline.value ? true : false,
+                                                msgFunctionStatus: false,
+                                                msgMoreStatus: false,
+                                                recallPopUp: false,
+                                                recallStatus: false,
+                                                userName: userName,
+                                            },
+                                        },
+                                    };
+                                    // 確認圖片是否放至伺服器;
+                                    // await axios({
+                                    //     method: "get",
+                                    //     url: `${config.fileUrl}${imageObj.janusMsg.format.Fileid}${imageObj.janusMsg.format.ExtensionName}`,
+                                    // })
+                                    //     .then((res) => {
+                                    //         imageReload.value = 0;
+                                    const sendMsgObj = {
+                                        msg: imageObj,
+                                        textPlugin: textPlugin.value,
+                                        chatRoomID: chatRoomID.value,
+                                        eventID: route.params.id,
+                                    };
+                                    sendPrivateMsg(sendMsgObj);
+                                    // })
+                                    // .catch((err) => {
+                                    //     console.error("圖片尚未放至伺服器 ", err);
+                                    //     if (imageReload.value === 4) {
+                                    //         imageReload.value = 0;
+                                    //         return;
+                                    //     }
+                                    //     if (imageReload.value < 4) {
+                                    //         imageReload.value++;
+                                    //         setTimeout(() => {
+                                    //             onUploadFile(file);
+                                    //         }, 300);
+                                    //     }
+                                    // });
+                                };
+                            };
+                        })
+                        .catch((err) => {
+                            // console.error(err);
+                            bugout.value.error(`error-log${userName.value}`, err.response.status);
+                            bugout.value.error(`error-log${userName.value}`, err.response.data);
+                            bugout.value.error(
+                                `error-log${userName.value}`,
+                                err.response.request.responseURL
+                            );
+                        });
+                },
+                error(err) {
+                    console.error(err);
+                },
+            });
+        }
+    } else if (fileArrType.includes("video")) {
+        //影片檔案
         const fd = new FormData();
         console.log("fileArr:", fileArr);
+        fd.append("file", new File([fileArr], fileArr.name, { type: fileArr.type }));
 
+        axios({
+            method: "post",
+            url: `${config.serverUrl}/v1/file`,
+            data: fd,
+            headers: { Authorization: `Bearer ${getToken}` },
+        })
+            .then((res) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(fileArr);
+                reader.onload = (e: any) => {
+                    files.value = e.target.result;
+                    let fileObj: any = {};
+                    fileObj = {
+                        janusMsg: {
+                            chatroomID: chatRoomID.value,
+                            msgType: 11,
+                            sender: 0,
+                            msgContent: "",
+                            time: unixTime(),
+                            type: 2,
+                            format: {
+                                Fileid: res.data.fileid,
+                                ShowName: fileArr.name,
+                                ExtensionName: res.data.ext,
+                                FileSize: fileArr.size,
+                                expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
+                            },
+                            config: {
+                                id: nanoid(),
+                                isReply: false,
+                                replyObj: {},
+                                currentDate: currentDate(),
+                                isExpire: false,
+                                isPlay: false,
+                                isRead: isOnline.value ? true : false,
+                                msgFunctionStatus: false,
+                                msgMoreStatus: false,
+                                recallPopUp: false,
+                                recallStatus: false,
+                                userName: userName,
+                            },
+                        },
+                    };
+                    const sendMsgObj = {
+                        msg: fileObj,
+                        textPlugin: textPlugin.value,
+                        chatRoomID: chatRoomID.value,
+                        eventID: route.params.id,
+                    };
+                    sendPrivateMsg(sendMsgObj);
+                };
+            })
+            .catch((err) => {
+                // console.error(err);
+                bugout.value.error(`error-log${userName.value}`, err.response.status);
+                bugout.value.error(`error-log${userName.value}`, err.response.data);
+                bugout.value.error(`error-log${userName.value}`, err.response.request.responseURL);
+            });
+    } else {
+        //一般檔案
+        const fd = new FormData();
+        console.log("fileArr:", fileArr);
         fd.append("file", new File([fileArr], fileArr.name, { type: fileArr.type }));
 
         axios({
@@ -786,7 +1089,7 @@ const onUploadFile = (file: any) => {
                             config: {
                                 id: nanoid(),
                                 isReply: false,
-                                replyObj: "",
+                                replyObj: {},
                                 currentDate: currentDate(),
                                 isExpire: false,
                                 isPlay: false,
@@ -795,7 +1098,7 @@ const onUploadFile = (file: any) => {
                                 msgMoreStatus: false,
                                 recallPopUp: false,
                                 recallStatus: false,
-                                userName: getUserName,
+                                userName: userName,
                             },
                         },
                     };
@@ -806,58 +1109,101 @@ const onUploadFile = (file: any) => {
                         eventID: route.params.id,
                     };
                     sendPrivateMsg(sendMsgObj);
-                    messageList.value.push(fileObj);
-                    pictures.value.push(fileObj);
                 };
             })
             .catch((err) => {
-                console.error(err);
+                // console.error(err);
+                bugout.value.error(`error-log${userName.value}`, err.response.status);
+                bugout.value.error(`error-log${userName.value}`, err.response.data);
+                bugout.value.error(`error-log${userName.value}`, err.response.request.responseURL);
             });
     }
 };
 
-const track: any = ref();
+const track: any = ref(null);
+const trackID: any = ref("");
+const oldMsg: any = ref({});
 const newTime: any = ref("0:00");
 const toggleAudio = (msg: any) => {
-    track.value = document.getElementById(`audio-player-${msg.janusMsg.config.id}`);
-    if (track.value.paused) {
+    //第一次播放錄音 或 暫停錄音
+    if (track.value === null || trackID.value === msg.janusMsg.config.id) {
+        trackID.value = msg.janusMsg.config.id;
+        track.value = document.getElementById(`audio-player-${msg.janusMsg.config.id}`);
+        oldMsg.value = msg;
+        if (track.value.paused) {
+            track.value.play();
+            // console.log(track.value);
+            // console.log("currentTime.value:", track.value.currentTime);
+            // console.log("play.paused:", track.value.paused);
+            msg.janusMsg.config.isPlay = true;
+            track.value.addEventListener(
+                "timeupdate",
+                () => {
+                    if (track.value !== null) {
+                        newTime.value = convertTime(track.value.currentTime);
+                    }
+                },
+                false
+            );
+            track.value.addEventListener(
+                "ended",
+                () => {
+                    if (track.value !== null) {
+                        track.value.pause();
+                        track.value.currentTime = 0;
+                        newTime.value = "0:00";
+                        oldMsg.value.janusMsg.config.isPlay = false;
+                    }
+                    track.value = null;
+                },
+                false
+            );
+        } else {
+            track.value.pause();
+            track.value.currentTime = 0;
+            newTime.value = "0:00";
+            // console.log("pause.paused:", track.value.paused);
+            oldMsg.value.janusMsg.config.isPlay = false;
+            track.value = null;
+        }
+    } else if (trackID.value !== msg.janusMsg.config.id) {
+        //點擊其他錄音檔 原先暫停 播新的錄音檔
+        track.value.pause();
+        track.value.currentTime = 0;
+        newTime.value = "0:00";
+        oldMsg.value.janusMsg.config.isPlay = false;
+        oldMsg.value = msg;
+        trackID.value = msg.janusMsg.config.id;
+        track.value = document.getElementById(`audio-player-${msg.janusMsg.config.id}`);
         track.value.play();
-        console.log(track.value);
-        console.log("currentTime.value:", track.value.currentTime);
-        console.log("play.paused:", track.value.paused);
+        // console.log(track.value);
+        // console.log("currentTime.value:", track.value.currentTime);
+        // console.log("play.paused:", track.value.paused);
         msg.janusMsg.config.isPlay = true;
         track.value.addEventListener(
             "timeupdate",
             () => {
-                newTime.value = convertTime(track.value.currentTime);
+                if (track.value !== null) {
+                    newTime.value = convertTime(track.value.currentTime);
+                }
             },
             false
         );
         track.value.addEventListener(
             "ended",
             () => {
-                track.value.pause();
-                track.value.currentTime = 0;
-                newTime.value = "0:00";
-                msg.janusMsg.config.isPlay = false;
+                if (track.value !== null) {
+                    track.value.pause();
+                    track.value.currentTime = 0;
+                    newTime.value = "0:00";
+                    msg.janusMsg.config.isPlay = false;
+                }
+                track.value = null;
             },
             false
         );
-    } else {
-        track.value.pause();
-        track.value.currentTime = 0;
-        newTime.value = "0:00";
-        console.log("pause.paused:", track.value.paused);
-        msg.janusMsg.config.isPlay = false;
     }
 };
-onMounted(() => {
-    scrollToBottom();
-});
-
-onUpdated(() => {
-    scrollHeight.value = findScrollHeight.value.scrollHeight;
-});
 
 const chatroomScrolltop = ref(0);
 const chatroomWindowHeight = ref(0);
@@ -869,43 +1215,55 @@ const chatroomToBottom = (e: any) => {
     chatroomWindowHeight.value = e.target.clientHeight;
     chatroomScrollHeight.value = e.target.scrollHeight;
     chatroomScrolltopAndWindowHeight.value = chatroomScrolltop.value + chatroomWindowHeight.value;
+    chatStore.saveChatroomParams(
+        chatroomScrolltop.value,
+        chatroomWindowHeight.value,
+        chatroomScrolltopAndWindowHeight.value,
+        chatroomScrollHeight.value
+    );
     // console.log("視窗滾動高", chatroomScrollHeight.value);
     // console.log("視窗離頂部距離+視窗高", chatroomScrolltopAndWindowHeight.value);
 };
 
-//聊天室置底功能
-const findScrollHeight: any = ref(null);
-const scrollHeight: any = ref(0);
-
-nextTick(() => {
+//聊天室置底新訊息提示消失
+const scrollHeight = ref(0);
+const scrollTop = ref(0);
+const offsetHeight = ref(0);
+const loadData = ref(false);
+onUpdated(() => {
     scrollHeight.value = findScrollHeight.value.scrollHeight;
-    scrollToBottom();
+    scrollTop.value = findScrollHeight.value.scrollTop;
+    offsetHeight.value = findScrollHeight.value.offsetHeight;
 });
-
-watch(scrollHeight, (newValue, oldValue) => {
-    if (newValue > oldValue) {
-        scrollToBottom();
+watch([scrollHeight, scrollTop, offsetHeight], (newVal, oldVal) => {
+    if (newVal[0] - newVal[1] < newVal[2] + 10) {
+        newMsgHint.value = false;
+    }
+    if (newVal[1] === 0 && newVal[0] > oldVal[0] && loadData.value === true) {
+        // console.log("oldscrollheight", oldVal[0]);
+        // console.log("newscrollheight", newVal[0]);
+        findScrollHeight.value.scrollTop = newVal[0] - oldVal[0];
+        loadData.value = false;
     }
 });
 
-//聊天室滾動條置底
-const scrollToBottom = (): void => {
-    findScrollHeight.value.scrollTop = scrollHeight.value;
-};
-//聊天室置頂時,刷api拿歷史資訊
+// 往上觸頂刷新歷史訊息api
 const handleScroll = (e) => {
     if (e.target.scrollTop == 0) {
+        loadData.value = true;
         loadMore();
     }
 };
 
 const loadMore = () => {
     if (totalCount.value >= 30) {
-        msgStart.value = msgStart.value + 30 + 1;
-        getHistoryApi(chatRoomID.value, props.eventID);
+        msgStart.value = msgStart.value + 30;
+        getHistoryApi(chatRoomID.value, props.eventID, true);
     }
 };
-window.addEventListener("scroll", handleScroll, true);
+onMounted(() => {
+    document.getElementById("drop-area").addEventListener("scroll", handleScroll, true);
+});
 
 //重新編輯
 const reEdit = (id: string): void => {
@@ -925,9 +1283,45 @@ const copyMsg = async (text: any) => {
     }
     text.janusMsg.config.msgFunctionStatus = false;
 };
+//發送傳統簡訊
+const transferSmsMsg = (text) => {
+    isMmsSend.value = true;
+    text.janusMsg.config.msgFunctionStatus = false;
+    msg.value = text.janusMsg.msgContent;
+    smsMessageComputed();
+};
 
 //訊息功能泡泡
 const onBubble = (text: txt): void => {
+    //先全部清空class
+    const ele = document.querySelectorAll(".timestamp");
+    ele.forEach((item, i, arr) => {
+        item.offsetParent.offsetParent.children[0].children[i].classList.remove("lastMsg");
+    });
+    //判斷訊息功能框的方向
+    const timeDOM = document.getElementById(text.janusMsg.config.id + "time");
+    const addClassDOM = document.getElementById(text.janusMsg.config.id);
+    if (timeDOM.getBoundingClientRect().top > document.body.clientHeight * 0.7) {
+        addClassDOM.classList.add("lastMsg");
+    }
+
+    // const ele = document.querySelectorAll(".timestamp");
+    // ele.forEach((item, i, arr) => {
+    //     if (item.getBoundingClientRect().top > document.body.clientHeight * 0.7) {
+    //         item.offsetParent.offsetParent.children[0].children[i].classList.add("lastMsg");
+    //     } else if (
+    //         !item.offsetParent.offsetParent.children[0].children[arr.length - 1].classList.contains(
+    //             "lastMsg"
+    //         )
+    //     ) {
+    //         item.offsetParent.offsetParent.children[0].children[arr.length - 1].classList.add(
+    //             "lastMsg"
+    //         );
+    //     } else {
+    //         item.offsetParent.offsetParent.children[0].children[i].classList.remove("lastMsg");
+    //     }
+    // });
+    //訊息功能框開關
     let arr = messageList.value.map((item: txt) => {
         if (item.janusMsg.config.id === text.janusMsg.config.id) {
             text.janusMsg.config.msgFunctionStatus = !text.janusMsg.config.msgFunctionStatus;
@@ -939,9 +1333,11 @@ const onBubble = (text: txt): void => {
     messageList.value = arr;
 };
 
-//下載圖片
-const downloadImage = (text: txt): void => {
+//下載
+const downloadFile = (text: txt): void => {
+    // console.log("download props", text);
     text.janusMsg.config.msgFunctionStatus = false;
+    download(text);
 };
 
 //收回訊息
@@ -975,7 +1371,10 @@ const confirmRecallPopup = (text: txt): void => {
     });
 };
 // 圖片展示
-const previewURL = (fileid: string): void => {
+const previewURL = (text): void => {
+    // fileid
+    // time
+    viewImgs.value = [];
     pictures.value.forEach((img: any) => {
         if (
             viewImgs.value.includes(
@@ -989,16 +1388,11 @@ const previewURL = (fileid: string): void => {
             );
         }
     });
-    // console.log(
-    //     "viewImgs",
-    //     viewImgs.value.map((img) => img.split("/"))
-    // );
     // 環境設定
-    const isProduction = process.env.NODE_ENV === "production";
-    const getSplit = isProduction ? 3 : 4;
+    const getSplit = isProduction || isStaging ? 3 : 4;
     const viewIndex = viewImgs.value
         .map((img: any) => Math.floor(img.split("/")[getSplit].split(".")[0]))
-        .indexOf(fileid);
+        .indexOf(Number(text.janusMsg.format.Fileid));
     viewerApi({
         options: {
             initialViewIndex: viewIndex,
@@ -1016,15 +1410,58 @@ const previewURL = (fileid: string): void => {
                 a.download = fileName;
                 a.className = "download";
                 a.innerHTML = `<span class="downloadImg"></span>`;
-                wrap[0].appendChild(div).appendChild(a);
+                (text.janusMsg.type === 2 &&
+                    dayjs().isBefore(dayjs(text.janusMsg.format.expirationDate))) ||
+                (text.janusMsg.type === 2 && text.janusMsg.config.isWelcomeMsg) ||
+                text.janusMsg.type === 1
+                    ? wrap[0].appendChild(div).appendChild(a)
+                    : null;
             },
         },
         images: viewImgs.value,
     });
 };
+//default pic  for ios video
+const iosVideoDefaultTag = ref("#t=0.1");
+// 自定義置底按鈕/輸入框高度差屬性
+const diffHeight = computed(() => {
+    console.log("是否打開了貼圖:", chatStore.showStickerModal);
+    let origialHeight = 70;
+    let typeHeight = chatStore.isMmsSend ? 44 : 0;
+    switch (chatStore.showStickerModal) {
+        case true:
+            typeHeight = 0;
+            origialHeight = 286;
+            break;
+        default:
+            origialHeight = 70;
+    }
+    return {
+        "--diffHeight": origialHeight + typeHeight + chatStore.diffHeight + "px",
+    };
+});
+
+// 自定義信息框高度差的屬性
+let originalHeight = 62;
+let typeHeight = chatStore.isMmsSend ? 44 : 0;
+const messageOffset = computed(() => {
+    console.log("是否打開了貼圖:", chatStore.showStickerModal);
+    switch (chatStore.showStickerModal) {
+        case true:
+            typeHeight = 0;
+            originalHeight = 280;
+            break;
+        default:
+            originalHeight = 62;
+    }
+    return {
+        "--messageOffset": originalHeight + typeHeight + chatStore.diffHeight + "px",
+    };
+});
 </script>
 <style lang="scss">
 @import "~@/assets/scss/var";
+
 .closeView {
     position: fixed;
     right: 0;
@@ -1041,6 +1478,7 @@ const previewURL = (fileid: string): void => {
         height: 80%;
     }
 }
+
 // 圖片預覽套件下載按鈕
 .download {
     position: fixed;
@@ -1069,6 +1507,11 @@ const previewURL = (fileid: string): void => {
 @media (max-width: 768px) {
     .download {
         left: 0;
+    }
+}
+.room-wrap {
+    .n-layout-scroll-container {
+        background-color: #f4f4f4;
     }
 }
 </style>
@@ -1122,14 +1565,14 @@ const previewURL = (fileid: string): void => {
         transform: translate3d(5px, 0, 0);
     }
 }
-*:not(input.field) {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-}
+// *:not(input.field) {
+//     -webkit-touch-callout: text !important;
+//     -webkit-user-select: text !important;
+//     -khtml-user-select: text !important;
+//     -moz-user-select: text !important;
+//     -ms-user-select: text !important;
+//     user-select: text !important;
+// }
 
 //收回訊息確認的彈窗
 .mask {
@@ -1231,14 +1674,37 @@ const previewURL = (fileid: string): void => {
         line-height: 1.6;
     }
 }
+// .scrollbar {
+// max-height: 676px;
+// #drop-area::-webkit-scrollbar {
+//     width: 5px;
+//     height: 5px;
+//     border-radius: 5px;
+// // }
+#drop-area::-webkit-scrollbar-track {
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#drop-area::-webkit-scrollbar {
+    width: 5px;
+}
+
+#drop-area::-webkit-scrollbar-thumb {
+    border-radius: 5px;
+    cursor: pointer;
+    -webkit-box-shadow: inset 5px 5px 5px rgba(0, 0, 0, 0.25);
+}
 .chatroom-inner {
     width: 100%;
     position: absolute;
     top: 46px;
-    bottom: 62px;
-    overflow-y: scroll;
+    // bottom: 62px;
+    bottom: var(--messageOffset);
+    overflow-y: auto;
     height: auto;
     box-sizing: border-box;
+    background-color: #fff;
     &.notMsg {
         padding-top: 20%;
         text-align: center;
@@ -1252,7 +1718,7 @@ const previewURL = (fileid: string): void => {
         // flex-direction: column;
         // justify-content: flex-end;
         padding: 10px 15px;
-        &.mobileMsg {
+        &.noFunctionMsg {
             &:hover {
                 .dialog {
                     .dialog-inner {
@@ -1292,19 +1758,33 @@ const previewURL = (fileid: string): void => {
                 }
             }
         }
-        &.recallChoice {
-            justify-content: center;
+        &.recallMsg {
+            > * {
+                opacity: 0.5;
+            }
+            > .recallHint {
+                opacity: 1;
+            }
         }
-        &.myMsg {
+        &.staffMsg {
             text-align: right;
             &.dateMsg {
                 display: block;
             }
         }
-        &.otherMsg {
+        &.clientMsg {
             justify-content: flex-start;
             &.dateMsg {
                 display: block;
+            }
+            &.lastMsg {
+                .dialog {
+                    .dialog-inner {
+                        .msgFunction {
+                            right: -50px;
+                        }
+                    }
+                }
             }
             .dialog {
                 display: flex;
@@ -1322,7 +1802,7 @@ const previewURL = (fileid: string): void => {
                     }
                     .msgFunction {
                         left: initial;
-                        right: 0px;
+                        right: -60px;
                         top: 30px;
                     }
                     .avatar {
@@ -1344,7 +1824,7 @@ const previewURL = (fileid: string): void => {
             }
         }
         @media (max-width: 768px) {
-            &.otherMsg {
+            &.clientMsg {
                 .dialog {
                     .dialog-inner {
                         .msgFunction {
@@ -1362,7 +1842,7 @@ const previewURL = (fileid: string): void => {
                 display: block;
                 margin-bottom: 20px;
                 div {
-                    max-width: 100px;
+                    max-width: 120px;
                     height: 27px;
                     margin: 0 auto;
                     display: flex;
@@ -1376,6 +1856,27 @@ const previewURL = (fileid: string): void => {
                     border-radius: 14px;
                     span {
                         cursor: pointer;
+                    }
+                }
+            }
+        }
+        &.lastMsg {
+            .dialog {
+                .dialog-inner {
+                    .msgFunction {
+                        left: initial;
+                        right: 30px;
+                        bottom: 20px;
+                        top: auto;
+                    }
+                }
+            }
+        }
+        &.SMSMsg {
+            .dialog {
+                .dialog-inner {
+                    .content {
+                        background-color: #ffe198;
                     }
                 }
             }
@@ -1408,6 +1909,7 @@ const previewURL = (fileid: string): void => {
             position: relative;
 
             .dialog-inner {
+                max-width: 60%;
                 display: inline-flex;
                 align-items: center;
                 justify-content: flex-end;
@@ -1421,21 +1923,25 @@ const previewURL = (fileid: string): void => {
                     box-shadow: 0 2px 4px 0 rgba(209, 209, 209, 0.5);
                     border-radius: 4px;
                     top: 30px;
-                    left: 5px;
+                    left: -60px;
                     z-index: 1;
                     .ulList {
-                        background-color: $primary-4;
+                        background-color: $primary-3;
                         li {
-                            width: 58px;
-                            height: 40px;
-                            padding: 10px 15px 9px 15px;
-                            text-align: center;
-                            display: block;
+                            width: 115px;
+                            height: 50px;
+                            padding: 10px 15px 10px 15px;
+                            // text-align: center;
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
                             color: $gray-1;
                             border-bottom: 1px solid $white;
                             span {
                                 font-size: $font-size-14;
                                 font-weight: 500;
+                                // display: table-cell;
+                                // vertical-align: middle;
                             }
                             a {
                                 font-size: $font-size-14;
@@ -1456,7 +1962,7 @@ const previewURL = (fileid: string): void => {
                     transition: 0.2s;
                     position: absolute;
                     left: -80px;
-                    bottom: 0;
+                    bottom: -4px;
 
                     img {
                         display: block;
@@ -1516,11 +2022,11 @@ const previewURL = (fileid: string): void => {
                     }
                 }
                 .content {
-                    max-width: 900px;
+                    max-width: 100%;
                     word-wrap: break-word;
                     word-break: break-all;
                     white-space: pre-wrap;
-                    background-color: $primary-4;
+                    background-color: $primary-3;
                     border-radius: 20px 5px 20px 20px;
                     padding: 10px;
                     text-align: left;
@@ -1528,12 +2034,6 @@ const previewURL = (fileid: string): void => {
                     flex-direction: column;
                     line-height: 1.5;
                     margin-left: 10px;
-                    -webkit-touch-callout: none;
-                    -webkit-user-select: none;
-                    -khtml-user-select: none;
-                    -moz-user-select: none;
-                    -ms-user-select: none;
-                    user-select: none;
                     &.reply {
                         min-width: 70px;
                     }
@@ -1660,7 +2160,15 @@ const previewURL = (fileid: string): void => {
                     font-weight: 500;
                     color: $gray-1;
                     display: flex;
-                    justify-content: flex-start;
+                    flex-direction: column;
+                    // justify-content: flex-start;
+                    a {
+                        display: contents;
+                    }
+                    .urlpreview {
+                        border-top: 2px solid #fff;
+                        padding-top: 5px;
+                    }
                 }
 
                 .replyMsg {
@@ -1674,7 +2182,7 @@ const previewURL = (fileid: string): void => {
                     align-items: center;
                     justify-content: space-between;
                     line-height: 1.5;
-                    border-bottom: 1px solid $primary-3;
+                    border-bottom: 1px solid $primary-2;
                     &:hover {
                         cursor: pointer;
                     }
@@ -1708,6 +2216,8 @@ const previewURL = (fileid: string): void => {
                     }
                     img {
                         width: 100%;
+                        max-width: 150px;
+                        max-height: 150px;
                         object-fit: cover;
                     }
                 }
@@ -1738,9 +2248,6 @@ const previewURL = (fileid: string): void => {
                     display: flex;
                     justify-content: center;
                     align-items: center;
-                    min-width: 100px;
-                    height: 150px;
-
                     -webkit-touch-callout: none;
                     -webkit-user-select: none;
                     -khtml-user-select: none;
@@ -1755,19 +2262,19 @@ const previewURL = (fileid: string): void => {
                     /* IE */
                     *font-size: 135px; /* 200px * 0.9 = 180px */
                     overflow: hidden;
-                    background-color: $gray-7;
+                    // background-color: $gray-7;
                     &:hover {
                         cursor: pointer;
                     }
                     &:after {
-                        content: ".";
+                        content: "";
                         font-size: 0;
                         -webkit-text-size-adjust: none;
                     }
                     img {
                         vertical-align: middle;
-                        max-width: 150px;
-                        max-height: 150px;
+                        max-width: 250px;
+                        max-height: 300px;
                         -webkit-touch-callout: none;
                         -webkit-user-select: none;
                         -khtml-user-select: none;
@@ -1782,6 +2289,7 @@ const previewURL = (fileid: string): void => {
                         color: $gray-1;
                         font-size: $font-size-14;
                         text-decoration: none;
+                        -webkit-user-drag: none;
                     }
                     .img {
                         width: 100%;
@@ -1792,6 +2300,8 @@ const previewURL = (fileid: string): void => {
                     }
                     img {
                         width: 100%;
+                        max-width: 150px;
+                        max-height: 150px;
                         object-fit: contain;
                     }
                 }
@@ -1799,18 +2309,27 @@ const previewURL = (fileid: string): void => {
             .timestamp {
                 display: flex;
                 flex-direction: column;
-
                 .mms {
-                    font-size: $font-size-12;
-                    margin-bottom: 4px;
-                    color: $danger;
+                    display: flex;
+                    align-items: center;
+                    justify-content: flex-end;
+                    p {
+                        font-size: $font-size-12;
+                        color: $danger;
+                    }
+                    span {
+                        display: block;
+                        color: $gray-3;
+                        font-size: $font-size-12;
+                        font-weight: 400;
+                        line-height: 17px;
+                    }
                 }
                 span {
                     display: block;
                     color: $gray-3;
                     font-size: $font-size-12;
                     font-weight: 400;
-                    line-height: 17px;
                 }
             }
         }
@@ -1819,11 +2338,18 @@ const previewURL = (fileid: string): void => {
             font-size: $font-size-10;
             margin-top: 5px;
         }
+        .recallHint {
+            color: red;
+            font-size: $font-size-10;
+            font-weight: bold;
+            margin-top: 5px;
+        }
     }
     .scrollToBottom {
         position: fixed;
         right: 285px;
-        bottom: 70px;
+        // bottom: 70px;
+        bottom: var(--diffHeight);
         border-radius: 50%;
         z-index: 100;
         cursor: pointer;
@@ -1844,6 +2370,7 @@ const previewURL = (fileid: string): void => {
         }
     }
 }
+// }
 .dropActive {
     background-color: rgba(0, 0, 0, 0.1);
 }

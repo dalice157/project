@@ -2,7 +2,7 @@
     <div class="more-chat-room" :class="{ menuToggle: hamburgerBoolean }">
         <HamburgerBar @menuToggle="menuToggle" />
         <div class="main">
-            <h1 v-if="!isResult || keyWord === ''" class="logo">talkOD</h1>
+            <h1 v-if="!isResult || keyWord === ''" class="logo">互動回覆簡訊</h1>
             <SeachBar />
             <ChatRoomList />
         </div>
@@ -40,13 +40,26 @@ onMounted(() => {
         headers: { Authorization: `Bearer ${signature}` },
     })
         .then((res: any) => {
-            isIllegalDevice.value = false;
+            isIllegalDevice.value = 0;
             getEventListApi(route.params.eventKey);
         })
         .catch((err: any) => {
-            console.error(err);
+            isLoading.value = false;
+            console.error("login err", err);
             if (err.response.status === 401) {
-                isIllegalDevice.value = true;
+                if (err.response.data.code === -1) {
+                    isIllegalDevice.value = 1;
+
+                    return;
+                }
+                if (err.response.data.code === -3) {
+                    isIllegalDevice.value = 3;
+
+                    return;
+                }
+            }
+            if (err.response.status === 404) {
+                noChatToken.value = true;
                 return;
             }
         });
@@ -71,9 +84,8 @@ const menuToggle = (menuBoolean: boolean) => {
         width: 100%;
         height: 100%;
         display: grid;
-        grid:
-            "header" 120px
-            "main" 1fr;
+        grid: "header" 120px;
+        // "main" 1fr;
         gap: 0;
         background-color: $gray-8;
         transform: translateX(0px);
@@ -81,19 +93,19 @@ const menuToggle = (menuBoolean: boolean) => {
         -o-transition: all 0.7s ease-in-out;
         transition: all 0.7s ease-in-out;
         &.menuToggle {
-            transform: translateX(250px);
+            transform: translateX(280px);
             -webkit-transition: all 0.7s ease-in-out;
             -o-transition: all 0.7s ease-in-out;
             transition: all 0.7s ease-in-out;
         }
     }
     .main {
-        grid-area: main;
+        // grid-area: main;
         .logo {
             margin: 20px auto;
-            width: 120px;
-            height: 40px;
-            background: url("~@/assets/Images/talkOD-logo.png") center no-repeat;
+            width: 165px;
+            height: 39.72px;
+            background: url("~@/assets/Images/talkod-logo-confirm.png") center no-repeat;
             background-size: 100%;
             text-indent: -9999px;
             white-space: nowrap;

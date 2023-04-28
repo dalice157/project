@@ -9,7 +9,7 @@ import { useChatStore } from "@/store/chat";
 import { sendPrivateMsg } from "@/util/chatUtil";
 import { useModelStore } from "@/store/model";
 import { useApiStore } from "@/store/api";
-import router from "@/router";
+import { nextTick } from "vue";
 
 /**
  * phoneType 狀態
@@ -26,7 +26,7 @@ function getQueryStringValue(name) {
         results = regex.exec(location.search);
     return results === null ? "" : decodeURIComponent(results[1].replace(/\+/g, " "));
 }
-const getUserName = localStorage.getItem("userName");
+// const getUserName = localStorage.getItem("userName");
 export const usePhoneCallStore = defineStore({
     id: "phoneCall",
     state: () => ({
@@ -41,6 +41,8 @@ export const usePhoneCallStore = defineStore({
         phoneTime: <any>"0:00",
         isMuted: <boolean>false,
         sender: <any>null,
+        getUserName: <any>localStorage.getItem("userName"),
+        phoneAlertMessage: <any>"",
     }),
     getters: {},
     actions: {
@@ -49,6 +51,7 @@ export const usePhoneCallStore = defineStore({
             // Call someone
             if (/[^a-zA-Z0-9]/.test(display)) {
                 alert("Input is not alphanumeric");
+                this.phoneAlertMessage = "Input is not alphanumeric";
                 return;
             }
             // eslint-disable-next-line @typescript-eslint/no-this-alias
@@ -69,7 +72,8 @@ export const usePhoneCallStore = defineStore({
                 },
 
                 error: function (error: any) {
-                    alert("請檢查麥克風是否開啟!!");
+
+                    this.phoneAlertMessage = "請檢查麥克風是否開啟!!";
                     const modelStore = useModelStore();
                     const { phoneCallModal } = storeToRefs(modelStore);
                     phoneCallModal.value = false;
@@ -110,7 +114,7 @@ export const usePhoneCallStore = defineStore({
                 error: function (error: any) {
                     // @ts-ignore
                     Janus.error("WebRTC error:", error);
-                    alert("請檢查麥克風是否開啟!!");
+                    this.phoneAlertMessage = "請檢查麥克風是否開啟!!";
                     const modelStore = useModelStore();
                     const { phoneCallModal } = storeToRefs(modelStore);
                     phoneCallModal.value = false;
@@ -121,6 +125,7 @@ export const usePhoneCallStore = defineStore({
         doHangup(type: any, chatRoomID, eventID, sender?) {
             const chatstore = useChatStore();
             const { textPlugin, isOnline } = storeToRefs(chatstore);
+            const { scrollToBottom } = chatstore;
             console.log("掛掉電話種類", type);
             console.log("掛掉電話", sender);
             // api store
@@ -148,7 +153,7 @@ export const usePhoneCallStore = defineStore({
                     config: {
                         id: nanoid(),
                         isReply: false,
-                        replyObj: "",
+                        replyObj: {},
                         currentDate: currentDate(),
                         isExpire: false,
                         isPlay: false,
@@ -157,12 +162,11 @@ export const usePhoneCallStore = defineStore({
                         msgMoreStatus: false,
                         recallPopUp: false,
                         recallStatus: false,
-                        userName: getUserName,
+                        userName: this.getUserName,
                     },
                 },
             };
 
-            messageList.value.push(phoneObj);
             const sendMsgObj = {
                 msg: phoneObj,
                 textPlugin: textPlugin.value,

@@ -47,7 +47,7 @@ var Fingerprint = function (options) {
 Fingerprint.prototype = {
     get: function () {
         var keys = [];
-        keys.push(navigator.userAgent);
+        // keys.push(navigator.userAgent);
         keys.push(navigator.language);
         keys.push(screen.colorDepth);
         keys.push(this.getScreenResolution().join("x"));

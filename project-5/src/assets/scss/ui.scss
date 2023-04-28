@@ -1,49 +1,105 @@
 //checkbox 統一樣式
 .n-checkbox.n-checkbox--checked .n-checkbox-box,
 .n-checkbox.n-checkbox--indeterminate .n-checkbox-box {
-    background-color: #ffb400;
+    background-color: #f9935c;
 }
 .n-checkbox.n-checkbox--checked .n-checkbox-box .n-checkbox-box__border,
 .n-checkbox.n-checkbox--indeterminate .n-checkbox-box .n-checkbox-box__border {
-    border: 1px solid #ffb400;
+    border: 1px solid #f9935c;
 }
 .n-checkbox:hover .n-checkbox-box .n-checkbox-box__border {
-    border-color: #ffb400;
+    border-color: #f9935c;
 }
 
 .n-checkbox.n-checkbox--checked:focus:not(:active) .n-checkbox-box .n-checkbox-box__border,
 .n-checkbox.n-checkbox--indeterminate:focus:not(:active) .n-checkbox-box .n-checkbox-box__border {
-    border-color: #ffb400;
-    box-shadow: 0 0 0 2px rgba(255, 180, 0, 0.3);
+    border-color: #f9935c;
+    box-shadow: 0 0 0 2px rgba(249, 147, 92, 0.3);
 }
 
 .n-checkbox:focus:not(:active) .n-checkbox-box .n-checkbox-box__border {
-    border-color: #ffb400;
-    box-shadow: 0 0 0 2px rgba(255, 180, 0, 0.3);
+    border-color: #f9935c;
+    box-shadow: 0 0 0 2px rgba(249, 147, 92, 0.3);
 }
 
 .n-pagination .n-pagination-item:not(.n-pagination-item--disabled).n-pagination-item--active {
-    color: #ffb400;
-    border-color: #ffb400;
+    color: #f9935c;
+    border-color: #f9935c;
 }
 
 .n-pagination .n-pagination-item:not(.n-pagination-item--disabled):hover {
-    color: #ffb400;
+    color: #f9935c;
 }
-//datapicker 統一樣式
+//datapicker button 統一樣式
 .n-button.n-button--primary-type.n-button--tiny-type {
-    --color-hover: #ffb400 !important;
-    --color-pressed: #ffb400 !important;
-    --color-focus: #ffb400 !important;
-    --border-hover: 1px solid #ffb400 !important;
-    --border-pressed: 1px solid #ffb400 !important;
-    --border-focus: 1px solid #ffb400 !important;
+    --n-color-hover: #ffb891 !important;
+    --n-color-pressed: #f9935c !important;
+    --n-color-focus: #ffdbc8 !important;
+    --n-border-hover: 1px solid #ffb891 !important;
+    --n-border-pressed: 1px solid #f9935c !important;
+    --n-border-focus: 1px solid #ffdbc8 !important;
 }
 .n-button.n-button--default-type.n-button--tiny-type {
-    --text-color-hover: #ffb400 !important;
-    --text-color-pressed: #ffb400 !important;
-    --text-color-focus: #ffb400 !important;
-    --border-hover: 1px solid #ffb400 !important;
-    --border-pressed: 1px solid #ffb400 !important;
-    --border-focus: 1px solid #ffb400 !important;
+    --n-text-color-hover: #ffb891 !important;
+    --n-text-color-pressed: #f9935c !important;
+    --n-text-color-focus: #ffdbc8 !important;
+    --n-border-hover: 1px solid #ffb891 !important;
+    --n-border-pressed: 1px solid #f9935c !important;
+    --n-border-focus: 1px solid #ffdbc8 !important;
+}
+//datatable button 統一樣式
+.n-button.n-button--default-type.n-button--small-type {
+    --n-text-color-hover: #ffb891 !important;
+    --n-text-color-pressed: #f9935c !important;
+    --n-text-color-focus: #ffdbc8 !important;
+    --n-border-hover: 1px solid #ffb891 !important;
+    --n-border-pressed: 1px solid #f9935c !important;
+    --n-border-focus: 1px solid #ffdbc8 !important;
+}
+//textarea 統一樣式
+.n-input.n-input--textarea {
+    --n-border: none !important;
+}
+//select 統一樣式
+.n-base-selection {
+    --n-border-focus: 1px solid #ffdbc8 !important;
+    --n-border-hover: 1px solid #ffb891 !important;
+}
+//option 統一樣式
+.n-base-select-menu.n-select-menu {
+    --n-option-color-pending: #fff9f5 !important;
+}
+
+//dropdown 統一樣式
+.n-dropdown-menu {
+    .n-dropdown-option {
+        .n-dropdown-option-body--pending {
+            &::before {
+                background-color: #fff9f5 !important;
+            }
+        }
+    }
+}
+//upload 統一樣式
+.n-upload {
+    width: auto;
+}
+
+//layout 統一背景色
+.n-layout-scroll-container {
+    background-color: #f4f4f4;
+}
+// datatable pagination 統一位置
+.n-data-table .n-data-table__pagination {
+    justify-content: center;
+}
+//n-card 統一樣式
+.n-modal .n-card {
+    background-color: rgba(0, 0, 0, 0) !important;
+}
+//avatar 圖片不能 動
+.n-avatar {
+    img {
+        -webkit-user-drag: none !important;
+    }
 }

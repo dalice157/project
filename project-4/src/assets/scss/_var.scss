@@ -1,8 +1,8 @@
 /**
 * 字體
 */
-$font-family: -apple-system, BlinkMacSystemFont, Arial, "微軟正黑體", "Microsoft JhengHei", Roboto,
-    "Segoe UI", "蘋方體", "PingFangTC", sans-serif !default;
+$font-family: -apple-system, BlinkMacSystemFont, "微軟正黑體", "Microsoft JhengHei", "蘋方體",
+    "PingFangTC", "Segoe UI", Arial, Roboto, sans-serif !default;
 
 /**
 * 文字大小
@@ -60,12 +60,14 @@ $gray-8: #f9f9f9 !default;
 $border-line: #ececec !default;
 
 $primary-1: #ffb400 !default;
-$primary-2: #ffcf5e !default;
-$primary-3: #fff1cf !default;
+$primary-2: #ffc740 !default;
+$primary-3: #ffcf5e !default;
+$primary-4: #fff1cf !default;
+$primary-5: #fffaed !default;
 
 $danger: #df3636 !default;
 
 /**
 * sider 寬度
 */
-$siderWidth: 330px;
+$siderWidth: 350px;

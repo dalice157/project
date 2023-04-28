@@ -9,9 +9,12 @@ const SERVER_SITE = {
     production: "https://fapi.talkod.im",
 };
 const JANUS_SITE = {
-    develop: "https://t.talkod.im:8089",
-    staging: "https://tj1.talkod.im:8089",
-    production: "https://j1.talkod.im:8089",
+    develop: "wss://t.talkod.im:8989",
+    // develop: "https://t.talkod.im:8089",
+    staging: "wss://tj1.talkod.im:443",
+    // staging: "https://tj1.talkod.im:443",
+    production: "wss://j1.talkod.im:443",
+    // production: "https://j1.talkod.im:443",
 };
 const FILE_SITE = {
     develop: "https://t.talkod.im:8029/fls/",

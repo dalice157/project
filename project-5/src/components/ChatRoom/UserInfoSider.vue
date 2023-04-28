@@ -40,6 +40,7 @@
                 v-model:value="userInfo.mobile"
                 type="text"
                 placeholder="請輸入電話"
+                disabled
             />
             <div class="tags-group edit">
                 <n-dynamic-tags round v-model:value="tags" />
@@ -92,7 +93,7 @@
                     text-color="#3e3e3e"
                     @click.stop="onSaveAvatar"
                 >
-                    確定
+                    儲存
                 </n-button>
             </div>
         </div>
@@ -105,11 +106,11 @@ import { storeToRefs } from "pinia";
 import { NAvatar, NInput, NButton, NDynamicTags, NGrid, NGridItem, NTag } from "naive-ui";
 import { useRouter, useRoute } from "vue-router";
 
+import { isProduction, isStaging, imgList } from "@/util/commonUtil";
 import { useApiStore } from "@/store/api";
 import { useSearchStore } from "@/store/search";
 import config from "@/config/config";
-import editIcon from "@/assets/Images/chatroom/edit-round.svg";
-import { imgList } from "@/util/commonUtil";
+import editIcon from "@/assets/Images/manage/edit-round.svg";
 
 const route = useRoute();
 
@@ -125,30 +126,29 @@ const { searchSwitch } = searchStore;
 const isEdited = ref(false);
 const img = ref(null);
 const showPopover = ref(false);
-const tags = ref([]);
 const isUserIcon = ref(false);
 
 const chatroomID = computed(() => route.query.chatroomID);
 
 // 環境設定
-const isProduction = process.env.NODE_ENV === "production";
-const getSplit = isProduction ? 4 : 5;
+const getSplit = isProduction || isStaging ? 4 : 5;
 
 // 開啟修改
 const handleEdited = () => {
     isEdited.value = true;
 };
-watch(
-    userInfo,
-    () => {
-        tags.value = userInfo.value.tag;
+
+const tags = computed({
+    get() {
+        return userInfo.value.tag;
     },
-    { immediate: true }
-);
+    set(val) {
+        userInfo.value.tag = val;
+    },
+});
 
 watchEffect(() => {
     img.value = imgList.find((item) => {
-        // console.log('save item.split("/"):', item.split("/"));
         const icon =
             item.split("/")[getSplit] === "default.svg"
                 ? 0
@@ -167,8 +167,7 @@ watch(
 const regDescShow = computed(() => userInfo.value.description.replace(/\n/g, "<br>"));
 // 儲存
 const onSaveEdited = () => {
-    console.log("rexDesc:", regDescShow.value);
-
+    // console.log("rexDesc:", regDescShow.value);
     const infoObj = {
         chatroomID: chatroomID.value,
         name: userInfo.value.name,
@@ -177,7 +176,7 @@ const onSaveEdited = () => {
             img.value.split("/")[getSplit] === "default.svg"
                 ? 0
                 : img.value.split("/")[getSplit].split(".")[0],
-        tag: tags.value.length === 0 ? userInfo.value.tag : tags.value,
+        tag: tags.value.length === 0 ? [] : tags.value,
         description: userInfo.value.description,
         eventID: route.params.id,
     };
@@ -229,7 +228,7 @@ const onSaveAvatar = () => {
         font-size: $font-size-12;
         padding: 10px;
         color: $gray-1;
-        background-color: $primary-4;
+        background-color: $primary-3;
         font-weight: 400;
         .n-tag__border {
             border: 1px solid $primary-4;
@@ -468,6 +467,7 @@ const onSaveAvatar = () => {
     background-color: $bg;
     line-height: 1.6;
     padding: 10px;
+    word-break: break-all;
     .n-input--textarea {
         background-color: $bg;
     }

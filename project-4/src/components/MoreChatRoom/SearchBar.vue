@@ -1,7 +1,8 @@
 <template>
     <!-- 搜尋bar -->
-    <div class="search-bar">
+    <div class="search-bar--moreChatRoom">
         <n-input
+            @input="onSearchMoreImResult"
             v-model:value="moreKeyWord"
             type="text"
             placeholder="直接輸入公司或店家名稱問問題吧..."
@@ -14,7 +15,7 @@
                     class="clearKeyWord"
                     :src="closeIcon"
                     v-if="moreKeyWord"
-                    @[events]="clearMoreKeyWord()"
+                    @[events].stop="clearMoreKeyWord()"
                     alt="close"
                 />
             </template>

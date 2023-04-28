@@ -31,6 +31,10 @@
             </div>
         </div>
     </div>
+    <!-- 捲動時下方有新訊息提示 -->
+    <div class="newMsgHint" v-show="newMsgHint" @click="scrollToBottom()">
+        <h1>下方有新信息</h1>
+    </div>
 
     <!-- 使用者輸入框 -->
     <div class="input">
@@ -40,25 +44,51 @@
                 刪除{{ deleteGroup.length > 0 ? `(${deleteGroup.length})` : "" }}
             </div>
         </div> -->
+        <div class="mmsFunctionBar" v-if="isMmsSend">
+            <div class="mmsComputed">
+                <div class="wordCount">{{ word }} 字</div>
+                <div class="numOfMessage">{{ count }} 則</div>
+                <div class="point">{{ computedPoint }} 點</div>
+            </div>
+            <div class="mmsHint">
+                <span class="mmsSend">發送傳統簡訊</span>
+                <n-popover trigger="hover" placement="top">
+                    <template #trigger>
+                        <n-icon :depth="3" size="22">
+                            <help-circle-outline />
+                        </n-icon>
+                    </template>
+                    <span class="pop"
+                        >一則SMS簡訊限定 70 字元，此處將於發送文字最末端自動嵌入交談室專屬連結共
+                        {{ config.wordLimit }}
+                        字元(發送內容不顯示於連結，請於發送後至「發送查詢」取得連結)，若欲以一則簡訊發送，其字數請設定
+                        53 字元以內。
+                    </span>
+                </n-popover>
+            </div>
+        </div>
         <div class="input-inner">
-            <span class="mmsSend" v-if="isMmsSend">簡訊發送</span>
-            <n-popover trigger="hover" placement="right" v-if="isMmsSend">
-                <template #trigger>
-                    <n-icon :depth="3" size="22">
-                        <help-circle-outline />
-                    </n-icon>
-                </template>
-                <span class="pop"
-                    >當此處顯示以「簡訊發送」，即文字內容將以SMS簡訊發送給此人；此處SMS以70個字元為一則，每一則將扣除點數一點，依此類推。
-                </span>
-            </n-popover>
             <span class="file-folder" v-if="!isMmsSend">
                 <input type="file" :accept="chatfileAccept" @change="onUploadFilePC" ref="file" />
             </span>
-            <div class="textArea">
+            <img
+                class="sticker"
+                @click.stop="closeStickerBox"
+                v-if="showStickerModal && !isMmsSend"
+                :src="emojiEnabled"
+                alt="表情貼圖"
+            />
+            <img
+                class="sticker"
+                @click.stop="openStickerBox"
+                v-if="!showStickerModal && !isMmsSend"
+                :src="emojiIcon"
+                alt="表情貼圖"
+            />
+            <div class="textArea" @input.stop="autoHeight">
                 <n-input
                     class="n-input-modify"
-                    :placeholder="isMmsSend ? '以簡訊發送' : 'Aa'"
+                    :placeholder="isMmsSend ? '以傳統簡訊發送' : 'Aa'"
                     type="textarea"
                     size="small"
                     :autosize="{
@@ -68,25 +98,27 @@
                     v-model:value="msg"
                     @keypress.enter.exact.prevent="addMsg"
                     @focus="closeAll('input')"
+                    @input="smsMessageComputed()"
                     ref="inputInstRef"
+                    id="backendInput"
                 >
-                    <!-- @keydown.enter.exact="addMsg" -->
                 </n-input>
                 <img
-                    @click.stop="closeStickerBox"
-                    v-if="showStickerModal && !isMmsSend"
-                    :src="emojiEnabled"
-                    alt="表情貼圖"
+                    class="send"
+                    :src="sendActiveIcon"
+                    alt="傳送訊息"
+                    @click.prevent="addMsg"
+                    v-if="msg !== ''"
                 />
-                <img
-                    @click.stop="openStickerBox"
-                    v-if="!showStickerModal && !isMmsSend"
-                    :src="emojiIcon"
-                    alt="表情貼圖"
-                />
+                <img class="notSend" :src="sendDefaultIcon" alt="傳送訊息" v-else />
             </div>
-            <img class="send" :src="sendIcon" alt="傳送訊息" @click.prevent="addMsg" v-show="msg" />
-            <img
+            <button v-show="!isMmsSend" @click="onChangMMSSend" class="change-mms">
+                切換發送傳統簡訊
+            </button>
+            <button v-show="isMmsSend" @click="onChangSMSSend" class="change-text">
+                返回發送訊息
+            </button>
+            <!-- <img
                 class="recorder"
                 :src="voiceIcon"
                 alt="開啟錄音"
@@ -99,10 +131,10 @@
                 alt="關閉錄音"
                 v-show="!msg && showRecorderModal"
                 @click="closeRecorder()"
-            />
+            /> -->
         </div>
         <!-- 貼圖視窗 -->
-        <div class="stickerArea" v-show="showStickerModal">
+        <div class="stickerArea" v-show="showStickerModal && !isMmsSend">
             <div class="stickerTabsArea">
                 <ul class="stickerTabs">
                     <li
@@ -132,52 +164,67 @@
                     </li>
                 </ul>
             </div>
-            <div class="stickerGroupID" v-show="stickerItems.length > 0 && stickerGroupID == 0">
-                <n-grid :x-gap="10" :y-gap="10" :cols="4">
-                    <n-grid-item
-                        v-for="(item, index) in stickerItems"
-                        :key="index"
-                        @click="addSticker(item, item.stickerFileID)"
-                    >
-                        <div class="stickerIcon">
-                            <img
-                                :src="`${item.stickerUrl}${item.stickerPackID}/${item.stickerFileID}.${item.ext}`"
-                                :alt="`${item.title}`"
-                            />
-                        </div>
-                    </n-grid-item>
-                </n-grid>
-            </div>
-            <div
-                class="stickerGroupID"
-                v-show="stickerGroupID == stickerGroup.stickerPackID && stickerGroupID != 0"
-            >
-                <n-grid :x-gap="10" :y-gap="10" :cols="4">
-                    <n-grid-item
-                        v-for="tab in stickerGroup.stickerList"
-                        :key="tab"
-                        @click="addSticker(stickerGroup, tab)"
-                        :class="{ hide: tab == 'tab' || tab == 'main' }"
-                    >
-                        <div class="stickerIcon">
-                            <img
-                                :src="`${stickerUrl}${stickerGroup.stickerPackID}/${tab}.${stickerGroup.ext}`"
-                                :alt="`${stickerGroup.stickerPackID}-${tab}`"
-                            />
-                        </div>
-                    </n-grid-item>
-                </n-grid>
-            </div>
+            <n-scrollbar style="max-height: 140px">
+                <div class="stickerGroupID" v-show="stickerItems.length > 0 && stickerGroupID == 0">
+                    <n-grid :x-gap="10" :y-gap="10" :cols="4">
+                        <n-grid-item
+                            v-for="(item, index) in stickerItems"
+                            :key="index"
+                            @click="addSticker(item, item.stickerFileID)"
+                        >
+                            <div class="stickerIcon">
+                                <img
+                                    :src="`${item.stickerUrl}${item.stickerPackID}/${item.stickerFileID}.${item.ext}`"
+                                    :alt="`${item.title}`"
+                                />
+                            </div>
+                        </n-grid-item>
+                    </n-grid>
+                </div>
+            </n-scrollbar>
+            <n-scrollbar style="max-height: 140px">
+                <div
+                    class="stickerGroupID"
+                    v-show="stickerGroupID == stickerGroup.stickerPackID && stickerGroupID != 0"
+                >
+                    <n-grid :x-gap="10" :y-gap="10" :cols="4">
+                        <n-grid-item
+                            v-for="tab in stickerGroup.stickerList"
+                            :key="tab"
+                            @click="addSticker(stickerGroup, tab)"
+                            :class="{ hide: tab == 'tab' || tab == 'main' }"
+                        >
+                            <div class="stickerIcon">
+                                <img
+                                    :src="`${stickerUrl}${stickerGroup.stickerPackID}/${tab}.${stickerGroup.ext}`"
+                                    :alt="`${stickerGroup.stickerPackID}-${tab}`"
+                                />
+                            </div>
+                        </n-grid-item>
+                    </n-grid>
+                </div>
+            </n-scrollbar>
         </div>
     </div>
+    <AlertPopUp :alertMessage="alertMessage" @clearAlertMessage="clearAlertMessage" />
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from "vue";
+import { computed, ref, onMounted, nextTick } from "vue";
 import { nanoid } from "nanoid";
 import Compressor from "compressorjs";
 import axios from "axios";
-import { NInput, NEllipsis, NIcon, NModal, NCard, NGrid, NGridItem, NPopover } from "naive-ui";
+import {
+    NInput,
+    NEllipsis,
+    NIcon,
+    NModal,
+    NCard,
+    NGrid,
+    NGridItem,
+    NPopover,
+    NScrollbar,
+} from "naive-ui";
 import { HelpCircleOutline } from "@vicons/ionicons5";
 import { storeToRefs } from "pinia";
 import Recorder from "js-audio-recorder";
@@ -193,7 +240,8 @@ import { currentTime, currentDate, unixTime } from "@/util/dateUtil";
 import { useApiStore } from "@/store/api";
 import { useChatStore } from "@/store/chat";
 import { useModelStore } from "@/store/model";
-import sendIcon from "@/assets/Images/chatroom/send.svg";
+import sendDefaultIcon from "@/assets/Images/chatroom/send.svg";
+import sendActiveIcon from "@/assets/Images/chatroom/send_y.svg";
 import closeIcon from "@/assets/Images/chatroom/round-fill_close.svg";
 import emojiEnabled from "@/assets/Images/chatroom/emoji-enabled.svg";
 import emojiIcon from "@/assets/Images/chatroom/emoji.svg";
@@ -201,8 +249,9 @@ import voiceIcon from "@/assets/Images/chatroom/voice.svg";
 import voiceEnabled from "@/assets/Images/chatroom/voice-enabled.svg";
 import reloadTimeEnabled from "@/assets/Images/chatroom/reload-time-enabled.svg";
 import reloadTimeIcon from "@/assets/Images/chatroom/reload-time.svg";
-import { chatfileAccept } from "@/util/commonUtil";
+import { chatfileAccept, pointCalculation } from "@/util/commonUtil";
 import config from "@/config/config";
+import AlertPopUp from "@/components/AlertPopUp.vue";
 
 // model sotre
 const modelStore = useModelStore();
@@ -212,10 +261,18 @@ const { closeAll } = modelStore;
 const apiStore = useApiStore();
 const { getSticker, sendMMSMsg } = apiStore;
 const { messageList, stickerList, stickerUrl, point } = storeToRefs(apiStore);
-//store
+//chat store
 const chatStore = useChatStore();
 const inputInstRef: any = ref(null);
-const { replyHide, openRecorder, closeRecorder, handleStickckerGroup } = chatStore;
+const {
+    replyHide,
+    openRecorder,
+    closeRecorder,
+    handleStickckerGroup,
+    scrollToBottom,
+    isIllegalCharacter,
+    smsMessageComputed,
+} = chatStore;
 const {
     messages,
     pictures,
@@ -234,15 +291,34 @@ const {
     stickerGroup,
     isMmsSend,
     isOnline,
+    newMsgHint,
+    diaryLog,
+    bugout,
+    word,
+    count,
+    computedPoint,
+    findScrollHeight,
+    chatroomScrolltop,
+    chatroomWindowHeight,
+    chatroomScrolltopAndWindowHeight,
+    chatroomScrollHeight,
 } = storeToRefs(chatStore);
+
 //router
 const route = useRoute();
 onMounted(() => {
     inputInstRef.value.blur();
     inputVal.value = inputInstRef.value;
+    const backendInput = document.getElementById("backendInput");
 });
 
-const getUserName = localStorage.getItem("userName");
+//alert popup
+const alertMessage = ref("");
+const clearAlertMessage = () => {
+    alertMessage.value = "";
+};
+
+const userName = localStorage.getItem("userName");
 
 const chatRoomID: any = computed(() => route.query.chatroomID);
 
@@ -266,7 +342,7 @@ const gettingPosition: any = () => {
         };
         navigator.geolocation.getCurrentPosition(successCallback, errorCallback, options);
     } else {
-        alert("你的裝置或瀏覽器不支援定位功能");
+        alertMessage.value = "你的裝置或瀏覽器不支援定位功能";
     }
 };
 
@@ -293,10 +369,8 @@ const errorCallback = (error: any) => {
 };
 
 //發送訊息
-//input v-model
-const addMsg = (): void => {
+const addMsg = async (): void => {
     const str = msg.value.trim();
-
     let textObj: any = {
         janusMsg: {
             chatroomID: chatRoomID.value,
@@ -309,7 +383,7 @@ const addMsg = (): void => {
             config: {
                 id: nanoid(),
                 isReply: replyMsg.value ? true : false,
-                replyObj: replyMsg.value || "",
+                replyObj: replyMsg.value || {},
                 currentDate: currentDate(),
                 isExpire: false,
                 isPlay: false,
@@ -318,16 +392,44 @@ const addMsg = (): void => {
                 msgMoreStatus: false,
                 recallPopUp: false,
                 recallStatus: false,
-                userName: getUserName,
+                userName: userName,
                 deliveryStatusSuccess: true,
             },
         },
     };
-
+    // 判斷文字訊息是否為url 抓取metaData
+    const reg = /^[h|H][t|T][t|T][p|P][s|S]?:\/\/([a-zA-Z0-9]+\.)+[a-zA-Z0-9]+/;
+    if (reg.test(str)) {
+        console.log("判斷此文字訊息 為link");
+        msg.value = "";
+        const fd = new FormData();
+        fd.append("url", str);
+        await axios({
+            method: "post",
+            url: `${config.serverUrl}/metadata`,
+            data: fd,
+        })
+            .then((res) => {
+                console.log("預覽 連結 res", res);
+                textObj.janusMsg.config.isLink = true;
+                textObj.janusMsg.format.metaTitle = res.data.title;
+                textObj.janusMsg.format.metaDescription = res.data.des;
+                textObj.janusMsg.format.metaImgurl = res.data.image;
+            })
+            .catch((err) => {
+                console.log("預覽 連結 err", err);
+            });
+    }
     if (str !== "") {
-        messageList.value.push(textObj);
-        // 送出後清除 msg 及 replyMsg
-        console.log("msg", msg.value);
+        if (isIllegalCharacter(str)) {
+            alertMessage.value = "發送內容不可含有 talkod.tw";
+            return;
+        }
+        //如果為簡訊發送必須先判斷點數
+        if (isMmsSend.value && computedPoint.value > point.value) {
+            alertMessage.value = "剩餘點數不足,請洽官網進行儲值!!!";
+            return;
+        }
         const sendMsgObj = {
             msg: textObj,
             textPlugin: textPlugin.value,
@@ -342,92 +444,122 @@ const addMsg = (): void => {
         sendPrivateMsg(sendMsgObj);
     }
     msg.value = "";
+    word.value = config.wordLimit;
+    count.value = 0;
+    computedPoint.value = 0;
     replyHide();
+    // 傳送後，輸入框的高度差置為0
+    chatStore.backToTheOrigialDiffHeight();
 };
 //手機版發送圖片
-const image = ref();
-const uploadImage = (e: any) => {
-    const fileArr = e.target.files[0];
-    const fileName = fileArr.name;
-    if (!fileArr) {
-        return;
-    }
-    //壓縮圖片套件 compressor js
-    new Compressor(fileArr, {
-        quality: 0.6,
-        success(result) {
-            //呼叫api
-            const fd = new FormData();
-            const getToken = localStorage.getItem("access_token");
-            fd.append("file", new File([result], fileArr.name, { type: "image/*" }));
-            axios({
-                method: "post",
-                url: `${config.serverUrl}/v1/file`,
-                data: fd,
-                headers: { Authorization: `Bearer ${getToken}` },
-            })
-                .then((res) => {
-                    const reader = new FileReader();
-                    reader.readAsDataURL(fileArr);
-                    reader.onload = (e: any) => {
-                        image.value = e.target.result;
-                        const imageObj: any = {
-                            janusMsg: {
-                                chatroomID: chatRoomID.value,
-                                msgType: 6,
-                                sender: 0,
-                                msgContent: "",
-                                time: unixTime(),
-                                type: 2,
-                                format: {
-                                    Fileid: res.data.fileid,
-                                    ShowName: fileName,
-                                    ExtensionName: res.data.ext,
-                                    FileSize: fileArr.size,
-                                    expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
-                                },
-                                config: {
-                                    id: nanoid(),
-                                    isReply: replyMsg.value ? true : false,
-                                    replyObj: replyMsg.value ? { ...replyMsg.value } : "",
-                                    currentDate: currentDate(),
-                                    isExpire: false,
-                                    isPlay: false,
-                                    isRead: isOnline.value ? true : false,
-                                    msgFunctionStatus: false,
-                                    msgMoreStatus: false,
-                                    recallPopUp: false,
-                                    recallStatus: false,
-                                    userName: getUserName,
-                                    deliveryStatusSuccess: true,
-                                },
-                            },
-                        };
-
-                        const sendMsgObj = {
-                            msg: imageObj,
-                            textPlugin: textPlugin.value,
-                            chatRoomID: chatRoomID.value,
-                            eventID: route.params.id,
-                        };
-                        sendPrivateMsg(sendMsgObj);
-                        messageList.value.push(imageObj);
-                        pictures.value.push(imageObj);
-                    };
-                })
-                .catch((err) => {
-                    console.error(err);
-                });
-        },
-        error(err) {
-            console.error(err);
-        },
-    });
-};
+// const imageReload = ref(0);
+// const uploadImage = (e: any) => {
+//     const fileArr = e.target.files[0];
+//     const fileName = fileArr.name;
+//     if (!fileArr) {
+//         return;
+//     }
+//     //壓縮圖片套件 compressor js
+//     new Compressor(fileArr, {
+//         quality: 0.6,
+//         async success(result) {
+//             //呼叫api
+//             const fd = new FormData();
+//             const getToken = localStorage.getItem("access_token");
+//             fd.append("file", new File([result], fileArr.name, { type: "image/*" }));
+//             await axios({
+//                 method: "post",
+//                 url: `${config.serverUrl}/v1/file`,
+//                 data: fd,
+//                 headers: { Authorization: `Bearer ${getToken}` },
+//             })
+//                 .then((res) => {
+//                     const reader = new FileReader();
+//                     reader.readAsDataURL(fileArr);
+//                     reader.onload = async (e: any) => {
+//                         image.value = e.target.result;
+//                         const imageObj: any = {
+//                             janusMsg: {
+//                                 chatroomID: chatRoomID.value,
+//                                 msgType: 6,
+//                                 sender: 0,
+//                                 msgContent: "",
+//                                 time: unixTime(),
+//                                 type: 2,
+//                                 format: {
+//                                     Fileid: res.data.fileid,
+//                                     ShowName: fileName,
+//                                     ExtensionName: res.data.ext,
+//                                     FileSize: fileArr.size,
+//                                     expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
+//                                 },
+//                                 config: {
+//                                     id: nanoid(),
+//                                     isReply: replyMsg.value ? true : false,
+//                                     replyObj: replyMsg.value ? { ...replyMsg.value } : {},
+//                                     currentDate: currentDate(),
+//                                     isExpire: false,
+//                                     isPlay: false,
+//                                     isRead: isOnline.value ? true : false,
+//                                     msgFunctionStatus: false,
+//                                     msgMoreStatus: false,
+//                                     recallPopUp: false,
+//                                     recallStatus: false,
+//                                     userName: userName,
+//                                     deliveryStatusSuccess: true,
+//                                 },
+//                             },
+//                         };
+//                         // 確認圖片是否放至伺服器;
+//                         // await axios({
+//                         //     method: "get",
+//                         //     url: `${config.fileUrl}${imageObj.janusMsg.format.Fileid}${imageObj.janusMsg.format.ExtensionName}`,
+//                         // })
+//                         //     .then((res) => {
+//                         imageReload.value = 0;
+//                         const sendMsgObj = {
+//                             msg: imageObj,
+//                             textPlugin: textPlugin.value,
+//                             chatRoomID: chatRoomID.value,
+//                             eventID: route.params.id,
+//                         };
+//                         sendPrivateMsg(sendMsgObj);
+//                         // })
+//                         // .catch((err) => {
+//                         //     console.error("圖片尚未放至伺服器 ", err);
+//                         //     if (imageReload.value === 4) {
+//                         //         imageReload.value = 0;
+//                         //         return;
+//                         //     }
+//                         //     if (imageReload.value < 4) {
+//                         //         imageReload.value++;
+//                         //         setTimeout(() => {
+//                         //             uploadImage(e);
+//                         //         }, 300);
+//                         //     }
+//                         // });
+//                     };
+//                 })
+//                 .catch((err) => {
+//                     // console.error(err);
+//                     bugout.value.error(`error-log${userName.value}`, err.response.status);
+//                     bugout.value.error(`error-log${userName.value}`, err.response.data);
+//                     bugout.value.error(
+//                         `error-log${userName.value}`,
+//                         err.response.request.responseURL
+//                     );
+//                 });
+//         },
+//         error(err) {
+//             console.error(err);
+//         },
+//     });
+// };
 //桌機版上傳檔案
+const image = ref();
 const file = ref(null);
 const files = ref();
-const onUploadFilePC = (e: any) => {
+const onUploadFilePC = async (e: any) => {
     inputFunctionBoolean.value = false;
     const fileArr = e.target.files[0];
     console.log("fileArr", fileArr);
@@ -438,24 +570,26 @@ const onUploadFilePC = (e: any) => {
         return;
     }
     //辨識上傳檔案
+    //圖片檔案
     if (fileArrType.includes("image")) {
-        new Compressor(fileArr, {
-            quality: 0.6,
-            success(result) {
-                //呼叫api
-                const fd = new FormData();
-                fd.append("file", new File([result], fileArr.name, { type: "image/*" }));
-                axios({
-                    method: "post",
-                    url: `${config.serverUrl}/v1/file`,
-                    data: fd,
-                    headers: { Authorization: `Bearer ${getToken}` },
-                })
-                    .then((res) => {
-                        const reader = new FileReader();
-                        reader.readAsDataURL(fileArr);
-                        reader.onload = (e: any) => {
-                            image.value = e.target.result;
+        //判斷為gif
+        if (fileName.split(".").pop() === "gif") {
+            // console.log("gif 檔 走這!!!");
+            const fd = new FormData();
+            fd.append("file", new File([fileArr], fileArr.name, { type: "image/*" }));
+            await axios({
+                method: "post",
+                url: `${config.serverUrl}/v1/file`,
+                data: fd,
+                headers: { Authorization: `Bearer ${getToken}` },
+            })
+                .then((res) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(fileArr);
+                    reader.onload = (e: any) => {
+                        let image = new Image();
+                        image.src = e.target.result;
+                        image.onload = function () {
                             const imageObj: any = {
                                 janusMsg: {
                                     chatroomID: chatRoomID.value,
@@ -469,6 +603,8 @@ const onUploadFilePC = (e: any) => {
                                         ShowName: fileName,
                                         ExtensionName: res.data.ext,
                                         FileSize: fileArr.size,
+                                        width: image.width,
+                                        height: image.height,
                                         expirationDate: dayjs
                                             .unix(res.data.exp)
                                             .format("YYYY-MM-DD"),
@@ -476,7 +612,7 @@ const onUploadFilePC = (e: any) => {
                                     config: {
                                         id: nanoid(),
                                         isReply: replyMsg.value ? true : false,
-                                        replyObj: replyMsg.value ? { ...replyMsg.value } : "",
+                                        replyObj: replyMsg.value ? { ...replyMsg.value } : {},
                                         currentDate: currentDate(),
                                         isExpire: false,
                                         isPlay: false,
@@ -485,7 +621,7 @@ const onUploadFilePC = (e: any) => {
                                         msgMoreStatus: false,
                                         recallPopUp: false,
                                         recallStatus: false,
-                                        userName: getUserName,
+                                        userName: userName,
                                         deliveryStatusSuccess: true,
                                     },
                                 },
@@ -498,25 +634,110 @@ const onUploadFilePC = (e: any) => {
                                 eventID: route.params.id,
                             };
                             sendPrivateMsg(sendMsgObj);
-                            messageList.value.push(imageObj);
-                            pictures.value.push(imageObj);
                         };
+                    };
+                })
+                .catch((err) => {
+                    // console.error(err);
+                    bugout.value.error(`error-log${userName.value}`, err.response.status);
+                    bugout.value.error(`error-log${userName.value}`, err.response.data);
+                    bugout.value.error(
+                        `error-log${userName.value}`,
+                        err.response.request.responseURL
+                    );
+                });
+        } else {
+            //圖檔 但不是gif
+            // console.log("是圖檔 但不是gif!!");
+            new Compressor(fileArr, {
+                quality: 0.6,
+                async success(result) {
+                    //呼叫api
+                    const fd = new FormData();
+                    fd.append("file", new File([result], fileArr.name, { type: "image/*" }));
+                    await axios({
+                        method: "post",
+                        url: `${config.serverUrl}/v1/file`,
+                        data: fd,
+                        headers: { Authorization: `Bearer ${getToken}` },
                     })
-                    .catch((err) => {
-                        console.error(err);
-                    });
-            },
-            error(err) {
-                console.error(err);
-            },
-        });
-    } else {
+                        .then((res) => {
+                            const reader = new FileReader();
+                            reader.readAsDataURL(fileArr);
+                            reader.onload = async (e: any) => {
+                                let image = new Image();
+                                image.src = e.target.result;
+                                image.onload = function () {
+                                    const imageObj: any = {
+                                        janusMsg: {
+                                            chatroomID: chatRoomID.value,
+                                            msgType: 6,
+                                            sender: 0,
+                                            msgContent: "",
+                                            time: unixTime(),
+                                            type: 2,
+                                            format: {
+                                                Fileid: res.data.fileid,
+                                                ShowName: fileName,
+                                                ExtensionName: res.data.ext,
+                                                FileSize: fileArr.size,
+                                                width: image.width,
+                                                height: image.height,
+                                                expirationDate: dayjs
+                                                    .unix(res.data.exp)
+                                                    .format("YYYY-MM-DD"),
+                                            },
+                                            config: {
+                                                id: nanoid(),
+                                                isReply: replyMsg.value ? true : false,
+                                                replyObj: replyMsg.value
+                                                    ? { ...replyMsg.value }
+                                                    : {},
+                                                currentDate: currentDate(),
+                                                isExpire: false,
+                                                isPlay: false,
+                                                isRead: isOnline.value ? true : false,
+                                                msgFunctionStatus: false,
+                                                msgMoreStatus: false,
+                                                recallPopUp: false,
+                                                recallStatus: false,
+                                                userName: userName,
+                                                deliveryStatusSuccess: true,
+                                            },
+                                        },
+                                    };
+
+                                    const sendMsgObj = {
+                                        msg: imageObj,
+                                        textPlugin: textPlugin.value,
+                                        chatRoomID: chatRoomID.value,
+                                        eventID: route.params.id,
+                                    };
+                                    sendPrivateMsg(sendMsgObj);
+                                };
+                            };
+                        })
+                        .catch((err) => {
+                            // console.error(err);
+                            bugout.value.error(`error-log${userName.value}`, err.response.status);
+                            bugout.value.error(`error-log${userName.value}`, err.response.data);
+                            bugout.value.error(
+                                `error-log${userName.value}`,
+                                err.response.request.responseURL
+                            );
+                        });
+                },
+                error(err) {
+                    console.error(err);
+                },
+            });
+        }
+    } else if (fileArrType.includes("video")) {
+        ///影片檔案
         const fd = new FormData();
         console.log("fileArr:", fileArr);
-
         fd.append("file", new File([fileArr], fileArr.name, { type: fileArr.type }));
-
-        axios({
+        await axios({
             method: "post",
             url: `${config.serverUrl}/v1/file`,
             data: fd,
@@ -527,7 +748,70 @@ const onUploadFilePC = (e: any) => {
                 reader.readAsDataURL(fileArr);
                 reader.onload = (e: any) => {
                     files.value = e.target.result;
-
+                    let fileObj: any = {};
+                    fileObj = {
+                        janusMsg: {
+                            chatroomID: chatRoomID.value,
+                            msgType: 11,
+                            sender: 0,
+                            msgContent: "",
+                            time: unixTime(),
+                            type: 2,
+                            format: {
+                                Fileid: res.data.fileid,
+                                ShowName: fileArr.name,
+                                ExtensionName: res.data.ext,
+                                FileSize: fileArr.size,
+                                expirationDate: dayjs.unix(res.data.exp).format("YYYY-MM-DD"),
+                            },
+                            config: {
+                                id: nanoid(),
+                                isReply: false,
+                                replyObj: {},
+                                currentDate: currentDate(),
+                                isExpire: false,
+                                isPlay: false,
+                                isRead: isOnline.value ? true : false,
+                                msgFunctionStatus: false,
+                                msgMoreStatus: false,
+                                recallPopUp: false,
+                                recallStatus: false,
+                                userName: userName,
+                                deliveryStatusSuccess: true,
+                            },
+                        },
+                    };
+                    const sendMsgObj = {
+                        msg: fileObj,
+                        textPlugin: textPlugin.value,
+                        chatRoomID: chatRoomID.value,
+                        eventID: route.params.id,
+                    };
+                    sendPrivateMsg(sendMsgObj);
+                };
+            })
+            .catch((err) => {
+                // console.error(err);
+                bugout.value.error(`error-log${userName.value}`, err.response.status);
+                bugout.value.error(`error-log${userName.value}`, err.response.data);
+                bugout.value.error(`error-log${userName.value}`, err.response.request.responseURL);
+            });
+    } else {
+        //一般檔案
+        const fd = new FormData();
+        console.log("fileArr:", fileArr);
+        fd.append("file", new File([fileArr], fileArr.name, { type: fileArr.type }));
+        await axios({
+            method: "post",
+            url: `${config.serverUrl}/v1/file`,
+            data: fd,
+            headers: { Authorization: `Bearer ${getToken}` },
+        })
+            .then((res) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(fileArr);
+                reader.onload = (e: any) => {
+                    files.value = e.target.result;
                     let fileObj: any = {};
                     fileObj = {
                         janusMsg: {
@@ -547,7 +831,7 @@ const onUploadFilePC = (e: any) => {
                             config: {
                                 id: nanoid(),
                                 isReply: false,
-                                replyObj: "",
+                                replyObj: {},
                                 currentDate: currentDate(),
                                 isExpire: false,
                                 isPlay: false,
@@ -556,7 +840,7 @@ const onUploadFilePC = (e: any) => {
                                 msgMoreStatus: false,
                                 recallPopUp: false,
                                 recallStatus: false,
-                                userName: getUserName,
+                                userName: userName,
                                 deliveryStatusSuccess: true,
                             },
                         },
@@ -568,12 +852,13 @@ const onUploadFilePC = (e: any) => {
                         eventID: route.params.id,
                     };
                     sendPrivateMsg(sendMsgObj);
-                    messageList.value.push(fileObj);
-                    pictures.value.push(fileObj);
                 };
             })
             .catch((err) => {
-                console.error(err);
+                // console.error(err);
+                bugout.value.error(`error-log${userName.value}`, err.response.status);
+                bugout.value.error(`error-log${userName.value}`, err.response.data);
+                bugout.value.error(`error-log${userName.value}`, err.response.request.responseURL);
             });
     }
     file.value.value = null;
@@ -621,7 +906,7 @@ const onUploadFilePC = (e: any) => {
 //                         config: {
 //                             id: nanoid(),
 //                             isReply: false,
-//                             replyObj: "",
+//                             replyObj: {},
 //                             currentDate: currentDate(),
 //                             isExpire: false,
 //                             isPlay: false,
@@ -630,7 +915,7 @@ const onUploadFilePC = (e: any) => {
 //                             msgMoreStatus: false,
 //                             recallPopUp: false,
 //                             recallStatus: false,
-//                             userName: getUserName,
+//                             userName: userName,
 //                         },
 //                     },
 //                 };
@@ -660,6 +945,14 @@ onMounted(() => {
 const openStickerBox = () => {
     showRecorderModal.value = false;
     showStickerModal.value = true;
+    if (chatroomScrolltopAndWindowHeight.value < chatroomScrollHeight.value - 30) {
+        console.log("不置底");
+    } else {
+        console.log("置底");
+        nextTick(() => {
+            findScrollHeight.value.scrollTop = findScrollHeight.value.scrollHeight;
+        });
+    }
 };
 
 const closeStickerBox = () => {
@@ -686,7 +979,7 @@ const addSticker = (sticker, id) => {
             config: {
                 id: nanoid(),
                 isReply: replyMsg.value ? true : false,
-                replyObj: replyMsg.value ? { ...replyMsg.value } : "",
+                replyObj: replyMsg.value ? { ...replyMsg.value } : {},
                 currentDate: currentDate(),
                 isExpire: false,
                 isPlay: false,
@@ -695,7 +988,7 @@ const addSticker = (sticker, id) => {
                 msgMoreStatus: false,
                 recallPopUp: false,
                 recallStatus: false,
-                userName: getUserName,
+                userName: userName,
                 deliveryStatusSuccess: true,
             },
         },
@@ -722,7 +1015,19 @@ const addSticker = (sticker, id) => {
 
     window.localStorage.setItem("sticker-backend", JSON.stringify(stickerItems.value));
     sendPrivateMsg(sendMsgObj);
-    messageList.value.push(stickerObj);
+};
+//簡訊一般文字切換
+const onChangMMSSend = () => {
+    isMmsSend.value = true;
+    nextTick(() => {
+        findScrollHeight.value.scrollTop = findScrollHeight.value.scrollHeight;
+    });
+};
+const onChangSMSSend = () => {
+    isMmsSend.value = false;
+    nextTick(() => {
+        findScrollHeight.value.scrollTop = findScrollHeight.value.scrollHeight;
+    });
 };
 
 //功能欄開關
@@ -736,6 +1041,10 @@ const inputFunctionClose = () => {
     inputFunctionBoolean.value = false;
     isReplyBox.value = false;
 };
+//刪除訊息談窗提示
+const confirmDeletePopup = () => {
+    deletePopUp.value = !deletePopUp.value;
+};
 //更改naive-ui 套件主題
 const themeOverrides = {
     common: {},
@@ -747,9 +1056,33 @@ const themeOverrides = {
         boxShadowFocus: "none",
     },
 };
-//刪除訊息談窗提示
-const confirmDeletePopup = () => {
-    deletePopUp.value = !deletePopUp.value;
+// 輸入框自動高度差
+const autoHeight = () => {
+    let initHeight = 30;
+    let diffHeight = 0;
+    if (backendInput.offsetHeight >= 30 && backendInput.offsetHeight <= 120) {
+        const height = Math.abs(backendInput.offsetHeight - initHeight);
+        if (height !== 90) {
+            diffHeight = height;
+        } else {
+            diffHeight = 89;
+        }
+    } else {
+        diffHeight = 0;
+    }
+    chatStore.setDiffHeight(diffHeight);
+    if (chatroomScrolltopAndWindowHeight.value < chatroomScrollHeight.value - 30) {
+        console.log("不置底");
+    } else {
+        console.log("置底");
+        nextTick(() => {
+            findScrollHeight.value.scrollTop = findScrollHeight.value.scrollHeight;
+        });
+    }
+    // nextTick(() => {
+    //     findScrollHeight.value.scrollTop = findScrollHeight.value.scrollHeight;
+    // });
+    console.log("HiHi後台: ", chatStore.diffHeight);
 };
 </script>
 <style lang="scss">
@@ -879,6 +1212,22 @@ const confirmDeletePopup = () => {
         }
     }
 }
+.newMsgHint {
+    cursor: pointer;
+    width: 100%;
+    height: 40px;
+    position: absolute;
+    bottom: 60px;
+    background-color: $primary-4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    opacity: 0.8;
+    user-select: none;
+    h1 {
+        color: black;
+    }
+}
 .inputFunctionBar {
     position: fixed;
     bottom: 60px;
@@ -982,6 +1331,62 @@ const confirmDeletePopup = () => {
             cursor: pointer;
         }
     }
+    .mmsFunctionBar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 10px 10px 0 10px;
+        .mmsComputed {
+            display: flex;
+            .wordCount {
+                width: 100px;
+                padding: 10px 0;
+                margin-right: 15px;
+                border-radius: 20px;
+                background-color: $primary-3;
+                text-align: center;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .numOfMessage {
+                width: 100px;
+                padding: 10px 0;
+                margin-right: 15px;
+                border-radius: 20px;
+                background-color: $primary-3;
+                text-align: center;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .point {
+                width: 100px;
+                padding: 10px 0;
+                border-radius: 20px;
+                background-color: $primary-3;
+                text-align: center;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+        }
+        .mmsHint {
+            display: flex;
+            align-items: center;
+            .mmsSend {
+                display: block;
+                min-width: 60px;
+                color: $danger;
+                font-weight: bold;
+                line-height: 1.2;
+            }
+            .n-icon {
+                color: red;
+                --n-opacity: 1 !important;
+            }
+        }
+    }
     .input-inner {
         box-sizing: border-box;
         width: 100%;
@@ -990,13 +1395,6 @@ const confirmDeletePopup = () => {
         align-items: center;
         padding: 10px 0px;
 
-        .mmsSend {
-            display: block;
-            min-width: 60px;
-            color: $danger;
-            font-weight: bold;
-            line-height: 1.2;
-        }
         .file-folder {
             display: block;
             min-width: 24px;
@@ -1013,6 +1411,9 @@ const confirmDeletePopup = () => {
                 height: 24px;
                 cursor: pointer;
             }
+        }
+        .sticker {
+            cursor: pointer;
         }
         @media (max-width: 768px) {
             .file-folder {
@@ -1061,16 +1462,58 @@ const confirmDeletePopup = () => {
             overflow-x: hidden;
             display: flex;
             justify-content: space-between;
-            img {
-                margin-right: 5px;
-                cursor: pointer;
+            align-items: center;
+            .send {
+                width: 28px;
+                height: 28px;
+                margin-right: 10px;
+                &:hover {
+                    cursor: pointer;
+                }
+            }
+            .notSend {
+                width: 28px;
+                height: 28px;
+                margin-right: 10px;
+                cursor: auto;
             }
         }
-        .send {
-            width: 28px;
-            height: 28px;
+        .change-mms {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 120px;
+            height: 30px;
+            border-radius: 15px;
+            border: 1px solid $primary-4;
+            background-color: #ffe198;
+            color: $gray-1;
+            font-size: $font-size-12;
+            font-weight: 400;
+            // padding: 8px 8px 8px 8px;
+            margin-left: 15px;
+            cursor: pointer;
             &:hover {
-                cursor: pointer;
+                background-color: #ffc740;
+            }
+        }
+        .change-text {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-width: 120px;
+            height: 30px;
+            border-radius: 15px;
+            border: 1px solid $primary-4;
+            background-color: $primary-1;
+            color: #fff;
+            font-size: $font-size-12;
+            font-weight: 400;
+            // padding: 8px 8px 8px 8px;
+            margin-left: 15px;
+            cursor: pointer;
+            &:hover {
+                background-color: $primary-1;
             }
         }
         .recorder {
@@ -1088,11 +1531,17 @@ const confirmDeletePopup = () => {
                 height: 24px;
                 margin-left: 9px;
             }
-            .recorder {
+            .notSend {
                 display: block;
                 width: 24px;
                 height: 24px;
                 margin-left: 9px;
+            }
+            .recorder {
+                // display: block;
+                // width: 24px;
+                // height: 24px;
+                // margin-left: 9px;
             }
         }
     }
@@ -1137,9 +1586,9 @@ const confirmDeletePopup = () => {
         .stickerGroupID {
             width: 100%;
             min-height: 150px;
-            max-height: 140px;
+            // max-height: 140px;
             display: block;
-            overflow-y: auto;
+            // overflow-y: auto;
             .hide {
                 display: none;
             }

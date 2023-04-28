@@ -65,7 +65,9 @@
                                 >
                                     {{ msg.janusMsg.format.ShowName }}
                                 </n-ellipsis>
-                                <p>檔案大小&thinsp;:&thinsp;{{ msg.janusMsg.format.FileSize }}KB</p>
+                                <p>
+                                    檔案大小&thinsp;:&thinsp;{{ msg.janusMsg.format.FileSize }}Byte
+                                </p>
                                 <p>
                                     下載期限&thinsp;:&thinsp;{{
                                         msg.janusMsg.format.expirationDate
@@ -85,7 +87,7 @@
                         </div>
                     </div>
                 </div>
-                <footer class="footer">
+                <footer class="footer" v-show="interactOption === '0'">
                     <img :src="addIcon" alt="開啟文件" />
                     <img :src="cameraIcon" alt="拍照" />
                     <img :src="photoIcon" alt="開啟圖檔" />
@@ -127,11 +129,13 @@ const props = defineProps({
     welcomeMsgCount: Object,
     name: String,
     avatar: String,
+    interactOption: String,
 });
 
 const welcomeMsgs = toRef(props, "welcomeMsgCount");
 const activeName = toRef(props, "name");
 const avatarImg = toRef(props, "avatar");
+const interactOption = toRef(props, "interactOption");
 </script>
 <style lang="scss" scoped>
 @import "~@/assets/scss/var";
@@ -178,8 +182,8 @@ const avatarImg = toRef(props, "avatar");
         position: relative;
         &__close {
             position: absolute;
-            right: -10%;
-            top: -10px;
+            right: -4%;
+            top: -2%;
             cursor: pointer;
         }
     }
@@ -241,6 +245,8 @@ const avatarImg = toRef(props, "avatar");
 
 .preview__button {
     width: 100px;
+    background-color: $gray-1;
+    color: #fff;
 }
 .inner {
     display: flex;

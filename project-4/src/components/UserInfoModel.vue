@@ -1,5 +1,5 @@
 <template>
-    <teleport to="body" v-if="showModal">
+    <teleport to="body" v-if="showUserInfoModal">
         <div class="mask">
             <div class="deviceCode">
                 <div class="closeBtn" @[events].stop="closeModal">
@@ -8,6 +8,10 @@
                 <UserInfo :info="info" />
                 <div class="description">
                     {{ info.description }}
+                </div>
+                <div class="homeURL" v-if="info.homeurl">
+                    <p>活動網址:</p>
+                    <a :href="info.homeurl" target="_blank">{{ info.homeurl }}</a>
                 </div>
                 <!-- <ul class="call_container">
                 <li
@@ -49,7 +53,7 @@ const route = useRoute();
 //model store
 const modelStore = useModelStore();
 const { closeModal, gotoPhone, gotoChat } = modelStore;
-const { showModal, info, phoneCallModal } = storeToRefs(modelStore);
+const { showUserInfoModal, info, phoneCallModal } = storeToRefs(modelStore);
 //phone store
 const phoneCallStore = usePhoneCallStore();
 const { doCall } = phoneCallStore;
@@ -64,7 +68,7 @@ const { eventInfo } = storeToRefs(apiStore);
 
 const onPhoneCallModal = () => {
     if (isOnline.value === true) {
-        showModal.value = false;
+        showUserInfoModal.value = false;
         phoneCallModal.value = true;
         const getCutomer = participantList.value[0];
         doCall(getCutomer);
@@ -175,6 +179,18 @@ const onPhoneCallModal = () => {
             margin: auto;
             word-wrap: break-word;
             line-height: 1.5;
+        }
+        .homeURL {
+            padding-top: 15px;
+            width: 90%;
+            margin: auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            word-break: break-word;
+            p {
+                display: block;
+            }
         }
         .closeBtn {
             position: absolute;

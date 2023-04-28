@@ -27,5 +27,6 @@ module.exports = {
         "no-unused-vars": "off",
         "no-undef": "off",
         "no-empty": "off",
+        "no-useless-escape": "off",
     },
 };

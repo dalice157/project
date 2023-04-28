@@ -3,13 +3,16 @@ import Janus from "@/assets/js/janus";
 import { useRoute } from "vue-router";
 import { nanoid } from "nanoid";
 import { storeToRefs } from "pinia";
+import { nextTick } from "vue";
 
 import { currentTime, currentDate, currentMonth, unixTime } from "@/util/dateUtil";
 import { chatroomID } from "@/util/commonUtil";
 import { useChatStore } from "@/store/chat";
 import { localStorageMsg } from "@/util/commonUtil";
 import { sendPrivateMsg } from "@/util/chatUtil";
+import { sendGroupMsg } from "@/util/groupChatUtil";
 import { useModelStore } from "@/store/model";
+import { useApiStore } from "@/store/api";
 
 /**
  * phoneType 狀態
@@ -105,7 +108,10 @@ export const usePhoneCallStore = defineStore({
             this.callPlugin.hangup();
             this.yourUsername = null;
             const chatstore = useChatStore();
-            const { messages, participantList, textPlugin, adminCount } = storeToRefs(chatstore);
+            const { messages, participantList, textPlugin } = storeToRefs(chatstore);
+            const { scrollToBottom } = chatstore;
+            const apiStore = useApiStore();
+            const { chatroomType } = storeToRefs(apiStore);
             const phoneObj = {
                 janusMsg: {
                     chatroomID: chatroomID(this.route.params.eventKey),
@@ -113,7 +119,7 @@ export const usePhoneCallStore = defineStore({
                     sender: sender, // 0:客服, 1:使用者
                     msgContent: "",
                     time: unixTime(),
-                    type: 2, //1:簡訊 2: 文字
+                    type: chatroomType.value === 0 ? 2 : 3, //1:簡訊 2: 文字 3:群聊
                     format: {
                         phoneType: type,
                         phoneTypeOther: type === 2 && this.isAccepted ? 4 : null,
@@ -122,11 +128,11 @@ export const usePhoneCallStore = defineStore({
                     config: {
                         id: nanoid(),
                         isReply: false,
-                        replyObj: "",
+                        replyObj: {},
                         currentDate: currentDate(),
                         isExpire: false,
                         isPlay: false,
-                        isRead: adminCount.value > 0 ? true : false,
+                        isRead: false,
                         msgFunctionStatus: false,
                         msgMoreStatus: false,
                         recallPopUp: false,
@@ -141,7 +147,7 @@ export const usePhoneCallStore = defineStore({
                     sender: 1, // 0:客服, 1:使用者
                     msgContent: "",
                     time: unixTime(),
-                    type: 2, //1:簡訊 2: 文字
+                    type: chatroomType.value === 0 ? 2 : 3, //1:簡訊 2: 文字 3:群聊
                     format: {
                         phoneType: 4,
                         phoneTypeOther: type === 2 && this.isAccepted ? 4 : null,
@@ -150,11 +156,11 @@ export const usePhoneCallStore = defineStore({
                     config: {
                         id: nanoid(),
                         isReply: false,
-                        replyObj: "",
+                        replyObj: {},
                         currentDate: currentDate(),
                         isExpire: false,
                         isPlay: false,
-                        isRead: adminCount.value > 0 ? true : false,
+                        isRead: false,
                         msgFunctionStatus: false,
                         msgMoreStatus: false,
                         recallPopUp: false,
@@ -162,7 +168,7 @@ export const usePhoneCallStore = defineStore({
                     },
                 },
             };
-            messages.value.push(phoneObj);
+
             const sendMsgObj = {
                 msg: type === 1 ? otherPhoneObj : phoneObj,
                 textPlugin: textPlugin.value,
@@ -170,8 +176,11 @@ export const usePhoneCallStore = defineStore({
                 msgParticipantList: participantList.value,
                 eventID: eventID,
             };
-            sendPrivateMsg(sendMsgObj);
-            localStorageMsg(messages.value, this.route.params.eventKey);
+            if (chatroomType.value === 0) {
+                sendPrivateMsg(sendMsgObj);
+            } else {
+                sendGroupMsg(sendMsgObj);
+            }
         },
     },
 });

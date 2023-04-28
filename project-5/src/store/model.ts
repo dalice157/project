@@ -10,31 +10,30 @@ import { randomString } from "@/util/chatUtil";
 export const useModelStore = defineStore({
     id: "model",
     state: () => ({
-        isInfoPop: <boolean>false,
-        showModal: <boolean>false,
-        phoneCallModal: <boolean>false,
-        info: <any>"",
-        showDropdown: <boolean>false,
         router: useRouter(),
+        internalPeopleInfoSwitch: <boolean>false,
+        externalPeopleInfoSwitch: <boolean>false,
+        phoneCallModal: <boolean>false,
+        innerPeopleInfo: <any>"",
+        outterPeopleInfo: <any>"",
+        showDropdown: <boolean>false,
+        channelArrayPopUp: <any>[],
+        uploadAnimationBoolean: <boolean>false,
     }),
     getters: {},
     actions: {
-        showCompanyInfo(msg: any): void {
-            // console.log("msg:", msg);
-            this.info = msg;
-            this.isInfoPop = true;
-            this.showModal = true;
+        showInternalPeopleInfo(personalInfo: any): void {
+            console.log("showInternalPeopleInfo:", personalInfo);
+            this.innerPeopleInfo = personalInfo;
+            this.internalPeopleInfoSwitch = !this.internalPeopleInfoSwitch;
         },
-        closeModal() {
-            this.showModal = false;
+        showExternalPeopleInfo(personalInfo: any): void {
+            console.log("showExternalPeopleInfo:", personalInfo);
+            this.outterPeopleInfo = personalInfo;
+            this.externalPeopleInfoSwitch = !this.externalPeopleInfoSwitch;
         },
         gotoChat(eventID: any, chatroomID: any, mobile: any, index?) {
-            const chatStore = useChatStore();
-            const { textPlugin } = storeToRefs(chatStore);
-            const chatRecord = useChatRecordStore();
-            const { values, lists } = storeToRefs(chatRecord);
-
-            console.log("eventID:", eventID);
+            // console.log("eventID:", eventID);
             this.router.push(`/chat/${eventID}?chatroomID=${chatroomID}&mobile=${mobile}`);
         },
         closeAll(isInput?) {

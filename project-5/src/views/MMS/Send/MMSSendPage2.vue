@@ -27,7 +27,11 @@
         <div class="mmsRecipient">
             <div class="mmsRecipientInfo">
                 <h2>收訊人資訊</h2>
-                <p>將扣除{{ mmsPoint }}點/<span>剩餘500點</span></p>
+                <p>
+                    將扣除{{ mmsPoint * validPhones?.length }}點/<span
+                        >剩餘{{ point - mmsPoint * validPhones?.length }}點</span
+                    >
+                </p>
             </div>
             <div class="mmsRecipientContent">
                 <div class="deliveryTime">
@@ -37,7 +41,11 @@
                 </div>
                 <div class="deliveryList">
                     <h3>發送名單</h3>
-                    <p>{{ getPhones.length }}筆</p>
+                    <p>
+                        有效&ensp;:&ensp;{{
+                            validPhoneCount
+                        }}筆&ensp;&ensp;&ensp;無效&ensp;:&ensp;{{ invalidPhoneCount }}筆
+                    </p>
                 </div>
             </div>
             <div class="mmsPage2Button">
@@ -49,26 +57,39 @@
             </div>
         </div>
     </div>
+    <AlertPopUp
+        :alertMessage="alertMessage"
+        :alertEvent="alertEvent"
+        :guideRouter="guideRouter"
+        @clearAlertMessage="clearAlertMessage"
+        @clearRouter="clearRouter"
+    />
 </template>
 
 <script lang="ts" setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { storeToRefs } from "pinia";
 import axios from "axios";
+import dayjs from "dayjs";
+import { clearAllCookie, tokenExpireToLogin } from "@/util/commonUtil";
 
 import { useRoute, useRouter } from "vue-router";
 import { useMmsStore } from "@/store/mmsStore";
+import { useSmsStore } from "@/store/smsStore";
 import { useApiStore } from "@/store/api";
 import config from "@/config/config";
+import AlertPopUp from "@/components/AlertPopUp.vue";
 
 const route = useRoute();
 const router = useRouter();
 const params = route.params;
-
+const userName = ref(localStorage.getItem("userName"));
 const apiStore = useApiStore();
-const { uploadRef, point } = storeToRefs(apiStore);
-
-//smsStore
+const { getPoint } = apiStore;
+const { uploadRef, point, bugout, addhttps } = storeToRefs(apiStore);
+const smsStore = useSmsStore();
+const { smsHour, smsMinute, smsExpireDate, smsTimelinessSetting } = storeToRefs(smsStore);
+//mmsStore
 const mmsStore = useMmsStore();
 const {
     mmsChannel,
@@ -78,33 +99,117 @@ const {
     mmsPoint,
     mmsSendOption,
     mmsPhoneArray,
+    validMMSPhoneArray,
+    invalidMMSPhoneArray,
     mmsPhoneString,
     mmsTabsType,
     mmsExcelFile,
     mmsSendTime,
     mmsUploadImgRef,
+    mmsImageWidth,
+    mmsImageHeight,
     mmsPhrases,
 } = storeToRefs(mmsStore);
-const getPhones: any = ref(null);
+//alert popup
+const alertMessage = ref("");
+const alertEvent = ref("");
+const guideRouter = ref("");
+const clearAlertMessage = () => {
+    alertMessage.value = "";
+};
+const clearRouter = () => {
+    alertEvent.value = "";
+    guideRouter.value = "";
+};
+//有效電話相關資訊
+const validPhones: any = ref(null);
+const validPhoneCount: any = ref(0);
+const localPhoneCount: any = ref(0);
+const globalPhoneCount: any = ref(0);
+//無效電話相關資訊
+const invalidPhoneCount: any = ref(0);
 if (mmsTabsType.value === "automatic") {
-    getPhones.value = uploadRef.value.valid.map((file) => `0${file.mobile}`);
+    //excel 匯入
+    //有效筆數
+    validPhones.value = uploadRef.value?.valid.map((file) => {
+        if (file.mobile.match(/^(0|\+?886)?9\d{8}$/)) {
+            localPhoneCount.value++;
+            return "09" + file.mobile.slice(-8);
+        } else {
+            globalPhoneCount.value++;
+            return file.mobile;
+        }
+    });
+    validPhoneCount.value = validPhones.value?.length;
+    //無效筆數
+    invalidPhoneCount.value = uploadRef.value?.invalid.length;
 } else {
-    getPhones.value = mmsPhoneArray.value;
+    //手動匯入
+    //有效筆數
+    validPhones.value = validMMSPhoneArray.value.map((item) => {
+        if (item.match(/^(0|\+?886)?9\d{8}$/)) {
+            localPhoneCount.value++;
+            return "09" + item.slice(-8);
+        } else {
+            globalPhoneCount.value++;
+            return item;
+        }
+    });
+    validPhoneCount.value = validPhones.value?.length;
+    //無效筆數
+    invalidPhoneCount.value = invalidMMSPhoneArray.value?.length;
 }
 //確認傳送
 const disable = ref(false);
 const onSend = () => {
     disable.value = true;
+    if (
+        mmsPoint.value * localPhoneCount.value + mmsPoint.value * 3 * globalPhoneCount.value >
+        point.value
+    ) {
+        alertMessage.value = "剩餘點數不足,請洽官網進行儲值!!!";
+        disable.value = false;
+        return;
+    }
+    const now = String(dayjs().startOf("second").valueOf());
+    if (mmsSendOption.value === 1 && Number(now.slice(0, 10)) + 600 > mmsSendTime.value) {
+
+        alertMessage.value = "預約發送時間必須大於當下時間10分鐘外!!!";
+        disable.value = false;
+        return;
+    }
+    if (
+        smsTimelinessSetting.value === true &&
+        smsExpireDate.value !== null &&
+        Number(now.slice(0, 10)) + 1800 > smsExpireDate.value
+    ) {
+ 
+        alertMessage.value = "簡訊連結時效到期時間必須大於當下時間30分鐘外!!!";
+        disable.value = false;
+        return;
+    }
+    if (validPhoneCount.value === 0) {
+
+        alertMessage.value = "您所輸入的有效名單數量為零，請修改名單！";
+        disable.value = false;
+        return;
+    }
     const getToken = localStorage.getItem("access_token");
     const sendObj = {
         text: mmsContent.value,
         type: "1",
         subject: mmsSubject.value,
-        list: getPhones.value.toString(),
+        list: validPhones.value.toString(),
         sendTime: mmsSendTime.value,
         image: mmsUploadImgRef.value.file,
+        imageWidth: mmsImageWidth.value,
+        imageHeight: mmsImageHeight.value,
         eventId: mmsChannel.value,
         phrases: mmsPhrases.value,
+        monthDay: smsExpireDate.value === null ? "0" : smsExpireDate.value,
+        hourTime: smsHour.value === "" ? "0" : smsHour.value,
+        minuteTime: smsMinute.value === "" ? "0" : smsMinute.value,
+        addhttps: addhttps.value,
     };
     console.log("MMS 確認傳送", sendObj);
     const fd = new FormData();
@@ -114,7 +219,13 @@ const onSend = () => {
     fd.append("list", sendObj.list);
     fd.append("sendTime", sendObj.sendTime);
     fd.append("image", sendObj.image);
+    fd.append("imgwidth", sendObj.imageWidth);
+    fd.append("imgheight", sendObj.imageHeight);
     fd.append("phrases", sendObj.phrases);
+    fd.append("monthDay", sendObj.monthDay);
+    fd.append("hourTime", sendObj.hourTime);
+    fd.append("minuteTime", sendObj.minuteTime);
+    fd.append("addhttps", sendObj.addhttps);
     axios({
         method: "post",
         url: `${config.serverUrl}/v1/msgs/${sendObj.eventId}`,
@@ -122,28 +233,37 @@ const onSend = () => {
         headers: { Authorization: `Bearer ${getToken}` },
     })
         .then((res) => {
-            // console.log("MMS 確認傳送 res", res);
+            console.log("MMS 確認傳送 res", res);
             point.value = res.data.point;
-            alert(`資料已成功傳送!\n您剩餘的點數為: ${point.value}`);
-            params.id
-                ? router.push(`/manage/${params.id}/MMSSend`)
-                : router.push(`/manage/MMSSend`);
-            mmsStore.$reset();
-            disable.value = false;
+
         })
         .catch((err) => {
-            console.error(err);
-            alert("傳送資料有誤, 請重新填寫");
-            params.id
-                ? router.push(`/manage/${params.id}/MMSSend`)
-                : router.push(`/manage/MMSSend`);
-            disable.value = false;
+            // console.error(err);
+            bugout.value.error(`error-log${userName.value}`, err.response.status);
+            bugout.value.error(`error-log${userName.value}`, err.response.data);
+            bugout.value.error(`error-log${userName.value}`, err.response.request.responseURL);
+            tokenExpireToLogin(err);
+            // alert("傳送資料有誤, 請重新填寫");
+            // alertMessage.value = "傳送資料有誤, 請重新填寫";
+            // getPoint();
         });
+    alertMessage.value =
+        "簡訊已由系統發送中，若一次發送數量逾數百則以上，系統全部發送完畢需數分鐘，發送完畢後將自動更新「剩餘點數」。請注意！發送完畢並不代表全數收訊者「成功接收」，想了解發送狀態，請至『發送查詢』頁面查詢發送紀錄。";
+    alertEvent.value = "guide";
+    guideRouter.value = params.id ? `/manage/${params.id}/MMSSend` : `/manage/MMSSend`;
+    mmsStore.$reset();
+    disable.value = false;
 };
 // 上一頁按鈕
 const goPage1 = () => {
     params.id ? router.push(`/manage/${params.id}/MMSSend`) : router.push(`/manage/MMSSend`);
 };
+//判斷如果重整導往第一頁
+onMounted(() => {
+    if (mmsContent.value === "") {
+        goPage1();
+    }
+});
 </script>
 <style lang="scss">
 @import "~@/assets/scss/extend";

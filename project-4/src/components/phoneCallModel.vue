@@ -35,14 +35,14 @@
                     <p>{{ isMuted ? "開啟" : "關閉" }}</p>
                     <p>麥克風</p>
                 </div>
-                <div class="microphone" v-else @[events]="onVoice">
+                <div class="microphone" v-else @[events].stop="onVoice">
                     <img :src="isMuted ? voiceDisabled : voiceEnabled" alt="麥克風" />
                     <p>{{ isMuted ? "開啟" : "關閉" }}</p>
                     <p>麥克風</p>
                 </div>
                 <div class="phone--close">
                     <img
-                        @[events]="doHangup(!isAccepted ? 2 : 3, eventID(eventKey), sender)"
+                        @[events].stop="doHangup(!isAccepted ? 2 : 3, eventID(eventKey), sender)"
                         :src="closeIcon"
                         alt="掛斷"
                     />
@@ -76,7 +76,7 @@ const eventKey = computed(() => route.params.eventKey);
 
 // api store
 const apiStore = useApiStore();
-const { getBackendApi } = apiStore;
+// const { getBackendApi } = apiStore;
 const { eventInfo } = storeToRefs(apiStore);
 
 //phoneCall store

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>check_o</title>
+    <g id="Guideline" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="icon" transform="translate(-181.000000, -636.000000)" fill-rule="nonzero">
+            <g id="check_o" transform="translate(181.000000, 636.000000)">
+                <rect id="Rectangle" fill="#000000" opacity="0" x="0" y="0" width="24" height="24"></rect>
+                <path d="M18.7111364,6.30092691 L10.3874446,14.5125573 L6.37162843,10.1081374 C5.93353939,9.66023027 5.27640583,9.66023027 4.83831678,10.0334862 C4.40022774,10.4813933 4.40022774,11.153254 4.76530192,11.6011611 L9.58428137,16.8267441 C9.80332589,17.0506977 10.0953852,17.2 10.3874446,17.2 C10.679504,17.2 10.9715634,17.0506976 11.117593,16.9013953 L20.1714332,7.94325298 C20.6095223,7.49534587 20.6095223,6.8234852 20.1714332,6.37557808 C19.806359,5.92767097 19.1492254,5.85301979 18.7111364,6.30092691 L18.7111364,6.30092691 Z" id="Path" fill="#F9935C"></path>
+            </g>
+        </g>
+    </g>
+</svg>

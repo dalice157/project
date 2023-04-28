@@ -3,7 +3,7 @@
         <h2>收訊人選取設定</h2>
         <n-divider></n-divider>
         <n-tabs class="tabs" type="card" @update-value="onChange">
-            <n-tab-pane name="tabs--automatic" tab="載入大量名單">
+            <n-tab-pane name="automatic" tab="載入大量名單">
                 <div class="automatic">
                     <div class="upload">
                         <img
@@ -83,7 +83,7 @@
                     </div>
                 </div>
             </n-tab-pane>
-            <n-tab-pane name="tabs--manual" tab="手動輸入">
+            <n-tab-pane name="manual" tab="手動輸入">
                 <div class="manual">
                     <div class="manual__type-area">
                         <n-config-provider :theme-overrides="themeOverrides">
@@ -93,7 +93,9 @@
                                 placeholder="請輸入手機號碼"
                                 :autosize="{
                                     minRows: 4,
+                                    maxRows: 8,
                                 }"
+                                :maxlength="15000"
                             />
                         </n-config-provider>
                         <div class="manual__msg-count">
@@ -104,7 +106,7 @@
                         <h4>【手動輸入說明】</h4>
                         <ul class="instructions__list">
                             <li>請直接於將收訊人手機號碼輸入於上方輸入欄位中。</li>
-                            <li>亦可將Excel中同一欄位資料複製貼入於網頁手機號碼輸入欄位中</li>
+                            <li>亦可將Excel中同一欄位資料複製貼入於網頁手機號碼輸入欄位中。</li>
                             <li>
                                 台灣地區號碼輸入範例:0912345678<br />國際地區(含大陸地區):+8612345678。
                             </li>
@@ -192,7 +194,7 @@
                         </template>
                     </n-input>
                     <!-- <div class="invalidCancel">匯出</div> -->
-                    <div class="invalidConfirm">確定</div>
+                    <!-- <div class="invalidConfirm">確定</div> -->
                 </div>
                 <div class="invalidTable">
                     <n-data-table
@@ -208,6 +210,7 @@
             </div>
         </div>
     </teleport>
+    <AlertPopUp :alertMessage="alertMessage" @clearAlertMessage="clearAlertMessage" />
 </template>
 <script lang="ts" setup>
 import { ref, watch, computed, watchEffect } from "vue";
@@ -216,9 +219,12 @@ import { NTabs, NTabPane, NInput, NButton, NIcon, NDivider, NUpload, NDataTable 
 import { storeToRefs } from "pinia";
 import { useRouter } from "vue-router";
 
+import { useChatStore } from "@/store/chat";
 import { useSmsStore } from "@/store/smsStore";
 import { useMmsStore } from "@/store/mmsStore";
 import { useApiStore } from "@/store/api";
+import { useModelStore } from "@/store/model";
+
 import config from "@/config/config";
 import { isphone } from "@/util/commonUtil";
 import delIcon from "@/assets/Images/manage/delete.svg";
@@ -226,6 +232,7 @@ import fileIcon from "@/assets/Images/common/file.svg";
 import editIcon from "@/assets/Images/manage/edit-round.svg";
 import closeIcon from "@/assets/Images/chatroom/close-round.svg";
 import searchIcon from "@/assets/Images/manage/search.svg";
+import AlertPopUp from "@/components/AlertPopUp.vue";
 
 //smsStore
 const smsStore = useSmsStore();
@@ -235,12 +242,13 @@ const {
     smsSendOption,
     smsSendTimeStamp,
     smsPhoneArray,
+    validSMSPhoneArray,
+    invalidSMSPhoneArray,
     smsPhoneString,
     smsTabsType,
     smsExcelFile,
     smsCacheComponent,
 } = storeToRefs(smsStore);
-
 //mmsStore
 const mmsStore = useMmsStore();
 const {
@@ -251,6 +259,8 @@ const {
     mmsSendOption,
     mmsSendTimeStamp,
     mmsPhoneArray,
+    validMMSPhoneArray,
+    invalidMMSPhoneArray,
     mmsPhoneString,
     mmsTabsType,
     mmsKB,
@@ -258,19 +268,32 @@ const {
     mmsCacheComponent,
 } = storeToRefs(mmsStore);
 
+//chat Store
+const chatStore = useChatStore();
+const { isIllegalCharacter } = chatStore;
+//api store
 const apiStore = useApiStore();
 const { excelVerification } = apiStore;
 const { uploadRef, invalidList } = storeToRefs(apiStore);
+//modal store
+const modelStore = useModelStore();
+const { uploadAnimationBoolean } = storeToRefs(modelStore);
+
 //props
 const props = defineProps({
     nextPageRouter: String,
     demoContent: String,
     optionType: String,
 });
-
+//alert popup
+const alertMessage = ref("");
+const clearAlertMessage = () => {
+    alertMessage.value = "";
+};
 const onChange = (value) => {
     if (props.optionType === "sms") {
         smsTabsType.value = value;
+        // console.log("smsTabsType", smsTabsType.value);
     } else {
         mmsTabsType.value = value;
     }
@@ -286,10 +309,20 @@ const nextPageList = () => {
             smsContent.value === props.demoContent ||
             (smsSendOption.value !== 0 && !smsSendTimeStamp.value)
         ) {
-            alert("仍有必填欄位尚未填寫!!");
+            alertMessage.value = "仍有必填欄位尚未填寫!!";
             return;
         }
-        smsCacheComponent.value.push("SMSSend");
+        if (isIllegalCharacter(smsContent.value)) {
+            alertMessage.value = "訊息內容不可含talkod.tw";
+            return;
+        }
+        if (uploadRef.value.valid.length === 0) {
+            alertMessage.value = "上傳檔案無有效名單,請重新上傳!!";
+            return;
+        }
+        if (!smsCacheComponent.value.includes("SMSSend")) {
+            smsCacheComponent.value.push("SMSSend");
+        }
         router.push(props.nextPageRouter);
     };
     const mmsValidate = () => {
@@ -301,17 +334,30 @@ const nextPageList = () => {
             mmsContent.value === props.demoContent ||
             (mmsSendOption.value !== 0 && !mmsSendTimeStamp.value)
         ) {
-            alert("仍有必填欄位尚未填寫!!");
+            alertMessage.value = "仍有必填欄位尚未填寫!!";
             return;
         }
-        mmsCacheComponent.value.push("MMSSend");
+        if (isIllegalCharacter(mmsContent.value)) {
+            alertMessage.value = "訊息內容不可含talkod.tw";
+            return;
+        }
+        if (mmsKB.value > 300) {
+            alertMessage.value = "請將圖文訊息調整至小於300KB！!";
+            return;
+        }
+        if (uploadRef.value.valid.length === 0) {
+            alertMessage.value = "上傳檔案無有效名單,請重新上傳!!";
+            return;
+        }
+        if (!mmsCacheComponent.value.includes("MMSSend")) {
+            mmsCacheComponent.value.push("MMSSend");
+        }
         router.push(props.nextPageRouter);
     };
     props.optionType == "sms" && smsValidate();
     props.optionType == "mms" && mmsValidate();
 };
 const nextPageManual = () => {
-    phoneReg.value = phoneArray.value.every(isphone);
     //檢查手機格式及必填欄位 有誤跳彈窗
     const smsValidate = () => {
         if (
@@ -320,15 +366,17 @@ const nextPageManual = () => {
             smsContent.value === props.demoContent ||
             (smsSendOption.value !== 0 && !smsSendTimeStamp.value)
         ) {
-            alert("仍有必填欄位尚未填寫!!");
+            alertMessage.value = "仍有必填欄位尚未填寫!!";
             return;
         }
-        if (phoneReg.value === false) {
-            alert("手機號碼格式有誤");
+        if (isIllegalCharacter(smsContent.value)) {
+            alertMessage.value = "訊息內容不可含talkod.tw";
             return;
         }
         smsPhoneString.value = phoneNumberList.value;
-        smsCacheComponent.value.push("SMSSend");
+        if (!smsCacheComponent.value.includes("SMSSend")) {
+            smsCacheComponent.value.push("SMSSend");
+        }
         router.push(props.nextPageRouter);
     };
     const mmsValidate = () => {
@@ -340,35 +388,91 @@ const nextPageManual = () => {
             mmsContent.value === props.demoContent ||
             (mmsSendOption.value !== 0 && !mmsSendTimeStamp.value)
         ) {
-            alert("仍有必填欄位尚未填寫!!");
+            alertMessage.value = "仍有必填欄位尚未填寫!!";
+            return;
+        }
+        if (isIllegalCharacter(mmsContent.value)) {
+            alertMessage.value = "訊息內容不可含talkod.tw";
             return;
         }
         if (mmsKB.value > 300) {
-            alert("請將圖文訊息調整至小於300KB！!");
+            alertMessage.value = "請將圖文訊息調整至小於300KB！!";
             return;
         }
-        if (phoneReg.value === false) {
-            alert("手機號碼格式有誤");
-            return;
-        }
-
         mmsPhoneString.value = phoneNumberList.value;
-        mmsCacheComponent.value.push("MMSSend");
+        if (!mmsCacheComponent.value.includes("MMSSend")) {
+            mmsCacheComponent.value.push("MMSSend");
+        }
         router.push(props.nextPageRouter);
     };
-
+    verifyManualPhone();
     props.optionType == "sms" && smsValidate();
     props.optionType == "mms" && mmsValidate();
 };
 //手動輸入textarea v-model
 const phoneNumberList = ref("");
 const phoneReg = ref(false);
-let phoneArray = ref([]);
+const phoneArray = ref([]);
+//驗證手動輸入號碼 function
+const verifyManualPhone = () => {
+    if (props.optionType == "sms") {
+        smsPhoneArray.value = phoneArray.value;
+        // console.log("原名單", smsPhoneArray.value);
+        validSMSPhoneArray.value = [];
+        invalidSMSPhoneArray.value = [];
+        smsPhoneArray.value.reduce((arr, item) => {
+            if (
+                (item.match(/^(0|\+?886)?9\d{8}$/) || item.match(/^\+[1-9]\d{6,14}$/)) &&
+                !validSMSPhoneArray.value.includes(`${item}`)
+            ) {
+                //sms手動輸入有效名單
+                validSMSPhoneArray.value.push(item);
+            } else {
+                //sms手動輸入無效名單
+                invalidSMSPhoneArray.value.push(item);
+            }
+        }, []);
+        console.log("sms手動輸入有效名單", validSMSPhoneArray.value);
+        console.log("sms手動輸入無效名單", invalidSMSPhoneArray.value);
+    } else {
+        mmsPhoneArray.value = phoneArray.value;
+        console.log("原名單", mmsPhoneArray.value);
+        validMMSPhoneArray.value = [];
+        invalidMMSPhoneArray.value = [];
+        mmsPhoneArray.value.reduce((arr, item) => {
+            if (
+                item.match(/^(0|\+?886)?9\d{8}$/) &&
+                !validMMSPhoneArray.value.includes(`${item}`)
+            ) {
+                //mms手動輸入有效名單
+                validMMSPhoneArray.value.push(item);
+            } else {
+                //mms手動輸入無效名單
+                invalidMMSPhoneArray.value.push(item);
+            }
+        }, []);
+        console.log("mms手動輸入有效名單", validMMSPhoneArray.value);
+        console.log("mms手動輸入無效名單", invalidMMSPhoneArray.value);
+    }
+};
 watch(phoneNumberList, () => {
     if (phoneNumberList.value === "") {
         phoneArray.value = [];
     } else {
-        phoneArray.value = phoneNumberList.value.split(",");
+        if (phoneNumberList.value.trim().charAt(phoneNumberList.value.length - 1) === ",") {
+            phoneArray.value = phoneNumberList.value
+                .trim()
+                .substr(0, phoneNumberList.value.length - 1)
+                .split(",");
+            // console.log("最後一個有逗號", phoneArray.value);
+        } else {
+            // 去空格
+            phoneNumberList.value = phoneNumberList.value.replace(/[ ]/g, "");
+            //去換行符
+            phoneNumberList.value = phoneNumberList.value.replace(/[\r\n]/g, "");
+            phoneArray.value = phoneNumberList.value.split(",");
+            // console.log("最後一個沒逗號", phoneArray.value);
+        }
         if (props.optionType == "sms") {
             smsPhoneArray.value = phoneArray.value;
         } else {
@@ -380,6 +484,7 @@ watch(phoneNumberList, () => {
 //excel 上傳功能
 const fileName: any = ref("");
 const handleChange = (e) => {
+    uploadAnimationBoolean.value = true;
     fileName.value = e.file.file.name;
     excelVerification(e.file.file);
 };
@@ -416,7 +521,7 @@ const createColumns = [
 
 //無效資料
 const data: any = computed(() => {
-    if (search.value.match(/^\+?\d+$/)) {
+    if (search.value.match(/^\+?\d+$/) && invalidList.value !== null) {
         return invalidList.value
             .map((item) => {
                 return {
@@ -427,7 +532,7 @@ const data: any = computed(() => {
             .filter((item) =>
                 item.mobile.toLocaleLowerCase().includes(search.value.toLocaleLowerCase())
             );
-    } else {
+    } else if (invalidList.value !== null) {
         return invalidList.value
             .map((item) => {
                 return {
@@ -438,6 +543,8 @@ const data: any = computed(() => {
             .filter((item) =>
                 item.name.toLocaleLowerCase().includes(search.value.toLocaleLowerCase())
             );
+    } else {
+        return [];
     }
 });
 
@@ -503,7 +610,7 @@ const themeOverrides = {
             .n-tabs-nav {
                 .n-tabs-tab {
                     color: $gray-3;
-                    background-color: $primary-4;
+                    background-color: $primary-3;
                     border: none;
                     border-top-left-radius: 4px;
                     border-top-right-radius: 4px;
@@ -522,8 +629,14 @@ const themeOverrides = {
                 width: 100%;
                 background-color: $gray-8;
                 border-radius: 0px 4px 4px 4px;
+                padding-bottom: 20px;
             }
         }
+    }
+}
+.manual__type-area {
+    .n-input.n-input--textarea {
+        --n-border: 1px solid #8b8b8b !important;
     }
 }
 </style>
@@ -606,6 +719,7 @@ const themeOverrides = {
     }
     .invalidFunctionBar {
         display: flex;
+        justify-content: center;
         margin-bottom: 15px;
         .invalidSearch {
             width: 700px;
@@ -698,10 +812,13 @@ const themeOverrides = {
                 cursor: pointer;
             }
             &__file {
-                width: 286px;
+                max-width: 286px;
                 display: flex;
                 align-items: center;
                 margin: 0 auto;
+                .n-upload {
+                    max-width: 90px;
+                }
             }
             &__img {
                 cursor: pointer;
@@ -722,7 +839,6 @@ const themeOverrides = {
             &__text {
                 a {
                     text-decoration: none;
-
                     h2 {
                         font-size: $font-size-16;
                         font-weight: 400;

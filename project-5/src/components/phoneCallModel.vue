@@ -71,6 +71,7 @@ import { NModal, NCard, NAvatar } from "naive-ui";
 import PulseLoader from "vue-spinner/src/PulseLoader.vue";
 import ScaleLoader from "vue-spinner/src/ScaleLoader.vue";
 
+import { isProduction, isStaging } from "@/util/commonUtil";
 import { useModelStore } from "@/store/model";
 import { useApiStore } from "@/store/api";
 import { usePhoneCallStore } from "@/store/phoneCall";
@@ -94,7 +95,7 @@ const { isAccepted, phoneTime, isMuted, callPlugin, sender } = storeToRefs(phone
 
 //modal store
 const modelStore = useModelStore();
-const { closeModal } = modelStore;
+// const {} = modelStore;
 const { phoneCallModal, info } = storeToRefs(modelStore);
 
 const chatRoomID: any = computed(() => route.query.chatroomID);
@@ -106,8 +107,7 @@ const filterUserInfo = computed(() => {
 
 const img = ref(null);
 // 環境設定
-const isProduction = process.env.NODE_ENV === "production";
-const getSplit = isProduction ? 4 : 5;
+const getSplit = isProduction || isStaging ? 4 : 5;
 watch(
     userInfo,
     () => {

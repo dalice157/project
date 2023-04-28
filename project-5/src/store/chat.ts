@@ -1,10 +1,16 @@
 import { defineStore, storeToRefs } from "pinia";
-
+import { watch, ref, onUpdated } from "vue";
 import { useApiStore } from "@/store/api";
+import config from "@/config/config";
+import { pointCalculation } from "@/util/commonUtil";
 
 export const useChatStore = defineStore({
     id: "chat",
     state: () => ({
+        //一般聊天室 messagebox template ref
+        findScrollHeight: <any>null,
+        //群聊聊天室 messagebox template ref
+        groupChatFindScrollHeight: <any>null,
         messages: <any>[],
         msg: <any>"",
         replyMsg: <any>"",
@@ -17,6 +23,10 @@ export const useChatStore = defineStore({
         pictures: <any>[],
         inputFunctionBoolean: <boolean>false,
         isUnableRead: <boolean>false,
+        janusArr: [],
+        // janus 註冊拿到的 transactions
+        transactions: {},
+        // 註冊後拿到的textPlugin
         textPlugin: <any>"",
         showRecorderModal: <any>false,
         showStickerModal: <boolean>false,
@@ -25,28 +35,50 @@ export const useChatStore = defineStore({
         stickerItems: <any>[],
         isMmsSend: <boolean>false,
         participantList: <any>[],
+        adminParticipantsWithOutMe: <any>[],
         onlineList: <any>[],
         isOnline: <boolean>false,
         messageFrom: <any>"",
         messageForm: <any>"",
+        newMsgHint: <boolean>false,
+        meJoinAlready: <boolean>false,
+        diffHeight: <any>0,
+        notification: <any>null,
+        word: <any>config.wordLimit,
+        count: <any>0,
+        computedPoint: <any>0,
+        chatroomScrolltop: <any>0,
+        chatroomWindowHeight: <any>0,
+        chatroomScrolltopAndWindowHeight: <any>0,
+        chatroomScrollHeight: <any>0,
+        isShowGuide7: <boolean>false,
+        groupReadNum: <any>0,
+        groupReadList: <any>[]
     }),
     getters: {},
     actions: {
         // 回覆訊息
         replyMsgEvent(msg: any) {
-            console.log("reply msg:", msg);
-
+            // console.log("reply msg:", msg);
             // api store
             const apiStore = useApiStore();
-            const { messageList } = storeToRefs(apiStore);
-            const findId = messageList.value.find((text: any) => {
-                return text.janusMsg.config.id === msg.janusMsg.config.id;
-            });
-            console.log("findid", findId);
+            const { groupChatMessageList, messageList } = storeToRefs(apiStore);
+            let findId;
+            if (msg.janusMsg.type !== 3) {
+                findId = messageList.value.find((text: any) => {
+                    return text.janusMsg.config.id === msg.janusMsg.config.id;
+                });
+            } else {
+                findId = groupChatMessageList.value.find((text: any) => {
+                    return text.janusMsg.config.id === msg.janusMsg.config.id;
+                });
+            }
+
+            // console.log("findid", findId);
             this.replyMsg = findId;
             this.isReplyBox = true;
             msg.janusMsg.config.msgFunctionStatus = false;
-            console.log("replyMsg:", this.replyMsg);
+            // console.log("replyMsg:", this.replyMsg);
             this.inputVal.focus();
             this.inputFunctionBoolean = false;
         },
@@ -61,14 +93,6 @@ export const useChatStore = defineStore({
             this.deleteGroup = [];
             this.deleteBoolean = !this.deleteBoolean;
             msg.msgFunctionStatus = false;
-        },
-        //獲取janus訊息
-        getCompanyMsg(msg) {
-            console.log("獲取janus訊息");
-            // api store
-            const apiStore = useApiStore();
-            const { isInput, messageList } = storeToRefs(apiStore);
-            isInput.value = true;
         },
         // 開啟錄音視窗
         openRecorder() {
@@ -101,6 +125,64 @@ export const useChatStore = defineStore({
             });
             this.stickerGroup = id == 0 ? this.stickerItems : getlist;
             // console.log('this.stickerGroup"', this.stickerGroup);
+        },
+        //一般聊天室置底
+        scrollToBottom() {
+            if (this.findScrollHeight !== null) {
+                this.findScrollHeight.scrollTop = this.findScrollHeight.scrollHeight;
+            }
+        },
+        //群聊聊天室置底
+        groupChatScrollToBottom() {
+            if (this.groupChatFindScrollHeight !== null) {
+                this.groupChatFindScrollHeight.scrollTop =
+                    this.groupChatFindScrollHeight.scrollHeight;
+            }
+        },
+        //驗證是否含有非法字元
+        isIllegalCharacter(val) {
+            const illegalWord = new RegExp("talkod.tw");
+            if (val.match(illegalWord)) {
+                return true;
+            } else {
+                return false;
+            }
+        },
+        // 動態獲取輸入框的高度差
+        setDiffHeight(value: any) {
+            this.diffHeight = value;
+        },
+        // 回到高度差為0
+        backToTheOrigialDiffHeight() {
+            this.diffHeight = 0;
+        },
+        //input 簡訊 字數計算
+        smsMessageComputed() {
+            this.word = this.msg.length + config.wordLimit;
+            this.count =
+                this.msg === "" ? 0 : pointCalculation(this.msg + config.extraString).smsCount;
+            this.computedPoint =
+                this.msg === "" ? 0 : pointCalculation(this.msg + config.extraString).point;
+        },
+        // 儲存chatRoom滾動參數
+        saveChatroomParams(
+            chatroomScrolltop,
+            chatroomWindowHeight,
+            chatroomScrolltopAndWindowHeight,
+            chatroomScrollHeight
+        ) {
+            this.chatroomScrolltop = chatroomScrolltop;
+            this.chatroomWindowHeight = chatroomWindowHeight;
+            this.chatroomScrolltopAndWindowHeight = chatroomScrolltopAndWindowHeight;
+            this.chatroomScrollHeight = chatroomScrollHeight;
+        },
+        //
+        saveGuide7(value) {
+            this.isShowGuide7 = value;
+        },
+        // 儲存群聊已讀數
+        saveGroupReadNum(value: any) {
+            this.groupReadNum = value;
         },
     },
 });

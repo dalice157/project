@@ -2,7 +2,7 @@ import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
 
 import ChatRoom from "@/views/ChatRoom.vue";
 import Login from "@/views/Login.vue";
-import Header from "@/components/Headers";
+import AutoLogin from "@/views/AutoLogin.vue";
 import Manage from "@/views/Manage.vue";
 import SMSSend from "@/views/SMS/Send";
 import SMSSendPage2 from "@/views/SMS/Send/SMSSendPage2.vue";
@@ -10,15 +10,23 @@ import SMSInquire from "@/views/SMS/Inquire";
 import MMSSend from "@/views/MMS/Send";
 import MMSSendPage2 from "@/views/MMS/Send/MMSSendPage2.vue";
 import MMSInquire from "@/views/MMS/Inquire";
-import ActivitySetting from "@/views/activityChannelSetting/ActivitySetting";
-import ManageSetting from "@/views/ManageSetting";
+import ActivitySetting from "@/views/Management/ActivitySetting";
+import ManageSetting from "@/views/Management/ManageSetting";
 import Gallery from "@/views/Gallery.vue";
-import AddChannel from "@/views/activityChannelSetting/AddChannel.vue";
-import EditChannel from "@/views/activityChannelSetting/EditChannel.vue";
-import AddCustomService from "@/views/activityChannelSetting/AddCustomService.vue";
-import AddAutoReply from "@/views/activityChannelSetting/AddAutoReply.vue";
-import EditAutoReply from "@/views/activityChannelSetting/EditAutoReply.vue";
-import AutoReplyList from "@/views/activityChannelSetting/AutoReplyList.vue";
+import AddChannel from "@/views/Management/AddChannel.vue";
+import EditChannel from "@/views/Management/EditChannel.vue";
+import AddCustomService from "@/views/Management/AddCustomService.vue";
+import AddAutoReply from "@/views/Management/AddAutoReply.vue";
+import EditAutoReply from "@/views/Management/EditAutoReply.vue";
+import AutoReplyList from "@/views/Management/AutoReplyList.vue";
+import AddressBookManagement from "@/views/GroupChat/addressBookManagement.vue";
+import Profile from "@/views/Profile.vue";
+import EditProfile from "@/views/EditProfile.vue";
+import GroupChatRoom from "@/views/GroupChatRoom.vue";
+import GroupChatArea from "@/views/GroupChatRoom/GroupChatArea.vue";
+import AddGroupChatRoom from "@/views/GroupChatRoom/AddGroupChatRoom.vue";
+import EditGroupChatRoom from "@/views/GroupChatRoom/EditGroupChatRoom.vue";
+import GroupChatGallery from "@/views/GroupChatRoom/GroupChatGallery.vue";
 
 const routes: Array<RouteRecordRaw> = [
     {
@@ -30,11 +38,56 @@ const routes: Array<RouteRecordRaw> = [
         meta: { show: true, home: false },
     },
     {
+        path: "/autoLogin",
+        name: "AutoLogin",
+        components: {
+            login: AutoLogin,
+        },
+    },
+    {
         path: "/chat/:id?",
         name: "ChatRoom",
         components: {
             container: ChatRoom,
         },
+        meta: { show: true, home: false, keepAlive: true },
+    },
+    {
+        path: "/groupChat",
+        name: "GroupChatRoom",
+        components: {
+            container: GroupChatRoom,
+        },
+        children: [
+            {
+                path: "/groupChat/chat",
+                name: "GroupChatArea",
+                components: {
+                    groupChat: GroupChatArea,
+                },
+            },
+            {
+                path: "/groupChat/gallery",
+                name: "GroupChatGallery",
+                components: {
+                    groupChat: GroupChatGallery,
+                },
+            },
+            {
+                path: "/groupChat/addGroupChatRoom",
+                name: "AddGroupChatRoom",
+                components: {
+                    groupChat: AddGroupChatRoom,
+                },
+            },
+            {
+                path: "/groupChat/editGroupChatRoom",
+                name: "EditGroupChatRoom",
+                components: {
+                    groupChat: EditGroupChatRoom,
+                },
+            },
+        ],
         meta: { show: true, home: false, keepAlive: true },
     },
     {
@@ -150,6 +203,27 @@ const routes: Array<RouteRecordRaw> = [
                 name: "ManageSetting",
                 components: {
                     manage: ManageSetting,
+                },
+            },
+            {
+                path: "/manage/:id?/addressBookManagement",
+                name: "AddressBookManagement",
+                components: {
+                    manage: AddressBookManagement,
+                },
+            },
+            {
+                path: "/manage/:id?/profile",
+                name: "Profile",
+                components: {
+                    manage: Profile,
+                },
+            },
+            {
+                path: "/manage/:id?/editprofile",
+                name: "EditProfile",
+                components: {
+                    manage: EditProfile,
                 },
             },
         ],

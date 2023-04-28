@@ -1,6 +1,6 @@
 <template>
     <n-layout class="bg">
-        <Headers />
+        <!-- <Headers /> -->
         <n-layout class="bg">
             <router-link
                 class="close"
@@ -84,6 +84,43 @@
                                     </n-ellipsis>
                                 </div>
                             </div>
+                            <div
+                                class="viedo-file-enable"
+                                v-if="
+                                    picture.janusMsg.msgType === 11 &&
+                                    !picture.janusMsg.config.isExpire
+                                "
+                            >
+                                <video
+                                    style="background-color: black"
+                                    controls
+                                    playsinline
+                                    width="112"
+                                    height="112"
+                                >
+                                    <source
+                                        :src="`${config.fileUrl}${picture.janusMsg.format.Fileid}${picture.janusMsg.format.ExtensionName}`"
+                                    />
+                                </video>
+                            </div>
+                            <div
+                                class="video-file-disable"
+                                v-if="
+                                    picture.janusMsg.msgType === 11 &&
+                                    picture.janusMsg.config.isExpire
+                                "
+                            >
+                                <div>
+                                    <img :src="fileIcon" />
+                                    <n-ellipsis
+                                        style="width: 90%; max-height: 80px"
+                                        :line-clamp="4"
+                                        :tooltip="false"
+                                    >
+                                        <p>{{ picture.janusMsg.format.ShowName }}</p>
+                                    </n-ellipsis>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -102,6 +139,7 @@ import { api as viewerApi } from "v-viewer";
 
 import { useApiStore } from "@/store/api";
 import { useChatStore } from "@/store/chat";
+import { isProduction, isStaging } from "@/util/commonUtil";
 import config from "@/config/config";
 import { currentDate, currentMonth } from "@/util/dateUtil";
 import Headers from "@/components/Headers.vue";
@@ -120,12 +158,15 @@ const { messageList } = storeToRefs(apiStore);
 if (Object.keys(route.query).length > 0) {
     getHistoryApi(route.query.chatroomID, route.params.id);
 }
+///從訊息分類出圖庫
 const pictures: any = computed({
     get() {
         const set = new Set();
         return messageList.value.filter((item: any) => {
             return !set.has(item.janusMsg.format.Fileid) &&
-                (item.janusMsg.msgType === 6 || item.janusMsg.msgType === 7)
+                (item.janusMsg.msgType === 6 ||
+                    item.janusMsg.msgType === 7 ||
+                    item.janusMsg.msgType === 11)
                 ? set.add(item.janusMsg.format.Fileid)
                 : false;
         });
@@ -135,19 +176,24 @@ const pictures: any = computed({
     },
 });
 watchEffect(() => {
-    console.log("pictures", pictures.value);
-    console.log("result", result?.value);
-    console.log("dateArr", dateArr?.value);
-    console.log("picArr", picArr?.value);
+    console.log("messageList 分完6,7,11", pictures.value);
+    console.log("result 判斷是否失效", result?.value);
+    console.log("dateArr 分月份陣列", dateArr?.value);
+    console.log("picArr 最後返回模板的陣列", picArr?.value);
 });
 
 const result: any = computed(() => {
     return pictures.value.map((pic: any, index: any) => {
-        if (dayjs().isAfter(dayjs(pic.janusMsg.format.expirationDate))) {
+        if (
+            (pic.janusMsg.type === 2 &&
+                dayjs().isBefore(dayjs(pic.janusMsg.format.expirationDate))) ||
+            (pic.janusMsg.type === 2 && pic.janusMsg.config.isWelcomeMsg) ||
+            pic.janusMsg.type === 1
+        ) {
             // 判斷是否到失效日期
-            pic.janusMsg.config.isExpire = true;
-        } else {
             pic.janusMsg.config.isExpire = false;
+        } else {
+            pic.janusMsg.config.isExpire = true;
         }
         return pic;
     });
@@ -162,6 +208,7 @@ const dateArr: any = computed(() => {
     );
     return arr
         .map((pic) => {
+            console.log("pic", pic);
             return { month: dayjs(pic.janusMsg.config.currentDate).format("YYYY/MM") };
         })
         .sort()
@@ -188,8 +235,7 @@ const picArr: any = computed(() => {
 // 圖片展示
 const viewImgs: any = ref([]);
 const previewURL = (fileid: string): void => {
-    // console.log("pictures.value:", pictures.value);
-
+    viewImgs.value = [];
     pictures.value.forEach((img: any) => {
         if (
             viewImgs.value.includes(
@@ -205,11 +251,10 @@ const previewURL = (fileid: string): void => {
         }
     });
     // 環境設定
-    const isProduction = process.env.NODE_ENV === "production";
-    const getSplit = isProduction ? 3 : 4;
+    const getSplit = isProduction || isStaging ? 3 : 4;
     const viewIndex = viewImgs.value
         .map((img: any) => Math.floor(img.split("/")[getSplit].split(".")[0]))
-        .indexOf(fileid);
+        .indexOf(Number(fileid));
     viewerApi({
         options: {
             initialViewIndex: viewIndex,
@@ -234,12 +279,21 @@ const previewURL = (fileid: string): void => {
     });
 };
 </script>
+<style lang="scss">
+@import "~@/assets/scss/var";
+@import "~@/assets/scss/extend";
+.bg {
+    .n-layout-scroll-container {
+        background-color: #fff;
+    }
+}
+</style>
 <style lang="scss" scoped>
 @import "~@/assets/scss/var";
 @import "~@/assets/scss/extend";
 
 .bg {
-    height: calc(100% - 90px);
+    // height: calc(100% - 90px);
 }
 .date {
     font-size: $font-size-18;
@@ -335,6 +389,47 @@ const previewURL = (fileid: string): void => {
                 }
             }
             .picture-file-disable {
+                width: 112px;
+                height: 112px;
+                background-color: $gray-5;
+                border-radius: 4px;
+                cursor: no-drop;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                > div {
+                    width: 100%;
+                    padding: 5px 8px;
+                    display: flex;
+                    justify-content: space-between;
+                }
+                img {
+                    width: 24px;
+                    height: 24px;
+                    background-color: transparent;
+                }
+                p {
+                    font-size: $font-size-12;
+                    font-weight: 500;
+                    font-family: $font-family;
+                    color: $gray-1;
+                    line-height: 1.6;
+
+                    margin-left: 4px;
+                    height: 100%;
+                    word-break: break-all;
+                }
+            }
+            .video-file-enable {
+                width: 112px;
+                height: 112px;
+                background-color: $primary-4;
+                border-radius: 4px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            }
+            .video-file-disable {
                 width: 112px;
                 height: 112px;
                 background-color: $gray-5;

@@ -1,13 +1,15 @@
 <template>
-    <div>
-        <n-layout has-sider class="chatroom" @click="closeChatBubble">
-            <n-layout-sider width="330px" bordered>
+    <n-layout class="chatroom" @click="closeChatBubble">
+        <n-layout-header style="height: 60px">
+            <IntegrateHeader />
+        </n-layout-header>
+        <n-layout position="absolute" style="top: 60px" has-sider>
+            <n-layout-sider width="330px" bordered :native-scrollbar="false">
                 <Sidebar />
             </n-layout-sider>
             <n-layout class="content">
                 <Headers />
                 <n-layout-content
-                    ref="content"
                     content-style="padding: 24px;"
                     :native-scrollbar="false"
                     v-if="Object.keys(route.query).length == 0"
@@ -20,7 +22,7 @@
                     has-sider
                     sider-placement="right"
                 >
-                    <n-layout-content ref="content" content-style="padding: 0;" class="msg-wrap">
+                    <n-layout-content content-style="padding: 0;" class="msg-wrap">
                         <NavBar />
                         <SearchBar />
                         <!-- 聊天室主畫面 -->
@@ -34,32 +36,37 @@
                 </n-layout>
             </n-layout>
         </n-layout>
+    </n-layout>
 
-        <n-modal
-            class="chatRecordCard"
-            v-model:show="isIncomingCall"
-            :mask-closable="false"
-            preset="card"
-        >
-            <n-card :bordered="false" size="huge" class="container">
-                <UserInfo :info="userInfo" />
-                <div class="description">語音來電</div>
-                <ul class="call_container">
-                    <li @click="doHangup(2, yourUserChatroomID, route.params.id, 1)">
-                        <span class="icon"><img :src="hangUpIcon" alt="掛斷" /></span>
-                        <h4 class="text">掛斷</h4>
-                    </li>
-                    <li>
-                        <button
-                            class="icon"
-                            @click="onIncomingCall(yourUserChatroomID, jsepMsg)"
-                        ></button>
-                        <h4 class="text">接聽</h4>
-                    </li>
-                </ul>
-            </n-card>
-        </n-modal>
-    </div>
+    <n-modal
+        class="chatRecordCard"
+        v-model:show="isIncomingCall"
+        :mask-closable="false"
+        preset="card"
+    >
+        <n-card :bordered="false" size="huge" class="container">
+            <UserInfo :info="userInfo" />
+            <div class="description">語音來電</div>
+            <ul class="call_container">
+                <li @click="doHangup(2, yourUserChatroomID, route.params.id, 1)">
+                    <span class="icon"><img :src="hangUpIcon" alt="掛斷" /></span>
+                    <h4 class="text">掛斷</h4>
+                </li>
+                <li>
+                    <button
+                        class="icon"
+                        @click="onIncomingCall(yourUserChatroomID, jsepMsg)"
+                    ></button>
+                    <h4 class="text">接聽</h4>
+                </li>
+            </ul>
+        </n-card>
+    </n-modal>
+    <AlertPopUp
+        :alertMessage="alertMessage"
+        :alertEvent="alertEvent"
+        @clearAlertMessage="clearAlertMessage"
+    />
 </template>
 <script lang="ts">
 export default {
@@ -69,8 +76,16 @@ export default {
 </script>
 <script setup lang="ts">
 import { storeToRefs } from "pinia";
-import { watch, ref, onMounted, computed, watchEffect, onActivated, onDeactivated } from "vue";
-import { NModal, NCard, NLayout, NLayoutSider, NLayoutContent } from "naive-ui";
+import { watch, ref, onMounted, computed, watchEffect } from "vue";
+import {
+    NModal,
+    NCard,
+    NLayout,
+    NLayoutSider,
+    NLayoutContent,
+    NLayoutHeader,
+    NScrollbar,
+} from "naive-ui";
 import { useRoute, useRouter } from "vue-router";
 
 import { txt, ITransactions, IAttachPlugin } from "@/util/interfaceUtil";
@@ -78,10 +93,13 @@ import { txt, ITransactions, IAttachPlugin } from "@/util/interfaceUtil";
 import { useApiStore } from "@/store/api";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { useChatStore } from "@/store/chat";
+import { useChatRecordStore } from "@/store/chatRecord";
 import { sendPrivateMsg } from "@/util/chatUtil";
 import { currentDate, unixTime } from "@/util/dateUtil";
 import { nanoid } from "nanoid";
 
+import AlertPopUp from "@/components/AlertPopUp.vue";
+import IntegrateHeader from "@/components/IntegrateHeader.vue";
 import NavBar from "@/components/ChatRoom/NavBar.vue";
 import MessageBox from "@/components/ChatRoom/MessageBox";
 import SearchBar from "@/components/ChatRoom/SearchBar.vue";
@@ -99,7 +117,8 @@ const router = useRouter();
 // api store
 const apiStore = useApiStore();
 const { getChatroomlistApi, getHistoryApi, getChatroomUserInfoApi } = apiStore;
-const { eventInfo, userInfo, isInput, eventList, chatroomList } = storeToRefs(apiStore);
+const { eventInfo, userInfo, isInput, eventList, chatroomList, messageList, chatroomListLoading } =
+    storeToRefs(apiStore);
 
 //phoneCall store
 const phoneCallStore = usePhoneCallStore();
@@ -110,29 +129,51 @@ const { callPlugin, yourUserChatroomID, jsepMsg, isIncomingCall, isAccepted, pho
 //chat store
 const chatStore = useChatStore();
 const { textPlugin, isOnline } = storeToRefs(chatStore);
+//chatRecord store
+const chatRecordStore = useChatRecordStore();
+const { recordMessages } = storeToRefs(chatRecordStore);
 
 const chatRoomID: any = computed(() => route.query.chatroomID);
 const mobile: any = computed(() => route.query.mobile);
 const eventID: any = ref("");
 const adminStatus = localStorage.getItem("adminStatus");
 
+//alert popup
+const alertMessage = ref("");
+const alertEvent = ref("");
+const clearAlertMessage = () => {
+    alertMessage.value = "";
+};
 onMounted(() => {
     watch(eventList, () => {
-        eventID.value = route.params.id ? route.params.id : eventList.value[0].eventID;
-        getChatroomlistApi(eventID.value);
+        eventID.value = route.params.id ? route.params.id : eventList.value[0]?.eventID;
+        if (eventID.value) {
+            getChatroomlistApi(eventID.value);
+        } else {
+            chatroomListLoading.value = false;
+        }
     });
+});
+//local 沒token 導至登入頁
+onMounted(() => {
+    const token = localStorage.getItem("access_token");
+    if (!token) {
+        alertMessage.value = "您帳號已登出，請重新登入!!";
+        alertEvent.value = "toHome";
+    }
 });
 
 // 監聽route query change寫法 2
 const initData = () => {
     console.log("initData ChatRoom");
-    getChatroomUserInfoApi(route.query.chatroomID);
-    getHistoryApi(route.query.chatroomID, eventID.value);
+    messageList.value = [];
+    getChatroomUserInfoApi(chatRoomID.value);
+    getHistoryApi(chatRoomID.value, eventID.value);
 };
-
 watch(
     () => route.query,
     (val) => {
+        // console.log("route.query", val);
         if (Object.keys(val).length > 1 && route.name == "ChatRoom") {
             isInput.value = true;
             initData();
@@ -143,29 +184,22 @@ watch(
     }
 );
 
-const { messageList } = storeToRefs(apiStore);
-
-const messages: any = computed({
-    get() {
-        return messageList.value;
-    },
-    set(val) {
-        messageList.value = val;
-    },
-});
-
 //取消訊息功能泡泡
 const closeChatBubble = (): void => {
     messageList.value = messageList.value.map((text: txt) => {
         text.janusMsg.config.msgFunctionStatus = false;
         return text;
     });
+    recordMessages.value.forEach((msg) => {
+        msg.isfunctionPopUp = false;
+    });
 };
 </script>
 
-<style lang="scss" scoped>
+<style lang="scss">
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
+
 .chatRecordCard.n-card.n-modal {
     width: 300px;
     border-radius: 4px;

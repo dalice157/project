@@ -1,4 +1,5 @@
 import config from "@/config/config";
+import { storeToRefs } from "pinia";
 import { useChatStore } from "@/store/chat";
 
 // 預設值
@@ -7,9 +8,11 @@ export const DO_CALL_NAME = "123";
 export const YOU_USER_NAME = ["tony1"]; // 對方
 export const OPAQUEID = "SMS_Plugin-123456789123";
 export const MY_ROOM = 1234; //Demo room
-export const JANUS_URL: any = `${config.janusUrl}/janus`;
+export const JANUS_URL: any = `${config.janusUrl}/ws`;
 
+// 環境設定
 export const isProduction = process.env.NODE_ENV === "production";
+export const isStaging = process.env.NODE_ENV === "staging";
 
 // 判斷是否是手機
 export const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(
@@ -23,12 +26,61 @@ export const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|oper
 // } else {
 //     JANUS_URL = "https://" + window.location.hostname + ":8089/janus";
 // }
-// 回覆點擊功能
+//聊天室 call join function
+export const callJoin = (transaction, textPlugin, eventID) => {
+    //Chat store
+    const chatStore = useChatStore();
+    const { participantList, transactions } = storeToRefs(chatStore);
+    const join = {
+        textroom: "join",
+        transaction: transaction,
+        room: eventID,
+        username: localStorage.getItem("account"),
+        accountID: localStorage.getItem("accountID"),
+        display: "admin",
+    };
+    textPlugin.data({
+        text: JSON.stringify(join),
+        error: function (reason: any) {
+            console.log("掛載頁面時 join error:", reason);
+        },
+        success: function () {
+            console.log("掛載頁面時 join 成功");
+        },
+    });
+    transactions.value[transaction] = function (res) {
+        participantList.value = res.participants?.map((item) => {
+            return {
+                [`${item.username}`]: item.display,
+            };
+        });
+        participantList.value.push({ [`${localStorage.getItem("account")}`]: "admin" });
+        console.log("call join 拿到participantList----Jonas的需求", participantList.value);
+    };
+};
+// 一般聊天室回覆點擊功能
 export const scrollPageTo = (replyId: string | null) => {
     if (!replyId) return;
     const element: any = document.getElementById(`${replyId}`);
     element.scrollIntoView({ behavior: "smooth", block: "center", nearest: "center" });
-    const shakeDom = isProduction ? 1 : 7;
+    const shakeDom = isProduction ? 2 : 9;
+    console.log("getAnimateClassName:", element.childNodes);
+    const getAnimateClassName = element.childNodes[shakeDom];
+    if (getAnimateClassName) {
+        setTimeout(() => {
+            getAnimateClassName.classList.add("animate__shakeX");
+        }, 600);
+        setTimeout(() => {
+            getAnimateClassName.classList.remove("animate__shakeX");
+        }, 1600);
+    }
+};
+//群聊聊天室回覆點擊功能
+export const groupChatScrollPageTo = (replyId: string | null) => {
+    if (!replyId) return;
+    const element: any = document.getElementById(`${replyId}`);
+    element.scrollIntoView({ behavior: "smooth", block: "center", nearest: "center" });
+    const shakeDom = isProduction ? 6 : 13;
     console.log("getAnimateClassName:", element.childNodes);
     const getAnimateClassName = element.childNodes[shakeDom];
     setTimeout(() => {
@@ -118,7 +170,8 @@ export const isObjToBeZero = (obj: any) => {
 
 // 判檢查每筆電話是否符合正則表達
 export function isphone(ele: any) {
-    return ele.match(/^09\d{2}-?\d{3}-?\d{3}$/);
+    // return ele.match(/^09\d{2}-?\d{3}-?\d{3}$/);
+    return ele.match(/^(0|\+?886)?9\d{8}$/);
 }
 //點數判斷
 //簡訊點數計算(傳入簡訊內容)
@@ -273,27 +326,27 @@ export const options = [
     },
     {
         label: "線上交談",
-        value: "線上交談",
+        value: "線上交談 ",
     },
     {
         label: "詢問客服",
-        value: "詢問客服",
+        value: "詢問客服 ",
     },
     {
         label: "了解詳情",
-        value: "了解詳情",
+        value: "了解詳情 ",
     },
     {
         label: "線上詢問",
-        value: "線上詢問",
+        value: "線上詢問 ",
     },
     {
         label: "線上互動",
-        value: "線上互動",
+        value: "線上互動 ",
     },
     {
         label: "詳洽",
-        value: "詳洽",
+        value: "詳洽 ",
     },
 ];
 
@@ -344,9 +397,23 @@ export const resetSetItem = (key, newVal) => {
     }
 };
 
+//清除所有cookie
+export const clearAllCookie = (path) => {
+    const keys = document.cookie.match(/[^ =;]+(?=\||=)/g);
+    if (keys) {
+        for (let i = keys.length; i--; ) {
+            document.cookie = `${keys[i]}=0;expires=${new Date(
+                0
+            )};path=${path};domain=.teamplus.tech;`;
+        }
+    }
+    // console.log("刪除所有cookie!!!");
+};
+
 //token過期導至登入頁
 export const tokenExpireToLogin = (err) => {
-    if (err.response.status === 401) {
+    if (err.response?.status === 401) {
+        clearAllCookie("/");
         location.href = `/`;
     }
 };

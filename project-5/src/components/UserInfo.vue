@@ -1,6 +1,6 @@
 <template>
     <div class="user__photo">
-        <n-avatar round :size="75" object-fit="cover" :fallback-src="user_pic_defaul" :src="img" />
+        <n-avatar round :size="75" object-fit="cover" :fallback-src="user_pic_default" :src="img" />
     </div>
     <h3 class="user__name">
         {{ userName }}
@@ -10,10 +10,11 @@
 import { watchEffect, ref, computed } from "vue";
 import { storeToRefs } from "pinia";
 import { NAvatar } from "naive-ui";
+import { isProduction,isStaging } from "@/util/commonUtil";
 
 import config from "@/config/config";
 import { imgList } from "@/util/commonUtil";
-import user_pic_defaul from "@/assets/Images/mugShot/User-round.svg";
+import user_pic_default from "@/assets/Images/mugShot/User-round.svg";
 import { useApiStore } from "@/store/api";
 
 const props = defineProps({
@@ -31,8 +32,7 @@ const userName = computed(() => {
 // });
 const img = ref(null);
 // 環境設定
-const isProduction = process.env.NODE_ENV === "production";
-const getSplit = isProduction ? 4 : 5;
+const getSplit = isProduction || isStaging ? 4 : 5;
 watchEffect(() => {
     img.value = imgList.find((item) => {
         // console.log('save item.split("/"):', item.split("/"));

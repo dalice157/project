@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="32px" viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>edit-round</title>
+    <g id="Guideline" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="icon" transform="translate(-72.000000, -182.000000)">
+            <g id="edit-round" transform="translate(72.000000, 182.000000)">
+                <circle id="Oval" fill="#FFF1CF" cx="16" cy="16" r="16"></circle>
+                <g id="pen" transform="translate(8.000000, 8.000000)" fill="#3E3E3E" fill-rule="nonzero">
+                    <rect id="Rectangle" opacity="0" x="0" y="0" width="16" height="16"></rect>
+                    <path d="M15.3809246,3.42603925 L13.8951197,4.91184416 L11.0292825,2.13381806 L12.5589929,0.604107578 C13.3382479,-0.175147336 14.6016697,-0.175147336 15.3809246,0.604107578 C16.1601795,1.38336249 16.1601795,2.64678434 15.3809246,3.42603925 L15.3809246,3.42603925 Z M13.0249908,5.78097516 L3.88963566,14.9163303 L0,16 L1.06670614,12.0953965 L10.1681343,2.99396839 L13.0249908,5.78097516 Z" id="Shape"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

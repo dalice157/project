@@ -1,12 +1,16 @@
 import Janus from "@/assets/js/janus";
 import { storeToRefs } from "pinia";
+import { useRoute } from "vue-router";
 import { nanoid } from "nanoid";
+import config from "@/config/config";
 
+import logo from "@/assets/Images/talkOD-logo.svg";
 import { useChatStore } from "@/store/chat";
 import { useApiStore } from "@/store/api";
 import { usePhoneCallStore } from "@/store/phoneCall";
 import { useChatRecordStore } from "@/store/chatRecord";
-import { resetSetItem } from "@/util/commonUtil";
+import { resetSetItem, isProduction, isStaging } from "@/util/commonUtil";
+
 
 //發送私人訊息
 export const sendPrivateMsg = ({
@@ -17,6 +21,7 @@ export const sendPrivateMsg = ({
 }) => {
     //Chat store
     const chatStore = useChatStore();
+    // const {} = chatStore;
     const { participantList } = storeToRefs(chatStore);
     //api store
     const apiStore = useApiStore();
@@ -31,17 +36,18 @@ export const sendPrivateMsg = ({
     });
 
     const display = [chatRoomID, ...filterDisplays];
-    console.log("sendPrivateMsg display", display);
+    console.log("發送私人訊息名單", display);
 
     if (!display) return;
-
     if (msg === "") {
-        console.log("Insert a message to send on the DataChannel");
+        console.log("發送私訊 不得為空!!");
         return;
     }
+
     if (msg.janusMsg.sender === 1 && msg.janusMsg.msgType === 9) {
         delete msg.janusMsg.config.userName;
     }
+    //textPlugin 發送訊息
     const message: any = {
         textroom: "message",
         transaction: randomString(12),
@@ -53,34 +59,34 @@ export const sendPrivateMsg = ({
     textPlugin.data({
         text: JSON.stringify(message),
         error: function (reason: any) {
-            console.log("error:", reason);
+            console.log(" textPlugin 發送私訊錯誤,原因為:", reason);
             isInput.value = false;
         },
         success: function () {
-            const data = {
-                name: msg.name,
-                what: "send",
-                display: display,
-                text: JSON.stringify(msg),
-            };
+            console.log(" textPlugin 發送私訊成功!!");
             isInput.value = true;
         },
     });
-    return;
 };
 
 /*textPlugin ondata 接收到的事件處理方法 */
 export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
+    //chat store
     const chatStore = useChatStore();
-    const { getCompanyMsg } = chatStore;
-    const { isOnline, textPlugin, messageFrom, messageForm } = storeToRefs(chatStore);
-
-    const chatRecordStore = useChatRecordStore();
-    const { recordMessages } = storeToRefs(chatRecordStore);
+    const { scrollToBottom } = chatStore;
+    const {
+        isOnline,
+        textPlugin,
+        messageFrom,
+        messageForm,
+        findScrollHeight,
+        newMsgHint,
+        pictures,
+    } = storeToRefs(chatStore);
 
     // api store
     const apiStore = useApiStore();
-    const { getHistoryApi, getChatroomlistApi } = apiStore;
+    const { getHistoryApi, getChatroomlistApi, getChatroomUserInfoApi } = apiStore;
     const { isInput, messageList, chatroomList } = storeToRefs(apiStore);
     interface whatType {
         [key: string]: any;
@@ -88,48 +94,75 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
     const { what, whisper } = data;
 
     const getUserName = localStorage.getItem("userName");
-
     const whatStatus: whatType = {
         message: () => {
             if (whisper === true) {
                 console.log("Private message->", data);
+                //解構 收到的私訊
                 const parseMsg = JSON.parse(data.msg);
                 const isRecall = Object.keys(parseMsg).includes("recall");
+
+                //收到收回訊息的處理
                 if (isRecall) {
                     const getFrom = parseMsg.janusMsg.chatroomID;
                     const msg = parseMsg;
                     messageFrom.value = getFrom;
                     delete msg.recall;
-                    // console.log("msg", msg);
+                    // 收回聊天紀錄
                     const lastChatMessageArr = JSON.parse(
                         sessionStorage.getItem(`${getFrom}-lastChatMessage`)
                     );
-                    // console.log("lastChatMessageArr", lastChatMessageArr);
+
                     lastChatMessageArr.forEach((item, index) => {
                         if (item.janusMsg.config.id === msg.janusMsg.config.id) {
                             lastChatMessageArr.splice(index, 1);
                         }
-                    });
+                    });   
                     resetSetItem(
                         `${getFrom}-lastChatMessage`,
                         JSON.stringify(lastChatMessageArr.slice(-10))
                     );
                 } else {
+                    //收到一般訊息的處理
                     const msg = JSON.parse(data.msg);
+                    // console.log("janus msg", msg);
                     const getFrom = msg.janusMsg.chatroomID;
+                    const findRoom = chatroomList.value.some((room) => room.chatroomID === getFrom);
+                    console.log("是否在chatroomList找到這間聊天室", findRoom);
                     messageFrom.value = getFrom;
                     messageForm.value = msg;
-                    // console.log("janus msg", msg);
-                    // console.log("janus msg from", getFrom);
-                    const lastChatMessageArr = JSON.parse(
-                        sessionStorage.getItem(`${getFrom}-lastChatMessage`)
-                    );
-                    lastChatMessageArr.push(msg);
-                    resetSetItem(
-                        `${getFrom}-lastChatMessage`,
-                        JSON.stringify(lastChatMessageArr.slice(-10))
-                    );
-                    if (chatroomID == getFrom && data.from) {
+                    // 如果在 chatroomList 找到 chatroomID 則更新左側列表最後一則訊息
+                    if (findRoom) {
+                        const lastChatMessageArr = JSON.parse(
+                            sessionStorage.getItem(`${getFrom}-lastChatMessage`)
+                        );
+                        lastChatMessageArr.push(msg);
+                        resetSetItem(
+                            `${getFrom}-lastChatMessage`,
+                            JSON.stringify(lastChatMessageArr.slice(-10))
+                        );
+                    } else {
+                        //  如果在 chatroomList 找不到 chatroomID 幫他新建room
+                        const chatroomInfo = {
+                            chatroomID: getFrom,
+                            msg: msg.janusMsg.msgContent,
+                            msgType: msg.janusMsg.msgType,
+                            pinTop: 0,
+                            icon: 0,
+                            mobile: 0,
+                            name: "",
+                            tag: [],
+                            visit: 0,
+                            time: msg.janusMsg.time,
+                            unread: 1,
+                        };
+                        getChatroomUserInfoApi(getFrom, true, chatroomInfo);
+                    }
+
+                    //判斷如果在當前頁面收到同頻道訊息 必須推入訊息
+                    if (chatroomID === getFrom) {
+                        console.log("當前頁面chatroomID", chatroomID);
+                        console.log("收訊息getFrom", getFrom);
                         const message: any = {
                             textroom: "message",
                             transaction: randomString(12),
@@ -148,28 +181,51 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
                             },
                         });
                         isInput.value = true;
+                        let scrollHeight = 0;
+                        let scrollTop = 0;
+                        let offsetHeight = 0;
+                        scrollHeight = findScrollHeight.value.scrollHeight;
+                        scrollTop = findScrollHeight.value.scrollTop;
+                        offsetHeight = findScrollHeight.value.offsetHeight;
                         messageList.value.push(msg);
+                        if (
+                            msg.janusMsg.msgType === 6 ||
+                            msg.janusMsg.msgType === 7 ||
+                            msg.janusMsg.msgType === 11
+                        ) {
+                            pictures.value.push(msg);
+                        }
+                        if (
+                            scrollHeight - scrollTop < offsetHeight + 30 ||
+                            msg.janusMsg.sender === 0
+                        ) {
+                            setTimeout(() => {
+                                scrollToBottom();
+                            }, 100);
+                        } else {
+                            newMsgHint.value = true;
+                        }
                     }
+                    // 訊息去重
+                    messageList.value = messageList.value.reduce((unique, o) => {
+                        const hasRepeatId = unique.some((obj) => {
+                            return obj.janusMsg.config.id === o.janusMsg.config.id;
+                        });
+                        if (!hasRepeatId) {
+                            if (o.janusMsg.sender === 0 && o.janusMsg.msgType === 9) {
+                                o.janusMsg.config = {
+                                    ...o.janusMsg.config,
+                                    userName: getUserName,
+                                };
+                            }
+                            if (isOnline.value) {
+                                o.janusMsg.config.isRead = true;
+                            }
+                            unique.push(o);
+                        }
+                        return unique;
+                    }, []);
                 }
-
-                messageList.value = messageList.value.reduce((unique, o) => {
-                    const hasRepeatId = unique.some((obj) => {
-                        return obj.janusMsg.config.id === o.janusMsg.config.id;
-                    });
-                    if (!hasRepeatId) {
-                        if (o.janusMsg.sender === 0 && o.janusMsg.msgType === 9) {
-                            o.janusMsg.config = {
-                                ...o.janusMsg.config,
-                                userName: getUserName,
-                            };
-                        }
-                        if (isOnline.value) {
-                            o.janusMsg.config.isRead = true;
-                        }
-                        unique.push(o);
-                    }
-                    return unique;
-                }, []);
 
                 // console.log("messageList.value:", messageList.value);
                 return;
@@ -183,7 +239,6 @@ export const processDataEvent = (data: any, chatroomID: any, eventID: any) => {
         join: () => {
             // console.log("join chatroomID:", chatroomID);
             // console.log("join username:", data.username);
-
             console.log("onlineList join:");
             if (chatroomID == data.username) {
                 isOnline.value = true;
@@ -225,9 +280,6 @@ export const onRegistered = (): void => {
 };
 //發起通話
 export const onCalling = (): void => {
-    //phoneCall store
-    const phoneCallStore = usePhoneCallStore();
-    const { doHangup } = phoneCallStore;
     console.log("發起通話");
 };
 
@@ -244,8 +296,6 @@ export const onHangup = (): void => {
 export const onError = (message: string, error = "") => {
     // @ts-ignore
     Janus.error(message, error);
-    console.log("onError:", message + error);
-
     return message + error;
 };
 
@@ -260,18 +310,25 @@ export const randomString = (len: any, charSet?: any) => {
     return randomString;
 };
 
-function notifyMe(data: any) {
-    const msg = JSON.parse(data.msg).janusMsg.message;
-    // console.log("msg:", msg);
-
+// webNotification 通知 admin 端
+export const notifyMe = (eventID: any) => {
+    const webNotification = "您有新訊息。";
     if (Notification.permission !== "granted") Notification.requestPermission();
     else {
-        const notification = new Notification(data.from, {
-            icon: "",
-            body: msg,
+        //Chat store
+        const chatStore = useChatStore();
+        const { notification } = storeToRefs(chatStore);
+        //推播所攜帶的資訊
+        notification.value = new Notification("互動回覆簡訊", {
+            icon: `${config.fileUrl}default.png`,
+            tag: "talkOD",
+            body: webNotification,
+            renotify: true,
         });
-        notification.onclick = function () {
-            // do some
+        //點擊推播的回調
+        notification.value.onclick = function () {
+            location.href = `/chat/${eventID}`;
+            notification.value.close();
         };
     }
-}
+};

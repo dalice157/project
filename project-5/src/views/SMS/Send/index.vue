@@ -3,7 +3,7 @@
         <div class="smsContent">
             <h2>輸入簡訊內容</h2>
             <n-divider></n-divider>
-            <div class="smsChannel">
+            <div class="smsChannel" id="guide9">
                 <div>
                     <h3><span>*</span>&ensp;發送頻道</h3>
                     <n-popover trigger="hover" placement="right">
@@ -22,6 +22,7 @@
                     class="selectChannel"
                     v-model:value="smsChannel"
                     :options="filterChannelList"
+                    :render-label="renderLabel"
                     placeholder="請選擇發送頻道"
                 >
                     <template #empty>
@@ -97,7 +98,7 @@
                             </template>
                             <span class="pop">
                                 一則SMS簡訊限定 70
-                                字元，此處將於發送文字最末端自動嵌入聊天室專屬連結共
+                                字元，此處將於發送文字最末端自動嵌入交談室專屬連結共
                                 {{ config.wordLimit }}
                                 字元(發送內容不顯示於連結，請於發送後至「發送查詢」取得連結)，若欲以一則簡訊發送，其字數請設定
                                 53 字元以內。
@@ -196,7 +197,7 @@
                         placeholder="請輸入簡訊主旨(可不填)"
                     />
                 </div>
-                <div class="smsSendContent">
+                <div class="smsSendContent2">
                     <div class="contentTitle">
                         <h3>發送內容</h3>
                     </div>
@@ -245,7 +246,7 @@
                         placeholder="請輸入簡訊主旨(可不填)"
                     />
                 </div>
-                <div class="smsSendContent">
+                <div class="smsSendContent2">
                     <div class="contentTitle">
                         <h3>發送內容</h3>
                     </div>
@@ -287,6 +288,7 @@
             </div>
         </div>
     </teleport>
+    <AlertPopUp :alertMessage="alertMessage" @clearAlertMessage="clearAlertMessage" />
 </template>
 <script lang="ts">
 export default {
@@ -310,7 +312,7 @@ import {
 } from "naive-ui";
 import { useRouter, useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
-import { HelpCircleOutline } from "@vicons/ionicons5";
+import { HelpCircleOutline, ShieldCheckmarkOutline } from "@vicons/ionicons5";
 
 import TimeSetting from "@/components/backend/TimeSetting.vue";
 import OptionSetting from "@/components/backend/OptionSetting.vue";
@@ -321,6 +323,7 @@ import { pointCalculation, options } from "@/util/commonUtil";
 import config from "@/config/config";
 import { HelpCircle } from "@vicons/ionicons5";
 import closeIcon from "@/assets/Images/chatroom/close-round.svg";
+import AlertPopUp from "@/components/AlertPopUp.vue";
 
 //router 設置
 const route = useRoute();
@@ -328,12 +331,17 @@ const params = route.params;
 
 //api store
 const apiStore = useApiStore();
-const { eventList, uploadRef: getUploadFile, commonMsgList } = storeToRefs(apiStore);
+const { eventList, uploadRef: getUploadFile, commonMsgList, addhttps } = storeToRefs(apiStore);
 const { getCommonMsgList, addCommonMsgObj, removeCommonMsgObj, editCommonMsgObj } = apiStore;
 //smsStore
 const smsStore: any = useSmsStore();
 const { smsPhrases, smsChannel, smsSubject, smsContent, smsWord, smsCount, smsPoint } =
     storeToRefs(smsStore);
+//alert popup
+const alertMessage = ref("");
+const clearAlertMessage = () => {
+    alertMessage.value = "";
+};
 // 常用簡訊彈窗
 const commonMsgPopUp = ref(false);
 //新增常用簡訊彈窗
@@ -386,7 +394,7 @@ const closeCommonMsg = () => {
 //刪除提示
 const removeHint = () => {
     if (checkedVal.value === null) {
-        alert("您尚未選擇要刪除之訊息!!!");
+        alertMessage.value = "您尚未選擇要刪除之訊息!!!";
     } else {
         deleteCommonMsgPopUp.value = !deleteCommonMsgPopUp.value;
     }
@@ -440,7 +448,7 @@ const exportCommonMsg = () => {
         smsContent.value = exportData.content;
     }
     exportData.subject = "";
-    exportData.content = "";
+    exportData.content = ""; 
     checkedVal.value = null;
     wordCount();
 };
@@ -470,7 +478,7 @@ const closeEditCommonMsg = () => {
 //送出編輯訊息
 const submitEditCommonMsg = () => {
     if (content.value === demoContent) {
-        alert("請填寫編輯內容!!!!");
+        alertMessage.value = "請填寫編輯內容!!!!";
     } else {
         editCommonMsgObj(dataID.value, subject.value, content.value);
         subject.value = "";
@@ -500,10 +508,10 @@ const storeToCommonMsg = () => {
         };
         const accountID = localStorage.getItem("accountID");
         addCommonMsgObj(accountID, addNewCommonMsg);
-        alert("已儲存至常用訊息");
+        alertMessage.value = "已儲存至常用訊息";
         storeBoolean.value = false;
     } else {
-        alert("請填寫要儲存的內容");
+        alertMessage.value = "請填寫要儲存的內容";
         storeBoolean.value = false;
     }
 };
@@ -636,6 +644,18 @@ const wordCount = () => {
             ? 0
             : pointCalculation(smsContent.value + smsPhrases.value + config.extraString).point;
     smsWord.value = smsContent.value.length + phrasesLen + config.wordLimit;
+    //判斷出去短網址是否要添加https://
+    if (
+        pointCalculation(smsContent.value + smsPhrases.value + config.extraString).point ===
+        pointCalculation(smsContent.value + smsPhrases.value + config.extraString + "https://")
+            .point
+    ) {
+        addhttps.value = true;
+        // console.log("可以加 https://");
+    } else {
+        addhttps.value = false;
+        // console.log("不不不不不可以加 https://");
+    }
 };
 
 const uploadRef = computed({
@@ -649,17 +669,43 @@ const uploadRef = computed({
 onMounted(() => {
     uploadRef.value = null;
 });
-
+//頻道option
 const filterChannelList = computed(() => {
     return eventList.value
         .filter((event: any) => {
             return event.status === 1;
         })
-        .map((item) => ({
-            label: `${item.name}`,
-            value: parseInt(`${item.eventID}`),
-        }));
+        .map((item) => {
+            return {
+                label: `${item.name}`,
+                value: parseInt(`${item.eventID}`),
+                preset: `${item.preset}`,
+            };
+        });
 });
+//頻道label
+const renderLabel = (option) => {
+    // console.log("option", option);
+    if (option.preset == "1") {
+        return [
+            option.label,
+            h(
+                NIcon,
+                {
+                    style: {
+                        verticalAlign: "-0.15em",
+                        marginLeft: "4px",
+                    },
+                },
+                {
+                    default: () => h(ShieldCheckmarkOutline),
+                }
+            ),
+        ];
+    } else {
+        return option.label;
+    }
+};
 
 //下一頁按鈕
 const nextPageRouter = params.id ? `/manage/${params.id}/SMSSendPage2` : `/manage/SMSSendPage2`;
@@ -679,6 +725,7 @@ const themeOverrides = {
 <style lang="scss">
 @import "~@/assets/scss/extend";
 @import "~@/assets/scss/var";
+@import "~@/assets/scss/ui";
 .lazyWrap {
     .n-base-selection {
         margin-left: 10px;
@@ -690,14 +737,14 @@ const themeOverrides = {
         --box-shadow-active: none !important;
         --box-shadow-focus: none !important;
         --caret-color: #3e3e3e !important;
-        --option-text-color-active: #ffb400 !important;
+        --option-text-color-active: #f9935c !important;
     }
 }
 .n-radio {
-    --box-shadow-active: inset 0 0 0 1px#ffb400 !important;
-    --box-shadow-focus: inset 0 0 0 1px #ffb400 !important;
-    --box-shadow-hover: inset 0 0 0 1px #ffb400 !important;
-    --dot-color-active: #ffb400 !important;
+    --box-shadow-active: inset 0 0 0 1px #f9935c !important;
+    --box-shadow-focus: inset 0 0 0 1px #f9935c !important;
+    --box-shadow-hover: inset 0 0 0 1px #f9935c !important;
+    --dot-color-active: #f9935c !important;
 }
 .SMSSend {
     .n-divider--no-title {
@@ -720,22 +767,24 @@ const themeOverrides = {
         --box-shadow-active: none !important;
         --box-shadow-focus: none !important;
         --caret-color: #3e3e3e !important;
-        --option-text-color-active: #ffb400 !important;
+        --option-text-color-active: #f9935c !important;
     }
 }
-.n-data-table .n-data-table__pagination {
-    justify-content: center;
-    position: fixed;
-    bottom: 15px;
-    left: 50%;
-    transform: translateX(-50%);
+.Table {
+    .n-data-table .n-data-table__pagination {
+        justify-content: center;
+        position: fixed;
+        bottom: 15px;
+        left: 50%;
+        transform: translateX(-50%);
+    }
 }
 .commonMsgTable {
     &.n-data-table .n-data-table-thead {
-        background-color: $primary-5;
+        background-color: $primary-4;
     }
     &.n-data-table .n-data-table-th {
-        background-color: $primary-5;
+        background-color: $primary-4;
         font-weight: bold;
         color: $gray-1;
         border: none;
@@ -744,7 +793,7 @@ const themeOverrides = {
         }
     }
     &.n-data-table .n-data-table-tr:nth-child(even) {
-        background: $primary-5;
+        background: $primary-4;
     }
     &.n-data-table .n-data-table-td {
         background: none;
@@ -775,6 +824,11 @@ const themeOverrides = {
         width: 25px;
         height: 25px;
         cursor: pointer;
+    }
+}
+.smsSendContent2 {
+    .n-input.n-input--textarea {
+        --n-border: 1px solid #8b8b8b !important;
     }
 }
 </style>
@@ -927,7 +981,7 @@ const themeOverrides = {
             }
         }
     }
-    .smsSendContent {
+    .smsSendContent2 {
         width: 60%;
         margin: 0 auto;
         .lazyWrap {
@@ -973,6 +1027,7 @@ const themeOverrides = {
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
+        margin-left: 170px;
         .messageInfo {
             margin-top: 15px;
             margin-bottom: 15px;
@@ -981,8 +1036,9 @@ const themeOverrides = {
             .wordCount {
                 width: 100px;
                 padding: 10px 0;
+                margin-right: 5px;
                 border-radius: 20px;
-                background-color: $primary-4;
+                background-color: $primary-3;
                 text-align: center;
                 display: flex;
                 justify-content: center;
@@ -991,8 +1047,9 @@ const themeOverrides = {
             .numOfMessage {
                 width: 100px;
                 padding: 10px 0;
+                margin-right: 5px;
                 border-radius: 20px;
-                background-color: $primary-4;
+                background-color: $primary-3;
                 text-align: center;
                 display: flex;
                 justify-content: center;
@@ -1002,7 +1059,7 @@ const themeOverrides = {
                 width: 100px;
                 padding: 10px 0;
                 border-radius: 20px;
-                background-color: $primary-4;
+                background-color: $primary-3;
                 text-align: center;
                 display: flex;
                 justify-content: center;
@@ -1078,9 +1135,10 @@ const themeOverrides = {
 .SMSSend {
     position: relative;
     display: flex;
-    min-height: calc(100vh - 80px);
+    min-height: calc(100vh - 140px);
     background-color: $bg;
-    padding: 15px;
+    padding: 15px 15px 45px 15px;
+    margin-bottom: 30px;
     .smsContent {
         background-color: $white;
         padding: 25px 20px;
@@ -1194,7 +1252,7 @@ const themeOverrides = {
                     width: 100px;
                     padding: 10px 0;
                     border-radius: 20px;
-                    background-color: $primary-4;
+                    background-color: $primary-3;
                     text-align: center;
                     display: flex;
                     justify-content: center;
@@ -1204,7 +1262,7 @@ const themeOverrides = {
                     width: 100px;
                     padding: 10px 0;
                     border-radius: 20px;
-                    background-color: $primary-4;
+                    background-color: $primary-3;
                     text-align: center;
                     display: flex;
                     justify-content: center;
@@ -1214,7 +1272,7 @@ const themeOverrides = {
                     width: 100px;
                     padding: 10px 0;
                     border-radius: 20px;
-                    background-color: $primary-4;
+                    background-color: $primary-3;
                     text-align: center;
                     display: flex;
                     justify-content: center;
@@ -1225,7 +1283,7 @@ const themeOverrides = {
                 width: 100px;
                 height: 25px;
                 line-height: 25px;
-                background-color: $primary-1;
+                background-color: $primary-3;
                 border-radius: 12.5px;
                 text-align: center;
                 cursor: pointer;

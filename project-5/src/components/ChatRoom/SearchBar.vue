@@ -66,12 +66,19 @@
                     />
                     <div
                         class="picture"
-                        v-else-if="msg.janusMsg.msgType === 6 || msg.janusMsg.msgType === 7"
+                        v-else-if="
+                            msg.janusMsg.msgType === 6 ||
+                            msg.janusMsg.msgType === 7 ||
+                            msg.janusMsg.msgType === 11
+                        "
                     >
                         <div v-if="msg.janusMsg.msgType === 6">
                             {{ msg.janusMsg.format.ShowName }}
                         </div>
                         <span v-if="msg.janusMsg.msgType === 7">
+                            {{ msg.janusMsg.format.ShowName }}
+                        </span>
+                        <span v-if="msg.janusMsg.msgType === 11">
                             {{ msg.janusMsg.format.ShowName }}
                         </span>
                     </div>
@@ -223,7 +230,7 @@ const themeOverrides = {
             padding: 10px 15px;
             &:hover,
             &:focus {
-                background-color: $gray-8;
+                background-color: $primary-4;
                 border-radius: 5px;
             }
             .avatar {

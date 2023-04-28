@@ -18,7 +18,9 @@ const headers = {
     typ: "JWT",
 };
 const payload = {
-    dev: String(withCanvasDrawing),
+    // dev: String(withCanvasDrawing),
+    dev: String(withoutCanvasDrawing),
+    source: 0,
 };
 const secret = `-----BEGIN PRIVATE KEY-----
 MIGHAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBG0wawIBAQQg98E7/hcplJHk2RIg

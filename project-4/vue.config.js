@@ -1,16 +1,27 @@
 const webpack = require("webpack");
 const { HashedModuleIdsPlugin } = require("webpack");
 const path = require("path");
-
+const CompressionPlugin = require('compression-webpack-plugin')
+// const productionGzipExtensions = ['js', 'css']
 const isProduction = process.env.NODE_ENV === "production";
 console.log("NODE_ENV", process.env.NODE_ENV);
 console.log("VUE_APP_outputDir", process.env.VUE_APP_outputDir);
 console.log("VUE_APP_config", process.env.VUE_APP_config);
+
 function resolve(dir) {
     return path.join(__dirname, dir);
 }
 const BASE_URL = isProduction ? "/" : "/";
 module.exports = {
+    pwa: {
+        iconPaths: {
+            favicon32: "favicon.ico",
+            favicon16: "favicon.ico",
+            appleTouchIcon: "favicon.ico",
+            maskIcon: "favicon.ico",
+            msTileImage: "favicon.ico",
+        },
+    },
     publicPath: BASE_URL,
     assetsDir: "static",
     outputDir: process.env.VUE_APP_outputDir,
@@ -51,6 +62,16 @@ module.exports = {
     },
     configureWebpack: (config) => {
         if (isProduction) {
+            config.plugins.push(
+                new CompressionPlugin({
+                    // filename: '[path].gz[query]',
+                    algorithm: 'gzip',
+                    // test: new RegExp('\\.(' + productionGzipExtensions.join('|') + ')$'),
+                    test: /\.js$|\.html$|\.css/,
+                    threshold: 10240,
+                    minRatio: 0.8
+                  })
+            )
             // 公共代码抽离
             config.optimization = {
                 splitChunks: {
@@ -71,7 +92,7 @@ module.exports = {
                             minChunks: 2,
                             maxInitialRequests: 5,
                             minSize: 0,
-                            priority: 60,
+                            priority: 60
                         },
                         styles: {
                             name: "styles",

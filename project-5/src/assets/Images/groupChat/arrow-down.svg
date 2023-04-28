@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="24px" height="24px" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>arrow-down</title>
+    <g id="Guideline" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="icon" transform="translate(-99.000000, -674.000000)" fill-rule="nonzero">
+            <g id="arrow-down" transform="translate(111.000000, 686.000000) rotate(-360.000000) translate(-111.000000, -686.000000) translate(99.000000, 674.000000)">
+                <rect id="Rectangle" fill="#000000" opacity="0" x="0" y="0" width="24" height="24"></rect>
+                <path d="M20.86725,7.75575 C20.5725,7.46475 20.0985,7.46625 19.80675,7.76025 L12.123,15.5145 L4.332,7.79325 C4.03725,7.5015 3.56325,7.50375 3.27075,7.79775 C2.979,8.0925 2.98125,8.56725 3.27525,8.859 L11.556,17.06475 C11.56875,17.0775 11.58525,17.0805 11.598,17.0925 C11.601,17.0955 11.60175,17.09925 11.60475,17.10225 C11.751,17.247 11.94225,17.31975 12.13275,17.31975 C12.3255,17.31975 12.519,17.2455 12.66525,17.09775 L20.871,8.817 C21.1635,8.52225 21.16125,8.0475 20.86725,7.75575 Z" id="Path" fill="#3E3E3E"></path>
+            </g>
+        </g>
+    </g>
+</svg>

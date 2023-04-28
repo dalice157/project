@@ -18,6 +18,7 @@ export const useSearchStore = defineStore({
         searcMoreMessages: <any>[],
         searchBoolean: <boolean>false,
         isResult: <boolean>false,
+        searchIsMove: <boolean>false,
     }),
     getters: {},
     actions: {
@@ -49,29 +50,34 @@ export const useSearchStore = defineStore({
             this.isResult = true;
             if (val) {
                 this.searcMessages = [];
-                let regStr = "";
-                const ary = val.split("");
-                ary.forEach((s: any) => {
-                    // regStr = regStr + "(" + val[i] + ")([\\s]*)";
-                    regStr += s;
-                });
-                console.log("regStr:", regStr);
-
-                const reg = new RegExp(regStr);
+                const regStr = val;
                 messages.value.forEach((msg: any) => {
                     const message =
-                        (msg.janusMsg.format && msg.janusMsg.format.ShowName) ||
-                        msg.janusMsg.msgContent;
-                    const regMatch = message.match(reg);
+                        msg.janusMsg.msgType === 1
+                            ? msg.janusMsg.msgContent
+                            : msg.janusMsg.msgType === 6 || msg.janusMsg.msgType === 7
+                            ? msg.janusMsg.format.ShowName
+                            : "";
+
+                    const regMatch = message.includes(regStr);
+                    // console.log("search message", message);
                     if (regMatch) {
-                        if (msg.janusMsg.msgContent) {
+                        //符合的文字訊息
+                        if (msg.janusMsg.msgType === 1) {
                             msg.janusMsg.tagMsg = msg.janusMsg.msgContent.replace(
-                                reg,
+                                regStr,
                                 `<span style="color: #FFB400; font-weight: bold;">${regStr}</span>`
                             );
                         }
-
-                        this.searcMessages.push(msg);
+                        //符合的圖片或檔案訊息
+                        if (msg.janusMsg.msgType === 6 || msg.janusMsg.msgType === 7) {
+                            msg.janusMsg.tagMsg = msg.janusMsg.format.ShowName.replace(
+                                regStr,
+                                `<span style="color: #FFB400; font-weight: bold;">${regStr}</span>`
+                            );
+                        }
+                        console.log("符合搜尋資格msg", msg);
+                        this.searcMessages.unshift(msg);
                     }
                 });
             }
@@ -92,7 +98,8 @@ export const useSearchStore = defineStore({
                 });
 
                 const reg = new RegExp(regStr);
-                console.log("recordMessages.value:", recordMessages.value);
+                // console.log("regStr:", regStr);
+                // console.log("recordMessages", recordMessages.value);
                 recordMessages.value.forEach((msg: any) => {
                     const regMatch = msg.janusMsg.msgContent.match(reg);
                     if (regMatch) {
@@ -106,6 +113,7 @@ export const useSearchStore = defineStore({
                         this.searcRecordMessages.unshift(msg);
                     }
                 });
+                console.log("this.searcRecordMessages", this.searcRecordMessages);
             } else {
                 this.searcRecordMessages = [];
             }
@@ -144,12 +152,15 @@ export const useSearchStore = defineStore({
         onClickGoto(id: string, eventKey: any) {
             console.log("eventKey:", eventKey);
             //chat store
-            const chatStore = useChatStore();
-            const { messages } = storeToRefs(chatStore);
-            const route = useRoute();
-            scrollPageTo(id);
-            messages.value = JSON.parse(localStorage.getItem(`${eventKey}`) || "[]");
-            this.closeSearchBar();
+            if (this.searchIsMove === false) {
+                const chatStore = useChatStore();
+                const { messages } = storeToRefs(chatStore);
+                scrollPageTo(id);
+                messages.value = JSON.parse(localStorage.getItem(`${eventKey}`) || "[]");
+                this.closeSearchBar();
+            } else {
+                this.searchIsMove = false;
+            }
         },
     },
 });

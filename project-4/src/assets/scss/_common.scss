@@ -1,11 +1,13 @@
 @import "./var";
 .search-bar,
-.search-bar--chatRoom {
+.search-bar--chatRoom,
+.search-bar--moreChatRoom {
     .n-input {
         width: 100%;
         background-color: $white;
         height: 36px;
         font-size: $font-size-16;
+        border-radius: 20px;
     }
     .n-input__input-el {
         outline-style: none;
@@ -21,17 +23,21 @@
     }
     .n-input .n-input__border,
     .n-input .n-input__state-border {
-        border: none;
+        // border: none;
+        border: 1px solid $border-line;
     }
     .n-input:not(.n-input--disabled):hover .n-input__state-border {
-        border: none;
+        // border: none;
+        border: 1px solid $border-line;
     }
     .n-input:not(.n-input--disabled).n-input--focus {
         background-color: none;
     }
     .n-input:not(.n-input--disabled).n-input--focus .n-input__state-border {
-        border: none;
-        box-shadow: none;
+        // border: none;
+        border: 1px solid $border-line;
+        // box-shadow: none;
+        box-shadow: 2px 0px 4px $gray-6;
     }
     .n-input .n-input__input-el,
     .n-input .n-input__textarea-el {
@@ -42,11 +48,9 @@
     display: flex;
     align-items: center;
     border-radius: 20px;
-    background-color: $white;
+    background-color: transparent;
     padding: 0 6px;
     height: 44px;
-    border: 1px solid $border-line;
-    box-shadow: 2px 0px 4px $gray-6;
     position: sticky;
     top: 60px;
     z-index: 100;
@@ -70,11 +74,16 @@
             height: 36px;
         }
     }
+    &--moreChatRoom {
+        padding: 10px 15px;
+    }
 }
 @media (max-width: 768px) {
     .search-bar {
-        width: 93%;
-        margin: -60px auto 0;
+        position: absolute;
+        width: 100%;
+        height: auto;
+        padding: 0 10px;
         display: flex;
         &--chatRoom {
             width: 100% !important;
@@ -84,6 +93,8 @@
                 width: 88%;
             }
         }
+        &--moreChatRoom {
+        }
     }
 }
 @media (max-width: 375px) {
@@ -92,6 +103,8 @@
             .n-input {
                 width: 85%;
             }
+        }
+        &--moreChatRoom {
         }
     }
 }

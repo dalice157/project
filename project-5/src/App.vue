@@ -3,15 +3,12 @@
         class="all"
         :theme-overrides="themeOverrides"
         :locale="zhTW"
-        :date-locale="dateZhCN"
+        :date-locale="dateZhTW"
     >
         <router-view name="login"></router-view>
         <!--監聽route query change寫法 1 <router-view name="container":key="route.query"></router-view> -->
-
         <router-view name="container" v-slot="{ Component }">
-            <keep-alive include="ChatRoom">
-                <component :is="Component" />
-            </keep-alive>
+            <component :is="Component" />
         </router-view>
     </n-config-provider>
 </template>
@@ -20,10 +17,10 @@
 import { defineComponent, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { storeToRefs } from "pinia";
-import { NConfigProvider, GlobalThemeOverrides, dateZhCN } from "naive-ui";
+import { NConfigProvider, GlobalThemeOverrides, zhTW, dateZhTW } from "naive-ui";
 
 import { useApiStore } from "@/store/api";
-import zhTW from "@/assets/js/zhTW";
+// import zhTW from "@/assets/js/zhTW";
 import config from "@/config/config";
 
 const apiStore = useApiStore();
@@ -32,7 +29,7 @@ const route = useRoute();
 
 const themeOverrides: GlobalThemeOverrides = {
     common: {
-        primaryColor: "#ffb400",
+        primaryColor: "#f9935c",
     },
     Input: {
         caretColor: "black",
@@ -43,7 +40,7 @@ const themeOverrides: GlobalThemeOverrides = {
         borderRadius: "5px",
     },
     Button: {
-        textColor: "#ffb400",
+        textColor: "#f9935c",
     },
     Checkbox: {
         colorChecked: "orange",
@@ -52,12 +49,11 @@ const themeOverrides: GlobalThemeOverrides = {
         boxShadowFocus: "transparent",
     },
     Radio: {
-        dotColorActive: "#ffb400",
-        boxShadowHover: "inset 0 0 0 1px #ffb400",
-        boxShadowFocus: "inset 0 0 0 1px #ffb400",
-        boxShadowActive: "inset 0 0 0 1px #ffb400",
+        dotColorActive: "#f9935c",
+        boxShadowHover: "inset 0 0 0 1px #f9935c",
+        boxShadowFocus: "inset 0 0 0 1px #f9935c",
+        boxShadowActive: "inset 0 0 0 1px #f9935c",
     },
-    // ...
 };
 </script>
 <style lang="scss">
@@ -79,6 +75,57 @@ const themeOverrides: GlobalThemeOverrides = {
 }
 .viewer-one-to-one {
     display: none;
+}
+
+.guide2,
+.guide3,
+.guide4,
+.guide5,
+.guide6 {
+    background: white url("~@/assets/Images/common/guide-pages-bg.png") no-repeat top left !important;
+    background-size: cover !important;
+    height: 200px !important;
+    text-align: center;
+    padding-top: 70px !important;
+}
+
+.guide2 .driver-popover-description,
+.guide3 .driver-popover-description,
+.guide4 .driver-popover-description,
+.guide5 .driver-popover-description,
+.guide6 .driver-popover-description {
+    font-weight: bold !important;
+}
+
+.guide6 .driver-popover-description {
+    margin-top: -30px;
+}
+
+.driver-close-btn,
+.driver-prev-btn,
+.driver-next-btn {
+    position: absolute;
+    bottom: 20px;
+    background: #ffb400 !important;
+    color: #fff !important;
+    border: none !important;
+    text-shadow: none !important;
+}
+
+.driver-close-btn {
+    left: 20px;
+}
+
+.driver-prev-btn {
+    right: 90px;
+}
+
+.driver-next-btn {
+    right: 20px;
+}
+
+.driver-prev-btn.driver-disabled {
+    display: none !important;
 }
 </style>
 <style lang="scss" scoped>

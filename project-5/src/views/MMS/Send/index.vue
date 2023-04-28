@@ -20,6 +20,7 @@
                 <n-select
                     class="selectChannel"
                     v-model:value="mmsChannel"
+                    :render-label="renderLabel"
                     :options="filterChannelList"
                     placeholder="請選擇發送頻道"
                 />
@@ -57,7 +58,7 @@
                     :class="{ uploadFile: mmsUploadImgRef !== null }"
                     ref="uploadImg"
                     @change="handleChange($event)"
-                    accept="image/*"
+                    accept=".png,.jpeg,.jpg,.gif"
                 >
                     圖檔上傳
                 </n-upload>
@@ -134,6 +135,7 @@
             ></OptionSetting>
         </div>
     </div>
+    <AlertPopUp :alertMessage="alertMessage" @clearAlertMessage="clearAlertMessage" />
 </template>
 
 <script lang="ts">
@@ -143,14 +145,15 @@ export default {
 };
 </script>
 <script lang="ts" setup>
-import { onMounted, ref, watchEffect, computed, watch } from "vue";
+import { onMounted, ref, watchEffect, computed, watch, h } from "vue";
 import { NIcon, NInput, NUpload, NDivider, NSelect, NPopover } from "naive-ui";
 import { useRouter, useRoute } from "vue-router";
 import { storeToRefs } from "pinia";
-import { HelpCircleOutline } from "@vicons/ionicons5";
+import { HelpCircleOutline, ShieldCheckmarkOutline } from "@vicons/ionicons5";
 
 import TimeSetting from "@/components/backend/TimeSetting.vue";
 import OptionSetting from "@/components/backend/OptionSetting.vue";
+import AlertPopUp from "@/components/AlertPopUp.vue";
 import { useApiStore } from "@/store/api";
 import { useMmsStore } from "@/store/mmsStore";
 import deleteIcon from "@/assets/Images/manage/delete.svg";
@@ -161,23 +164,62 @@ const router = useRouter();
 const route = useRoute();
 
 const apiStore = useApiStore();
-const { eventList, uploadRef: getUploadFile } = storeToRefs(apiStore);
+const { eventList, uploadRef: getUploadFile, addhttps } = storeToRefs(apiStore);
 
 //mmsStore
 const mmsStore = useMmsStore();
-const { mmsPhrases, mmsChannel, mmsSubject, mmsUploadImgRef, mmsContent, mmsKB, mmsPoint } =
-    storeToRefs(mmsStore);
-
+const {
+    mmsPhrases,
+    mmsChannel,
+    mmsSubject,
+    mmsUploadImgRef,
+    mmsImageWidth,
+    mmsImageHeight,
+    mmsContent,
+    mmsKB,
+    mmsPoint,
+} = storeToRefs(mmsStore);
+//alert popup
+const alertMessage = ref("");
+const clearAlertMessage = () => {
+    alertMessage.value = "";
+};
 const filterChannelList = computed(() => {
-    return eventList.value
-        .filter((event: any) => {
-            return event.status === 1;
-        })
-        .map((item) => ({
-            label: `${item.name}`,
-            value: parseInt(`${item.eventID}`),
-        }));
+    return eventList.value.length !== 0
+        ? eventList.value
+              .filter((event: any) => {
+                  return event.status === 1;
+              })
+              .map((item) => ({
+                  label: `${item.name}`,
+                  value: parseInt(`${item.eventID}`),
+                  preset: `${item.preset}`,
+              }))
+        : [];
 });
+//頻道label
+const renderLabel = (option) => {
+    // console.log("option", option);
+    if (option.preset == "1") {
+        return [
+            option.label,
+            h(
+                NIcon,
+                {
+                    style: {
+                        verticalAlign: "-0.15em",
+                        marginLeft: "4px",
+                    },
+                },
+                {
+                    default: () => h(ShieldCheckmarkOutline),
+                }
+            ),
+        ];
+    } else {
+        return option.label;
+    }
+};
 
 //textarea dom元素
 const inputInstRef = ref(null);
@@ -263,7 +305,7 @@ const KBCount = () => {
     } else {
         mmsLazyTextLen.value = 0;
     }
-    console.log("mmsLazyTextLen.value:", mmsLazyTextLen.value);
+    // console.log("mmsLazyTextLen.value:", mmsLazyTextLen.value);
 
     if (
         !mmsSubject.value &&
@@ -284,23 +326,63 @@ const KBCount = () => {
         );
     }
 };
-
+const addHttpsMmsKB = ref(0);
 //下一頁按鈕
 const nextPageRouter = params.id ? `/manage/${params.id}/MMSSendPage2` : `/manage/MMSSendPage2`;
-watchEffect(() => {
-    //點數判斷
-    if (mmsKB.value < 50 && mmsKB.value > 0) {
-        mmsPoint.value = 3;
-    } else if (mmsKB.value >= 50 && mmsKB.value < 300) {
-        mmsPoint.value = 5;
-    } else if (mmsKB.value === 0) {
-        mmsPoint.value = 0;
-    }
-});
+watchEffect(
+    () => {
+        //點數判斷
+        if (mmsKB.value < 50 && mmsKB.value > 0) {
+            mmsPoint.value = 3;
+        } else if (mmsKB.value >= 50 && mmsKB.value < 300) {
+            mmsPoint.value = 5;
+        } else if (mmsKB.value === 0) {
+            mmsPoint.value = 0;
+        }
+        //判斷是否添加短網址
+        addHttpsMmsKB.value =
+            mmsSubjectLen.value +
+            mmsContentLen.value +
+            uploadFileSize.value +
+            mmsLazyTextLen.value +
+            2.0078125;
+        addHttpsMmsKB.value = Number(
+            addHttpsMmsKB.value
+                .toString()
+                .substring(0, addHttpsMmsKB.value.toString().lastIndexOf(".") + 3)
+        );
+        if (mmsKB.value < 50 && addHttpsMmsKB.value >= 50) {
+            addhttps.value = false;
+            // console.log("不不不不不能加https://");
+        } else {
+            addhttps.value = true;
+            // console.log("能加https://");
+        }
+        // console.log("mmsKB", mmsKB.value);
+        // console.log("addHttpsMmsKB", addHttpsMmsKB.value);
+    },
+    { flush: "post" }
+);
 //上傳圖片功能
 const uploadFileSize = ref(0);
 const handleChange = ({ fileList }) => {
+    console.log("fileList", fileList[fileList.length - 1].file);
+    const reader = new FileReader();
+    reader.readAsDataURL(fileList[fileList.length - 1].file);
+    reader.onload = function (e) {
+        let image = new Image();
+        image.src = e.target.result;
+        image.onload = function () {
+            mmsImageWidth.value = image.width;
+            mmsImageHeight.value = image.height;
+        };
+    };
     mmsUploadImgRef.value = fileList[fileList.length - 1];
+    if (Math.round((mmsUploadImgRef.value.file.size / 1024) * 100) / 100 > 300) {
+        clearFile();
+        alertMessage.value = "所上傳之圖檔超過300K,請重新上傳符合規定之圖檔!!";
+        return;
+    }
     uploadFileSize.value = Math.round((mmsUploadImgRef.value.file.size / 1024) * 100) / 100;
     mmsKB.value =
         mmsSubjectLen.value + mmsContentLen.value + uploadFileSize.value + mmsLazyTextLen.value + 2;
@@ -423,9 +505,10 @@ const clearFile = () => {
 .MMSSend {
     position: relative;
     display: flex;
-    min-height: calc(100vh - 80px);
+    min-height: calc(100vh - 140px);
     background-color: $bg;
-    padding: 15px;
+    padding: 15px 15px 45px 15px;
+    margin-bottom: 30px;
     .mmsContent {
         background-color: $white;
         padding: 25px 20px;
@@ -545,7 +628,7 @@ const clearFile = () => {
                     width: 100px;
                     padding: 10px 0;
                     border-radius: 20px;
-                    background-color: $primary-4;
+                    background-color: $primary-3;
                     text-align: center;
                     display: flex;
                     justify-content: center;
@@ -556,7 +639,7 @@ const clearFile = () => {
                     width: 100px;
                     padding: 10px 0;
                     border-radius: 20px;
-                    background-color: $primary-4;
+                    background-color: $primary-3;
                     text-align: center;
                     display: flex;
                     justify-content: center;
@@ -570,7 +653,7 @@ const clearFile = () => {
                     width: 100px;
                     padding: 10px 0;
                     border-radius: 20px;
-                    background-color: $primary-4;
+                    background-color: $primary-3;
                     text-align: center;
                     display: flex;
                     justify-content: center;

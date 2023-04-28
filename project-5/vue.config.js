@@ -13,6 +13,15 @@ function resolve(dir) {
 const BASE_URL = isProduction ? "/" : "/";
 
 module.exports = {
+    pwa: {
+        iconPaths: {
+            favicon32: "favicon.ico",
+            favicon16: "favicon.ico",
+            appleTouchIcon: "favicon.ico",
+            maskIcon: "favicon.ico",
+            msTileImage: "favicon.ico",
+        },
+    },
     publicPath: BASE_URL,
     assetsDir: "static",
     outputDir: process.env.VUE_APP_outputDir,

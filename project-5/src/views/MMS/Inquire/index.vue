@@ -1,7 +1,7 @@
 <template>
     <div id="mms_inquire_wrap">
         <div class="mms_inquire">
-            <div class="inquire_title">
+            <!-- <div class="inquire_title">
                 <div class="inquire">
                     <h2>查詢發送紀錄</h2>
                     <n-input
@@ -16,7 +16,7 @@
                     </n-input>
                 </div>
             </div>
-            <n-divider />
+            <n-divider /> -->
             <n-form class="inquireCondition1" :model="model" :rules="rules" ref="formRef">
                 <n-form-item path="searchSend_box">
                     <n-checkbox-group v-model:value="model.searchSend_box">
@@ -30,6 +30,7 @@
                                         type="daterange"
                                         clearable
                                         size="small"
+                                        :is-date-disabled="dateTimeLimit"
                                     />
                                 </n-form-item>
                                 <p>(可查詢三個月內的發送紀錄)</p>
@@ -56,30 +57,39 @@
                 class="mms_table"
                 :bordered="false"
                 :scroll-x="1200"
-                :columns="createColumns({ cancelReservationPopUp })"
-                :data="data"
+                :columns="
+                    tableInformation === 'normal'
+                        ? createColumns({ cancelReservationPopUp, filterDetailData })
+                        : detailDataPopUpColumns()
+                "
+                :data="tableInformation === 'normal' ? data : detailData"
                 :pagination="pagination"
                 :bottom-bordered="false"
             />
         </div>
     </div>
-    <teleport to="body" v-if="popUpisOpen">
-        <!-- v-if="isOpen" -->
+    <!-- 取消預約談窗 -->
+    <teleport to="body" v-if="cancelReservationPopUpIsOpen">
         <div class="mask">
             <div class="dataTable">
-                <div>
+                <div class="cancelReservationTitle">
                     <div class="delete" @click="deleteReservationPopUp">刪除已預約的簡訊紀錄</div>
-                    <img :src="closeIcon" alt="關閉" @click="popUpisOpen = !popUpisOpen" />
+                    <img
+                        class="cancelReservationCloseIcon"
+                        :src="closeIcon"
+                        alt="關閉"
+                        @click="cancelReservationPopUpIsOpen = !cancelReservationPopUpIsOpen"
+                    />
                 </div>
                 <n-data-table
-                    class="sms_table"
+                    class="mms_table"
                     :bordered="false"
                     :scroll-x="800"
-                    :columns="popUpColumns()"
-                    :data="popUpData"
+                    :columns="cancelReservationPopUpColumns()"
+                    :data="cancelReservationPopUpData"
                     :bottom-bordered="false"
                     :row-key="(row) => row"
-                    @update:checked-row-keys="handleCheck"
+                    v-model:checked-row-keys="pickUpData"
                 />
             </div>
         </div>
@@ -95,10 +105,36 @@
             </div>
         </div>
     </teleport>
+    <!-- 詳細資料談窗 -->
+    <teleport to="body" v-if="detailDataPopUpIsOpen">
+        <div class="mask">
+            <div class="dataTable">
+                <div class="detailDataTitle">
+                    <img
+                        class="detailDataCloseIcon"
+                        :src="closeIcon"
+                        alt="關閉"
+                        @click="detailDataPopUpIsOpen = !detailDataPopUpIsOpen"
+                    />
+                </div>
+                <n-data-table
+                    class="mms_table"
+                    :bordered="false"
+                    :scroll-x="800"
+                    :columns="detailDataPopUpColumns()"
+                    :data="detailData"
+                    :bottom-bordered="false"
+                    :max-height="350"
+                />
+            </div>
+        </div>
+    </teleport>
+    <Loading :isLoading="inquireLoading" />
+    <AlertPopUp :alertMessage="alertMessage" @clearAlertMessage="clearAlertMessage" />
 </template>
 
 <script lang="ts" setup>
-import { reactive, ref, h, computed } from "vue";
+import { reactive, ref, h, computed, watch, onBeforeUnmount } from "vue";
 import {
     NForm,
     NFormItem,
@@ -117,15 +153,163 @@ import { storeToRefs } from "pinia";
 import searchIcon from "@/assets/Images/manage/search.svg";
 import closeIcon from "@/assets/Images/chatroom/close-round.svg";
 import dayjs from "dayjs";
+import Loading from "@/components/LoadingPage.vue";
+import AlertPopUp from "@/components/AlertPopUp.vue";
 
 //store
 const apiStore = useApiStore();
 const { inquireShortMessage, deleteReservationShortMsg } = apiStore;
-const { inquireMMSShortMessageList } = storeToRefs(apiStore);
+const { inquireMMSShortMessageList, tableInformation, inquireLoading } = storeToRefs(apiStore);
 
+//alert popup
+const alertMessage = ref("");
+const clearAlertMessage = () => {
+    alertMessage.value = "";
+};
+
+//v-model
 const search = ref("");
-
-const createColumns = ({ cancelReservationPopUp }) => [
+const formRef = ref(null);
+const model = reactive({
+    searchSend_box: ["box_time"],
+    searchSend_date: [
+        dayjs().subtract(1, "day").startOf("date").valueOf(),
+        dayjs().startOf("date").valueOf(),
+    ],
+    searchSend_phone: "",
+}) as any;
+//限制不能選未來時間
+const dateTimeLimit = (ts) => {
+    return ts > dayjs().startOf("day").valueOf();
+};
+//驗證規則
+const rules = {
+    searchSend_date: {
+        type: "array",
+        validator(rule: any, value: any) {
+            if (!value) {
+                return new Error("請輸入時間區間");
+            }
+        },
+    },
+    searchSend_phone: {
+        type: "string",
+        validator(rule: any, value: any) {
+            if (model.searchSend_box.includes("box_phone") && !value) {
+                return new Error("請輸入門號");
+            } else if (
+                model.searchSend_box.includes("box_phone") &&
+                !/(^[+]?[0-9]{10,15}$)|(^$)/.test(value)
+            ) {
+                return new Error("請填寫正確格式的行動電話");
+            }
+        },
+    },
+};
+// 判斷第一層table鎖鑰顯示的data 及 column
+watch(
+    tableInformation,
+    (newVal, oldVal) => {
+        // console.log("tableInformation newVal", newVal);
+        // console.log("tableInformation oldVal", oldVal);
+        if (newVal === "detail") {
+            detailData.value = [];
+            detailData.value = data.value.reduce((arr, item) => {
+                return arr.concat(item.data);
+            }, []);
+            console.log("detailData", detailData.value);
+        }
+    },
+    { deep: true }
+);
+// 查詢按鈕
+const onMmsSubmit = (e: any) => {
+    e.preventDefault();
+    inquireLoading.value = true;
+    formRef.value.validate((errors) => {
+        if (!errors) {
+            const transformDate = ref([]);
+            model.searchSend_date[1] += 86400000;
+            transformDate.value = model.searchSend_date.map((item) => {
+                return item * 1000000;
+            });
+            inquireShortMessage(
+                "1",
+                transformDate.value,
+                model.searchSend_box.includes("box_phone") ? model.searchSend_phone : null,
+                null
+            );
+            model.searchSend_date[1] -= 86400000;
+            // console.log("驗證成功, 打api", model);
+        } else {
+            inquireLoading.value = false;
+            console.log("驗證失敗, 不打api", errors);
+        }
+    });
+};
+// 取消預約傳送
+const cancelReservationPopUpIsOpen = ref(false);
+const confirmCancel = ref(false);
+const cancelReservationPopUp = (rowData) => {
+    if (rowData.statusCount[2] >= 1) {
+        cancelReservationPopUpIsOpen.value = !cancelReservationPopUpIsOpen.value;
+        cancelReservationPopUpData.value = [rowData];
+        console.log("預約傳送點進去代的資料", cancelReservationPopUpData.value);
+        // 直接帶入選中資料
+        pickUpData.value = cancelReservationPopUpData.value;
+    } else {
+        alertMessage.value = "無預約傳送訊息,無法取消!!!";
+    }
+};
+//點進去popup帶的資料
+const cancelReservationPopUpData = ref([]);
+//選中的資料
+const pickUpData = ref([]);
+//選取資料function
+// const handleCheck = (rowKey) => {
+//     pickUpData.value = rowKey;
+//     console.log("pickUpData", pickUpData.value);
+// };
+//確定刪除彈窗
+const deleteReservationPopUp = () => {
+    if (pickUpData.value.length !== 0) {
+        confirmCancel.value = !confirmCancel.value;
+    } else {
+        alertMessage.value = "請選取要刪除的訊息!!!";
+    }
+};
+//取消刪除簡訊
+const cancel = () => {
+    confirmCancel.value = !confirmCancel.value;
+};
+//確定刪除簡訊
+const deleteReservation = () => {
+    deleteReservationShortMsg("1", pickUpData.value[0]);
+    confirmCancel.value = false;
+    cancelReservationPopUpIsOpen.value = false;
+};
+// 過濾第一層資料到第二層
+const filterDetailData = (status, data, showCount) => {
+    // console.log("過濾第一層資料到第二層 data", data);
+    //有資料才顯示詳細table
+    if (showCount >= 1) {
+        // 過濾 data 條件
+        if (status === -1) {
+            detailData.value = data;
+        } else {
+            detailData.value = data.filter((item) => item.status === status);
+        }
+        detailDataPopUpIsOpen.value = true;
+    } else {
+        alertMessage.value = "無詳細資料可查尋";
+    }
+};
+// 查看詳細資料
+const detailDataPopUpIsOpen = ref(false);
+const detailData = ref([]);
+//------------------------------------------- table column ---------------------------------------------
+// 一般資料 table column
+const createColumns = ({ cancelReservationPopUp, filterDetailData }) => [
     {
         title: "編號",
         key: "id",
@@ -134,7 +318,7 @@ const createColumns = ({ cancelReservationPopUp }) => [
             return h(
                 "p",
                 {
-                    class: "link subject",
+                    class: "link",
                 },
                 index + 1
             );
@@ -142,7 +326,7 @@ const createColumns = ({ cancelReservationPopUp }) => [
     },
     {
         title: "發送時間",
-        key: "time",
+        key: "sendTime",
         align: "center",
         width: 100,
         render(row, index) {
@@ -151,7 +335,7 @@ const createColumns = ({ cancelReservationPopUp }) => [
                 {
                     class: "link subject",
                 },
-                dayjs(row.time / 1000000).format("YYYY/MM/DD")
+                dayjs(row.sendTime / 1000000).format("YYYY/MM/DD")
             );
         },
     },
@@ -170,14 +354,27 @@ const createColumns = ({ cancelReservationPopUp }) => [
     },
     {
         title: "發送內容",
-        key: "text",
+        key: "content",
         render(row, index) {
             return h(
                 "p",
                 {
                     class: "link content",
                 },
-                row.text
+                row.content
+            );
+        },
+    },
+    {
+        title: "成功率",
+        key: "successfulPercent",
+        render(row, index) {
+            return h(
+                "p",
+                {
+                    class: "link",
+                },
+                (row.statusCount[0] / row.count).toFixed(2) * 100 + "%"
             );
         },
     },
@@ -189,7 +386,8 @@ const createColumns = ({ cancelReservationPopUp }) => [
             return h(
                 "p",
                 {
-                    class: "link",
+                    class: "link hover",
+                    onClick: () => filterDetailData(-1, row.data, row.count),
                 },
                 row.count
             );
@@ -203,29 +401,33 @@ const createColumns = ({ cancelReservationPopUp }) => [
             return h(
                 "p",
                 {
-                    class: "link",
+                    class: "link hover",
+                    onClick: () => filterDetailData(0, row.data, row.statusCount[0]),
                 },
-                row.status === 0 ? 1 : 0
+
+                row.statusCount[0]
             );
         },
     },
     {
-        title: "傳送中通數",
-        key: "status",
+        title: "傳送中",
+        key: "statusCount",
         align: "center",
         render(row, index) {
             return h(
                 "p",
                 {
-                    class: "link",
+                    class: "link hover",
+                    onClick: () => filterDetailData(1, row.data, row.statusCount[1]),
                 },
-                row.status === 1 ? 1 : 0
+
+                row.statusCount[1]
             );
         },
     },
     {
-        title: "預約傳送通數",
-        key: "status",
+        title: "預約傳送",
+        key: "statusCount",
         align: "center",
         render(row, index) {
             return h(
@@ -234,41 +436,46 @@ const createColumns = ({ cancelReservationPopUp }) => [
                     class: "link hover",
                     onClick: () => cancelReservationPopUp(row),
                 },
-                row.status === 2 ? 1 : 0
+
+                row.statusCount[2]
             );
         },
     },
     {
-        title: "預約取消通數",
-        key: "status",
+        title: "預約取消",
+        key: "statusCount",
         align: "center",
         render(row, index) {
             return h(
                 "p",
                 {
-                    class: "link",
+                    class: "link hover",
+                    onClick: () => filterDetailData(3, row.data, row.statusCount[3]),
                 },
-                row.status === 3 ? 1 : 0
+
+                row.statusCount[3]
             );
         },
     },
     {
         title: "收訊失敗",
-        key: "status",
+        key: "statusCount",
         align: "center",
         render(row, index) {
             return h(
                 "p",
                 {
-                    class: "link",
+                    class: "link hover",
+                    onClick: () => filterDetailData(4, row.data, row.statusCount[4]),
                 },
-                row.status === 4 ? 1 : 0
+
+                row.statusCount[4]
             );
         },
     },
     {
         title: "發送扣點",
-        key: "cost",
+        key: "totalCost",
         align: "center",
         className: "deduction",
         render(row, index) {
@@ -277,19 +484,23 @@ const createColumns = ({ cancelReservationPopUp }) => [
                 {
                     class: "link",
                 },
-                row.cost
+                row.totalCost
             );
         },
     },
 ];
-const popUpColumns = () =>
+//取消預約傳送 table column
+const cancelReservationPopUpColumns = () =>
     [
         {
             type: "selection",
+            disabled(row) {
+                return row;
+            },
         },
         {
             title: "發送時間",
-            key: "time",
+            key: "sendTime",
             align: "center",
             width: 100,
             render(row, index) {
@@ -298,7 +509,7 @@ const popUpColumns = () =>
                     {
                         class: "link",
                     },
-                    dayjs(row.time / 1000000).format("YYYY/MM/DD")
+                    dayjs(row.sendTime / 1000000).format("YYYY/MM/DD")
                 );
             },
         },
@@ -318,6 +529,83 @@ const popUpColumns = () =>
         },
         {
             title: "發送內容",
+            key: "content",
+            render(row, index) {
+                return h(
+                    "p",
+                    {
+                        class: "link",
+                    },
+                    row.content
+                );
+            },
+        },
+
+        {
+            title: "預約傳送通數",
+            key: "statusCount",
+            align: "center",
+            render(row, index) {
+                return h(
+                    "a",
+                    {
+                        class: "link hover",
+                    },
+                    row.statusCount[2]
+                );
+            },
+        },
+
+        {
+            title: "發送扣點",
+            key: "totalCost",
+            align: "center",
+            className: "deduction",
+            render(row, index) {
+                return h(
+                    "p",
+                    {
+                        class: "link",
+                    },
+                    row.totalCost
+                );
+            },
+        },
+    ] as any;
+// 詳細資料 table column
+const detailDataPopUpColumns = () =>
+    [
+        {
+            title: "編號",
+            key: "index",
+            align: "center",
+            width: 80,
+            render(row, index) {
+                return h(
+                    "p",
+                    {
+                        class: "link",
+                    },
+                    index + 1
+                );
+            },
+        },
+        {
+            title: "門號",
+            key: "mobile",
+            align: "center",
+            render(row, index) {
+                return h(
+                    "p",
+                    {
+                        class: "link",
+                    },
+                    row.mobile
+                );
+            },
+        },
+        {
+            title: "發送內容",
             key: "text",
             render(row, index) {
                 return h(
@@ -331,16 +619,38 @@ const popUpColumns = () =>
         },
 
         {
-            title: "預約傳送通數",
+            title: "接收狀態",
             key: "status",
             align: "center",
             render(row, index) {
                 return h(
                     "a",
                     {
-                        class: "link hover",
+                        class: "link",
                     },
-                    row.status === 2 ? 1 : 0
+                    row.status === 0
+                        ? "成功接收"
+                        : row.status === 1
+                        ? "傳送中"
+                        : row.status === 2
+                        ? "預約傳送"
+                        : row.status === 3
+                        ? "預約取消"
+                        : "收訊失敗"
+                );
+            },
+        },
+        {
+            title: "收訊時間",
+            key: "receivedTime",
+            align: "center",
+            render(row, index) {
+                return h(
+                    "a",
+                    {
+                        class: "link",
+                    },
+                    dayjs(row.receivedTime / 1000000).format("YYYY/MM/DD")
                 );
             },
         },
@@ -361,102 +671,26 @@ const popUpColumns = () =>
             },
         },
     ] as any;
-const popUpisOpen = ref(false);
-const confirmCancel = ref(false);
-const cancelReservationPopUp = (rowData) => {
-    if (rowData.status === 2) {
-        popUpisOpen.value = !popUpisOpen.value;
-        popUpData.value = [rowData];
-        // console.log("rowData", rowData);
-    } else {
-        alert("無預約傳送訊息,無法取消!!!");
-    }
-};
-//點進去popup帶的資料
-const popUpData = ref([]);
-//選中的資料
-const pickUpData = ref([]);
-//選取資料function
-const handleCheck = (rowKey) => {
-    pickUpData.value = rowKey;
-    console.log("pickUpData", pickUpData.value);
-};
-//確定刪除彈窗
-const deleteReservationPopUp = () => {
-    if (pickUpData.value.length !== 0) {
-        confirmCancel.value = !confirmCancel.value;
-    } else {
-        alert("請選取要刪除的訊息!!!");
-    }
-};
-//取消刪除簡訊
-const cancel = () => {
-    confirmCancel.value = !confirmCancel.value;
-};
-//確定刪除簡訊
-const deleteReservation = () => {
-    deleteReservationShortMsg("1", pickUpData.value[0]);
-    confirmCancel.value = false;
-    popUpisOpen.value = false;
-};
+// 第一層資料
+const data = computed(() => {
+    return inquireMMSShortMessageList.value.map((item) => {
+        return {
+            ...item,
+            // text: item.text.split(" ")[0],
+            // time: item.sendTime,
+            // subject: item.subject,
+            // text: item.content,
+            // count: item.count,
+            // status: item.statusCount,
+            // cost: item.totalCost,
+        };
+    });
+});
+onBeforeUnmount(() => {
+    inquireMMSShortMessageList.value = [];
+});
 const pagination = {
     pageSize: 6,
-};
-
-const data = computed(() => {
-    return inquireMMSShortMessageList.value;
-});
-
-const formRef = ref(null);
-
-const model = reactive({
-    searchSend_box: ["box_time"],
-    searchSend_date: [
-        dayjs().startOf("date").valueOf(),
-        dayjs().add(1, "days").startOf("date").valueOf(),
-    ],
-    searchSend_phone: "",
-}) as any;
-
-const rules = {
-    searchSend_date: {
-        type: "array",
-        validator(rule: any, value: any) {
-            console.log("value:", value);
-            if (!value) {
-                return new Error("請輸入時間區間");
-            }
-        },
-    },
-    searchSend_phone: {
-        type: "string",
-        validator(rule: any, value: any) {
-            if (model.searchSend_box.includes("box_phone") && !value) {
-                return new Error("請輸入門號");
-            } else if (
-                model.searchSend_box.includes("box_phone") &&
-                !/(^[+]?[0-9]{10,15}$)|(^$)/.test(value)
-            ) {
-                return new Error("請填寫正確格式的行動電話");
-            }
-        },
-    },
-};
-
-const onMmsSubmit = (e: any) => {
-    e.preventDefault();
-    formRef.value.validate((errors) => {
-        if (!errors) {
-            const transformDate = ref([]);
-            transformDate.value = model.searchSend_date.map((item) => {
-                return item * 1000000;
-            });
-            inquireShortMessage("1", transformDate.value, model.searchSend_phone, null);
-            // console.log("驗證成功, 打api", model);
-        } else {
-            console.log("驗證失敗, 不打api", errors);
-        }
-    });
 };
 </script>
 <style lang="scss">
@@ -577,10 +811,10 @@ const onMmsSubmit = (e: any) => {
 }
 .mms_table {
     &.n-data-table .n-data-table-thead {
-        background-color: $primary-5;
+        background-color: $primary-4;
     }
     &.n-data-table .n-data-table-th {
-        background-color: $primary-5;
+        background-color: $primary-4;
         font-weight: bold;
         color: $gray-1;
         border: none;
@@ -589,7 +823,7 @@ const onMmsSubmit = (e: any) => {
         }
     }
     &.n-data-table .n-data-table-tr:nth-child(even) {
-        background: $primary-5;
+        background: $primary-4;
     }
     &.n-data-table .n-data-table-td {
         background: none;
@@ -650,13 +884,12 @@ const onMmsSubmit = (e: any) => {
     display: flex;
     justify-content: center;
     align-items: center;
-
     .dataTable {
         padding: 10px;
         width: 800px;
-        height: 375px;
+        height: 505px;
         background-color: $white;
-        > div {
+        .cancelReservationTitle {
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -671,7 +904,16 @@ const onMmsSubmit = (e: any) => {
                 background-color: $gray-1;
                 cursor: pointer;
             }
-            img {
+            .cancelReservationCloseIcon {
+                cursor: pointer;
+            }
+        }
+        .detailDataTitle {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            margin-bottom: 30px;
+            .detailDataCloseIcon {
                 cursor: pointer;
             }
         }
@@ -744,8 +986,9 @@ const onMmsSubmit = (e: any) => {
     position: relative;
     display: flex;
     flex-direction: column;
-    min-height: calc(100vh - 80px);
-    padding: 15px 15px 0px 15px;
+    min-height: calc(100vh - 140px);
+    padding: 15px 15px 45px 15px;
+    margin-bottom: 30px;
     background-color: $bg;
     .mms_inquire {
         background-color: $white;

@@ -2,8 +2,15 @@
     <div class="userInfo-sider" @click="closeSearchBar">
         <ul class="tabs-nav">
             <li class="log" :class="{ active: type === 'log' }" @click="onLog">交談紀錄</li>
+            <li
+                class="group-chat-log"
+                :class="{ active: type === 'groupChatLog' }"
+                @click="onGroupChatLog"
+            >
+                群組聊天
+            </li>
             <li class="more-chat" :class="{ active: type === 'moreChat' }" @click="onMoreChat">
-                更多聊天室
+                找商家
             </li>
             <li class="more">
                 <n-dropdown
@@ -17,9 +24,15 @@
                 </n-dropdown>
             </li>
         </ul>
-        <div v-if="type === 'default' && eventInfo !== null" class="userInfo">
+        <div
+            v-if="
+                (chatroomType === 0 && type === 'default' && eventInfo !== null) ||
+                (chatroomType === 1 && type === 'default' && groupChatEvent !== null)
+            "
+            class="userInfo"
+        >
             <div class="userInfo__photo">
-                <a :href="eventInfo.homeurl" target="_blank">
+                <a href="javascript:;" v-if="chatroomType === 0">
                     <n-avatar
                         round
                         :size="100"
@@ -28,17 +41,44 @@
                         :src="`${config.fileUrl}${eventInfo.icon}`"
                     />
                 </a>
+                <a href="javascript:;" v-if="chatroomType === 1">
+                    <n-avatar
+                        round
+                        :size="100"
+                        object-fit="cover"
+                        fallback-src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
+                        :src="`${config.fileUrl}${groupChatEvent.icon}`"
+                    />
+                </a>
+                <!-- <a :href="eventInfo.homeurl" target="_blank">
+                    <n-avatar
+                        round
+                        :size="100"
+                        object-fit="cover"
+                        fallback-src="https://07akioni.oss-cn-beijing.aliyuncs.com/07akioni.jpeg"
+                        :src="`${config.fileUrl}${eventInfo.icon}`"
+                    />
+                </a> -->
             </div>
-            <h2 class="userInfo__name">
+            <h2 class="userInfo__name" v-if="chatroomType === 0">
                 {{ eventInfo.name }}
             </h2>
-            <div class="description">{{ eventInfo.description }}</div>
+            <h2 class="userInfo__name" v-if="chatroomType === 1">
+                {{ groupChatEvent.name }}
+            </h2>
+            <div class="description" v-if="chatroomType === 0">{{ eventInfo.description }}</div>
         </div>
         <div class="log__content" v-if="type === 'log'">
             <div class="search">
                 <ChatRecordSearch />
             </div>
             <ChatRecordList />
+        </div>
+        <div class="groupChatLog__content" v-if="type === 'groupChatLog'">
+            <div class="search">
+                <GroupChatSearchBar />
+            </div>
+            <GroupChatRecordMessage />
         </div>
         <div class="more-chat__content" v-if="type === 'moreChat'">
             <div class="search">
@@ -85,7 +125,7 @@
                 <n-config-provider :theme-overrides="themeOverrides">
                     <n-input round v-model:value="mCode" readonly type="text" />
                 </n-config-provider>
-                <p class="ps__word">請發送上列數字簡訊至<br />0912345678</p>
+                <p class="ps__word">請發送上列數字簡訊至<br />0{{ mMobile }}</p>
                 <n-button
                     @[events].stop="onCloseMoMode"
                     color="#e4e4e4"
@@ -109,12 +149,15 @@ import { useRoute } from "vue-router";
 import axios from "axios";
 
 import config from "@/config/config";
+import { isProduction, isStaging } from "@/util/commonUtil";
 import { useApiStore } from "@/store/api";
 import { useSearchStore } from "@/store/search";
 import MoreSeachBar from "@/components/MoreChatRoom/SearchBar.vue";
 import MoreList from "@/components/MoreChatRoom/ChatRoomList.vue";
 import ChatRecordSearch from "@/components/ChatRecord/SearchBar.vue";
 import ChatRecordList from "@/components/ChatRecord/ChatRecordMessage.vue";
+import GroupChatSearchBar from "@/components/GroupChatRecord/GroupChatSearchBar.vue";
+import GroupChatRecordMessage from "@/components/GroupChatRecord/GroupChatRecordMessage.vue";
 import moreIcon from "@/assets/Images/common/more.svg";
 import closeIcon from "@/assets/Images/common/close-round.svg";
 import { signature, withCanvasDrawing } from "@/util/deviceUtil";
@@ -122,11 +165,18 @@ import { isMobile } from "@/util/commonUtil";
 
 const events = ref(isMobile ? "touchend" : "click");
 
-const isProduction = process.env.NODE_ENV == "production";
-
 //api store
 const apiStore = useApiStore();
-const { eventInfo, vOldCode, mCode, isIllegalDevice } = storeToRefs(apiStore);
+const {
+    eventInfo,
+    vOldCode,
+    mCode,
+    mMobile,
+    isIllegalDevice,
+    bugout,
+    chatroomType,
+    groupChatEvent,
+} = storeToRefs(apiStore);
 
 //router
 const route = useRoute();
@@ -150,86 +200,64 @@ const type = ref("default");
 const onLog = () => {
     type.value = "log";
 };
+const onGroupChatLog = () => {
+    type.value = "groupChatLog";
+};
 const onMoreChat = () => {
     type.value = "moreChat";
 };
 const isOldModel = ref(false);
 const isMCodeModel = ref(false);
-const options = isProduction
-    ? [
-          {
-              label: "常見問題",
-              key: 3,
-              props: {
-                  onClick: () => {
-                      onQa();
-                  },
-              },
-          },
-          {
-              type: "divider",
-              key: "d1",
-          },
-          {
-              label: "服務條款",
-              key: 4,
-              props: {
-                  onClick: () => {
-                      open("https://www.teamplus.tech/every8d-agreement/");
-                  },
-              },
-          },
-      ]
-    : [
-          {
-              label: "取得簡訊驗證碼",
-              key: 1,
-              props: {
-                  onClick: () => {
-                      getMOCode();
-                  },
-              },
-          },
-          {
-              type: "divider",
-              key: "d1",
-          },
-          {
-              label: "發送原手機驗證碼",
-              key: 2,
-              props: {
-                  onClick: () => {
-                      onOpenOldDevice();
-                  },
-              },
-          },
-          {
-              type: "divider",
-              key: "d1",
-          },
-          {
-              label: "常見問題",
-              key: 3,
-              props: {
-                  onClick: () => {
-                      onQa();
-                  },
-              },
-          },
-          {
-              type: "divider",
-              key: "d1",
-          },
-          {
-              label: "服務條款",
-              key: 4,
-              props: {
-                  onClick: () => {
-                      open("https://www.teamplus.tech/every8d-agreement/");
-                  },
-              },
-          },
-      ];
+const options = [
+    //   {
+    //       label: "取得簡訊驗證碼",
+    //       key: 1,
+    //       props: {
+    //           onClick: () => {
+    //               getMOCode();
+    //           },
+    //       },
+    //   },
+    //   {
+    //       type: "divider",
+    //       key: "d1",
+    //   },
+    {
+        label: "取得裝置驗證碼",
+        key: 2,
+        props: {
+            onClick: () => {
+                onOpenOldDevice();
+            },
+        },
+    },
+    {
+        type: "divider",
+        key: "d1",
+    },
+    {
+        label: "常見問題",
+        key: 3,
+        props: {
+            onClick: () => {
+                onQa();
+            },
+        },
+    },
+    {
+        type: "divider",
+        key: "d1",
+    },
+    {
+        label: "服務條款",
+        key: 4,
+        props: {
+            onClick: () => {
+                open("https://www.teamplus.tech/every8d-agreement/");
+            },
+        },
+    },
+];
 const getMOCode = () => {
     axios({
         method: "get",
@@ -237,10 +265,17 @@ const getMOCode = () => {
         headers: { Authorization: `Bearer ${signature}` },
     })
         .then((res: any) => {
-            mCode.value = res.data.code;
+            mCode.value = String(res.data.code);
+            mMobile.value = res.data.mobile.slice(4, 13);
             isMCodeModel.value = true;
         })
         .catch((err: any) => {
+            bugout.value.error(`error-log${route.params.eventKey}`, err.response.status);
+            bugout.value.error(`error-log${route.params.eventKey}`, err.response.data);
+            bugout.value.error(
+                `error-log${route.params.eventKey}`,
+                err.response.request.responseURL
+            );
             console.error(err);
         });
 };
@@ -260,6 +295,12 @@ const onOpenOldDevice = () => {
             isOldModel.value = true;
         })
         .catch((err: any) => {
+            bugout.value.error(`error-log${route.params.eventKey}`, err.response.status);
+            bugout.value.error(`error-log${route.params.eventKey}`, err.response.data);
+            bugout.value.error(
+                `error-log${route.params.eventKey}`,
+                err.response.request.responseURL
+            );
             console.error(err);
         });
 };
@@ -382,7 +423,8 @@ const onQa = () => {
     }
 }
 .userInfo-sider {
-    grid-area: sidebar;
+    // grid-area: sidebar;
+    width: 350px;
     .search {
         padding: 15px;
     }
@@ -409,21 +451,31 @@ const onQa = () => {
             &.log {
                 background-image: url("~@/assets/Images/common/log-hover.svg");
             }
+            &.group-chat-log {
+                background-image: url("~@/assets/Images/common/user group_y.svg");
+            }
             &.more-chat {
                 background-image: url("~@/assets/Images/common/more-chat-hover.svg");
             }
         }
         &.log {
-            background: url("~@/assets/Images/common/log.svg") no-repeat left center;
-            padding-left: 30px;
+            background: url("~@/assets/Images/common/log.svg") no-repeat top center;
+            padding-top: 30px;
             &:hover {
                 background-image: url("~@/assets/Images/common/log-hover.svg");
             }
         }
+        &.group-chat-log {
+            background: url("~@/assets/Images/common/user group.svg") no-repeat top center;
+            padding-top: 30px;
+            &:hover {
+                background-image: url("~@/assets/Images/common/user group_y.svg");
+            }
+        }
         &.more-chat {
-            background: url("~@/assets/Images/common/more-chat.svg") no-repeat left center;
+            background: url("~@/assets/Images/common/more-chat.svg") no-repeat top center;
             background-size: 23px 23px;
-            padding-left: 30px;
+            padding-top: 30px;
             &:hover {
                 background-image: url("~@/assets/Images/common/more-chat-hover.svg");
             }
@@ -438,6 +490,7 @@ const onQa = () => {
 }
 
 .more-chat__content,
+.groupChatLog__content,
 .log__content {
     border-top-left-radius: 30px;
     border-top-right-radius: 30px;
@@ -448,7 +501,7 @@ const onQa = () => {
     border-top-right-radius: 30px;
     height: calc(100% - 106px);
     background: url("~@/assets/Images/common/sider-bg.svg") no-repeat center bottom;
-    &__Photo {
+    &__photo {
         display: block;
         padding-top: 50px;
         padding-bottom: 20px;
